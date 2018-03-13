@@ -1,0 +1,42 @@
+# Python and Django
+*.egg-info
+*.pot
+*.py[co]
+*.log
+*.exe
+*.lnk
+**/settings.py
+.tox/
+__pycache__
+MANIFEST
+dist/
+docs/_build/
+docs/locale/
+node_modules/
+tests/coverage_html/
+tests/.coverage
+build/
+tests/report/
+
+# Non Source
+/bin/
+/include/
+/lib/
+env/
+virtualenv/
+local/
+.vscode/
+
+# Mac
+.Python
+.DS_Store
+
+# Cache files for Sublime Text
+*.tmlanguage.cache
+*.tmPreferences.cache
+*.stTheme.cache
+*.sublime-workspace
+*.sublime-project
+
+# Docker
+Dockerfile

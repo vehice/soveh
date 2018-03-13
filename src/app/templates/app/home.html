@@ -1,0 +1,55 @@
+{% extends 'layout.html' %}
+{% load static %}
+
+{% block stylesheets %}
+{% endblock stylesheets %}
+
+{% block content %}
+<!--stats-->
+<div class="row">
+    <div class="col-xl-3 col-lg-6 col-xs-12">
+        <div class="card" data-toggle="modal" data-target="#card1">
+            <div class="card-body">
+                <div class="card-block">
+                    <div class="media">
+                        <div class="media-body text-xs-left">
+                            <h3 class="primary">270</h3>
+                            <span>Cantidad Total Ordenes Ingresadas</span>
+                        </div>
+                        <div class="media-right media-middle">
+                            <i class="icon-clock primary font-large-2 float-xs-right"></i>
+                        </div>
+                    </div>
+                    <progress class="progress progress-sm progress-primary mt-1 mb-0" value="5" max="100"></progress>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-3 col-lg-6 col-xs-12">
+        <div class="card" data-toggle="modal" data-target="#card2">
+            <div class="card-body">
+                <div class="card-block">
+                    <div class="media">
+                        <div class="media-body text-xs-left">
+                            <h3 class="danger">42</h3>
+                            <span>Cantidad Ordenes en Análisis</span>
+                        </div>
+                        <div class="media-right media-middle">
+                            <i class="icon-building danger font-large-2 float-xs-right"></i>
+                        </div>
+                    </div>
+                    <progress class="progress progress-sm progress-danger mt-1 mb-0" value="40" max="100"></progress>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!--/stats-->
+
+
+{% endblock content %}
+
+{% block scripts %}
+<script type="text/javascript">
+</script>
+{% endblock scripts %}
