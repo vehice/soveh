@@ -67,9 +67,14 @@ ol li, ul li, dl li {
 code {
   padding: .2rem .4rem;
   font-size: 90%;
-  color: #F74B5C;
-  background-color: rgba(237, 85, 100, 0.07);
+  color: #e83e8c;
+  background-color: #F5F7FA;
   border-radius: 0.25rem; }
+
+pre {
+  background-color: #f7f7f9; }
+  pre code {
+    background-color: transparent !important; }
 
 .bd-example-row .row + .row {
   margin-top: 1rem; }
@@ -171,9 +176,6 @@ code {
   border-left: none; }
 
 .table th, .table td {
-  border-top: table-borderless; }
-
-.table th, .table td {
   padding: 0.75rem 2rem; }
 
 .table.table-xl th, .table.table-xl td {
@@ -235,6 +237,8 @@ form {
       color: #b1c1d8; }
     form .form-control:-ms-input-placeholder {
       color: #b1c1d8; }
+    form .form-control button {
+        color: #fff; }
   form .form-section {
     color: #404E67;
     line-height: 3rem;
@@ -259,7 +263,7 @@ form {
       border-bottom: 1px solid #d3dce9;
       margin-top: 0;
       margin-bottom: 20px; }
-    @media (max-width: 767px) {
+    @media (max-width: 767.98px) {
       form .form-actions .buttons-group {
         float: left !important;
         margin-bottom: 10px; } }
@@ -319,8 +323,8 @@ select.form-control {
   padding-top: 0 !important;
   padding-bottom: 0 !important; }
 
-/* 
-TODO:M: To check with latest bootstrap version and remove it. 
+/*
+TODO:M: To check with latest bootstrap version and remove it.
 Bootstrap Enhance */
 .custom-control {
   display: block; }
@@ -661,7 +665,7 @@ button, html [type='button'], [type='reset'], [type='submit'] {
     horiznotal main navigation bar related SCSS.
     ----------------------------------------------------------------------------------------------
     Item Name: Stack - Responsive Admin Theme
-    Version: 2.1
+    Version: 3.0
     Author: PIXINVENT
     Author URL: http://www.themeforest.net/user/pixinvent
 ================================================================================================*/
@@ -690,7 +694,8 @@ button, html [type='button'], [type='reset'], [type='submit'] {
     left: 50%;
     padding: 0;
     margin: 0;
-    transform: translate(-50%, 0); }
+    transform: translate(-50%, 0);
+    z-index: 999; }
   .header-navbar .navbar-header {
     height: 100%;
     width: 240px;
@@ -710,7 +715,6 @@ button, html [type='button'], [type='reset'], [type='submit'] {
         letter-spacing: 1px; }
   .header-navbar .navbar-container {
     padding: 0rem 18px;
-    height: 4rem;
     transition: 300ms ease all;
     background: inherit; }
     .header-navbar .navbar-container ul.nav li > a.nav-link {
@@ -757,7 +761,7 @@ button, html [type='button'], [type='reset'], [type='submit'] {
     margin-left: 0; }
   .header-navbar .nav-item + .nav-item {
     margin-left: 0rem; }
-  @media (max-width: 767px) {
+  @media (max-width: 767.98px) {
     .header-navbar .navbar-header {
       width: 100% !important;
       padding: 0.5rem 1rem; }
@@ -965,7 +969,7 @@ button, html [type='button'], [type='reset'], [type='submit'] {
   top: 10px;
   transform: rotate(-135deg); }
 
-@media (max-width: 767px) {
+@media (max-width: 767.98px) {
   .header-navbar .navbar-nav .show {
     position: static; }
   .header-navbar .navbar-nav .open-navbar-container {
@@ -1031,7 +1035,7 @@ button, html [type='button'], [type='reset'], [type='submit'] {
 .headroom--unpinned-bottom {
   transform: translateY(100%); }
 
-@media (max-width: 1199px) {
+@media (max-width: 1199.98px) {
   .header-navbar .navbar-container ul.nav li > a.nav-link {
     padding: 1.4rem 0.4rem 0.8rem 0.4rem; }
     .header-navbar .navbar-container ul.nav li > a.nav-link i.flag-icon {
@@ -1047,7 +1051,7 @@ button, html [type='button'], [type='reset'], [type='submit'] {
     margin-right: 0;
     margin-left: -2px; } }
 
-@media (max-width: 1199px) {
+@media (max-width: 1199.98px) {
   .header-navbar .navbar-container ul.nav li .selected-language {
     display: none; }
   .header-navbar .navbar-container ul.nav li a.dropdown-user-link .user-name {
@@ -1163,7 +1167,7 @@ button, html [type='button'], [type='reset'], [type='submit'] {
 .card-transparent {
   background-color: transparent; }
 
-@media (max-width: 991px) {
+@media (max-width: 991.98px) {
   .heading-elements {
     text-align: center; }
     .heading-elements .list-inline {
@@ -1249,42 +1253,42 @@ button, html [type='button'], [type='reset'], [type='submit'] {
   background-color: #404E67; }
   .badge-secondary.badge-glow {
     box-shadow: 0px 0px 10px #404E67; }
-  .badge-secondary[href]:focus, .badge-secondary[href]:hover {
+  .badge-secondary[href]:hover, .badge-secondary[href]:focus {
     background-color: #2c3648; }
 
 .badge-primary {
   background-color: #00B5B8; }
   .badge-primary.badge-glow {
     box-shadow: 0px 0px 10px #00B5B8; }
-  .badge-primary[href]:focus, .badge-primary[href]:hover {
+  .badge-primary[href]:hover, .badge-primary[href]:focus {
     background-color: #008385; }
 
 .badge-success {
   background-color: #16D39A; }
   .badge-success.badge-glow {
     box-shadow: 0px 0px 10px #16D39A; }
-  .badge-success[href]:focus, .badge-success[href]:hover {
+  .badge-success[href]:hover, .badge-success[href]:focus {
     background-color: #11a578; }
 
 .badge-info {
   background-color: #2DCEE3; }
   .badge-info.badge-glow {
     box-shadow: 0px 0px 10px #2DCEE3; }
-  .badge-info[href]:focus, .badge-info[href]:hover {
+  .badge-info[href]:hover, .badge-info[href]:focus {
     background-color: #1ab0c3; }
 
 .badge-warning {
   background-color: #FFA87D; }
   .badge-warning.badge-glow {
     box-shadow: 0px 0px 10px #FFA87D; }
-  .badge-warning[href]:focus, .badge-warning[href]:hover {
+  .badge-warning[href]:hover, .badge-warning[href]:focus {
     background-color: #ff864a; }
 
 .badge-danger {
   background-color: #FF7588; }
   .badge-danger.badge-glow {
     box-shadow: 0px 0px 10px #FF7588; }
-  .badge-danger[href]:focus, .badge-danger[href]:hover {
+  .badge-danger[href]:hover, .badge-danger[href]:focus {
     background-color: #ff425c; }
 
 .badge-up {
@@ -1863,7 +1867,7 @@ button, html [type='button'], [type='reset'], [type='submit'] {
   Description: Extended bootstrap progress bar scss.
   ----------------------------------------------------------------------------------------
   Item Name: Stack - Responsive Admin Theme
-  Version: 2.1
+  Version: 3.0
   Author: PIXINVENT
   Author URL: http://www.themeforest.net/user/pixinvent
   ----------------------------------------------------------------------------------------
@@ -1894,7 +1898,7 @@ button, html [type='button'], [type='reset'], [type='submit'] {
 	Description: Contain list item, list group related extended SCSS.
 	----------------------------------------------------------------------------------------------
 	Item Name: Stack - Responsive Admin Theme
-	Version: 2.1
+	Version: 3.0
 	Author: PIXINVENT
 	Author URL: http://www.themeforest.net/user/pixinvent
 ================================================================================================*/

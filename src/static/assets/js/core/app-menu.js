@@ -4,7 +4,7 @@
   initialization and manipulations
   ----------------------------------------------------------------------------------------
   Item Name: Stack - Responsive Admin Theme
-  Version: 2.1
+  Version: 3.0
   Author: Pixinvent
   Author URL: hhttp://www.themeforest.net/user/pixinvent
 ==========================================================================================*/

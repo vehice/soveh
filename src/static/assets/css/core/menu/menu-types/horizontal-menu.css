@@ -5,7 +5,7 @@
 	item seperation.
 	----------------------------------------------------------------------------------------
 	Item Name: Stack - Responsive Admin Theme
-	Version: 2.1
+	Version: 3.0
 	Author: PIXINVENT
 	Author URL: http://www.themeforest.net/user/pixinvent
 ==========================================================================================*/
@@ -48,7 +48,7 @@
 	item seperation.
 	----------------------------------------------------------------------------------------
 	Item Name: Stack - Responsive Admin Theme
-	Version: 2.1
+	Version: 3.0
 	Author: PIXINVENT
 	Author URL: http://www.themeforest.net/user/pixinvent
 ==========================================================================================*/
@@ -116,6 +116,6 @@
 .vertical-overlay-menu.menu-flipped.menu-open .main-menu {
   transform: translate3d(-240px, 0, 0); }
 
-@media (max-width: 991px) {
+@media (max-width: 991.98px) {
   .vertical-overlay-menu .main-menu .main-menu-footer {
     bottom: 0px; } }

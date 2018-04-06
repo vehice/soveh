@@ -5,7 +5,7 @@
     item seperation.
     ----------------------------------------------------------------------------------------
     Item Name: Stack - Responsive Admin Theme
-    Version: 2.1
+    Version: 3.0
     Author: PIXINVENT
     Author URL: http://www.themeforest.net/user/pixinvent
 ==========================================================================================*/
@@ -73,6 +73,9 @@ body.vertical-layout.vertical-menu.menu-collapsed .navbar .navbar-header {
 body.vertical-layout.vertical-menu.menu-collapsed .navbar.navbar-brand-center .navbar-header {
   float: left;
   width: auto; }
+
+body.vertical-layout.vertical-menu.menu-collapsed .navbar.navbar-brand-center .navbar-brand .brand-text {
+  animation: 0.3s cubic-bezier(0.25, 0.8, 0.25, 1) 0s normal forwards 1 fadein; }
 
 body.vertical-layout.vertical-menu.menu-collapsed .navbar .navbar-brand {
   padding: 15px 0px; }
@@ -223,7 +226,7 @@ body.vertical-layout.vertical-menu.menu-collapsed.menu-flipped .footer {
     margin: 0;
     margin-right: 240px; } }
 
-@media (max-width: 991px) {
+@media (max-width: 991.98px) {
   body.vertical-layout.vertical-menu .main-menu {
     width: 60px; }
     body.vertical-layout.vertical-menu .main-menu .main-menu-footer {
@@ -234,7 +237,7 @@ body.vertical-layout.vertical-menu.menu-collapsed.menu-flipped .footer {
   body.vertical-layout.vertical-menu .footer {
     margin-left: 60px; } }
 
-@media (max-width: 767px) {
+@media (max-width: 767.98px) {
   body.vertical-layout.vertical-menu .content,
   body.vertical-layout.vertical-menu .footer {
     margin-left: 0; } }
@@ -258,7 +261,7 @@ body.vertical-layout.vertical-menu.menu-collapsed.menu-flipped .footer {
 	item seperation.
 	----------------------------------------------------------------------------------------
 	Item Name: Stack - Responsive Admin Theme
-	Version: 2.1
+	Version: 3.0
 	Author: PIXINVENT
 	Author URL: http://www.themeforest.net/user/pixinvent
 ==========================================================================================*/
@@ -326,6 +329,6 @@ body.vertical-layout.vertical-menu.menu-collapsed.menu-flipped .footer {
 .vertical-overlay-menu.menu-flipped.menu-open .main-menu {
   transform: translate3d(-240px, 0, 0); }
 
-@media (max-width: 991px) {
+@media (max-width: 991.98px) {
   .vertical-overlay-menu .main-menu .main-menu-footer {
     bottom: 0px; } }
