@@ -15,40 +15,16 @@ Including another URLconf
 """
 from django.conf.urls import url, include
 from django.contrib import admin
-from django.contrib.auth import views as auth_views
 from django.conf import settings
 from django.conf.urls.static import static
+from django.views.decorators.cache import cache_page
+from django_js_reverse.views import urls_js
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
     url(r'^accounts/', include('accounts.urls')),
     url(r'^', include('app.urls')),
-    # url(r'^', include('backend.urls')),
-
-    url(r'^password_reset/$',
-    auth_views.password_reset,
-    {'template_name': "registration/password_reset_form.html",
-    'html_email_template_name': "registration/password_reset_email.html",
-    'post_reset_redirect' : 'password_reset_done'},
-    name='password_reset'
-  ),
-
-  url(r'^password_reset/done/$',
-    auth_views.password_reset_done,
-    {'template_name': "registration/password_reset_done.html"},
-    name='password_reset_done'
-  ),
-
-  url(r'^reset/(?P<uidb64>[0-9A-Za-z_\-]+)/(?P<token>[0-9A-Za-z]{1,13}-[0-9A-Za-z]{1,20})/$',
-    auth_views.password_reset_confirm,
-    {'template_name': "registration/password_reset_confirm.html",
-    'post_reset_redirect' : 'password_reset_complete'},
-    name='password_reset_confirm'
-  ),
-
-  url(r'^reset/done/$',
-    auth_views.password_reset_complete,
-    {'template_name': "registration/password_reset_complete.html"},
-    name='password_reset_complete'
-  ),
-] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    url(r'^', include('backend.urls')),
+    url(r'^jsreverse/$', cache_page(3600)(urls_js), name='js_reverse'),
+] + static(
+    settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
