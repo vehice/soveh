@@ -1,5 +1,6 @@
 from django.db import models
-from workflows.models import Flow
+from django.contrib.contenttypes.fields import GenericRelation
+from workflows.models import Form
 
 
 class Specie(models.Model):
@@ -55,18 +56,18 @@ class QuestionReceptionCondition(models.Model):
 
 
 class Customer(models.Model):
+    TYPE_CUSTOMER = (('l', 'Laboratory'), ('s', 'Salmon Farming'))
     name = models.CharField(max_length=250, null=True, blank=True)
     company = models.CharField(max_length=250, null=True, blank=True)
+    type_customer = models.CharField(
+        max_length=1, null=True, blank=True, choices=TYPE_CUSTOMER)
 
     def __str__(self):
         return self.name
 
 
 class EntryForm(models.Model):
-    form_id = models.CharField(max_length=250, null=True, blank=True)
-    flow = models.OneToOneField(Flow, null=True, on_delete=models.SET_NULL)
     specie = models.ForeignKey(Specie, null=True, on_delete=models.SET_NULL)
-
     watersource = models.ForeignKey(
         WaterSource,
         null=True,
@@ -87,8 +88,29 @@ class EntryForm(models.Model):
     questionreceptionconditions = models.ManyToManyField(
         QuestionReceptionCondition, through='AnswerReceptionCondition')
     observation = models.TextField(null=True, blank=True)
-    created_at = models.DateTimeField(auto_now_add=True)
+    no_order = models.IntegerField(null=True, blank=True)
+    created_at = models.DateTimeField(null=True, blank=True)
     sampled_at = models.DateTimeField(null=True, blank=True)
+    forms = GenericRelation(Form, related_query_name='form')
+
+    def __str__(self):
+        return str(self.pk)
+
+    @property
+    def form(self):
+        return self.forms.get()
+
+
+class Identification(models.Model):
+    entryform = models.ForeignKey(
+        EntryForm, null=True, on_delete=models.SET_NULL)
+    cage = models.CharField(max_length=250, null=True, blank=True)
+    no_fish = models.IntegerField(null=True, blank=True)
+    no_container = models.IntegerField(null=True, blank=True)
+    group = models.CharField(max_length=250, null=True, blank=True)
+
+    def __str__(self):
+        return str(self.pk)
 
 
 class AnswerReceptionCondition(models.Model):
@@ -105,3 +127,6 @@ class AnswerReceptionCondition(models.Model):
         on_delete=models.SET_NULL,
     )
     answer = models.CharField(max_length=3, choices=ANSWER)
+
+    def __str__(self):
+        return str(self.pk)
