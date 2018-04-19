@@ -20,7 +20,7 @@
   <div class="content-header-right col-md-6 col-12">
     <div role="group" class="btn-group float-md-right">
       <button id="btnGroup" type="button" class="btn btn-outline-primary">
-      <i class="ft-settings"></i> Nuevo Usuario</button>
+        <i class="ft-settings"></i> Nuevo Usuario</button>
     </div>
   </div>
 </div>
@@ -40,17 +40,17 @@
                 <th>Email (Usuario)</th>
                 <th>Administrador</th>
                 <th>Estado</th>
-                <th>Opciones</th>
               </tr>
             </thead>
             <tbody>
+              {% for user in user_list %}
               <tr>
-                <td>Alvaro Alvarez</td>
-                <td>aalvarez@solmat.cl</td>
-                <td>X</td>
-                <td>Activo</td>
-                <td></td>
+                <td>{{ user.user }}</td>
+                <td>{{ user.email }}</td>
+                <td>{{ user.admin }}</td>
+                <td>{{ user.estado }}</td>
               </tr>
+              {% endfor %}
             </tbody>
           </table>
         </div>
