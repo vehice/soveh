@@ -1,7 +1,7 @@
 {% extends 'layout.html' %} {% load static %} {% block stylesheets %} {% endblock stylesheets %} {% block content_header%}
 <div class="content-header row">
   <div class="content-header-left col-md-6 col-12 mb-2">
-    <h3 class="content-header-title mb-0">Empresas</h3>
+    <h3 class="content-header-title mb-0">Ingresos</h3>
     <div class="row breadcrumbs-top">
       <div class="breadcrumb-wrapper col-12">
         <ol class="breadcrumb">
@@ -34,17 +34,17 @@
           <table class="table table-striped table-bordered zero-configuration">
             <thead>
               <tr>
-                <th>Nombre</th>
-                <th>Rut</th>
-                <th>Opciones</th>
+                <th>Nro Ingreso</th>
+                <th>Cliente</th>
               </tr>
             </thead>
             <tbody>
+              {% for entryForm in entryForm_list %}
               <tr>
-                <td>Salmones Aysen S.A</td>
-                <td>76.650.680-1</td>
-                <td></td>
+                <td>{{ entryForm.id }}</td>
+                <td>{{ entryForm.customer }}</td>
               </tr>
+              {% endfor %}
             </tbody>
           </table>
         </div>
@@ -57,7 +57,11 @@
 <script type="text/javascript">
 
   $(document).ready(function () {
-    $('.zero-configuration').DataTable();
+    $('.zero-configuration').DataTable({
+      "oLanguage": {
+        "sUrl": "https://cdn.datatables.net/plug-ins/1.10.16/i18n/Spanish.json"
+      }
+    });
   });
 
 

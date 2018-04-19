@@ -25,27 +25,29 @@ def show_users(request):
             'admin': usuario.is_superuser
         }
         usuarios.append(aux)
-    return render(request, 'app/users.html', {'users': usuarios})
+    return render(request, 'app/users.html', {'user_list': usuarios})
 
 
 @login_required
-def show_empresas(request):
-    return render(request, 'app/empresas.html', {})
+def show_clientes(request):
+    customers = Customer.objects.all()
+    return render(request, 'app/clientes.html', {'customer_list': customers})
 
 
 @login_required
 def show_analisis(request):
-    return render(request, 'app/analisis.html', {})
+    exams = Exam.objects.all()
+    return render(request, 'app/analisis.html', {'exam_list': exams})
 
 
 @login_required
 def show_ingresos(request):
-    return render(request, 'app/ingresos.html', {})
+    entryForms = EntryForm.objects.all()
+    return render(request, 'app/ingresos.html', {'entryForm_list': entryForms})
 
 
 @login_required
 def new_ingreso(request):
-
     species = Specie.objects.all()
     larvalStages = LarvalStage.objects.all()
     fixtatives = Fixative.objects.all()
@@ -54,14 +56,16 @@ def new_ingreso(request):
         status='a')
     exams = Exam.objects.all()
     organs = Organ.objects.all()
+    customers = Customer.objects.all()
 
     return render(
-        request, 'app/nuevo_ingreso.html', {
+        request, 'app/flujo_principal/step-1.html', {
             'specie_list': species,
             'larvalStage_list': larvalStages,
             'fixtative_list': fixtatives,
             'waterSource_list': waterSources,
             'questionReceptionCondition_list': questionReceptionCondition,
             'exam_list': exams,
-            'organ_list': organs
+            'organ_list': organs,
+            'customer_list': customers
         })

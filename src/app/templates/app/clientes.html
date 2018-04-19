@@ -1,17 +1,17 @@
 {% extends 'layout.html' %} {% load static %} {% block stylesheets %} {% endblock stylesheets %} {% block content_header%}
 <div class="content-header row">
   <div class="content-header-left col-md-6 col-12 mb-2">
-    <h3 class="content-header-title mb-0">Análisis</h3>
+    <h3 class="content-header-title mb-0">Clientes</h3>
     <div class="row breadcrumbs-top">
       <div class="breadcrumb-wrapper col-12">
         <ol class="breadcrumb">
           <li class="breadcrumb-item">
-            <a href="index.html">Home</a>
+            <a href="/">Home</a>
           </li>
           <li class="breadcrumb-item">
             <a href="#">Administración</a>
           </li>
-          <li class="breadcrumb-item active">Análisis
+          <li class="breadcrumb-item active">Clientes
           </li>
         </ol>
       </div>
@@ -19,8 +19,8 @@
   </div>
   <div class="content-header-right col-md-6 col-12">
     <div role="group" class="btn-group float-md-right">
-      <button id="btnGroup" type="button" class="btn btn-outline-primary" data-toggle="modal" data-target="#new_exam">
-        <i class="ft-settings"></i> Nuevo Análisis</button>
+      <button id="btnGroup" type="button" class="btn btn-outline-primary" data-toggle="modal" data-target="#new_customer">
+        <i class="ft-settings"></i> Nuevo Cliente</button>
     </div>
   </div>
 </div>
@@ -29,23 +29,23 @@
   <div class="col-12">
     <div class="card">
       <div class="card-header">
-        <h4 class="card-title">Listado de Análisis</h4>
+        <h4 class="card-title">Listado de Clientes</h4>
       </div>
       <div class="card-content">
         <div class="card-body card-dashboard">
           <table class="table table-striped table-bordered zero-configuration">
             <thead>
               <tr>
-                <th>Codigo</th>
                 <th>Nombre</th>
+                <th>Rut</th>
                 <th>Opciones</th>
               </tr>
             </thead>
             <tbody>
-              {% for exam in exam_list %}
+              {% for customer in customer_list %}
               <tr>
-                <td>{{ exam.id }}</td>
-                <td>{{ exam.name }}</td>
+                <td>{{ customer.name }}</td>
+                <td>{{ customer.company }}</td>
                 <td></td>
               </tr>
               {% endfor %}
@@ -57,20 +57,33 @@
   </div>
 </div>
 
-<div class="modal fade text-left" id="new_exam" tabindex="-1" role="dialog" aria-labelledby="myModalLabel35" aria-hidden="true">
+<div class="modal fade text-left" id="new_customer" tabindex="-1" role="dialog" aria-labelledby="myModalLabel35" aria-hidden="true">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h3 class="modal-title" id="myModalLabel35">Nuevo Analisis</h3>
+        <h3 class="modal-title" id="myModalLabel35">Nuevo Cliente</h3>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
       </div>
-      <form id="nuevo_analisis">
+      <form id="nuevo_cliente">
         <div class="modal-body">
           <fieldset class="form-group floating-label-form-group">
-            <label for="name">Nombre</label>
-            <input type="text" class="form-control" id="nombre" placeholder="Nombre del Analisis">
+            <label for="customer">Cliente</label>
+            <input type="text" class="form-control" id="nombre" placeholder="Nombre de Cliente">
+          </fieldset>
+          <br>
+          <fieldset class="form-group floating-label-form-group">
+            <label for="title">Rut Cliente</label>
+            <input type="text" class="form-control" id="rut" placeholder="Rut de Cliente">
+          </fieldset>
+          <br>
+          <fieldset class="form-group floating-label-form-group">
+            <label for="title1">Laboratorio</label>
+            <div class="form-group pb-1">
+              <input type="checkbox" id="switchery" class="switchery" checked/>
+              <label for="switchery" class="font-medium-2 text-bold-600 ml-1"></label>
+            </div>
           </fieldset>
         </div>
         <div class="modal-footer">
@@ -82,16 +95,18 @@
   </div>
 </div>
 
-
-
 {% endblock content %} {% block scripts %}
+<script src="{% url 'js_reverse' %}" type="text/javascript"></script>
+
 <script type="text/javascript">
 
   $("#save").on('click', function (e) {
     e.preventDefault();
-    var url = Urls.exam();
+    var url = Urls.customer();
 
     var nombre = $("#nombre").val();
+    var rut = $("#rut").val();
+    var laboratorio = $("#switchery").val();
 
     $.ajax({
       type: "POST",
@@ -117,5 +132,6 @@
       }
     });
   });
+
 
 </script> {% endblock scripts %}

@@ -37,61 +37,69 @@
               <div class="row">
                 <div class="col-md-6">
                   <div class="form-group">
-                    <label for="client">
+                    <label for="customer">
                       Cliente :
                       <span class="danger">*</span>
                     </label>
-                    <input type="text" class="form-control required" id="firstName3" name="firstName">
+                    <select class="select2 form-control" name="customer" id="customer_select">
+                      <option></option>
+                      {% for customer in customer_list %}
+                      <option value="{{customer.id}}" data-type-customer={{customer.type_customer}}>{{customer.name}}</option>
+                      {% endfor %}
+                    </select>
                   </div>
                 </div>
                 <div class="col-md-6">
                   <div class="form-group">
                     <label>Fecha / Hora Recepción : </label>
                     <div class='input-group date' id='datetime_created_at'>
-                      <input type='text' class="form-control" />
+                      <input type='text' class="form-control" name="created_at" />
                       <div class="input-group-append">
                         <span class="input-group-text">
                           <span class="fa fa-calendar"></span>
                         </span>
                       </div>
                     </div>
+                    <input type="hidden" name="created_at_submit" id="created_at_submit" />
                   </div>
                 </div>
                 <div class="col-md-6">
-                  <div class="form-group">
-                    <label for="lastName3">
-                      Empresa :
+                  <div class="form-group" id="center">
+                    <label for="center">
+                      Centro :
                       <span class="danger">*</span>
                     </label>
-                    <input type="text" class="form-control required" id="lastName3" name="lastName">
+                    <input class="form-control" name="center" id="center_input">
+                  </div>
+                  <div class="form-group" id="order_number">
+                    <label for="order_number">
+                      Nro Orden :
+                      <span class="danger">*</span>
+                    </label>
+                    <input type='text' class="form-control" id="order_number_input" name="no_order" />
                   </div>
                 </div>
                 <div class="col-md-6">
                   <div class="form-group">
                     <label>Fecha / Hora Muestreo : </label>
                     <div class='input-group date' id='datetime_sampled_at'>
-                      <input type='text' class="form-control" />
+                      <input type='text' class="form-control" name='sampled_at' />
                       <div class="input-group-append">
                         <span class="input-group-text">
                           <span class="fa fa-calendar"></span>
                         </span>
                       </div>
                     </div>
+                    <input type="hidden" name="sampled_at_submit" id="sampled_at_submit" />
                   </div>
                 </div>
                 <div class="col-md-6">
-                  <div class="form-group">
-                    <label for="location">
-                      Centro :
-                      <span class="danger">*</span>
-                    </label>
-                    <input type="email" class="form-control required" id="emailAddress5" name="emailAddress">
-                  </div>
                 </div>
                 <div class="col-md-6">
                   <div class="form-group">
                     <label for="phoneNumber3">Fijador :</label>
-                    <select class="select2 form-control" id="single-placeholder">
+                    <select class="select2 form-control" id="fixtative_select" name="fixative">
+                      <option></option>
                       {% for fixtative in fixtative_list %}
                       <option value="{{fixtative.id}}">{{fixtative}}</option>
                       {% endfor %}
@@ -100,13 +108,14 @@
                 </div>
               </div>
               <h4 class="form-section">
-                <i class="ft-user"></i> LALALALALA
+                <i class="ft-droplet"></i> Detalle Muestra
               </h4>
               <div class="row">
                 <div class="col-md-6">
                   <div class="form-group">
                     <label for="date3">Especie :</label>
-                    <select class="select2 form-control" id="single-placeholder">
+                    <select class="select2 form-control" id="specie_select" name="specie">
+                      <option></option>
                       {% for specie in specie_list %}
                       <option value="{{specie.id}}">{{specie}}</option>
                       {% endfor %}
@@ -116,7 +125,8 @@
                 <div class="col-md-6">
                   <div class="form-group">
                     <label for="phoneNumber3">Estadio Desarrollo :</label>
-                    <select class="select2 form-control" id="single-placeholder">
+                    <select class="select2 form-control" id="larvalstage_select" name="larvalstage">
+                      <option></option>
                       {% for larvalStage in larvalStage_list %}
                       <option value="{{larvalStage.id}}">{{larvalStage}}</option>
                       {% endfor %}
@@ -126,7 +136,8 @@
                 <div class="col-md-6">
                   <div class="form-group">
                     <label for="date3">Fuente Agua :</label>
-                    <select class="select2 form-control" id="single-placeholder">
+                    <select class="select2 form-control" id="watersource_select" name="watersource">
+                      <option></option>
                       {% for waterSource in waterSource_list %}
                       <option value="{{waterSource.id}}">{{waterSource}}</option>
                       {% endfor %}
@@ -135,7 +146,7 @@
                 </div>
               </div>
               <h4 class="form-section">
-                <i class="ft-user"></i> Condiciones de Recepción
+                <i class="ft-file-text"></i> Condiciones de Recepción
               </h4>
               <div class="row">
                 <div class="col-md-12">
@@ -145,47 +156,45 @@
                     <div class="col-md-4">
                       <div class="input-group">
                         <div class="d-inline-block custom-control custom-radio mr-1">
-                          <input type="radio" name="question_{{questionReceptionCondition.id}}" class="custom-control-input" checked="" id="question_{{questionReceptionCondition.id}}_si">
+                          <input type="radio" name="question['answer'][{{ forloop.counter0 }}]" class="custom-control-input" value="si" id="question_{{questionReceptionCondition.id}}_si">
                           <label class="custom-control-label" for="question_{{questionReceptionCondition.id}}_si">Si</label>
                         </div>
                         <div class="d-inline-block custom-control custom-radio">
-                          <input type="radio" name="question_{{questionReceptionCondition.id}}" class="custom-control-input" id="question_{{questionReceptionCondition.id}}_no">
+                          <input type="radio" name="question['answer'][{{ forloop.counter0 }}]" class="custom-control-input" value="no" id="question_{{questionReceptionCondition.id}}_no">
                           <label class="custom-control-label" for="question_{{questionReceptionCondition.id}}_no">No</label>
                         </div>
                         <div class="d-inline-block custom-control custom-radio">
-                          <input type="radio" name="question_{{questionReceptionCondition.id}}" class="custom-control-input" id="question_{{questionReceptionCondition.id}}_n/a">
+                          <input type="radio" name="question['answer'][{{ forloop.counter0 }}]" class="custom-control-input" value="n/a" id="question_{{questionReceptionCondition.id}}_n/a">
                           <label class="custom-control-label" for="question_{{questionReceptionCondition.id}}_n/a">N/A</label>
                         </div>
                       </div>
                     </div>
+                    <input type="hidden" name="question['id'][{{ forloop.counter0 }}]" value="{{questionReceptionCondition.id}}" />
                   </div>
                   {% endfor %}
                 </div>
               </div>
               <h4 class="form-section">
-                <i class="ft-user"></i> Identificación
+                <i class="ft-clipboard"></i> Identificación
               </h4>
               <div class="row">
-                <div class="col-md-6">
-                  <div class="form-group">
-                    <label for="date3">??????</label>
-                    <input type="date" class="form-control" id="date3">
-                  </div>
-                </div>
                 <div class="col-md-12">
                   <div class="form-group">
                     <label for="date3">Observaciones</label>
-                    <textarea rows="5" class="form-control" name="observaciones" placeholder="Observaciones / Anamnesis"></textarea>
+                    <textarea rows="5" class="form-control" name="observation" id="observation" placeholder="Observaciones / Anamnesis"></textarea>
                   </div>
                 </div>
               </div>
+              <div id="identification_group">
+
+              </div>
               <h4 class="form-section">
-                <i class="ft-user"></i> Análisis
+                <i class="ft-search"></i> Análisis
               </h4>
               <div class="row">
                 <div class="col-md-12">
                   <div class="form-group">
-                    <label for="date3">Seleccione los análisis:</label>
+                    <label for="analisis">Seleccione los análisis:</label>
                     <select class="select2 form-control" id="analisis_select" multiple="multiple">
                       {% for exam in exam_list %}
                       <option value="{{exam.id}}">{{exam}}</option>
@@ -197,24 +206,6 @@
               <div id="analisis_group">
               </div>
             </fieldset>
-            <!-- Step 2 -->
-            <h6>Step 2</h6>
-            <fieldset>
-              <div class="row">
-              </div>
-            </fieldset>
-            <!-- Step 3 -->
-            <h6>Step 3</h6>
-            <fieldset>
-              <div class="row">
-              </div>
-            </fieldset>
-            <!-- Step 4 -->
-            <h6>Step 4</h6>
-            <fieldset>
-              <div class="row">
-              </div>
-            </fieldset>
           </form>
         </div>
       </div>
@@ -223,49 +214,151 @@
 </div>
 
 <script id="analisis_template" type="text/x-lodash-template">
-<div data-id="<%= analisis_id %>" class="row">
-  <div class="col-md-4">
+  <div data-id="<%= analisis_id %>" class="row">
+    <div class="col-md-4">
+      <div class="form-group">
+        <label for="date3">Análisis</label>
+        <input value="<%= analisis_name %>" class="form-control" disabled>
+        <input type="hidden" value="<%= analisis_id %>" name="analisis[id]" class="form-control">
+      </div>
+    </div>
+    <div class="col-md-2">
+      <div class="form-group">
+        <label for="date3">No. Peces</label>
+        <input class="form-control" name="analisis[no_fish]" required>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="form-group">
+        <label for="date3">Órganos</label>
+        <select class="select2 form-control" id="analisis-select" name="analisis[organ]" required>
+          {% for organ in organ_list %}
+          <option value="{{organ.id}}">{{organ}}</option>
+          {% endfor %}
+        </select>
+      </div>
+    </div>
+    <div class="col-md-1 text-center">
+      <div class="form-group">
+        <label for="date3">&nbsp;</label>
+        <button class="btn_white_letter btn btn-danger form-control" id="delete_analisis" type="button">x</button>
+      </div>
+    </div>
+  </div>
+</script>
+<script id="identification_template" type="text/x-lodash-template">
+<div class="row" id="identification">
+  <div class="col-md-3">
     <div class="form-group">
-      <label for="date3">Análisis</label>
-      <input type="email" value="<%= analisis_name %>" class="form-control required" disabled id="emailAddress5">
+      <label for="cage">Estanque/Jaula</label>
+      <input type="text" value="" name="identification['cage']" class="form-control">
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="form-group">
+      <label for="group">Grupo</label>
+      <input name="identification['group']" class="form-control">
     </div>
   </div>
   <div class="col-md-2">
     <div class="form-group">
-      <label for="date3">No. Peces</label>
-      <input type="email" class="form-control required" id="emailAddress5" name="emailAddress">
+      <label for="no_fish">No. Peces</label>
+      <input name="identification['no_fish']" class="form-control">
     </div>
   </div>
-  <div class="col-md-4">
+  <div class="col-md-2">
     <div class="form-group">
-      <label for="date3">Órganos</label>
-      <select class="select2 form-control" id="analisis-select">
-        {% for organ in organ_list %}
-        <option value="{{organ.id}}">{{organ}}</option>
-        {% endfor %}
-      </select>
+      <label for="no_container">No. Contenedores</label>
+      <input name="identification['no_container']" class="form-control">
     </div>
   </div>
   <div class="col-md-1 text-center">
     <div class="form-group">
-      <label for="date3">&nbsp;</label>
-      <button class="btn_white_letter btn btn-danger form-control" id="delete_analisis" type="button">X</button>
+      <label for="add">&nbsp;</label>
+      <button class="btn_white_letter btn btn-success form-control" id="add_identification" type="button">+</button>
+    </div>
+  </div>
+  <div class="col-md-1 text-center">
+    <div class="form-group">
+      <label for="delete">&nbsp;</label>
+      <button class="btn_white_letter btn btn-danger form-control" id="delete_identification" type="button">x</button>
     </div>
   </div>
 </div>
-
 </script> {% endblock content %} {% block scripts %}
-
-
+<script src="{% url 'js_reverse' %}" type="text/javascript"></script>
 
 <script type="text/javascript ">
+
+
 
 var form = $(".steps-validation").show();
 
 $(function () {
-  $('#datetime_created_at').datetimepicker();
-  $('#datetime_sampled_at').datetimepicker();
-  $(".select2").select2();
+  $("#order_number").hide();
+  $("#center").hide();
+  addIdentificationTemplate();
+
+  $('#datetime_created_at').datetimepicker({
+    locale: 'es',
+  });
+
+  $('#datetime_sampled_at').datetimepicker({
+    locale: 'es',
+  });
+
+  $('#datetime_created_at').on("dp.change", function (e) {
+    if (e.date) {
+      $("#created_at_submit").val(e.date.format());
+    }
+  });
+
+  $('#datetime_sampled_at').on("dp.change", function (e) {
+    if (e.date) {
+      $("#sampled_at_submit").val(e.date.format());
+    }
+  });
+
+  $('#analisis_select').select2();
+
+  $('#customer_select').select2({
+    placeholder: "Porfavor seleccione un cliente"
+  });
+
+  $('#fixtative_select').select2({
+    placeholder: "Porfavor seleccione un fijador"
+  });
+
+  $('#specie_select').select2({
+    placeholder: "Porfavor seleccione una especie"
+  });
+
+  $('#larvalstage_select').select2({
+    placeholder: "Porfavor seleccione un estadio desarrollo"
+  });
+
+  $('#watersource_select').select2({
+    placeholder: "Porfavor seleccione una fuente de agua"
+  });
+
+  $('#customer_select').on("select2:select", function(e) {
+    var analisis_name = e.params.data.text
+    var analisis_id = e.params.data.id
+
+    var customer_type = $('#customer_select').find(':selected').data('type-customer')
+
+    if (customer_type === 'l') {
+      $("#center").val("");
+      $("#center").hide();
+      $("#order_number").val("")
+      $("#order_number").show()
+    } else {
+      $("#center").val("");
+      $("#center").show();
+      $("#order_number").val("")
+      $("#order_number").hide()
+    }
+  });
 
   $('#analisis_select').on("select2:select", function(e) {
     var analisis_name = e.params.data.text
@@ -289,7 +382,6 @@ $(function () {
         }
       }
       $(e.target).closest("[data-id]").remove()
-
     }
     e.stopPropagation();
   });
@@ -302,24 +394,48 @@ $(function () {
     var unselected_value = e.params.args.data.id;
     $('#analisis_group').find('[data-id="' + unselected_value + '"]').remove();
   });
+
+  $('#identification_group').on("click", "#add_identification", function(e) {
+    addIdentificationTemplate();
+  })
+
+  $('#identification_group').on("click", "#delete_identification", function(e) {
+    $(this).closest("#identification").remove()
+  })
+
 });
+
+// function initializeSelect2(selectElementObj) {
+//     selectElementObj.select2({
+//       width: "80%",
+//       tags: true
+//     });
+//   }
+
+
+
+//   $(".add-new-select").on("click", function() {
+//     var newSelect = $("<select class='select-to-select2'  multiple><option>option 1</option><option>option 2</option></select>");
+//     $(".select-container").append(newSelect);
+//     initializeSelect2(newSelect);
+//   });
 
 function addAnalisisTemplate(data) {
   var analisisTemplate = document.getElementById("analisis_template").innerHTML;
 
   var templateFn = _.template(analisisTemplate);
-  var analisisDiv = document.getElementById("analisis_group");
   var templateHTML = templateFn(data);
 
-  analisisDiv.innerHTML += templateHTML;
+  $("#analisis_group").append(templateHTML)
 }
 
+function addIdentificationTemplate() {
+  var identificationTemplate = document.getElementById("identification_template").innerHTML;
 
+  var templateHTML = _.template(identificationTemplate)();
 
-
-
-
-
+  $("#identification_group").append(templateHTML);
+}
 
 $(".steps-validation").steps({
     headerTag: "h6",
@@ -327,7 +443,8 @@ $(".steps-validation").steps({
     transitionEffect: "fade",
     titleTemplate: '<span class="step">#index#</span> #title#',
     labels: {
-        finish: 'Submit'
+        finish: 'Continuar'
+
     },
     onStepChanging: function (event, currentIndex, newIndex)
     {
@@ -358,7 +475,21 @@ $(".steps-validation").steps({
     },
     onFinished: function (event, currentIndex)
     {
-        alert("Submitted!");
+      event.preventDefault();
+      var url = Urls.entryform();
+      var form_data = ($("form").serialize())
+
+      $.ajax({
+        type: "POST",
+        url: url,
+        data: form_data,
+      })
+      .done(function () {
+        console.log("Success")
+      })
+      .fail(function () {
+        console.log("Fail")
+      })
     }
 });
 
@@ -377,9 +508,6 @@ $(".steps-validation").validate({
         error.insertAfter(element);
     },
     rules: {
-        email: {
-            email: true
-        }
     }
 });
 
