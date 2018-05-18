@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
+from accounts.models import Profile
 
 
 class State(models.Model):
@@ -39,8 +40,18 @@ class Permission(models.Model):
         return self.name
 
 
+class Actor(models.Model):
+    name = models.CharField(max_length=250, null=True, blank=True)
+    permission = models.ManyToManyField(Permission)
+    profile = models.ForeignKey(Profile, null=True, on_delete=models.SET_NULL)
+
+    def __str__(self):
+        return self.name
+
+
 class Step(models.Model):
     name = models.CharField(max_length=250, null=True, blank=True)
+    tag = models.CharField(max_length=250, null=True, blank=True)
     state = models.OneToOneField(
         State,
         on_delete=models.CASCADE,
@@ -48,20 +59,7 @@ class Step(models.Model):
     )
     flow = models.ForeignKey(Flow, null=True, on_delete=models.SET_NULL)
     route = models.CharField(max_length=250, null=True, blank=True)
-
-    def __str__(self):
-        return self.name
-
-
-class Actor(models.Model):
-    name = models.CharField(max_length=250, null=True, blank=True)
-    permission = models.ForeignKey(
-        Permission, null=True, on_delete=models.SET_NULL)
-    step = models.ForeignKey(
-        Step,
-        null=True,
-        on_delete=models.SET_NULL,
-    )
+    actors = models.ManyToManyField(Actor)
 
     def __str__(self):
         return self.name
@@ -77,7 +75,3 @@ class Form(models.Model):
 
     def __str__(self):
         return str(self.content_type)
-
-    @property
-    def form(self):
-        return self.form.get()
