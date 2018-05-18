@@ -1,4 +1,8 @@
-{% extends 'layout.html' %} {% load static %} {% block stylesheets %} {% endblock stylesheets %} {% block content_header%}
+{% extends 'layout.html' %}
+{% load static %}
+{% block stylesheets %}
+{% endblock stylesheets %}
+{% block content_header %}
 <div class="content-header row">
   <div class="content-header-left col-md-6 col-12 mb-2">
     <h3 class="content-header-title mb-0">Ingresos</h3>
@@ -36,13 +40,15 @@
               <tr>
                 <th>Nro Ingreso</th>
                 <th>Cliente</th>
+                <th>Paso</th>
               </tr>
             </thead>
             <tbody>
               {% for entryForm in entryForm_list %}
               <tr>
-                <td>{{ entryForm.id }}</td>
-                <td>{{ entryForm.customer }}</td>
+                <td>{{ entryForm.content_object.id }}</td>
+                <td>{{ entryForm.content_object.customer }}</td>
+                <td>{{ entryForm.state.step }}</td>
               </tr>
               {% endfor %}
             </tbody>
@@ -58,9 +64,9 @@
 
   $(document).ready(function () {
     $('.zero-configuration').DataTable({
-      "oLanguage": {
-        "sUrl": "https://cdn.datatables.net/plug-ins/1.10.16/i18n/Spanish.json"
-      }
+      language: {
+        url: "https://cdn.datatables.net/plug-ins/1.10.16/i18n/Spanish.json"
+      },
     });
   });
 

@@ -88,17 +88,18 @@ class EntryForm(models.Model):
     questionreceptionconditions = models.ManyToManyField(
         QuestionReceptionCondition, through='AnswerReceptionCondition')
     observation = models.TextField(null=True, blank=True)
-    no_order = models.IntegerField(null=True, blank=True)
+    no_order = models.CharField(max_length=250, null=True, blank=True)
+    center = models.CharField(max_length=250, null=True, blank=True)
     created_at = models.DateTimeField(null=True, blank=True)
     sampled_at = models.DateTimeField(null=True, blank=True)
-    forms = GenericRelation(Form, related_query_name='form')
+    forms = GenericRelation(Form)
 
     def __str__(self):
         return str(self.pk)
 
     @property
     def form(self):
-        return self.forms.get()
+        return self.form.get()
 
 
 class Identification(models.Model):
@@ -130,3 +131,24 @@ class AnswerReceptionCondition(models.Model):
 
     def __str__(self):
         return str(self.pk)
+
+
+class Analysis(models.Model):  # Maybe AnalysisForm
+    entryform = models.ForeignKey(
+        EntryForm, null=True, on_delete=models.SET_NULL)
+    exam = models.ForeignKey(Exam, null=True, on_delete=models.SET_NULL)
+    organs = models.ManyToManyField(Organ)
+    no_fish = models.IntegerField(null=True, blank=True)
+
+
+class Slide(models.Model):
+    exams = models.ManyToManyField(Exam)
+
+
+class Cassette(models.Model):
+    entryform = models.ForeignKey(
+        EntryForm, null=True, on_delete=models.SET_NULL)
+    sample_id = models.CharField(max_length=250, null=True, blank=True)
+    organs = models.ManyToManyField(Organ)
+    slides = models.ManyToManyField(Slide)
+    # estanque =

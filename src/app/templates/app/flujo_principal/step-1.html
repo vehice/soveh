@@ -1,240 +1,174 @@
-{% extends 'layout.html' %} {% load static %} {% block stylesheets %} {% endblock stylesheets %} {% block content_header%}
-<div class="content-header row">
-  <div class="content-header-left col-md-6 col-12 mb-2">
-    <h3 class="content-header-title mb-0">Nuevo Ingreso</h3>
-    <div class="row breadcrumbs-top">
-      <div class="breadcrumb-wrapper col-12">
-        <ol class="breadcrumb">
-          <li class="breadcrumb-item">
-            <a href="/">Home</a>
-          </li>
-          <li class="breadcrumb-item">
-            <a href="#">Ingresos</a>
-          </li>
-          <li class="breadcrumb-item active">Nuevo Ingreso
-          </li>
-        </ol>
+<fieldset>
+  <div id="step_{{ step_tab }}">
+    <input type="hidden" name="step_tag" value="{{step_tag}}">
+    <input type="hidden" id="form_id" name="form_id" value="{{form_id}}" >
+    <input type="hidden" id="entryform_id" name="entryform_id" value="{{entryform_id}}" >
+    <h4 class="form-section">
+      <i class="ft-user"></i> Informacion General
+    </h4>
+    <div class="row">
+      <div class="col-md-6">
+        <div class="form-group">
+          <label for="customer">
+            Cliente :
+          </label>
+          <select class="select2 form-control" name="customer" id="customer_select">
+            <option></option>
+          </select>
+        </div>
       </div>
-    </div>
-  </div>
-</div>
-{% endblock content_header %} {% block content %}
-<div class="row">
-  <div class="col-12">
-    <div class="card">
-      <div class="card-header">
-        <h4 class="card-title"> Nuevo Ingreso</h4>
+      <div class="col-md-6">
+        <div class="form-group">
+          <label>Fecha / Hora Recepción : </label>
+          <div class='input-group date' id='datetime_created_at'>
+            <input type="text" class="form-control" name="created_at" />
+            <div class="input-group-append">
+              <span class="input-group-text">
+                <span class="fa fa-calendar"></span>
+              </span>
+            </div>
+          </div>
+          <input type="hidden" name="created_at_submit" id="created_at_submit" />
+        </div>
       </div>
-      <div class="card-content">
-        <div class="card-body">
-          <form action="#" class="steps-validation wizard-circle">
-            <!-- Step 1 -->
-            <h6>Paso 1</h6>
-            <fieldset>
-              <h4 class="form-section">
-                <i class="ft-user"></i> Informacion General
-              </h4>
-              <div class="row">
-                <div class="col-md-6">
-                  <div class="form-group">
-                    <label for="customer">
-                      Cliente :
-                      <span class="danger">*</span>
-                    </label>
-                    <select class="select2 form-control" name="customer" id="customer_select">
-                      <option></option>
-                      {% for customer in customer_list %}
-                      <option value="{{customer.id}}" data-type-customer={{customer.type_customer}}>{{customer.name}}</option>
-                      {% endfor %}
-                    </select>
-                  </div>
-                </div>
-                <div class="col-md-6">
-                  <div class="form-group">
-                    <label>Fecha / Hora Recepción : </label>
-                    <div class='input-group date' id='datetime_created_at'>
-                      <input type='text' class="form-control" name="created_at" />
-                      <div class="input-group-append">
-                        <span class="input-group-text">
-                          <span class="fa fa-calendar"></span>
-                        </span>
-                      </div>
-                    </div>
-                    <input type="hidden" name="created_at_submit" id="created_at_submit" />
-                  </div>
-                </div>
-                <div class="col-md-6">
-                  <div class="form-group" id="center">
-                    <label for="center">
-                      Centro :
-                      <span class="danger">*</span>
-                    </label>
-                    <input class="form-control" name="center" id="center_input">
-                  </div>
-                  <div class="form-group" id="order_number">
-                    <label for="order_number">
-                      Nro Orden :
-                      <span class="danger">*</span>
-                    </label>
-                    <input type='text' class="form-control" id="order_number_input" name="no_order" />
-                  </div>
-                </div>
-                <div class="col-md-6">
-                  <div class="form-group">
-                    <label>Fecha / Hora Muestreo : </label>
-                    <div class='input-group date' id='datetime_sampled_at'>
-                      <input type='text' class="form-control" name='sampled_at' />
-                      <div class="input-group-append">
-                        <span class="input-group-text">
-                          <span class="fa fa-calendar"></span>
-                        </span>
-                      </div>
-                    </div>
-                    <input type="hidden" name="sampled_at_submit" id="sampled_at_submit" />
-                  </div>
-                </div>
-                <div class="col-md-6">
-                </div>
-                <div class="col-md-6">
-                  <div class="form-group">
-                    <label for="phoneNumber3">Fijador :</label>
-                    <select class="select2 form-control" id="fixtative_select" name="fixative">
-                      <option></option>
-                      {% for fixtative in fixtative_list %}
-                      <option value="{{fixtative.id}}">{{fixtative}}</option>
-                      {% endfor %}
-                    </select>
-                  </div>
-                </div>
-              </div>
-              <h4 class="form-section">
-                <i class="ft-droplet"></i> Detalle Muestra
-              </h4>
-              <div class="row">
-                <div class="col-md-6">
-                  <div class="form-group">
-                    <label for="date3">Especie :</label>
-                    <select class="select2 form-control" id="specie_select" name="specie">
-                      <option></option>
-                      {% for specie in specie_list %}
-                      <option value="{{specie.id}}">{{specie}}</option>
-                      {% endfor %}
-                    </select>
-                  </div>
-                </div>
-                <div class="col-md-6">
-                  <div class="form-group">
-                    <label for="phoneNumber3">Estadio Desarrollo :</label>
-                    <select class="select2 form-control" id="larvalstage_select" name="larvalstage">
-                      <option></option>
-                      {% for larvalStage in larvalStage_list %}
-                      <option value="{{larvalStage.id}}">{{larvalStage}}</option>
-                      {% endfor %}
-                    </select>
-                  </div>
-                </div>
-                <div class="col-md-6">
-                  <div class="form-group">
-                    <label for="date3">Fuente Agua :</label>
-                    <select class="select2 form-control" id="watersource_select" name="watersource">
-                      <option></option>
-                      {% for waterSource in waterSource_list %}
-                      <option value="{{waterSource.id}}">{{waterSource}}</option>
-                      {% endfor %}
-                    </select>
-                  </div>
-                </div>
-              </div>
-              <h4 class="form-section">
-                <i class="ft-file-text"></i> Condiciones de Recepción
-              </h4>
-              <div class="row">
-                <div class="col-md-12">
-                  {% for questionReceptionCondition in questionReceptionCondition_list %}
-                  <div class="form-group row">
-                    <label class="col-md-6 label-control">{{questionReceptionCondition.text}} </label>
-                    <div class="col-md-4">
-                      <div class="input-group">
-                        <div class="d-inline-block custom-control custom-radio mr-1">
-                          <input type="radio" name="question['answer'][{{ forloop.counter0 }}]" class="custom-control-input" value="si" id="question_{{questionReceptionCondition.id}}_si">
-                          <label class="custom-control-label" for="question_{{questionReceptionCondition.id}}_si">Si</label>
-                        </div>
-                        <div class="d-inline-block custom-control custom-radio">
-                          <input type="radio" name="question['answer'][{{ forloop.counter0 }}]" class="custom-control-input" value="no" id="question_{{questionReceptionCondition.id}}_no">
-                          <label class="custom-control-label" for="question_{{questionReceptionCondition.id}}_no">No</label>
-                        </div>
-                        <div class="d-inline-block custom-control custom-radio">
-                          <input type="radio" name="question['answer'][{{ forloop.counter0 }}]" class="custom-control-input" value="n/a" id="question_{{questionReceptionCondition.id}}_n/a">
-                          <label class="custom-control-label" for="question_{{questionReceptionCondition.id}}_n/a">N/A</label>
-                        </div>
-                      </div>
-                    </div>
-                    <input type="hidden" name="question['id'][{{ forloop.counter0 }}]" value="{{questionReceptionCondition.id}}" />
-                  </div>
-                  {% endfor %}
-                </div>
-              </div>
-              <h4 class="form-section">
-                <i class="ft-clipboard"></i> Identificación
-              </h4>
-              <div class="row">
-                <div class="col-md-12">
-                  <div class="form-group">
-                    <label for="date3">Observaciones</label>
-                    <textarea rows="5" class="form-control" name="observation" id="observation" placeholder="Observaciones / Anamnesis"></textarea>
-                  </div>
-                </div>
-              </div>
-              <div id="identification_group">
-
-              </div>
-              <h4 class="form-section">
-                <i class="ft-search"></i> Análisis
-              </h4>
-              <div class="row">
-                <div class="col-md-12">
-                  <div class="form-group">
-                    <label for="analisis">Seleccione los análisis:</label>
-                    <select class="select2 form-control" id="analisis_select" multiple="multiple">
-                      {% for exam in exam_list %}
-                      <option value="{{exam.id}}">{{exam}}</option>
-                      {% endfor %}
-                    </select>
-                  </div>
-                </div>
-              </div>
-              <div id="analisis_group">
-              </div>
-            </fieldset>
-          </form>
+      <div class="col-md-6">
+        <div class="form-group" id="center">
+          <label for="center">
+            Centro :
+            <!-- <span class="danger">*</span> -->
+          </label>
+          <input class="form-control" name="center" id="center_input">
+        </div>
+        <div class="form-group" id="order_number">
+          <label for="order_number">
+            Nro Orden :
+          </label>
+          <input type='text' class="form-control" id="order_number_input" name="no_order" />
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="form-group">
+          <label>Fecha / Hora Muestreo : </label>
+          <div class='input-group date' id='datetime_sampled_at'>
+            <input type='text' class="form-control" name='sampled_at' />
+            <div class="input-group-append">
+              <span class="input-group-text">
+                <span class="fa fa-calendar"></span>
+              </span>
+            </div>
+          </div>
+          <input type="hidden" name="sampled_at_submit" id="sampled_at_submit" />
+        </div>
+      </div>
+      <div class="col-md-6">
+      </div>
+      <div class="col-md-6">
+        <div class="form-group">
+          <label for="phoneNumber3">Fijador :</label>
+          <select class="select2 form-control" id="fixtative_select" name="fixative">
+            <option></option>
+          </select>
         </div>
       </div>
     </div>
+    <h4 class="form-section">
+      <i class="ft-droplet"></i> Detalle Muestra
+    </h4>
+    <div class="row">
+      <div class="col-md-6">
+        <div class="form-group">
+          <label for="date3">Especie :</label>
+          <select class="select2 form-control" id="specie_select" name="specie">
+            <option></option>
+          </select>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="form-group">
+          <label for="phoneNumber3">Estadio Desarrollo :</label>
+          <select class="select2 form-control" id="larvalstage_select" name="larvalstage">
+            <option></option>
+          </select>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="form-group">
+          <label for="date3">Fuente Agua :</label>
+          <select class="select2 form-control" id="watersource_select" name="watersource">
+            <option></option>
+            {% for waterSource in waterSource_list %}
+            <option value="{{waterSource.id}}">{{waterSource}}</option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+    </div>
+    <h4 class="form-section">
+      <i class="ft-file-text"></i> Condiciones de Recepción
+    </h4>
+    <div class="row">
+      <div class="col-md-12" id="question_reception">
+      </div>
+    </div>
+    <h4 class="form-section">
+      <i class="ft-clipboard"></i> Identificación
+    </h4>
+    <div class="row">
+      <div class="col-md-12">
+        <div class="form-group">
+          <label for="date3">Observaciones</label>
+          <textarea rows="5" class="form-control" name="observation" id="observation" placeholder="Observaciones / Anamnesis"></textarea>
+        </div>
+      </div>
+    </div>
+    <div id="identification_group">
+      <div class="row">
+        <div class="col-md-3">
+          <div class="form-group">
+            <button class="btn_white_letter btn btn-success form-control" id="add_identification" type="button">Añadir Indetificación</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <h4 class="form-section">
+      <i class="ft-search"></i> Análisis
+    </h4>
+    <div class="row">
+      <div class="col-md-12">
+        <div class="form-group">
+          <label for="exam">Seleccione los análisis:</label>
+          <select class="select2 form-control" id="exam_select" multiple="multiple">
+          </select>
+        </div>
+      </div>
+    </div>
+    <div id="exam_group">
+    </div>
   </div>
-</div>
+</fieldset>
 
-<script id="analisis_template" type="text/x-lodash-template">
-  <div data-id="<%= analisis_id %>" class="row">
+<script id="analysis_template" type="text/x-lodash-template">
+  <div data-id="<%= analysis_id %>" class="row">
     <div class="col-md-4">
       <div class="form-group">
         <label for="date3">Análisis</label>
-        <input value="<%= analisis_name %>" class="form-control" disabled>
-        <input type="hidden" value="<%= analisis_id %>" name="analisis[id]" class="form-control">
+        <input value="<%= analysis_name %>" class="form-control" disabled>
+        <input type="hidden" value="<%= analysis_id %>" name="analysis[id][<%= analysis_index %>]" class="form-control">
       </div>
     </div>
     <div class="col-md-2">
       <div class="form-group">
         <label for="date3">No. Peces</label>
-        <input class="form-control" name="analisis[no_fish]" required>
+        <input class="form-control" name="analysis[no_fish][<%= analysis_index %>]" value="<%= analysis_fish %>" >
       </div>
     </div>
     <div class="col-md-4">
       <div class="form-group">
         <label for="date3">Órganos</label>
-        <select class="select2 form-control" id="analisis-select" name="analisis[organ]" required>
-          {% for organ in organ_list %}
-          <option value="{{organ.id}}">{{organ}}</option>
-          {% endfor %}
+        <select class="select2 form-control" id="analysis-organ" name="analysis[organ][<%= analysis_index %>]" multiple="multiple">
+          <% _.each(analysis_organs, function (organ) { %>
+            <option value=<%= organ.id %>> <%= organ.name %> </option>
+          <% }); %>
         </select>
       </div>
     </div>
@@ -246,269 +180,61 @@
     </div>
   </div>
 </script>
+
 <script id="identification_template" type="text/x-lodash-template">
 <div class="row" id="identification">
   <div class="col-md-3">
     <div class="form-group">
       <label for="cage">Estanque/Jaula</label>
-      <input type="text" value="" name="identification['cage']" class="form-control">
+      <input type="text" value="" name="identification[cage]" class="form-control">
     </div>
   </div>
   <div class="col-md-3">
     <div class="form-group">
       <label for="group">Grupo</label>
-      <input name="identification['group']" class="form-control">
+      <input name="identification[group]" class="form-control">
     </div>
   </div>
   <div class="col-md-2">
     <div class="form-group">
       <label for="no_fish">No. Peces</label>
-      <input name="identification['no_fish']" class="form-control">
+      <input name="identification[no_fish]" class="form-control">
     </div>
   </div>
   <div class="col-md-2">
     <div class="form-group">
       <label for="no_container">No. Contenedores</label>
-      <input name="identification['no_container']" class="form-control">
+      <input name="identification[no_container]" class="form-control">
     </div>
   </div>
-  <div class="col-md-1 text-center">
-    <div class="form-group">
-      <label for="add">&nbsp;</label>
-      <button class="btn_white_letter btn btn-success form-control" id="add_identification" type="button">+</button>
-    </div>
-  </div>
-  <div class="col-md-1 text-center">
+  <div class="offset-md-1 col-md-1 text-center">
     <div class="form-group">
       <label for="delete">&nbsp;</label>
       <button class="btn_white_letter btn btn-danger form-control" id="delete_identification" type="button">x</button>
     </div>
   </div>
 </div>
-</script> {% endblock content %} {% block scripts %}
-<script src="{% url 'js_reverse' %}" type="text/javascript"></script>
+</script>
 
-<script type="text/javascript ">
-
-
-
-var form = $(".steps-validation").show();
-
-$(function () {
-  $("#order_number").hide();
-  $("#center").hide();
-  addIdentificationTemplate();
-
-  $('#datetime_created_at').datetimepicker({
-    locale: 'es',
-  });
-
-  $('#datetime_sampled_at').datetimepicker({
-    locale: 'es',
-  });
-
-  $('#datetime_created_at').on("dp.change", function (e) {
-    if (e.date) {
-      $("#created_at_submit").val(e.date.format());
-    }
-  });
-
-  $('#datetime_sampled_at').on("dp.change", function (e) {
-    if (e.date) {
-      $("#sampled_at_submit").val(e.date.format());
-    }
-  });
-
-  $('#analisis_select').select2();
-
-  $('#customer_select').select2({
-    placeholder: "Porfavor seleccione un cliente"
-  });
-
-  $('#fixtative_select').select2({
-    placeholder: "Porfavor seleccione un fijador"
-  });
-
-  $('#specie_select').select2({
-    placeholder: "Porfavor seleccione una especie"
-  });
-
-  $('#larvalstage_select').select2({
-    placeholder: "Porfavor seleccione un estadio desarrollo"
-  });
-
-  $('#watersource_select').select2({
-    placeholder: "Porfavor seleccione una fuente de agua"
-  });
-
-  $('#customer_select').on("select2:select", function(e) {
-    var analisis_name = e.params.data.text
-    var analisis_id = e.params.data.id
-
-    var customer_type = $('#customer_select').find(':selected').data('type-customer')
-
-    if (customer_type === 'l') {
-      $("#center").val("");
-      $("#center").hide();
-      $("#order_number").val("")
-      $("#order_number").show()
-    } else {
-      $("#center").val("");
-      $("#center").show();
-      $("#order_number").val("")
-      $("#order_number").hide()
-    }
-  });
-
-  $('#analisis_select').on("select2:select", function(e) {
-    var analisis_name = e.params.data.text
-    var analisis_id = e.params.data.id
-    var data = { 'analisis_id': analisis_id, 'analisis_name': analisis_name }
-
-    addAnalisisTemplate(data);
-  });
-
-  $("#analisis_group").on("click", function(e) {
-    if(e.target.id === 'delete_analisis') {
-      var analisis_id = $(e.target).closest("[data-id]").data("id").toString();
-      var analisis_select = $('#analisis_select')
-      var values_analisis_select = analisis_select.val();
-
-      if (values_analisis_select) {
-        var i = values_analisis_select.indexOf(analisis_id);
-        if (i >= 0) {
-          values_analisis_select.splice(i, 1);
-          analisis_select.val(values_analisis_select).change();
-        }
-      }
-      $(e.target).closest("[data-id]").remove()
-    }
-    e.stopPropagation();
-  });
-
-  $('#analisis_select').on("select2:unselecting", function(e) {
-    if (e.params.args.originalEvent) {
-        e.params.args.originalEvent.stopPropagation();
-    }
-
-    var unselected_value = e.params.args.data.id;
-    $('#analisis_group').find('[data-id="' + unselected_value + '"]').remove();
-  });
-
-  $('#identification_group').on("click", "#add_identification", function(e) {
-    addIdentificationTemplate();
-  })
-
-  $('#identification_group').on("click", "#delete_identification", function(e) {
-    $(this).closest("#identification").remove()
-  })
-
-});
-
-// function initializeSelect2(selectElementObj) {
-//     selectElementObj.select2({
-//       width: "80%",
-//       tags: true
-//     });
-//   }
-
-
-
-//   $(".add-new-select").on("click", function() {
-//     var newSelect = $("<select class='select-to-select2'  multiple><option>option 1</option><option>option 2</option></select>");
-//     $(".select-container").append(newSelect);
-//     initializeSelect2(newSelect);
-//   });
-
-function addAnalisisTemplate(data) {
-  var analisisTemplate = document.getElementById("analisis_template").innerHTML;
-
-  var templateFn = _.template(analisisTemplate);
-  var templateHTML = templateFn(data);
-
-  $("#analisis_group").append(templateHTML)
-}
-
-function addIdentificationTemplate() {
-  var identificationTemplate = document.getElementById("identification_template").innerHTML;
-
-  var templateHTML = _.template(identificationTemplate)();
-
-  $("#identification_group").append(templateHTML);
-}
-
-$(".steps-validation").steps({
-    headerTag: "h6",
-    bodyTag: "fieldset",
-    transitionEffect: "fade",
-    titleTemplate: '<span class="step">#index#</span> #title#',
-    labels: {
-        finish: 'Continuar'
-
-    },
-    onStepChanging: function (event, currentIndex, newIndex)
-    {
-        // Allways allow previous action even if the current form is not valid!
-        if (currentIndex > newIndex)
-        {
-            return true;
-        }
-        // Forbid next action on "Warning" step if the user is to young
-        if (newIndex === 3 && Number($("#age-2").val()) < 18)
-        {
-            return false;
-        }
-        // Needed in some cases if the user went back (clean up)
-        if (currentIndex < newIndex)
-        {
-            // To remove error styles
-            form.find(".body:eq(" + newIndex + ") label.error").remove();
-            form.find(".body:eq(" + newIndex + ") .error").removeClass("error");
-        }
-        form.validate().settings.ignore = ":disabled,:hidden";
-        return form.valid();
-    },
-    onFinishing: function (event, currentIndex)
-    {
-        form.validate().settings.ignore = ":disabled";
-        return form.valid();
-    },
-    onFinished: function (event, currentIndex)
-    {
-      event.preventDefault();
-      var url = Urls.entryform();
-      var form_data = ($("form").serialize())
-
-      $.ajax({
-        type: "POST",
-        url: url,
-        data: form_data,
-      })
-      .done(function () {
-        console.log("Success")
-      })
-      .fail(function () {
-        console.log("Fail")
-      })
-    }
-});
-
-// Initialize validation
-$(".steps-validation").validate({
-    ignore: 'input[type=hidden]', // ignore hidden fields
-    errorClass: 'danger',
-    successClass: 'success',
-    highlight: function(element, errorClass) {
-        $(element).removeClass(errorClass);
-    },
-    unhighlight: function(element, errorClass) {
-        $(element).removeClass(errorClass);
-    },
-    errorPlacement: function(error, element) {
-        error.insertAfter(element);
-    },
-    rules: {
-    }
-});
-
-</script> {% endblock scripts %}
+<script id="questionReception_template" type="text/x-lodash-template">
+  <div class="form-group row">
+    <label class="col-md-6 label-control"> <%= question_text %> </label>
+    <div class="col-md-4">
+      <div class="input-group">
+        <div class="d-inline-block custom-control custom-radio">
+          <input type="radio" name="question['answer'][<%= question_index %>]" class="custom-control-input" value="si" id="question_<%= question_id %>_si">
+          <label class="custom-control-label" for="question_<%= question_id %>_si">Si</label>
+        </div>
+        <div class="d-inline-block custom-control custom-radio">
+          <input type="radio" name="question['answer'][<%= question_index %>]" class="custom-control-input" value="no" id="question_<%= question_id %>_no">
+          <label class="custom-control-label" for="question_<%= question_id %>_no">No</label>
+        </div>
+        <div class="d-inline-block custom-control custom-radio">
+          <input type="radio" name="question['answer'][<%= question_index %>]" class="custom-control-input" value="n/a" id="question_<%= question_id %>_n/a">
+          <label class="custom-control-label" for="question_<%= question_id %>_n/a">N/A</label>
+        </div>
+      </div>
+    </div>
+    <input type="hidden" name="question['id'][<%= question_index %>]" value="<%= question_id %>" />
+  </div>
+</script>

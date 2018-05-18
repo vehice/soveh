@@ -1,0 +1,143 @@
+{% extends 'layout.html' %}
+{% load static %}
+{% block stylesheets %}
+{% endblock stylesheets %}
+{% block content_header %}
+<div class="content-header row">
+  <div class="content-header-left col-md-6 col-12 mb-2">
+    <h3 class="content-header-title mb-0">Nuevo Ingreso</h3>
+    <div class="row breadcrumbs-top">
+      <div class="breadcrumb-wrapper col-12">
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item">
+            <a href="/">Home</a>
+          </li>
+          <li class="breadcrumb-item">
+            <a href="#">Ingresos</a>
+          </li>
+          <li class="breadcrumb-item active">Nuevo Ingreso
+          </li>
+        </ol>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock content_header %}
+{% block content %}
+<div class="row">
+  <div class="col-12">
+    <div class="card">
+      <div class="card-header">
+        <h4 class="card-title"> Nuevo Ingreso</h4>
+      </div>
+      <div class="card-content">
+        <div class="card-body">
+          <form action="#" id="workflow_form" class="wizard-circle">
+            {% for step in form.flow.step_set.all %}
+              <h6>{{ step.name }}</h6>
+              {% include step.route|add:".html" with step_tag=step.tag form_id=form_id entryform_id=entryform_id step_tab=forloop.counter0 %}
+            {% endfor %}
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock content %}
+{% block scripts %}
+<script src="{% url 'js_reverse' %}" type="text/javascript"></script>
+{% for step in form.flow.step_set.all %}
+  {% with step.route|add:".js" as script_step %}
+    <script src="{% static script_step %}" type="text/javascript"></script>
+  {% endwith %}
+{% endfor %}
+
+<script type="text/javascript">
+
+var form = $("#workflow_form");
+
+$("#workflow_form").steps({
+    headerTag: "h6",
+    bodyTag: "fieldset",
+    transitionEffect: "fade",
+    titleTemplate: '<span class="step">#index#</span> #title#',
+    labels: {
+        next: 'Continuar',
+        finish: 'Finalizar'
+    },
+    startIndex: 0,
+    onStepChanging: function (event, currentIndex, newIndex)
+    {
+       // Allways allow previous action even if the current form is not valid!
+      if (currentIndex > newIndex)
+      {
+          return true;
+      }
+
+      var url = Urls.workflow();
+      var form_data = $("#step_" + currentIndex + " :input").serialize()
+      var next_step = false;
+      var response;
+      $.ajax({
+        type: "POST",
+        url: url,
+        data: form_data,
+        async: false,
+      })
+      .done(function (data) {
+        response = data;
+        if (data.next_step_permission) {
+          next_step = true;
+        }
+      })
+      .fail(function () {
+        console.log("Fail")
+      })
+      if (response.next_step_permission) {
+        var step = newIndex + 1
+        var function_name = "init_step_" + step;
+
+        window[function_name]();
+      } else {
+        toastr.error('No puedes continuar ya que no tienes permisos para los siguientes pasos.', 'No tienes permisos');
+        setTimeout(function() {
+          window.location.href = '/ingresos'
+        }, 1000);
+      }
+
+      // form.validate().settings.ignore = ":disabled,:hidden";
+      // return form.valid();
+      if(response.process_response) {
+        toastr.success('', 'Paso guardado exitosamente!');
+      }
+
+      return next_step;
+    },
+    onFinishing: function (event, currentIndex)
+    {
+        // form.validate().settings.ignore = ":disabled";
+        // return form.valid();
+    },
+    onFinished: function (event, currentIndex)
+    {
+      event.preventDefault();
+      var url = Urls.entryform();
+      var form_data = ($("form").serialize())
+
+      $.ajax({
+        type: "POST",
+        url: url,
+        data: form_data,
+      })
+      .done(function () {
+
+      })
+      .fail(function () {
+        console.log("Fail")
+      })
+    }
+});
+
+
+</script> {% endblock scripts %}

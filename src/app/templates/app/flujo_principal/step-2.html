@@ -1,0 +1,74 @@
+<fieldset>
+  <div id="step_{{ step_tab }}">
+    <input type="hidden" name="step_tag" value="{{step_tag}}">
+    <input type="hidden" name="form_id" value="{{form_id}}" >
+    <input type="hidden" name="entryform_id" value="{{entryform_id}}" >
+    <h4 class="form-section">
+      <i class="ft-user"></i> Cargar Procesador Tejido
+    </h4>
+    <div class="row">
+      <div class="col-md-6">
+        <div class="form-group">
+          <label>Fecha / Hora Procesado Tejido : </label>
+          <div class='input-group date' id='datetime_processor_texture_at'>
+            <input type="text" class="form-control" name="processor_texture_at" />
+            <div class="input-group-append">
+              <span class="input-group-text">
+                <span class="fa fa-calendar"></span>
+              </span>
+            </div>
+          </div>
+          <input type="hidden" name="processor_texture_at_submit" id="processor_texture_at_submit" />
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="form-group">
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="form-group">
+          <label for="date3">Nro muestras por cassettes</label>
+          <select class="select2 form-control" id="no_cassette" name="cassette">
+            <option value='1' selected>x1</option>
+            <option value='2'>x2</option>
+            <option value='3'>x3</option>
+            <option value='4'>x4</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <div id="cassette_group">
+      <table id="cassettes_table" class="table table-striped table-bordered" width="100%">
+        <thead>
+          <tr>
+            <th>Id Muestra</th>
+            <th>Cassette</th>
+            <th>Organos</th>
+          </tr>
+        </thead>
+        <tbody>
+        </tbody>
+        </table>
+    </div>
+  </div>
+</fieldset>
+
+<script id="cassette_row" type="text/x-lodash-template">
+  <tr>
+    <td>
+      <%= sample_id %>
+      <input type="hidden" name="cassette[sample_id][<%= cassette_index %>]" value="<%= sample_id %>" >
+    </td>
+    <td>
+      <%= cassette_id %>
+      <input type="hidden" name="cassette[cassette_id][<%= cassette_index %>]" value="<%= cassette_id %>" >
+    </td>
+    <td style="width:40%">
+      <select class="select2" style="width:100%" id="cassette-organ" name="cassette[organ][<%= cassette_index %>]" multiple="multiple">
+        <% _.each( cassette_organs, function( organ ){ %>
+          <option value=<%= organ.value %>> <%= organ.name %> </option>
+        <% }); %>
+      </select>
+    </td>
+  </tr>
+</script>

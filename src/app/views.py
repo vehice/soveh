@@ -1,9 +1,11 @@
 from django.shortcuts import render
+from django.shortcuts import redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 
 from accounts.models import *
 from backend.models import *
+from workflows.models import *
 
 
 @login_required
@@ -42,30 +44,38 @@ def show_analisis(request):
 
 @login_required
 def show_ingresos(request):
-    entryForms = EntryForm.objects.all()
-    return render(request, 'app/ingresos.html', {'entryForm_list': entryForms})
+    up = UserProfile.objects.filter(user=request.user).first()
+
+    if up.user.is_staff:
+        form = Form.objects.filter(content_type__model='entryform')
+    else:
+        form = Form.objects.filter(
+            content_type__model='entryform',
+            state__step__actors__profile=up.profile)
+
+    return render(request, 'app/ingresos.html', {'entryForm_list': form})
 
 
 @login_required
 def new_ingreso(request):
-    species = Specie.objects.all()
-    larvalStages = LarvalStage.objects.all()
-    fixtatives = Fixative.objects.all()
-    waterSources = WaterSource.objects.all()
-    questionReceptionCondition = QuestionReceptionCondition.objects.filter(
-        status='a')
-    exams = Exam.objects.all()
-    organs = Organ.objects.all()
-    customers = Customer.objects.all()
+    flow = Flow.objects.get(pk=1)
+    entryform = EntryForm.objects.create()
+    form = Form.objects.create(
+        content_object=entryform,
+        flow=flow,
+        state=flow.step_set.all()[0].state)
 
-    return render(
-        request, 'app/flujo_principal/step-1.html', {
-            'specie_list': species,
-            'larvalStage_list': larvalStages,
-            'fixtative_list': fixtatives,
-            'waterSource_list': waterSources,
-            'questionReceptionCondition_list': questionReceptionCondition,
-            'exam_list': exams,
-            'organ_list': organs,
-            'customer_list': customers
-        })
+    return show_workflow_form(request, form_id=form.id)
+
+
+@login_required
+def show_workflow_form(request, form_id):
+    up = UserProfile.objects.filter(user=request.user).first()
+    form = Form.objects.get(pk=form_id)
+    entryform_id = form.content_object.id
+
+    return render(request, 'app/workflow.html', {
+        'form': form,
+        'form_id': form_id,
+        'entryform_id': entryform_id
+    })
