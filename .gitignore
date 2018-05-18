@@ -16,6 +16,7 @@ node_modules/
 tests/coverage_html/
 tests/.coverage
 build/
+public/
 tests/report/
 
 # Non Source
@@ -26,6 +27,7 @@ env/
 virtualenv/
 local/
 .vscode/
+
 
 # Mac
 .Python
