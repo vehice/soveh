@@ -25,6 +25,6 @@ urlpatterns = [
     url(r'^accounts/', include('accounts.urls')),
     url(r'^', include('app.urls')),
     url(r'^', include('backend.urls')),
-    url(r'^jsreverse/$', cache_page(3600)(urls_js), name='js_reverse'),
+    url(r'^jsreverse/$', urls_js, name='js_reverse'),
 ] + static(
     settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
