@@ -3,8 +3,11 @@ from django.views.generic import View
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
+from distutils.util import strtobool
 from utils.functions import renderjson
 from django.db.models import F
+from django.db.models import Prefetch
+
 from datetime import datetime
 from .models import *
 from workflows.models import *
@@ -50,7 +53,7 @@ class ENTRYFORM(View):
 
         if id:
             entryform = EntryForm.objects.values().get(pk=id)
-            identification = list(
+            identifications = list(
                 Identification.objects.filter(
                     entryform=entryform['id']).values())
             organs = list(
@@ -60,8 +63,8 @@ class ENTRYFORM(View):
 
             data = {
                 'entryform': entryform,
-                'identifications': identification,
-                'organs': organs
+                'identifications': identifications,
+                'organs': organs,
             }
         else:
             species = list(Specie.objects.all().values())
@@ -88,22 +91,88 @@ class ENTRYFORM(View):
         return JsonResponse(data)
 
 
+class CASSETTE(View):
+    http_method_names = ['get']
+
+    def get(self, request, entry_form=None):
+        analyses = list(
+            Analysis.objects.filter(entryform=entry_form).values_list(
+                'id', flat=True))
+        exams = list(
+            Analysis.objects.filter(entryform=entry_form).values(
+                name=F('exam__name'), stain=F('exam__stain')))
+
+        no_slice = len(analyses)
+
+        cassettes_qs = Cassette.objects.filter(
+            entryform=entry_form).prefetch_related(Prefetch('organs'))
+        cassettes = []
+
+        for cassette in cassettes_qs:
+            organs = [organ.name for organ in cassette.organs.all()]
+
+            cassettes.append({
+                'id': cassette.id,
+                'sample_id': cassette.sample_id,
+                'cassette_name': cassette.cassette_name,
+                'organs': organs,
+                'no_slice': no_slice
+            })
+
+        data = {'cassettes': cassettes, 'exams': exams, 'analyses': analyses}
+
+        return JsonResponse(data)
+
+
+class SLICE(View):
+    def get(self, request, entry_form=None):
+        slices_qs = Slice.objects.filter(entryform=entry_form)
+        slices = []
+
+        for slice_new in slices_qs:
+            exam = slice_new.analysis.first().exam
+
+            slices.append({
+                'id': slice_new.id,
+                'slice_name': slice_new.slice_name,
+                'exam_name': exam.name,
+                'exam_stain': exam.stain
+            })
+
+        data = {'slices': slices}
+
+        return JsonResponse(data)
+
+
 class WORKFLOW(View):
     def post(self, request):
         var_post = request.POST.copy()
+        print("WORKFLOWWWW")
+        print(var_post)
+
+        id_next_step = var_post.get('id_next_step')
+        previous_step = strtobool(var_post.get('previous_step'))
+        next_step = Step.objects.get(pk=id_next_step)
+
         next_step_permission = False
         process_response = False
+        process_answer = True
 
         up = UserProfile.objects.filter(user=request.user).first()
         form = Form.objects.get(pk=var_post.get('form_id'))
 
-        next_state = form.state
-        for actor in form.state.step.actors.all():
+        for actor in next_step.actors.all():
             if actor.profile == up.profile:
-                next_state = actor.permission.get(
-                    from_state=form.state).to_state
+                if previous_step:
+                    next_state = actor.permission.get(
+                        to_state=form.state).from_state
+                else:
+                    next_state = actor.permission.get(
+                        from_state=form.state).to_state
 
-        process_answer = call_process_method(form.content_type.model, request)
+        if not previous_step:
+            process_answer = call_process_method(form.content_type.model,
+                                                 request)
 
         if process_answer:
             form.state = next_state
@@ -128,9 +197,10 @@ def process_entryform(request):
 
     # try:
     switcher = {
-        'step_1': step_1_entryform,
-        'step_2': step_2_entryform,
-        'step_3': step_3_entryform
+        'step_1_main': step_1_entryform,
+        'step_2_main': step_2_entryform,
+        'step_3_main': step_3_entryform,
+        'step_4_main': step_4_entryform
     }
 
     method = switcher.get(step_tag)
@@ -146,12 +216,9 @@ def process_entryform(request):
 
 # Steps Function for entry forms
 def step_1_entryform(request):
-    print("step_1")
-
     var_post = request.POST.copy()
-    print(var_post)
-    form = Form.objects.get(pk=var_post.get('form_id'))
-    entryform = form.content_object
+
+    entryform = EntryForm.objects.get(pk=var_post.get('entryform_id'))
 
     entryform.specie_id = var_post.get('specie')
     entryform.watersource_id = var_post.get('watersource')
@@ -174,13 +241,13 @@ def step_1_entryform(request):
     ]
     zip_question = zip(questions_id, answers)
 
+    entryform.answerreceptioncondition_set.all().delete()
     for values in zip_question:
         answerquestion = AnswerReceptionCondition.objects.create(
             entryform_id=entryform.id,
             question_id=values[0],
             answer=values[1],
         )
-        answerquestion.save()
 
     identification_cage = var_post.getlist("identification[cage]")
     identification_group = var_post.getlist("identification[group]")
@@ -192,6 +259,7 @@ def step_1_entryform(request):
                              identification_no_container,
                              identification_no_fish)
 
+    entryform.identification_set.all().delete()
     for values in zip_identification:
         identificacion = Identification.objects.create(
             entryform_id=entryform.id,
@@ -200,7 +268,6 @@ def step_1_entryform(request):
             no_container=values[2],
             no_fish=values[3],
         )
-        identificacion.save()
 
     analysis_id = [
         v for k, v in var_post.items() if k.startswith("analysis[id]")
@@ -215,44 +282,114 @@ def step_1_entryform(request):
 
     zip_analysis = zip(analysis_id, analysis_no_fish, analysis_organ)
 
+    entryform.analysis_set.all().delete()
     for values in zip_analysis:
         analysis = Analysis.objects.create(
             entryform_id=entryform.id,
             exam_id=values[0],
             no_fish=values[1],
         )
-        analysis.save()
+
         analysis.organs.set(values[2])
 
 
 def step_2_entryform(request):
-    print("step_2")
     var_post = request.POST.copy()
-    print(var_post)
-    entryform = var_post.get('entryform_id')
+
+    entryform = EntryForm.objects.get(pk=var_post.get('entryform_id'))
 
     cassette_sample_id = [
         v for k, v in var_post.items() if k.startswith("cassette[sample_id]")
+    ]
+    cassette_name = [
+        v for k, v in var_post.items()
+        if k.startswith("cassette[cassette_name]")
     ]
     cassette_organs = [
         var_post.getlist(k) for k, v in var_post.items()
         if k.startswith("cassette[organ]")
     ]
 
-    zip_cassettes = zip(cassette_sample_id, cassette_organs)
+    zip_cassettes = zip(cassette_sample_id, cassette_name, cassette_organs)
 
+    entryform.cassette_set.all().delete()
     for values in zip_cassettes:
         cassette = Cassette.objects.create(
-            entryform_id=entryform,
+            entryform_id=entryform.id,
             sample_id=values[0],
+            cassette_name=values[1],
         )
         cassette.save()
-        cassette.organs.set(values[1])
+        cassette.organs.set(values[2])
 
 
 def step_3_entryform(request):
     print("step_3")
-    return 'step_3'
+    var_post = request.POST.copy()
+    print(var_post)
+
+    entryform = EntryForm.objects.get(pk=var_post.get('entryform_id'))
+
+    block_cassette_pk = [
+        var_post.getlist(k) for k, v in var_post.items()
+        if k.startswith("block[cassette_pk]")
+    ]
+    block_start_block = [
+        v for k, v in var_post.items() if k.startswith("block[start_block]")
+    ]
+    block_end_block = [
+        v for k, v in var_post.items() if k.startswith("block[end_block]")
+    ]
+    block_start_slice = [
+        v for k, v in var_post.items() if k.startswith("block[start_slice]")
+    ]
+    block_end_slice = [
+        v for k, v in var_post.items() if k.startswith("block[end_slice]")
+    ]
+    block_cassette_name = [
+        v for k, v in var_post.items() if k.startswith("block[cassette_name]")
+    ]
+    block_analyses = [
+        var_post.getlist(k) for k, v in var_post.items()
+        if k.startswith("analyses")
+    ]
+
+    block_analyses = list(set(block_analyses[0]))
+
+    zip_block = zip(block_start_block, block_end_block, block_start_slice,
+                    block_end_slice, block_cassette_pk, block_cassette_name)
+
+    entryform.slice_set.all().delete()
+
+    flow = Flow.objects.get(pk=2)
+
+    for values in zip_block:
+        slice_index = 0
+        for index, val in enumerate(block_analyses):
+            slice_index = index + 1
+            slice_name = values[5] + "-S" + str(slice_index)
+
+            slice_new = Slice.objects.create(
+                entryform_id=entryform.id,
+                slice_name=slice_name,
+                start_block=values[0],
+                end_block=values[1],
+                start_slice=values[2],
+                end_slice=values[3],
+            )
+            slice_new.save()
+
+            slice_new.cassettes.set(values[4])
+            slice_new.analysis.set([val])
+
+            form = Form.objects.create(
+                content_object=slice_new,
+                flow=flow,
+                state=flow.step_set.all()[0].state)
+
+
+def step_4_entryform(request):
+    print("step_4")
 
 
 # Generic function for call any process method for any model_form

@@ -12,18 +12,28 @@ function init_step_2() {
     .done(function (data) {
       data_step_2 = data
 
-      loadTable(data_step_2);
+      loadCassetteTable(data_step_2);
     })
     .fail(function () {
       console.log("Fail")
     })
+
+  $('#datetime_processor_texture_at').datetimepicker({
+    locale: 'es',
+  });
+
+  $('#datetime_processor_texture_at').on("dp.change", function (e) {
+    if (e.date) {
+      $("#processor_texture_at_submit").val(e.date.format());
+    }
+  });
 }
 
 $(document).on('change', '#no_cassette', function (e) {
-  loadTable(data_step_2);
+  loadCassetteTable(data_step_2);
 })
 
-function loadTable(data) {
+function loadCassetteTable(data) {
   var no_cassette = $('#no_cassette').val();
 
   if ($.fn.DataTable.isDataTable('#cassettes_table')) {
@@ -31,7 +41,7 @@ function loadTable(data) {
     $('#cassettes_table').DataTable().clear().destroy();
   }
 
-  populateTable(data, no_cassette);
+  populateCassetteTable(data, no_cassette);
 
   $('#cassettes_table').DataTable({
     ordering: false,
@@ -45,24 +55,29 @@ function loadTable(data) {
   });
 
   $('[name*="cassette[organ]"]').select2();
+  $('[name*="cassette[organ]"] > option').prop('selected', 'selected');
+  $('[name*="cassette[organ]"]').trigger('change');
 }
 
-function populateTable(data, no_cassette) {
+function populateCassetteTable(data, no_cassette) {
   var organs = data.organs;
+  var cassette_index = 0;
 
   $.each(data.identifications, function (i, item) {
     var no_fish = item.no_fish * no_cassette;
 
     var array_index = _.range(1, no_fish + 1);
-    var id_muestra = 'C_' + data.entryform.id + '-' + 'E_' + item.cage + '-C_';
+    var id_muestra = data.entryform.id + '-E_' + item.cage + '-G_' + item.group;
 
     $.each(array_index, function (i, item) {
       var row = {};
-      var final_id_muestra = id_muestra + item;
-      row.sample_id = final_id_muestra;
-      row.cassette_id = item;
+
+      row.sample_id = id_muestra;
+      row.cassette_name = data.entryform.id + '-C' + item;
       row.cassette_organs = organs;
-      row.cassette_index = i;
+      row.cassette_index = cassette_index;
+
+      cassette_index += 1;
 
       addCasseteRow(row)
     });

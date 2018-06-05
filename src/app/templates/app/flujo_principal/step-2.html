@@ -1,8 +1,9 @@
 <fieldset>
   <div id="step_{{ step_tab }}">
-    <input type="hidden" name="step_tag" value="{{step_tag}}">
-    <input type="hidden" name="form_id" value="{{form_id}}" >
-    <input type="hidden" name="entryform_id" value="{{entryform_id}}" >
+    <input type="hidden" id="step_id" name="step_id" value="{{step_id}}">
+    <input type="hidden" id="step_tag" name="step_tag" value="{{step_tag}}">
+    <input type="hidden" id="form_id" name="form_id" value="{{form_id}}" >
+    <input type="hidden" id="entryform_id" name="entryform_id" value="{{entryform_id}}" >
     <h4 class="form-section">
       <i class="ft-user"></i> Cargar Procesador Tejido
     </h4>
@@ -41,7 +42,7 @@
       <table id="cassettes_table" class="table table-striped table-bordered" width="100%">
         <thead>
           <tr>
-            <th>Id Muestra</th>
+            <th>Muestra</th>
             <th>Cassette</th>
             <th>Organos</th>
           </tr>
@@ -60,8 +61,8 @@
       <input type="hidden" name="cassette[sample_id][<%= cassette_index %>]" value="<%= sample_id %>" >
     </td>
     <td>
-      <%= cassette_id %>
-      <input type="hidden" name="cassette[cassette_id][<%= cassette_index %>]" value="<%= cassette_id %>" >
+      <%= cassette_name %>
+      <input type="hidden" name="cassette[cassette_name][<%= cassette_index %>]" value="<%= cassette_name %>" >
     </td>
     <td style="width:40%">
       <select class="select2" style="width:100%" id="cassette-organ" name="cassette[organ][<%= cassette_index %>]" multiple="multiple">

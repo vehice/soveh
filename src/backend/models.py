@@ -33,6 +33,7 @@ class Fixative(models.Model):
 
 class Exam(models.Model):
     name = models.CharField(max_length=250, null=True, blank=True)
+    stain = models.CharField(max_length=250, null=True, blank=True)
 
     def __str__(self):
         return self.name
@@ -133,7 +134,7 @@ class AnswerReceptionCondition(models.Model):
         return str(self.pk)
 
 
-class Analysis(models.Model):  # Maybe AnalysisForm
+class Analysis(models.Model):
     entryform = models.ForeignKey(
         EntryForm, null=True, on_delete=models.SET_NULL)
     exam = models.ForeignKey(Exam, null=True, on_delete=models.SET_NULL)
@@ -141,14 +142,21 @@ class Analysis(models.Model):  # Maybe AnalysisForm
     no_fish = models.IntegerField(null=True, blank=True)
 
 
-class Slide(models.Model):
-    exams = models.ManyToManyField(Exam)
-
-
 class Cassette(models.Model):
     entryform = models.ForeignKey(
         EntryForm, null=True, on_delete=models.SET_NULL)
     sample_id = models.CharField(max_length=250, null=True, blank=True)
+    cassette_name = models.CharField(max_length=250, null=True, blank=True)
     organs = models.ManyToManyField(Organ)
-    slides = models.ManyToManyField(Slide)
-    # estanque =
+
+
+class Slice(models.Model):
+    slice_name = models.CharField(max_length=250, null=True, blank=True)
+    start_block = models.DateTimeField(null=True, blank=True)
+    end_block = models.DateTimeField(null=True, blank=True)
+    start_slice = models.DateTimeField(null=True, blank=True)
+    end_slice = models.DateTimeField(null=True, blank=True)
+    cassettes = models.ManyToManyField(Cassette)
+    analysis = models.ManyToManyField(Analysis)
+    entryform = models.ForeignKey(
+        EntryForm, null=True, on_delete=models.SET_NULL)
