@@ -59,7 +59,12 @@ class Step(models.Model):
     )
     flow = models.ForeignKey(Flow, null=True, on_delete=models.SET_NULL)
     route = models.CharField(max_length=250, null=True, blank=True)
+    order = models.PositiveIntegerField(null=True)
     actors = models.ManyToManyField(Actor)
+
+    class Meta:
+        unique_together = ('flow', 'order')
+        ordering = ['order']
 
     def __str__(self):
         return self.name

@@ -62,9 +62,11 @@ function loadCassetteTable(data) {
 function populateCassetteTable(data, no_cassette) {
   var organs = data.organs;
   var cassette_index = 0;
-
+  console.log(data);
   $.each(data.identifications, function (i, item) {
+
     var no_fish = item.no_fish * no_cassette;
+    var identification_id = item.id;
 
     var array_index = _.range(1, no_fish + 1);
     var id_muestra = data.entryform.id + '-E_' + item.cage + '-G_' + item.group;
@@ -72,6 +74,7 @@ function populateCassetteTable(data, no_cassette) {
     $.each(array_index, function (i, item) {
       var row = {};
 
+      row.identification_id = identification_id;
       row.sample_id = id_muestra;
       row.cassette_name = data.entryform.id + '-C' + item;
       row.cassette_organs = organs;

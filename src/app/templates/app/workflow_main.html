@@ -5,7 +5,7 @@
 {% block content_header %}
 <div class="content-header row">
   <div class="content-header-left col-md-6 col-12 mb-2">
-    <h3 class="content-header-title mb-0">Nuevo Ingreso</h3>
+    <h3 class="content-header-title mb-0">Ingreso</h3>
     <div class="row breadcrumbs-top">
       <div class="breadcrumb-wrapper col-12">
         <ol class="breadcrumb">
@@ -15,7 +15,7 @@
           <li class="breadcrumb-item">
             <a href="#">Ingresos</a>
           </li>
-          <li class="breadcrumb-item active">Nuevo Ingreso
+          <li class="breadcrumb-item active">CASO: {{entryform_id}}
           </li>
         </ol>
       </div>
@@ -72,7 +72,6 @@ $("#workflow_form").steps({
       var previous_step = false;
       var form_data;
 
-      // Si se cumple se apreto el previous
       if (currentIndex > newIndex)
       {
         previous_step = true;

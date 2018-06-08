@@ -1,4 +1,5 @@
 from django.conf.urls import include, url
+from django.urls import path
 from django.conf import settings
 from django_js_reverse import views as js_reverse_views
 from app import views
@@ -10,6 +11,10 @@ urlpatterns = [
     url(r'^analisis$', views.show_analisis, name='analisis'),
     url(r'^ingresos$', views.show_ingresos, name='ingresos'),
     url(r'^ingresos/new$', views.new_ingreso, name='ingresos_new'),
+    path(
+        'analisis/<int:form_id>',
+        views.show_workflow_analysis_form,
+        name='workflow_analysis_form'),
 ]
 
 if settings.DEBUG:

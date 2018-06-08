@@ -134,12 +134,13 @@ class AnswerReceptionCondition(models.Model):
         return str(self.pk)
 
 
-class Analysis(models.Model):
+class AnalysisForm(models.Model):
     entryform = models.ForeignKey(
         EntryForm, null=True, on_delete=models.SET_NULL)
     exam = models.ForeignKey(Exam, null=True, on_delete=models.SET_NULL)
     organs = models.ManyToManyField(Organ)
     no_fish = models.IntegerField(null=True, blank=True)
+    forms = GenericRelation(Form)
 
 
 class Cassette(models.Model):
@@ -147,6 +148,7 @@ class Cassette(models.Model):
         EntryForm, null=True, on_delete=models.SET_NULL)
     sample_id = models.CharField(max_length=250, null=True, blank=True)
     cassette_name = models.CharField(max_length=250, null=True, blank=True)
+    identifications = models.ManyToManyField(Identification)
     organs = models.ManyToManyField(Organ)
 
 
@@ -156,7 +158,10 @@ class Slice(models.Model):
     end_block = models.DateTimeField(null=True, blank=True)
     start_slice = models.DateTimeField(null=True, blank=True)
     end_slice = models.DateTimeField(null=True, blank=True)
+    start_diagnostic = models.DateTimeField(null=True, blank=True)
+    end_diagnostic = models.DateTimeField(null=True, blank=True)
+    slice_store = models.CharField(max_length=250, null=True, blank=True)
     cassettes = models.ManyToManyField(Cassette)
-    analysis = models.ManyToManyField(Analysis)
+    analysis = models.ManyToManyField(AnalysisForm)
     entryform = models.ForeignKey(
         EntryForm, null=True, on_delete=models.SET_NULL)

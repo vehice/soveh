@@ -7,21 +7,20 @@
     <h4 class="form-section">
       <i class="ft-user"></i> Analisis
     </h4>
-    <div id="slice_group" class="list-group list-group-flush media-list">
+    <div id="analysis_group" class="list-group list-group-flush media-list">
     </div>
   </div>
 </fieldset>
 
-
-<script id="slice_element" type="text/x-lodash-template">
-<a href="#" class="list-group-item list-group-item-action">
+<script id="analysis_element" type="text/x-lodash-template">
+<a href="/analisis/<%= form_id %>" class="list-group-item list-group-item-action">
   <div class="media-body">
-    <h4 class="list-group-item-heading"><%= slice_name %>
+    <h4 class="list-group-item-heading"><%= exam_name %>
       <span class="font-medium-4 float-right pt-1">Tincion: <%= exam_stain %></span>
     </h4>
-    <p class="list-group-item-text"><%= exam_name %></p>
+    <p class="list-group-item-text"><%= no_slice %> cortes</p>
     <div class="progress" style="height: 18px;">
-      <div class="progress-bar" role="progressbar" style="width:25%" aria-describedby="example-caption-2"> <%= current_step %> de <%= total_step  %> pasos</div>
+      <div class="progress-bar" role="progressbar" style="width:<%= percentage_step %>%" aria-describedby="example-caption-2"> <%= current_step %> de <%= total_step  %> pasos</div>
     </div>
   </div>
 </a>

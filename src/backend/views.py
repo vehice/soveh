@@ -58,8 +58,8 @@ class ENTRYFORM(View):
                     entryform=entryform['id']).values())
             organs = list(
                 EntryForm.objects.filter(id=id).values(
-                    value=F('analysis__organs__id'),
-                    name=F('analysis__organs__name')).distinct())
+                    value=F('analysisform__organs__id'),
+                    name=F('analysisform__organs__name')).distinct())
 
             data = {
                 'entryform': entryform,
@@ -96,10 +96,10 @@ class CASSETTE(View):
 
     def get(self, request, entry_form=None):
         analyses = list(
-            Analysis.objects.filter(entryform=entry_form).values_list(
+            AnalysisForm.objects.filter(entryform=entry_form).values_list(
                 'id', flat=True))
         exams = list(
-            Analysis.objects.filter(entryform=entry_form).values(
+            AnalysisForm.objects.filter(entryform=entry_form).values(
                 name=F('exam__name'), stain=F('exam__stain')))
 
         no_slice = len(analyses)
@@ -124,19 +124,57 @@ class CASSETTE(View):
         return JsonResponse(data)
 
 
-class SLICE(View):
+class ANALYSIS(View):
     def get(self, request, entry_form=None):
-        slices_qs = Slice.objects.filter(entryform=entry_form)
+        analyses_qs = AnalysisForm.objects.filter(entryform=entry_form)
+        analyses = []
+
+        for analysis in analyses_qs:
+            exam = analysis.exam
+            form = analysis.forms.get()
+
+            form_id = form.id
+
+            current_step = form.state.step.order
+            total_step = form.flow.step_set.count()
+            percentage_step = (int(current_step) / int(total_step)) * 100
+
+            slices_qs = analysis.slice_set.all()
+            slices = []
+
+            for slice_new in slices_qs:
+                slices.append({'name': slice_new.slice_name})
+
+            analyses.append({
+                'form_id': form_id,
+                'exam_name': exam.name,
+                'exam_stain': exam.stain,
+                'slices': slices,
+                'current_step': current_step,
+                'total_step': total_step,
+                'percentage_step': percentage_step,
+            })
+
+        data = {'analyses': analyses}
+
+        return JsonResponse(data)
+
+
+class SLICE(View):
+    def get(self, request, analysis_form=None):
+        slices_qs = Slice.objects.filter(analysis=analysis_form)
         slices = []
 
         for slice_new in slices_qs:
-            exam = slice_new.analysis.first().exam
+            slice_id = slice_new.id
+            slice_name = slice_new.slice_name
+            identification_cage = slice_new.cassettes.first(
+            ).identifications.first().cage
 
             slices.append({
-                'id': slice_new.id,
-                'slice_name': slice_new.slice_name,
-                'exam_name': exam.name,
-                'exam_stain': exam.stain
+                'slice_id': slice_id,
+                'slice_name': slice_name,
+                'identification_cage': identification_cage
             })
 
         data = {'slices': slices}
@@ -201,6 +239,27 @@ def process_entryform(request):
         'step_2_main': step_2_entryform,
         'step_3_main': step_3_entryform,
         'step_4_main': step_4_entryform
+    }
+
+    method = switcher.get(step_tag)
+
+    if not method:
+        raise NotImplementedError(
+            "Method %s_entryform not implemented" % step_tag)
+
+    method(request)
+
+    return True
+
+
+def process_analysisform(request):
+    step_tag = request.POST.get('step_tag')
+
+    # try:
+    switcher = {
+        'step_1_analysis': step_1_analysisform,
+        'step_2_analysis': step_2_analysisform,
+        'step_3_analysis': step_3_analysisform,
     }
 
     method = switcher.get(step_tag)
@@ -282,15 +341,28 @@ def step_1_entryform(request):
 
     zip_analysis = zip(analysis_id, analysis_no_fish, analysis_organ)
 
-    entryform.analysis_set.all().delete()
+    analyses_qs = entryform.analysisform_set.all()
+
+    for analysis in analyses_qs:
+        analysis.forms.get().delete()
+
+    analyses_qs.delete()
+
+    flow = Flow.objects.get(pk=2)
+
     for values in zip_analysis:
-        analysis = Analysis.objects.create(
+        analysis = AnalysisForm.objects.create(
             entryform_id=entryform.id,
             exam_id=values[0],
             no_fish=values[1],
         )
 
         analysis.organs.set(values[2])
+
+        Form.objects.create(
+            content_object=analysis,
+            flow=flow,
+            state=flow.step_set.all()[0].state)
 
 
 def step_2_entryform(request):
@@ -309,8 +381,13 @@ def step_2_entryform(request):
         var_post.getlist(k) for k, v in var_post.items()
         if k.startswith("cassette[organ]")
     ]
+    cassette_identification_id = [
+        var_post.getlist(k) for k, v in var_post.items()
+        if k.startswith("cassette[identification_id]")
+    ]
 
-    zip_cassettes = zip(cassette_sample_id, cassette_name, cassette_organs)
+    zip_cassettes = zip(cassette_sample_id, cassette_name, cassette_organs,
+                        cassette_identification_id)
 
     entryform.cassette_set.all().delete()
     for values in zip_cassettes:
@@ -321,12 +398,11 @@ def step_2_entryform(request):
         )
         cassette.save()
         cassette.organs.set(values[2])
+        cassette.identifications.set(values[3])
 
 
 def step_3_entryform(request):
-    print("step_3")
     var_post = request.POST.copy()
-    print(var_post)
 
     entryform = EntryForm.objects.get(pk=var_post.get('entryform_id'))
 
@@ -361,8 +437,6 @@ def step_3_entryform(request):
 
     entryform.slice_set.all().delete()
 
-    flow = Flow.objects.get(pk=2)
-
     for values in zip_block:
         slice_index = 0
         for index, val in enumerate(block_analyses):
@@ -382,14 +456,46 @@ def step_3_entryform(request):
             slice_new.cassettes.set(values[4])
             slice_new.analysis.set([val])
 
-            form = Form.objects.create(
-                content_object=slice_new,
-                flow=flow,
-                state=flow.step_set.all()[0].state)
-
 
 def step_4_entryform(request):
     print("step_4")
+
+
+def step_1_analysisform(request):
+    var_post = request.POST.copy()
+
+    slice_slice_id = [
+        v for k, v in var_post.items() if k.startswith("slice[slice_id]")
+    ]
+    slice_start_diagnostic = [
+        v for k, v in var_post.items()
+        if k.startswith("slice[start_diagnostic]")
+    ]
+    slice_end_diagnostic = [
+        v for k, v in var_post.items() if k.startswith("slice[end_diagnostic]")
+    ]
+    slice_store = [
+        v for k, v in var_post.items() if k.startswith("slice[store]")
+    ]
+
+    zip_slice = zip(slice_slice_id, slice_start_diagnostic,
+                    slice_end_diagnostic, slice_store)
+
+    for values in zip_slice:
+        slice_new = Slice.objects.get(pk=values[0])
+        slice_new.start_diagnostic = values[1]
+        slice_new.end_diagnostic = values[2]
+        slice_new.slice_store = values[3]
+
+        slice_new.save()
+
+
+def step_2_analysisform(request):
+    print("Step 2 Analysis Form")
+
+
+def step_3_analysisform(request):
+    print("Step 3 Analysis Form")
 
 
 # Generic function for call any process method for any model_form

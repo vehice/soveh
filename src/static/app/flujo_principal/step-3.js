@@ -40,7 +40,7 @@ function loadBlockTable(data) {
   var elems = Array.prototype.slice.call(document.querySelectorAll('.switchery'));
 
   elems.forEach(function (html) {
-    var switchery = new Switchery(html);
+    new Switchery(html);
   });
 
   $('[data-toggle="popover"]').popover();
