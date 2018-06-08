@@ -59,9 +59,7 @@ function populateBlockTable(data) {
   var analyses = data.analyses;
 
   $.each(data.cassettes, function (i, item) {
-
     var row = {};
-    var slice_index = i + 1;
 
     row.sample_id = item.sample_id;
     row.cassette_name = item.cassette_name

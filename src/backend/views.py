@@ -50,7 +50,6 @@ class ENTRYFORM(View):
     http_method_names = ['get']
 
     def get(self, request, id=None):
-
         if id:
             entryform = EntryForm.objects.values().get(pk=id)
             identifications = list(
@@ -260,6 +259,7 @@ def process_analysisform(request):
         'step_1_analysis': step_1_analysisform,
         'step_2_analysis': step_2_analysisform,
         'step_3_analysis': step_3_analysisform,
+        'step_4_analysis': step_4_analysisform,
     }
 
     method = switcher.get(step_tag)
@@ -464,38 +464,74 @@ def step_4_entryform(request):
 def step_1_analysisform(request):
     var_post = request.POST.copy()
 
-    slice_slice_id = [
-        v for k, v in var_post.items() if k.startswith("slice[slice_id]")
+    stain_slice_id = [
+        v for k, v in var_post.items() if k.startswith("stain[slice_id]")
     ]
-    slice_start_diagnostic = [
-        v for k, v in var_post.items()
-        if k.startswith("slice[start_diagnostic]")
+    stain_start_stain = [
+        v for k, v in var_post.items() if k.startswith("stain[start_stain]")
     ]
-    slice_end_diagnostic = [
-        v for k, v in var_post.items() if k.startswith("slice[end_diagnostic]")
-    ]
-    slice_store = [
-        v for k, v in var_post.items() if k.startswith("slice[store]")
+    stain_end_stain = [
+        v for k, v in var_post.items() if k.startswith("stain[end_stain]")
     ]
 
-    zip_slice = zip(slice_slice_id, slice_start_diagnostic,
-                    slice_end_diagnostic, slice_store)
+    zip_stain = zip(stain_slice_id, stain_start_stain, stain_end_stain)
 
-    for values in zip_slice:
+    for values in zip_stain:
         slice_new = Slice.objects.get(pk=values[0])
-        slice_new.start_diagnostic = values[1]
-        slice_new.end_diagnostic = values[2]
-        slice_new.slice_store = values[3]
+        slice_new.start_stain = values[1]
+        slice_new.end_stain = values[2]
 
         slice_new.save()
 
 
 def step_2_analysisform(request):
-    print("Step 2 Analysis Form")
+    var_post = request.POST.copy()
+
+    scan_slice_id = [
+        v for k, v in var_post.items() if k.startswith("scan[slice_id]")
+    ]
+    scan_start_scan = [
+        v for k, v in var_post.items() if k.startswith("scan[start_scan]")
+    ]
+    scan_end_scan = [
+        v for k, v in var_post.items() if k.startswith("scan[end_scan]")
+    ]
+    scan_store = [
+        v for k, v in var_post.items() if k.startswith("scan[store]")
+    ]
+
+    zip_scan = zip(scan_slice_id, scan_start_scan, scan_end_scan, scan_store)
+
+    for values in zip_scan:
+        slice_new = Slice.objects.get(pk=values[0])
+        slice_new.start_scan = values[1]
+        slice_new.end_scan = values[2]
+        slice_new.slice_store = values[3]
+
+        slice_new.save()
 
 
 def step_3_analysisform(request):
-    print("Step 3 Analysis Form")
+    var_post = request.POST.copy()
+
+    store_slice_id = [
+        v for k, v in var_post.items() if k.startswith("store[slice_id]")
+    ]
+    store_box_id = [
+        v for k, v in var_post.items() if k.startswith("store[box_id]")
+    ]
+
+    zip_store = zip(store_slice_id, store_box_id)
+
+    for values in zip_store:
+        slice_new = Slice.objects.get(pk=values[0])
+        slice_new.box_id = values[1]
+
+        slice_new.save()
+
+
+def step_4_analysisform(request):
+    print("Step 4 Analysis Form")
 
 
 # Generic function for call any process method for any model_form

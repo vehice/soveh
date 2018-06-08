@@ -3,11 +3,54 @@
     <input type="hidden" id="step_id" name="step_id" value="{{step_id}}">
     <input type="hidden" id="step_tag" name="step_tag" value="{{step_tag}}">
     <input type="hidden" id="form_id" name="form_id" value="{{form_id}}" >
-    <input type="hidden" id="entryform_id" name="entryform_id" value="{{entryform_id}}" >
+    <input type="hidden" id="analysis_id" name="analysis_id" value="{{analysis_id}}" >
     <h4 class="form-section">
-      <i class="ft-user"></i> Guardado Muestras
+      <i class="ft-user"></i> Digitalizacion Scanner
     </h4>
     <div class="row">
+      <div class="col-md-6">
+        <div class="form-group">
+        </div>
+      </div>
+    </div>
+    <div id="scan_group">
+      <table id="scan_table" class="table table-striped table-bordered">
+        <thead>
+          <tr>
+            <th>Corte</th>
+            <th>Jaula</th>
+            <th>Inicio Digitalizacion</th>
+            <th>Fin Digitalizacion</th>
+            <th>Guardado</th>
+          </tr>
+        </thead>
+        <tbody>
+        </tbody>
+        </table>
     </div>
   </div>
 </fieldset>
+
+
+<script id="scan_row" type="text/x-lodash-template">
+  <tr>
+    <td>
+      <%= slice_name %>
+      <input type="hidden" name="scan[slice_id][<%= scan_index %>]" value="<%= slice_id %>" >
+    </td>
+    <td>
+      <%= identification_cage %>
+    </td>
+    <td>
+      <input type="checkbox" id="scan[start_scan][<%= scan_index %>]" class="switchery" />
+      <input type="hidden" name="scan[start_scan][<%= scan_index %>]" />
+    </td>
+    <td>
+      <input type="checkbox" id="scan[end_scan][<%= scan_index %>]" class="switchery" />
+      <input type="hidden" name="scan[end_scan][<%= scan_index %>]" />
+    </td>
+    <td>
+      <input name="scan[store][<%= scan_index %>]" class="form-control">
+    </td>
+  </tr>
+</script>

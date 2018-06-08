@@ -6,7 +6,7 @@ $(function () {
     url: url,
   })
     .done(function (data) {
-      loadSliceTable(data)
+      loadStainTable(data)
     })
     .fail(function () {
       console.log("Fail")
@@ -14,7 +14,7 @@ $(function () {
 
   // Events
 
-  $(document).on('change', '#slice_table :checkbox', function (e) {
+  $(document).on('change', '#stain_table :checkbox', function (e) {
     if (e.target.checked) {
       $("[name='" + e.target.id + "']").val(moment().format());
     } else {
@@ -23,14 +23,13 @@ $(function () {
   });
 });
 
-
-function loadSliceTable(data) {
-  if ($.fn.DataTable.isDataTable('#slice_table')) {
+function loadStainTable(data) {
+  if ($.fn.DataTable.isDataTable('#stain_table')) {
     // TODO: Fix efecto al destruir la tabla
-    $('#slice_table').DataTable().clear().destroy();
+    $('#stain_table').DataTable().clear().destroy();
   }
 
-  populateSliceTable(data);
+  populateStainTable(data);
 
   var elems = Array.prototype.slice.call(document.querySelectorAll('.switchery'));
 
@@ -38,41 +37,34 @@ function loadSliceTable(data) {
     new Switchery(html);
   });
 
-  $('[data-toggle="popover"]').popover();
-
   $('#slice_table').DataTable({
     ordering: false,
     paginate: false,
     scrollX: true,
-    columnDefs: [
-      { "width": "20%", "targets": 0 },
-      { "width": "20%", "targets": 1 },
-      { "width": "40%", "targets": 4 },
-    ],
     language: {
       url: "https://cdn.datatables.net/plug-ins/1.10.16/i18n/Spanish.json"
     },
   });
 }
 
-function populateSliceTable(data) {
+function populateStainTable(data) {
   $.each(data.slices, function (i, item) {
     var row = {};
 
     row.slice_id = item.slice_id;
     row.slice_name = item.slice_name;
-    row.slice_index = i;
+    row.stain_index = i;
     row.identification_cage = 'E-' + item.identification_cage;
 
-    addBlockRow(row)
+    addStainRow(row)
   });
 }
 
-function addBlockRow(data) {
-  var blockRowTemplate = document.getElementById("slice_row").innerHTML;
+function addStainRow(data) {
+  var blockStainTemplate = document.getElementById("stain_row").innerHTML;
 
-  var templateFn = _.template(blockRowTemplate);
+  var templateFn = _.template(blockStainTemplate);
   var templateHTML = templateFn(data);
 
-  $("#slice_table tbody").append(templateHTML)
+  $("#stain_table tbody").append(templateHTML)
 }
