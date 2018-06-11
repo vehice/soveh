@@ -46,6 +46,46 @@ class Organ(models.Model):
         return self.name
 
 
+class OrganLocation(models.Model):
+    name = models.CharField(max_length=250, null=True, blank=True)
+    organs = models.ManyToManyField(Organ)
+
+    def __str__(self):
+        return self.name
+
+
+class Pathology(models.Model):
+    name = models.CharField(max_length=250, null=True, blank=True)
+    organs = models.ManyToManyField(Organ)
+
+    def __str__(self):
+        return self.name
+
+
+class Diagnostic(models.Model):
+    name = models.CharField(max_length=250, null=True, blank=True)
+    organs = models.ManyToManyField(Organ)
+
+    def __str__(self):
+        return self.name
+
+
+class DiagnosticDistribution(models.Model):
+    name = models.CharField(max_length=250, null=True, blank=True)
+    organs = models.ManyToManyField(Organ)
+
+    def __str__(self):
+        return self.name
+
+
+class DiagnosticIntensity(models.Model):
+    name = models.CharField(max_length=250, null=True, blank=True)
+    organs = models.ManyToManyField(Organ)
+
+    def __str__(self):
+        return self.name
+
+
 class QuestionReceptionCondition(models.Model):
     STATUS = (('a', 'Active'), ('i', 'Inactive'))
 
