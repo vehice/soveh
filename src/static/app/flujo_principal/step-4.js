@@ -8,13 +8,17 @@ function init_step_4() {
     async: false,
   })
     .done(function (data) {
-      console.log(data);
-
-      populateAnalysisData(data);
+      loadAnalysisData(data);
     })
     .fail(function () {
       console.log("Fail")
     })
+}
+
+function loadAnalysisData(data) {
+  $("#analysis_group").empty();
+
+  populateAnalysisData(data);
 }
 
 function populateAnalysisData(data) {
