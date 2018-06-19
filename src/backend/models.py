@@ -208,3 +208,20 @@ class Slice(models.Model):
     analysis = models.ManyToManyField(AnalysisForm)
     entryform = models.ForeignKey(
         EntryForm, null=True, on_delete=models.SET_NULL)
+
+
+class Report(models.Model):
+    analysis = models.ForeignKey(
+        AnalysisForm, null=True, on_delete=models.SET_NULL)
+    slice = models.ForeignKey(Slice, null=True, on_delete=models.SET_NULL)
+    organ = models.ForeignKey(Organ, null=True, on_delete=models.SET_NULL)
+    organ_location = models.ForeignKey(
+        OrganLocation, null=True, on_delete=models.SET_NULL)
+    pathology = models.ForeignKey(
+        Pathology, null=True, on_delete=models.SET_NULL)
+    diagnostic = models.ForeignKey(
+        Diagnostic, null=True, on_delete=models.SET_NULL)
+    diagnostic_distribution = models.ForeignKey(
+        DiagnosticDistribution, null=True, on_delete=models.SET_NULL)
+    diagnostic_intensity = models.ForeignKey(
+        DiagnosticIntensity, null=True, on_delete=models.SET_NULL)

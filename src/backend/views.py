@@ -46,6 +46,30 @@ class EXAM(View):
         return JsonResponse({'ok': True})
 
 
+class ORGAN(View):
+    http_method_names = ['get']
+
+    def get(self, request, organ_id=None):
+        if organ_id:
+            organ = Organ.objects.filter(pk=organ_id)
+            organLocations = list(organ.organlocation_set.all().values())
+            pathologys = list(organ.pathology_set.all().values())
+            diagnostics = list(organ.diagnostic_set.all().values())
+            diagnosticDistributions = list(
+                organ.diagnosticdistribution_set.all().values())
+            diagnosticIntensity = list(
+                organ.diagnosticintensity_set.all().values())
+
+        else:
+            organs = list(Organ.objects.all().values())
+
+            data = {
+                'organs': organs,
+            }
+
+        return JsonResponse(data)
+
+
 class ENTRYFORM(View):
     http_method_names = ['get']
 
@@ -169,11 +193,14 @@ class SLICE(View):
             slice_name = slice_new.slice_name
             identification_cage = slice_new.cassettes.first(
             ).identifications.first().cage
+            analysis = slice_new.analysis.first()
+            organs = [organ.name for organ in analysis.organs.all()]
 
             slices.append({
                 'slice_id': slice_id,
                 'slice_name': slice_name,
-                'identification_cage': identification_cage
+                'identification_cage': identification_cage,
+                'organs': organs
             })
 
         data = {'slices': slices}
@@ -226,6 +253,97 @@ class WORKFLOW(View):
             'process_response': process_response,
             'next_step_permission': next_step_permission
         })
+
+
+class REPORT(View):
+    def get(self, request, slice_id):
+        if slice_id:
+            report_qs = Report.objects.filter(slice=slice_id)
+
+            reports = []
+            for report in report_qs:
+                reports.append({
+                    "report_id":
+                    report.id,
+                    "organ":
+                    report.organ.name,
+                    "organ_location":
+                    report.organ_location.name,
+                    "pathology":
+                    report.pathology.name,
+                    "diagnostic":
+                    report.diagnostic.name,
+                    "diagnostic_distribution":
+                    report.diagnostic_distribution.name,
+                    "diagnostic_intensity":
+                    report.diagnostic_intensity.name
+                })
+
+            data = {'reports': reports}
+
+        return JsonResponse(data)
+
+    def post(self, request):
+        var_post = request.POST.copy()
+
+        analysis_id = var_post.get('analysis_id')
+        slice_id = var_post.get('slice_id')
+        organ_id = var_post.get('organ')
+        organ_location_id = var_post.get('organ_location')
+        pathology_id = var_post.get('pathology')
+        diagnostic_id = var_post.get('diagnostic')
+        diagnostic_distribution_id = var_post.get('diagnostic_distribution')
+        diagnostic_intensity_id = var_post.get('diagnostic_intensity')
+
+        report = Report.objects.create(
+            analysis_id=analysis_id,
+            slice_id=slice_id,
+            organ_id=organ_id,
+            organ_location_id=organ_location_id,
+            pathology_id=pathology_id,
+            diagnostic_id=diagnostic_id,
+            diagnostic_distribution_id=diagnostic_distribution_id,
+            diagnostic_intensity_id=diagnostic_intensity_id,
+        )
+        report.save()
+
+        return JsonResponse({'ok': True})
+
+    def delete(self, request, report_id):
+        if report_id:
+            report = Report.objects.get(pk=report_id)
+            report.delete()
+
+            return JsonResponse({'ok': True})
+
+
+def organs_by_slice(request, slice_id=None):
+    if slice_id:
+        organs_qs = Slice.objects.get(
+            pk=slice_id).analysis.first().organs.all()
+
+        organs = []
+        for organ in organs_qs:
+            organs.append({
+                "id":
+                organ.id,
+                "name":
+                organ.name,
+                "organ_locations":
+                list(organ.organlocation_set.all().values()),
+                "pathologys":
+                list(organ.pathology_set.all().values()),
+                "diagnostics":
+                list(organ.diagnostic_set.all().values()),
+                "diagnostic_distributions":
+                list(organ.diagnosticdistribution_set.all().values()),
+                "diagnostic_intensity":
+                list(organ.diagnosticintensity_set.all().values())
+            })
+
+        data = {'organs': organs}
+
+        return JsonResponse(data)
 
 
 # Any process function must to have a switcher for choice which method will be call

@@ -24,4 +24,18 @@ urlpatterns = [
         'slice-analysis/<int:analysis_form>',
         csrf_exempt(views.SLICE.as_view()),
         name='slice_analysis_id'),
+    path('customer', csrf_exempt(views.CUSTOMER.as_view()), name='customer'),
+    path(
+        'report-slice/<int:slice_id>',
+        csrf_exempt(views.REPORT.as_view()),
+        name='report_by_slice'),
+    path(
+        'report/<int:report_id>',
+        csrf_exempt(views.REPORT.as_view()),
+        name='report_id'),
+    path('report', csrf_exempt(views.REPORT.as_view()), name='report'),
+    path(
+        'organs-slice/<int:slice_id>',
+        csrf_exempt(views.organs_by_slice),
+        name="organs_by_slice")
 ]
