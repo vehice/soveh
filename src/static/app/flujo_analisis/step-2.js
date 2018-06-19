@@ -26,7 +26,6 @@ function init_step_2() {
 
 function loadScanTable(data) {
   if ($.fn.DataTable.isDataTable('#scan_table')) {
-    // TODO: Fix efecto al destruir la tabla
     $('#scan_table').DataTable().clear().destroy();
   }
 
@@ -38,14 +37,11 @@ function loadScanTable(data) {
     new Switchery(html);
   });
 
-  $('#slice_table').DataTable({
+  $('#scan_table').DataTable({
     ordering: false,
     paginate: false,
-    scrollX: true,
     columnDefs: [
-      { "width": "20%", "targets": 0 },
-      { "width": "20%", "targets": 1 },
-      { "width": "40%", "targets": 4 },
+      { className: "dt-head-center", targets: [0] },
     ],
     language: {
       url: "https://cdn.datatables.net/plug-ins/1.10.16/i18n/Spanish.json"

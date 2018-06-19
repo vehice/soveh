@@ -31,7 +31,6 @@ $(document).on('change', '#block_table :checkbox', function (e) {
 
 function loadBlockTable(data) {
   if ($.fn.DataTable.isDataTable('#block_table')) {
-    // TODO: Fix efecto al destruir la tabla
     $('#block_table').DataTable().clear().destroy();
   }
 

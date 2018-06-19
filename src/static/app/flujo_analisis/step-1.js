@@ -1,4 +1,8 @@
 $(function () {
+  init_step_1();
+});
+
+function init_step_1() {
   var analysis_id = $('#analysis_id').val();
   var url = Urls.slice_analysis_id(analysis_id);
   $.ajax({
@@ -21,11 +25,10 @@ $(function () {
       $("[name='" + e.target.id + "']").val("");
     }
   });
-});
+}
 
 function loadStainTable(data) {
   if ($.fn.DataTable.isDataTable('#stain_table')) {
-    // TODO: Fix efecto al destruir la tabla
     $('#stain_table').DataTable().clear().destroy();
   }
 
@@ -37,10 +40,9 @@ function loadStainTable(data) {
     new Switchery(html);
   });
 
-  $('#slice_table').DataTable({
+  $('#stain_table').DataTable({
     ordering: false,
     paginate: false,
-    scrollX: true,
     language: {
       url: "https://cdn.datatables.net/plug-ins/1.10.16/i18n/Spanish.json"
     },

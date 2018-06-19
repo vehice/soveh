@@ -15,7 +15,6 @@ function init_step_3() {
 
 function loadStoreTable(data) {
   if ($.fn.DataTable.isDataTable('#store_table')) {
-    // TODO: Fix efecto al destruir la tabla
     $('#store_table').DataTable().clear().destroy();
   }
 

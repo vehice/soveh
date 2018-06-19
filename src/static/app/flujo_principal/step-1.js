@@ -57,7 +57,7 @@ $(function () {
 
     var templateData = {
       'analysis_id': analysis_id, 'analysis_name': analysis_name,
-      'analysis_fish': no_fish, 'analysis_organs': organs,
+      'analysis_fish': no_fish, 'analysis_organs': analysis_organs,
       'analysis_index': analysis_index
     };
 

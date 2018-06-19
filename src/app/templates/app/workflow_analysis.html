@@ -102,12 +102,15 @@ $("#workflow_form").steps({
       })
 
       if (response.next_step_permission) {
-        if(!previous_step) {
+        if(previous_step) {
           var step = newIndex + 1
           var function_name = "init_step_" + step;
-
-          window[function_name]();
+        } else {
+          var step = newIndex + 1
+          var function_name = "init_step_" + step;
         }
+        console.log(function_name);
+        window[function_name]();
       } else {
         toastr.error('No puedes continuar ya que no tienes permisos para los siguientes pasos.', 'No tienes permisos');
         setTimeout(function() {
