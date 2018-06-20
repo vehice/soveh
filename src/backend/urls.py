@@ -32,7 +32,7 @@ urlpatterns = [
     path(
         'report/<int:report_id>',
         csrf_exempt(views.REPORT.as_view()),
-        name='report_id'),
+        name='report_by_id'),
     path('report', csrf_exempt(views.REPORT.as_view()), name='report'),
     path(
         'organs-slice/<int:slice_id>',

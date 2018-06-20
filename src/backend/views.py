@@ -314,7 +314,7 @@ class REPORT(View):
             report = Report.objects.get(pk=report_id)
             report.delete()
 
-            return JsonResponse({'ok': True})
+        return JsonResponse({'ok': True})
 
 
 def organs_by_slice(request, slice_id=None):

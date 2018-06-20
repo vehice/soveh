@@ -108,7 +108,7 @@ function init_step_4() {
 
   $(document).on('click', '#remove_pathology', function (e) {
     var report_id = $(this).data("report-id");
-    var url = Urls.report(report_id);
+    var url = Urls.report_by_id(report_id);
 
     $.ajax({
       type: "DELETE",
