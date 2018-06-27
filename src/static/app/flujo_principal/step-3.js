@@ -1,5 +1,3 @@
-var data_step_3;
-
 function init_step_3() {
   var entryform_id = $('#entryform_id').val();
   var url = Urls.cassette_entryform_id(entryform_id);
@@ -10,15 +8,29 @@ function init_step_3() {
     async: false,
   })
     .done(function (data) {
-      data_step_3 = data
-
-      console.log(data_step_3);
-
-      loadBlockTable(data_step_3);
+      loadBlockTable(data);
+      loadData();
     })
     .fail(function () {
       console.log("Fail")
     })
+
+  function loadData() {
+    var entryform_id = $('#entryform_id').val();
+    var url = Urls.cassette_entryform_id(entryform_id);
+
+    $.ajax({
+      type: "GET",
+      url: url,
+      async: false,
+    })
+      .done(function (data) {
+
+      })
+      .fail(function () {
+        console.log("Fail")
+      })
+  }
 }
 
 $(document).on('change', '#block_table :checkbox', function (e) {

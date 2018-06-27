@@ -48,7 +48,7 @@
               <tr>
                 <td>{{ entryForm.content_object.id }}</td>
                 <td>{{ entryForm.content_object.customer }}</td>
-                <td>{{ entryForm.state.step }}</td>
+                <td><a href="workflow/{{ entryForm.id }}/{{ entryForm.state.step.tag }}">{{ entryForm.state.step }}</a></td>
               </tr>
               {% endfor %}
             </tbody>

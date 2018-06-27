@@ -67,60 +67,65 @@ $("#workflow_form").steps({
         finish: 'Finalizar'
     },
     startIndex: 0,
-    onStepChanging: function (event, currentIndex, newIndex)
+    onStepChanging: function (events, currentIndex, newIndex)
     {
-      var previous_step = false;
-      var form_data;
+      console.log("SET STATE")
+      console.log(set_state)
+      if(!set_state) {
+        var previous_step = false;
+        var form_data;
 
-      if (currentIndex > newIndex)
-      {
-        previous_step = true;
-        form_data = $("#step_" + newIndex + " :input").serialize();
-      } else {
-        previous_step = false;
-        form_data = $("#step_" + currentIndex + " :input").serialize();
-      }
+        if (currentIndex > newIndex)
+        {
+          previous_step = true;
+          form_data = $("#step_" + newIndex + " :input").serialize();
+        } else {
+          previous_step = false;
+          form_data = $("#step_" + currentIndex + " :input").serialize();
+        }
 
-      var url = Urls.workflow();
-      var id_next_step = $("#step_" + newIndex).children("#step_id").val();
+        var url = Urls.workflow();
+        var id_next_step = $("#step_" + newIndex).children("#step_id").val();
 
-      var response;
-      $.ajax({
-        type: "POST",
-        url: url,
-        data: form_data + "&id_next_step=" + id_next_step +"&previous_step=" + previous_step,
-        async: false,
-      })
-      .done(function (data) {
-        response = data;
-      })
-      .fail(function () {
-        console.log("Fail")
-      })
+        var response;
+        $.ajax({
+          type: "POST",
+          url: url,
+          data: form_data + "&id_next_step=" + id_next_step +"&previous_step=" + previous_step,
+          async: false,
+        })
+        .done(function (data) {
+          response = data;
+        })
+        .fail(function () {
+          console.log("Fail")
+        })
 
-      if (response.next_step_permission) {
+        if (response.next_step_permission) {
+          if(!previous_step) {
+            var step = newIndex + 1
+            var function_name = "init_step_" + step;
+
+            window[function_name]();
+          }
+        } else {
+          toastr.error('No puedes continuar ya que no tienes permisos para los siguientes pasos.', 'No tienes permisos');
+          setTimeout(function() {
+            window.location.href = '/ingresos'
+          }, 1000);
+        }
+
         if(!previous_step) {
-          var step = newIndex + 1
-          var function_name = "init_step_" + step;
-
-          window[function_name]();
+          if(response.process_response) {
+            toastr.success('', 'Paso guardado exitosamente!');
+          }
         }
+
+        return response.next_step_permission;
       } else {
-        toastr.error('No puedes continuar ya que no tienes permisos para los siguientes pasos.', 'No tienes permisos');
-        setTimeout(function() {
-          window.location.href = '/ingresos'
-        }, 1000);
+        set_state = false;
+        return true
       }
-
-      // form.validate().settings.ignore = ":disabled,:hidden";
-      // return form.valid();
-      if(!previous_step) {
-        if(response.process_response) {
-          toastr.success('', 'Paso guardado exitosamente!');
-        }
-      }
-
-      return response.next_step_permission;
     },
     onFinishing: function (event, currentIndex)
     {
@@ -145,6 +150,27 @@ $("#workflow_form").steps({
         console.log("Fail")
       })
     }
+});
+
+$()
+
+$(window).on('load', function (e) {
+  // If para cargar un paso en especifico
+  {% if set_step_tag and set_step_tag != "step_1" %}
+    console.log("SET STEP TAG DESPUES DEL CAMBIO")
+    set_state = true;
+    var step_wizard = parseInt("{{ set_step_tag }}".split("_")[1]) - 1; // Se resta 1 para igualar a los indices del plugin
+    var step_tag_function = "init_{{ set_step_tag }}";
+
+    form.steps("setStep", step_wizard);
+
+    window[step_tag_function]();
+  {% else %}
+    set_state = false;
+
+    // Si se abre un nuevo caso es necesario ejecutar el metodo del paso 1
+    init_step_1();
+  {% endif %}
 });
 
 

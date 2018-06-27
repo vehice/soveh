@@ -4,7 +4,6 @@ from django.contrib.contenttypes.models import ContentType
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from distutils.util import strtobool
-from utils.functions import renderjson
 from django.db.models import F
 from django.db.models import Prefetch
 
@@ -76,6 +75,7 @@ class ENTRYFORM(View):
     def get(self, request, id=None):
         if id:
             entryform = EntryForm.objects.values().get(pk=id)
+            entryform_object = EntryForm.objects.get(pk=id)
             identifications = list(
                 Identification.objects.filter(
                     entryform=entryform['id']).values())
@@ -83,6 +83,30 @@ class ENTRYFORM(View):
                 EntryForm.objects.filter(id=id).values(
                     value=F('analysisform__organs__id'),
                     name=F('analysisform__organs__name')).distinct())
+
+            entryform["identifications"] = list(
+                entryform_object.identification_set.all().values())
+            entryform["answer_questions"] = list(
+                entryform_object.answerreceptioncondition_set.all().values())
+            entryform["analyses"] = list(
+                entryform_object.analysisform_set.all().values())
+
+            cassettes = []
+            for cassette in entryform_object.cassette_set.all():
+                cassette_organs = [organ.id for organ in cassette.organs.all()]
+
+                cassettes.append({
+                    'sample_id':
+                    cassette.sample_id,
+                    'cassette_name':
+                    cassette.cassette_name,
+                    'processor_loaded_at':
+                    cassette.processor_loaded_at,
+                    'organs':
+                    cassette_organs
+                })
+
+            entryform["cassettes"] = cassettes
 
             data = {
                 'entryform': entryform,
@@ -209,10 +233,20 @@ class SLICE(View):
 
 
 class WORKFLOW(View):
+    def get(self, request, form_id, step_tag):
+        form = Form.objects.get(pk=form_id)
+        entryform_id = form.content_object.id
+
+        return render(
+            request, 'app/workflow_main.html', {
+                'form': form,
+                'form_id': form_id,
+                'entryform_id': entryform_id,
+                'set_step_tag': step_tag
+            })
+
     def post(self, request):
         var_post = request.POST.copy()
-        print("WORKFLOWWWW")
-        print(var_post)
 
         id_next_step = var_post.get('id_next_step')
         previous_step = strtobool(var_post.get('previous_step'))
@@ -352,10 +386,10 @@ def process_entryform(request):
 
     # try:
     switcher = {
-        'step_1_main': step_1_entryform,
-        'step_2_main': step_2_entryform,
-        'step_3_main': step_3_entryform,
-        'step_4_main': step_4_entryform
+        'step_1': step_1_entryform,
+        'step_2': step_2_entryform,
+        'step_3': step_3_entryform,
+        'step_4': step_4_entryform
     }
 
     method = switcher.get(step_tag)
@@ -487,6 +521,7 @@ def step_2_entryform(request):
     var_post = request.POST.copy()
 
     entryform = EntryForm.objects.get(pk=var_post.get('entryform_id'))
+    processor_loaded_at = var_post.get('processor_loaded_at_submit')
 
     cassette_sample_id = [
         v for k, v in var_post.items() if k.startswith("cassette[sample_id]")
@@ -511,6 +546,7 @@ def step_2_entryform(request):
     for values in zip_cassettes:
         cassette = Cassette.objects.create(
             entryform_id=entryform.id,
+            processor_loaded_at=processor_loaded_at,
             sample_id=values[0],
             cassette_name=values[1],
         )

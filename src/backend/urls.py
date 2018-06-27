@@ -15,6 +15,10 @@ urlpatterns = [
         'cassettes-entry-form/<int:entry_form>',
         csrf_exempt(views.CASSETTE.as_view()),
         name='cassette_entryform_id'),
+    path(
+        'workflow/<int:form_id>/<slug:step_tag>',
+        csrf_exempt(views.WORKFLOW.as_view()),
+        name='workflow_open_step'),
     path('workflow', csrf_exempt(views.WORKFLOW.as_view()), name='workflow'),
     path(
         'analysis-entry-form/<int:entry_form>',

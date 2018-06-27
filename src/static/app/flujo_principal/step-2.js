@@ -13,20 +13,48 @@ function init_step_2() {
       data_step_2 = data
 
       loadCassetteTable(data_step_2);
+      loadData();
     })
     .fail(function () {
       console.log("Fail")
     })
 
-  $('#datetime_processor_texture_at').datetimepicker({
+  $('#datetime_processor_loaded_at').datetimepicker({
     locale: 'es',
   });
 
-  $('#datetime_processor_texture_at').on("dp.change", function (e) {
+  $('#datetime_processor_loaded_at').on("dp.change", function (e) {
     if (e.date) {
-      $("#processor_texture_at_submit").val(e.date.format());
+      $("#processor_loaded_at_submit").val(e.date.format());
     }
   });
+
+  function loadData() {
+    var entryform = data_step_2.entryform;
+
+    if (entryform.cassettes.length > 0) {
+      var nro_fish_total = _.sumBy(entryform.identifications, 'no_fish');
+      var nro_cassette = entryform.cassettes.length
+      var nro_sample_cassette = nro_cassette / nro_fish_total;
+
+      $('[name="processor_loaded_at"]').val(moment(entryform.cassettes[0].processor_loaded_at).format("DD/MM/YYYY HH:MM") || "");
+      $('#processor_loaded_at_submit').val(entryform.cassettes[0].processor_loaded_at);
+
+      $("#no_cassette").val(nro_sample_cassette)
+    } else {
+      $('[name="processor_loaded_at"]').val("");
+      $('#processor_loaded_at_submit').val("");
+
+      $("#no_cassette").val(1)
+    }
+
+    $.each(entryform.cassettes, function (i, item) {
+      $('div[attr1="value1"][attr2="value2"]')
+      $("#cassettes_table")
+        .find("[data-sample-id='" + item.sample_id + "'][data-cassette-name='" + item.cassette_name + "']")
+        .val(item.organs).trigger("change");
+    });
+  };
 }
 
 $(document).on('change', '#no_cassette', function (e) {
@@ -47,7 +75,9 @@ function loadCassetteTable(data) {
     ordering: false,
     paginate: false,
     columnDefs: [
-      { "width": "50%", "targets": 2 }
+      { "width": "20%", "targets": 0 },
+      { "width": "20%", "targets": 1 },
+      { "width": "60%", "targets": 2 }
     ],
     language: {
       url: "https://cdn.datatables.net/plug-ins/1.10.16/i18n/Spanish.json"
@@ -62,7 +92,7 @@ function loadCassetteTable(data) {
 function populateCassetteTable(data, no_cassette) {
   var organs = data.organs;
   var cassette_index = 0;
-  console.log(data);
+
   $.each(data.identifications, function (i, item) {
 
     var no_fish = item.no_fish * no_cassette;

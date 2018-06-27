@@ -1,15 +1,17 @@
 // Data Template
 var organs;
 
-$(function () {
+function init_step_1() {
   var url = Urls.entryform();
   $.ajax({
     type: "GET",
     url: url,
   })
     .done(function (data) {
+      console.log("PASOOOO 1");
       initialData(data);
       initialConf();
+      loadData();
 
       organs = data.organs;
     })
@@ -19,18 +21,21 @@ $(function () {
 
   // Events
 
-  $('#customer_select').on("select2:select", function (e) {
-    var customer_type = $('#customer_select').find(':selected').data('type_customer')
+  $('#customer_select').on("change", function (e) {
+    var customer_type = $('#customer_select').find(':selected').data('type-customer')
 
     if (customer_type === 'l') {
       $("#center_input").val("");
       $("#center").hide();
       $("#order_number_input").val("")
       $("#order_number").show()
-    } else {
+    } else if ((customer_type === 's')) {
       $("#center_input").val("");
       $("#center").show();
       $("#order_number_input").val("")
+      $("#order_number").hide()
+    } else {
+      $("#center").hide();
       $("#order_number").hide()
     }
   });
@@ -47,6 +52,10 @@ $(function () {
   $('#identification_group').on('change', '[name="identification[no_fish]"]', function (e) {
     refreshNoFish();
   })
+
+  $('#exam_select').on('change', function (e) {
+    var selected = $(this).find("option:selected").val();
+  });
 
   $('#exam_select').on("select2:select", function (e) {
     var analysis_name = e.params.data.text;
@@ -89,7 +98,78 @@ $(function () {
     var unselected_value = e.params.args.data.id;
     $('#exam_group').find('[data-id="' + unselected_value + '"]').remove();
   });
-});
+
+  function loadData() {
+    var entryform_id = $('#entryform_id').val();
+    var url = Urls.entryform_id(entryform_id);
+    $.ajax({
+      type: "GET",
+      url: url,
+    })
+      .done(function (data) {
+        var entryform = data.entryform;
+
+        $('#customer_select').val(entryform.customer_id).trigger('change');
+        $('#fixtative_select').val(entryform.fixative_id).trigger('change');
+        $('#larvalstage_select').val(entryform.larvalstage_id).trigger('change');
+        $('#watersource_select').val(entryform.watersource_id).trigger('change');
+        $('#specie_select').val(entryform.specie_id).trigger('change');
+
+        $('#observation').val(entryform.observation);
+        $('#order_number_input').val(entryform.no_order);
+
+        if (entryform.created_at) {
+          $('[name="created_at"]').val(moment(entryform.created_at).format("DD/MM/YYYY HH:MM") || "");
+        } else {
+          $('[name="created_at"]').val("");
+        }
+        if (entryform.sampled_at) {
+          $('[name="sampled_at"]').val(moment(entryform.sampled_at).format("DD/MM/YYYY HH:MM") || "");
+        } else {
+          $('[name="sampled_at"]').val("");
+        }
+
+        $('#created_at_submit').val(entryform.created_at);
+        $('#sampled_at_submit').val(entryform.sampled_at);
+
+        $.each(entryform.answer_questions, function (i, item) {
+          var question_id = item.question_id
+          var answer = item.answer
+
+          $("#question_" + question_id + "_" + answer).prop('checked', true);
+        });
+
+        var identification_size = entryform.identifications.length;
+
+        if (identification_size > 1) {
+          for (var i = 1; i < identification_size; i++) {
+            $("#add_identification").trigger("click");
+          }
+        }
+
+        var identifications_cage = $('[name="identification[cage]"]');
+        var identifications_group = $('[name="identification[group]"]');
+        var identifications_no_fish = $('[name="identification[no_fish]"]');
+        var identifications_no_container = $('[name="identification[no_container]"]')
+
+        $.each(entryform.identifications, function (i, item) {
+          $(identifications_cage[i]).val(item.cage);
+          $(identifications_group[i]).val(item.group);
+          $(identifications_no_fish[i]).val(item.no_fish);
+          $(identifications_no_container[i]).val(item.no_container);
+        });
+
+        var exams_id = _.map(entryform.analyses, 'exam_id');
+
+        $("#exam_select").val(exams_id).trigger("change");
+
+      })
+      .fail(function () {
+        console.log("Fail")
+      })
+  }
+}
+
 
 // Function for events
 
@@ -206,7 +286,7 @@ function loadCustomers(customers) {
     $('#customer_select').append($('<option>', {
       value: item.id,
       text: item.name,
-      'data-type_customer': item.type_customer
+      'data-type-customer': item.type_customer
     }));
   });
 }

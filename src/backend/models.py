@@ -188,6 +188,7 @@ class Cassette(models.Model):
         EntryForm, null=True, on_delete=models.SET_NULL)
     sample_id = models.CharField(max_length=250, null=True, blank=True)
     cassette_name = models.CharField(max_length=250, null=True, blank=True)
+    processor_loaded_at = models.DateTimeField(null=True, blank=True)
     identifications = models.ManyToManyField(Identification)
     organs = models.ManyToManyField(Organ)
 
