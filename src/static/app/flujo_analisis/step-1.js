@@ -57,8 +57,14 @@ function populateStainTable(data) {
     row.slice_name = item.slice_name;
     row.stain_index = i;
     row.identification_cage = 'E-' + item.identification_cage;
+    row.start_stain = item.start_stain;
+    row.end_stain = item.end_stain;
 
     addStainRow(row)
+
+    if (item.start_stain != null && item.end_stain != null) {
+      $("[data-index='" + i + "']").find(".switchery").trigger("click");
+    }
   });
 }
 

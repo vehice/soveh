@@ -13,7 +13,7 @@ function init_step_2() {
       data_step_2 = data
 
       loadCassetteTable(data_step_2);
-      loadData();
+      loadData(data_step_2);
     })
     .fail(function () {
       console.log("Fail")
@@ -29,8 +29,8 @@ function init_step_2() {
     }
   });
 
-  function loadData() {
-    var entryform = data_step_2.entryform;
+  function loadData(data) {
+    var entryform = data.entryform;
 
     if (entryform.cassettes.length > 0) {
       var nro_fish_total = _.sumBy(entryform.identifications, 'no_fish');

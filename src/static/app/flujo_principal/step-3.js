@@ -9,28 +9,10 @@ function init_step_3() {
   })
     .done(function (data) {
       loadBlockTable(data);
-      loadData();
     })
     .fail(function () {
       console.log("Fail")
     })
-
-  function loadData() {
-    var entryform_id = $('#entryform_id').val();
-    var url = Urls.cassette_entryform_id(entryform_id);
-
-    $.ajax({
-      type: "GET",
-      url: url,
-      async: false,
-    })
-      .done(function (data) {
-
-      })
-      .fail(function () {
-        console.log("Fail")
-      })
-  }
 }
 
 $(document).on('change', '#block_table :checkbox', function (e) {
@@ -79,17 +61,31 @@ function populateBlockTable(data) {
     row.no_slice = item.no_slice
     row.block_index = i;
     row.analyses = analyses;
+
+    if (item.slices.length > 0) {
+      row.start_block = item.slices[0].start_block;
+      row.end_block = item.slices[0].end_block;
+      row.start_slice = item.slices[0].start_slice;
+      row.end_slice = item.slices[0].end_slice;
+    } else {
+      row.start_block = "";
+      row.end_block = "";
+      row.start_slice = "";
+      row.end_slice = "";
+    }
+
     row.slice_info = "<ol>";
-
     var cage = row.sample_id.split("-")[1].split("_")[1]
-
     $.each(data.exams, function (i, item) {
       row.slice_info += "<li><p><strong>Cassette:</strong> " + row.cassette_name + " /<strong> Jaula: </strong>" + cage + " /<strong> Tinci&oacute;n: </strong>" + item.stain + "</p></li>"
     })
-
     row.slice_info += "</ol>";
 
     addBlockRow(row)
+
+    if (item.slices.length > 0) {
+      $("[data-index='" + i + "']").find(".switchery").trigger("click");
+    }
   });
 }
 

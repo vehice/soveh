@@ -158,12 +158,22 @@ class CASSETTE(View):
         for cassette in cassettes_qs:
             organs = [organ.name for organ in cassette.organs.all()]
 
+            slices = []
+            for slice_new in cassette.slice_set.all():
+                slices.append({
+                    'start_block': slice_new.start_block,
+                    'end_block': slice_new.end_block,
+                    'start_slice': slice_new.start_slice,
+                    'end_slice': slice_new.end_slice,
+                })
+
             cassettes.append({
                 'id': cassette.id,
                 'sample_id': cassette.sample_id,
                 'cassette_name': cassette.cassette_name,
                 'organs': organs,
-                'no_slice': no_slice
+                'no_slice': no_slice,
+                'slices': slices
             })
 
         data = {'cassettes': cassettes, 'exams': exams, 'analyses': analyses}
@@ -182,6 +192,7 @@ class ANALYSIS(View):
 
             form_id = form.id
 
+            current_step_tag = form.state.step.tag
             current_step = form.state.step.order
             total_step = form.flow.step_set.count()
             percentage_step = (int(current_step) / int(total_step)) * 100
@@ -197,9 +208,11 @@ class ANALYSIS(View):
                 'exam_name': exam.name,
                 'exam_stain': exam.stain,
                 'slices': slices,
+                'current_step_tag': current_step_tag,
                 'current_step': current_step,
                 'total_step': total_step,
                 'percentage_step': percentage_step,
+                'form_closed': form.form_closed
             })
 
         data = {'analyses': analyses}
@@ -221,9 +234,15 @@ class SLICE(View):
             organs = [organ.name for organ in analysis.organs.all()]
 
             slices.append({
-                'slice_id': slice_id,
-                'slice_name': slice_name,
+                'slice_id': slice_new.id,
+                'slice_name': slice_new.slice_name,
                 'identification_cage': identification_cage,
+                'start_scan': slice_new.start_scan,
+                'end_scan': slice_new.end_scan,
+                'start_stain': slice_new.start_stain,
+                'end_stain': slice_new.end_stain,
+                'slice_store': slice_new.slice_store,
+                'box_id': slice_new.box_id,
                 'organs': organs
             })
 
@@ -235,58 +254,82 @@ class SLICE(View):
 class WORKFLOW(View):
     def get(self, request, form_id, step_tag):
         form = Form.objects.get(pk=form_id)
-        entryform_id = form.content_object.id
+        object_form_id = form.content_object.id
 
-        return render(
-            request, 'app/workflow_main.html', {
+        if (form.content_type.name == 'entry form'):
+            route = 'app/workflow_main.html'
+            data = {
                 'form': form,
                 'form_id': form_id,
-                'entryform_id': entryform_id,
+                'entryform_id': object_form_id,
                 'set_step_tag': step_tag
-            })
+            }
+        elif (form.content_type.name == 'analysis form'):
+            route = 'app/workflow_analysis.html'
+            data = {
+                'form': form,
+                'form_id': form_id,
+                'analysis_id': object_form_id,
+                'set_step_tag': step_tag,
+                'exam_name': form.content_object.exam.name,
+                'form_parent_id': form.parent.id
+            }
+
+        return render(request, route, data)
 
     def post(self, request):
         var_post = request.POST.copy()
 
-        id_next_step = var_post.get('id_next_step')
-        previous_step = strtobool(var_post.get('previous_step'))
-        next_step = Step.objects.get(pk=id_next_step)
-
-        next_step_permission = False
-        process_response = False
-        process_answer = True
-
         up = UserProfile.objects.filter(user=request.user).first()
         form = Form.objects.get(pk=var_post.get('form_id'))
 
-        for actor in next_step.actors.all():
-            if actor.profile == up.profile:
-                if previous_step:
-                    next_state = actor.permission.get(
-                        to_state=form.state).from_state
-                else:
-                    next_state = actor.permission.get(
-                        from_state=form.state).to_state
+        form_closed = False
 
-        if not previous_step:
-            process_answer = call_process_method(form.content_type.model,
-                                                 request)
+        if (var_post.get('form_closed')):
+            form_closed = True
 
-        if process_answer:
-            form.state = next_state
+        if not form_closed:
+            id_next_step = var_post.get('id_next_step')
+            previous_step = strtobool(var_post.get('previous_step'))
+            next_step = Step.objects.get(pk=id_next_step)
+
+            next_step_permission = False
+            process_response = False
+            process_answer = True
+
+            for actor in next_step.actors.all():
+                if actor.profile == up.profile:
+                    if previous_step:
+                        next_state = actor.permission.get(
+                            to_state=form.state).from_state
+                    else:
+                        next_state = actor.permission.get(
+                            from_state=form.state).to_state
+
+            if not previous_step:
+                process_answer = call_process_method(form.content_type.model,
+                                                     request)
+
+            if process_answer:
+                form.state = next_state
+                form.save()
+
+                for actor in form.state.step.actors.all():
+                    if actor.profile == up.profile:
+                        next_step_permission = True
+                process_response = True
+            else:
+                print("FALLO EL PROCESAMIENTO")
+
+            return JsonResponse({
+                'process_response': process_response,
+                'next_step_permission': next_step_permission
+            })
+        else:
+            form.form_closed = True
             form.save()
 
-            for actor in form.state.step.actors.all():
-                if actor.profile == up.profile:
-                    next_step_permission = True
-            process_response = True
-        else:
-            print("FALLO EL PROCESAMIENTO")
-
-        return JsonResponse({
-            'process_response': process_response,
-            'next_step_permission': next_step_permission
-        })
+            return JsonResponse({'redirect_flow': True})
 
 
 class REPORT(View):
@@ -408,10 +451,10 @@ def process_analysisform(request):
 
     # try:
     switcher = {
-        'step_1_analysis': step_1_analysisform,
-        'step_2_analysis': step_2_analysisform,
-        'step_3_analysis': step_3_analysisform,
-        'step_4_analysis': step_4_analysisform,
+        'step_1': step_1_analysisform,
+        'step_2': step_2_analysisform,
+        'step_3': step_3_analysisform,
+        'step_4': step_4_analysisform,
     }
 
     method = switcher.get(step_tag)
@@ -514,7 +557,8 @@ def step_1_entryform(request):
         Form.objects.create(
             content_object=analysis,
             flow=flow,
-            state=flow.step_set.all()[0].state)
+            state=flow.step_set.all()[0].state,
+            parent_id=entryform.forms.first().id)
 
 
 def step_2_entryform(request):
@@ -562,22 +606,22 @@ def step_3_entryform(request):
 
     block_cassette_pk = [
         var_post.getlist(k) for k, v in var_post.items()
-        if k.startswith("block[cassette_pk]")
+        if k.startswith("block_cassette_pk")
     ]
     block_start_block = [
-        v for k, v in var_post.items() if k.startswith("block[start_block]")
+        v for k, v in var_post.items() if k.startswith("block_start_block")
     ]
     block_end_block = [
-        v for k, v in var_post.items() if k.startswith("block[end_block]")
+        v for k, v in var_post.items() if k.startswith("block_end_block")
     ]
     block_start_slice = [
-        v for k, v in var_post.items() if k.startswith("block[start_slice]")
+        v for k, v in var_post.items() if k.startswith("block_start_slice")
     ]
     block_end_slice = [
-        v for k, v in var_post.items() if k.startswith("block[end_slice]")
+        v for k, v in var_post.items() if k.startswith("block_end_slice")
     ]
     block_cassette_name = [
-        v for k, v in var_post.items() if k.startswith("block[cassette_name]")
+        v for k, v in var_post.items() if k.startswith("block_cassette_name")
     ]
     block_analyses = [
         var_post.getlist(k) for k, v in var_post.items()

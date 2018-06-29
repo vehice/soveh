@@ -73,7 +73,13 @@ class Step(models.Model):
 class Form(models.Model):
     flow = models.ForeignKey(Flow, on_delete=models.CASCADE)
     state = models.ForeignKey(State, on_delete=models.CASCADE)
-
+    form_closed = models.BooleanField(default=False)
+    parent = models.ForeignKey(
+        'self',
+        related_name='children',
+        null=True,
+        blank=True,
+        on_delete=models.CASCADE)
     content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
     object_id = models.PositiveIntegerField(null=True)
     content_object = GenericForeignKey()

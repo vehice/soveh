@@ -90,21 +90,3 @@ def show_workflow_main_form(request, form_id):
         'form_id': form_id,
         'entryform_id': entryform_id
     })
-
-
-@login_required
-def show_workflow_analysis_form(request, form_id):
-    form = Form.objects.get(pk=form_id)
-    analysis = form.content_object
-    analysis_id = analysis.id
-    exam_name = analysis.exam.name
-    entryform_id = analysis.entryform_id
-
-    return render(
-        request, 'app/workflow_analysis.html', {
-            'form': form,
-            'form_id': form_id,
-            'analysis_id': analysis_id,
-            'exam_name': exam_name,
-            'entryform_id': entryform_id,
-        })

@@ -32,7 +32,7 @@
 
 
   <script id="stain_row" type="text/x-lodash-template">
-    <tr>
+    <tr data-index="<%= stain_index %>">
       <td>
         <%= slice_name %>
         <input type="hidden" name="stain[slice_id][<%= stain_index %>]" value="<%= slice_id %>" >
@@ -42,11 +42,11 @@
       </td>
       <td>
         <input type="checkbox" id="stain[start_stain][<%= stain_index %>]" class="switchery" />
-        <input type="hidden" name="stain[start_stain][<%= stain_index %>]" />
+        <input type="hidden" name="stain[start_stain][<%= stain_index %>]" value="<%= start_stain %>" />
       </td>
       <td>
         <input type="checkbox" id="stain[end_stain][<%= stain_index %>]" class="switchery" />
-        <input type="hidden" name="stain[end_stain][<%= stain_index %>]" />
+        <input type="hidden" name="stain[end_stain][<%= stain_index %>]" value="<%= end_stain %>" />
       </td>
     </tr>
   </script>

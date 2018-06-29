@@ -69,8 +69,6 @@ $("#workflow_form").steps({
     startIndex: 0,
     onStepChanging: function (events, currentIndex, newIndex)
     {
-      console.log("SET STATE")
-      console.log(set_state)
       if(!set_state) {
         var previous_step = false;
         var form_data;
@@ -102,12 +100,17 @@ $("#workflow_form").steps({
         })
 
         if (response.next_step_permission) {
-          if(!previous_step) {
-            var step = newIndex + 1
-            var function_name = "init_step_" + step;
+          var step;
+          var function_name;
+          if(previous_step) {
+            step = currentIndex
+            function_name = "init_step_" + step;
 
-            window[function_name]();
+          } else {
+            step = newIndex + 1
+            function_name = "init_step_" + step;
           }
+          window[function_name]();
         } else {
           toastr.error('No puedes continuar ya que no tienes permisos para los siguientes pasos.', 'No tienes permisos');
           setTimeout(function() {

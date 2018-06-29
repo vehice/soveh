@@ -36,15 +36,15 @@
 </fieldset>
 
 <script id="block_dyeing_row" type="text/x-lodash-template">
-  <tr>
+  <tr data-index="<%= block_index %>">
     <td>
       <%= sample_id %>
-      <input type="hidden" name="cassette[sample_id][<%= block_index %>]" value="<%= sample_id %>" >
+      <input type="hidden" name="cassette_sample_id_<%= block_index %>]" value="<%= sample_id %>" >
     </td>
     <td>
       <%= cassette_name %>
-      <input type="hidden" name="block[cassette_pk][<%= block_index %>]" value="<%= cassette_pk %>" >
-      <input type="hidden" name="block[cassette_name][<%= block_index %>]" value="<%= cassette_name %>" >
+      <input type="hidden" name="block_cassette_pk_<%= block_index %>" value="<%= cassette_pk %>" >
+      <input type="hidden" name="block_cassette_name_<%= block_index %>" value="<%= cassette_name %>" >
     </td>
     <td>
       <%= organs %>
@@ -53,20 +53,20 @@
       <%= no_slice %>
     </td>
     <td>
-      <input type="checkbox" id="block[start_block][<%= block_index %>]" class="switchery" />
-      <input type="hidden" name="block[start_block][<%= block_index %>]" />
+      <input type="checkbox" id="block_start_block_<%= block_index %>" class="switchery" />
+      <input type="hidden" name="block_start_block_<%= block_index %>" value="<%= start_block %>"  />
     </td>
     <td>
-      <input type="checkbox" id="block[end_block][<%= block_index %>]" class="switchery" />
-      <input type="hidden" name="block[end_block][<%= block_index %>]" />
+      <input type="checkbox" id="block_end_block_<%= block_index %>" class="switchery" />
+      <input type="hidden" name="block_end_block_<%= block_index %>" value="<%= end_block %>" />
     </td>
     <td>
-      <input type="checkbox" id="block[start_slice][<%= block_index %>]" class="switchery" />
-      <input type="hidden" name="block[start_slice][<%= block_index %>]" />
+      <input type="checkbox" id="block_start_slice_<%= block_index %>" class="switchery" />
+      <input type="hidden" name="block_start_slice_<%= block_index %>" value="<%= start_slice %>" />
     </td>
     <td>
-      <input type="checkbox" id="block[end_slice][<%= block_index %>]" class="switchery" />
-      <input type="hidden" name="block[end_slice][<%= block_index %>]" />
+      <input type="checkbox" id="block_end_slice_<%= block_index %>" class="switchery" />
+      <input type="hidden" name="block_end_slice_<%= block_index %>" value="<%= end_slice %>" />
     </td>
     <td>
       <span id="slice-info" data-trigger="hover" data-toggle="popover" data-html="true"  title="Info Corte" data-content="<%= slice_info %>"><i class="ft-eye"></i></span>

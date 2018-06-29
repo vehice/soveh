@@ -37,6 +37,7 @@ function populateStoreTable(data) {
     row.slice_name = item.slice_name;
     row.store_index = i;
     row.identification_cage = 'E-' + item.identification_cage;
+    row.box_id = item.box_id
 
     addStoreRow(row)
   });

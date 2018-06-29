@@ -16,7 +16,7 @@
             <a href="/ingresos">Ingresos</a>
           </li>
           <li class="breadcrumb-item">
-            <a href="/ingresos/{{entryform_id}}">CASO: {{entryform_id}}</a>
+            <a href="/ingresos/{{form_parent_id}}">CASO: {{form_parent_id}}</a>
           </li>
           <li class="breadcrumb-item active">Analisis</li>
         </ol>
@@ -37,7 +37,7 @@
           <form action="#" id="workflow_form" class="wizard-circle">
             {% for step in form.flow.step_set.all %}
               <h6>{{ step.name }}</h6>
-              {% include step.route|add:".html" with step_tag=step.tag step_id=step.pk form_id=form_id analysis_id=analysis_id step_tab=forloop.counter0 %}
+              {% include step.route|add:".html" with step_tag=step.tag step_id=step.pk form_id=form_id analysis_id=analysis_id form_parent_id=form_parent_id step_tab=forloop.counter0 %}
             {% endfor %}
           </form>
         </div>
@@ -71,45 +71,103 @@ $("#workflow_form").steps({
     startIndex: 0,
     onStepChanging: function (event, currentIndex, newIndex)
     {
-      var previous_step = false;
-      var form_data;
+      if(!set_state) {
+        var previous_step = false;
+        var form_data;
 
-      // Si se cumple se apreto el previous
-      if (currentIndex > newIndex)
-      {
-        previous_step = true;
-        form_data = $("#step_" + newIndex + " :input").serialize();
+        if (currentIndex > newIndex)
+        {
+          previous_step = true;
+          form_data = $("#step_" + newIndex + " :input").serialize();
+        } else {
+          previous_step = false;
+          form_data = $("#step_" + currentIndex + " :input").serialize();
+        }
+
+        var url = Urls.workflow();
+        var id_next_step = $("#step_" + newIndex).children("#step_id").val();
+
+        var response;
+        $.ajax({
+          type: "POST",
+          url: url,
+          data: form_data + "&id_next_step=" + id_next_step +"&previous_step=" + previous_step,
+          async: false,
+        })
+        .done(function (data) {
+          response = data;
+        })
+        .fail(function () {
+          console.log("Fail")
+        })
+
+        if (response.next_step_permission) {
+          var step;
+          var function_name;
+          if(previous_step) {
+            step = currentIndex
+            function_name = "init_step_" + step;
+
+          } else {
+            step = newIndex + 1
+            function_name = "init_step_" + step;
+          }
+          window[function_name]();
+        } else {
+          toastr.error('No puedes continuar ya que no tienes permisos para los siguientes pasos.', 'No tienes permisos');
+          setTimeout(function() {
+            window.location.href = '/ingresos'
+          }, 1000);
+        }
+
+        if(!previous_step) {
+          if(response.process_response) {
+            toastr.success('', 'Paso guardado exitosamente!');
+          }
+        }
+
+        return response.next_step_permission;
       } else {
-        previous_step = false;
-        form_data = $("#step_" + currentIndex + " :input").serialize();
+        set_state = false;
+        return true
       }
-
+    },
+    onFinishing: function (event, currentIndex)
+    {
       var url = Urls.workflow();
-      var id_next_step = $("#step_" + newIndex).children("#step_id").val();
+      var form_closed = true;
+      var form_parent_id = $("#step_" + currentIndex).children("#form_parent_id").val();
+      var form_data = $("#step_" + currentIndex + " :input").serialize();
 
       var response;
       $.ajax({
         type: "POST",
         url: url,
-        data: form_data + "&id_next_step=" + id_next_step +"&previous_step=" + previous_step,
+        data: form_data + "&form_closed=" + form_closed,
         async: false,
       })
       .done(function (data) {
-        response = data;
+        if (data.redirect_flow) {
+          window.location.href = '/workflow/' + form_parent_id + "/step_4"
+        } else {
+
+        }
       })
       .fail(function () {
         console.log("Fail")
       })
 
       if (response.next_step_permission) {
+        var step;
+        var function_name;
         if(previous_step) {
-          var step = newIndex + 1
-          var function_name = "init_step_" + step;
+          step = currentIndex
+          function_name = "init_step_" + step;
+
         } else {
-          var step = newIndex + 1
-          var function_name = "init_step_" + step;
+          step = newIndex + 1
+          function_name = "init_step_" + step;
         }
-        console.log(function_name);
         window[function_name]();
       } else {
         toastr.error('No puedes continuar ya que no tienes permisos para los siguientes pasos.', 'No tienes permisos');
@@ -118,8 +176,6 @@ $("#workflow_form").steps({
         }, 1000);
       }
 
-      // form.validate().settings.ignore = ":disabled,:hidden";
-      // return form.valid();
       if(!previous_step) {
         if(response.process_response) {
           toastr.success('', 'Paso guardado exitosamente!');
@@ -128,29 +184,29 @@ $("#workflow_form").steps({
 
       return response.next_step_permission;
     },
-    onFinishing: function (event, currentIndex)
-    {
-        // form.validate().settings.ignore = ":disabled";
-        // return form.valid();
-    },
     onFinished: function (event, currentIndex)
     {
-      event.preventDefault();
-      var url = Urls.entryform();
-      var form_data = ($("form").serialize())
 
-      $.ajax({
-        type: "POST",
-        url: url,
-        data: form_data,
-      })
-      .done(function () {
-
-      })
-      .fail(function () {
-        console.log("Fail")
-      })
     }
+});
+
+$(window).on('load', function (e) {
+  // If para cargar un paso en especifico
+  {% if set_step_tag and set_step_tag != "step_1" %}
+    console.log("SET STEP TAG DESPUES DEL CAMBIO")
+    set_state = true;
+    var step_wizard = parseInt("{{ set_step_tag }}".split("_")[1]) - 1; // Se resta 1 para igualar a los indices del plugin
+    var step_tag_function = "init_{{ set_step_tag }}";
+
+    form.steps("setStep", step_wizard);
+
+    window[step_tag_function]();
+  {% else %}
+    set_state = false;
+
+    // Si se abre un nuevo caso es necesario ejecutar el metodo del paso 1
+    init_step_1();
+  {% endif %}
 });
 
 

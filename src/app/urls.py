@@ -11,10 +11,6 @@ urlpatterns = [
     url(r'^analisis$', views.show_analisis, name='analisis'),
     url(r'^ingresos$', views.show_ingresos, name='ingresos'),
     url(r'^ingresos/new$', views.new_ingreso, name='ingresos_new'),
-    path(
-        'analisis/<int:form_id>',
-        views.show_workflow_analysis_form,
-        name='workflow_analysis_form'),
 ]
 
 if settings.DEBUG:

@@ -57,8 +57,15 @@ function populateScanTable(data) {
     row.slice_name = item.slice_name;
     row.scan_index = i;
     row.identification_cage = 'E-' + item.identification_cage;
+    row.start_scan = item.start_scan;
+    row.end_scan = item.end_scan;
+    row.slice_store = item.slice_store;
 
     addScanRow(row)
+
+    if (item.start_scan != null && item.end_scan != null) {
+      $("[data-index='" + i + "']").find(".switchery").trigger("click");
+    }
   });
 }
 

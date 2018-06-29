@@ -33,6 +33,8 @@ function populateAnalysisData(data) {
     row.current_step = item.current_step;
     row.total_step = item.total_step;
     row.percentage_step = item.percentage_step;
+    row.current_step_tag = item.current_step_tag;
+    row.form_closed = item.form_closed;
 
     addAnalysisElement(row)
   });

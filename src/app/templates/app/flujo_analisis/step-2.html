@@ -33,7 +33,7 @@
 
 
 <script id="scan_row" type="text/x-lodash-template">
-  <tr>
+  <tr data-index="<%= scan_index %>">
     <td>
       <%= slice_name %>
       <input type="hidden" name="scan[slice_id][<%= scan_index %>]" value="<%= slice_id %>" >
@@ -43,14 +43,14 @@
     </td>
     <td>
       <input type="checkbox" id="scan[start_scan][<%= scan_index %>]" class="switchery" />
-      <input type="hidden" name="scan[start_scan][<%= scan_index %>]" />
+      <input type="hidden" name="scan[start_scan][<%= scan_index %>]" value="<%= start_scan %>" />
     </td>
     <td>
       <input type="checkbox" id="scan[end_scan][<%= scan_index %>]" class="switchery" />
-      <input type="hidden" name="scan[end_scan][<%= scan_index %>]" />
+      <input type="hidden" name="scan[end_scan][<%= scan_index %>]" value="<%= end_scan %>" />
     </td>
     <td>
-      <input name="scan[store][<%= scan_index %>]" class="form-control">
+      <input name="scan[store][<%= scan_index %>]" value="<%= slice_store %>" class="form-control">
     </td>
   </tr>
 </script>
