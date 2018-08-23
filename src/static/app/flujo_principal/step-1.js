@@ -90,6 +90,23 @@ function init_step_1() {
     }
   });
 
+  $('#flow_divider').on("change", function(e) {
+    var no_fish = countNoFish();
+    var no_groups = $(this).val();
+    var groups = splitArrayByChunkSize(new Array(no_fish), no_groups);
+
+    $('#workgroup_preview').html("");
+
+    $.each(groups, function(i, element){
+      var group_size = element.length;
+      var templateData = {
+        'group_size_text' : group_size.toString()+" PECES"
+      }
+      addWorkGroupTemplate(templateData);
+    });
+
+  });
+
   $('#exam_select').on("select2:unselecting", function (e) {
     if (e.params.args.originalEvent) {
       e.params.args.originalEvent.stopPropagation();
@@ -188,6 +205,33 @@ function refreshNoFish() {
   $('[name*="analysis[no_fish]"]').each(function (i, element) {
     $(element).val(no_fish);
   });
+
+  $('#flow_divider').trigger('change');
+}
+
+function splitArrayByChunkSize(arr, n) {
+  var rest = arr.length % n,
+      restUsed = rest,
+      partLength = Math.floor(arr.length / n),
+      result = [];
+
+  for(var i = 0; i < arr.length; i += partLength) {
+      var end = partLength + i,
+          add = false;
+
+      if(rest !== 0 && restUsed) {
+          end++;
+          restUsed--;
+          add = true;
+      }
+
+      result.push(arr.slice(i, end));
+
+      if(add) {
+          i++;
+      }
+  }
+  return result;
 }
 
 // Template management
@@ -219,6 +263,13 @@ function addQuestionReceptionTemplate(data) {
   $("#question_reception").append(templateHTML);
 }
 
+function addWorkGroupTemplate(data){
+  var groupTemplate = document.getElementById("flowgroup_template").innerHTML;
+  var templateFn = _.template(groupTemplate);
+  var templateHTML = templateFn(data);
+
+  $("#workgroup_preview").append(templateHTML);
+}
 // Initial Data and Config
 
 function initialConf() {
