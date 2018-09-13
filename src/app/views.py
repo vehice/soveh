@@ -47,11 +47,11 @@ def show_ingresos(request):
     up = UserProfile.objects.filter(user=request.user).first()
 
     if up.user.is_staff:
-        form = Form.objects.filter(content_type__model='entryform')
+        form = Form.objects.filter(content_type__model='entryform').order_by('-id')
     else:
         form = Form.objects.filter(
             content_type__model='entryform',
-            state__step__actors__profile=up.profile)
+            state__step__actors__profile=up.profile).order_by('-id')
 
     return render(request, 'app/ingresos.html', {'entryForm_list': form})
 
@@ -74,6 +74,9 @@ def show_ingresos_by_id(request, form_id):
 def new_ingreso(request):
     flow = Flow.objects.get(pk=1)
     entryform = EntryForm.objects.create()
+    no_caso = "V0{0}".format(entryform.pk)
+    entryform.no_caso = no_caso
+    entryform.save()
     form = Form.objects.create(
         content_object=entryform, flow=flow, state=flow.step_set.first().state)
 

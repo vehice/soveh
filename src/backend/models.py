@@ -130,10 +130,12 @@ class EntryForm(models.Model):
         QuestionReceptionCondition, through='AnswerReceptionCondition')
     observation = models.TextField(null=True, blank=True)
     no_order = models.CharField(max_length=250, null=True, blank=True)
+    no_caso = models.CharField(max_length=250, null=True, blank=True)
     center = models.CharField(max_length=250, null=True, blank=True)
     created_at = models.DateTimeField(null=True, blank=True)
     sampled_at = models.DateTimeField(null=True, blank=True)
     forms = GenericRelation(Form)
+    flag_subflow = models.BooleanField(default=False)
 
     def __str__(self):
         return str(self.pk)
@@ -142,6 +144,18 @@ class EntryForm(models.Model):
     def form(self):
         return self.form.get()
 
+    @property
+    def get_subflow(self):
+        subflows = EntryForm.objects.filter(no_caso=self.no_caso).order_by('id')
+        if subflows.count() > 1:
+            for i in range(len(subflows)):
+                if subflows[i].pk == self.pk:
+                    try:
+                        return self.no_caso + "-" + str(i+1)
+                    except:
+                        return "SIN NO_CASO"
+        else:
+            return "N/A"
 
 class Identification(models.Model):
     entryform = models.ForeignKey(

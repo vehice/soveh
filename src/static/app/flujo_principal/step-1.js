@@ -90,21 +90,26 @@ function init_step_1() {
     }
   });
 
-  $('#flow_divider').on("change", function(e) {
-    var no_fish = countNoFish();
-    var no_groups = $(this).val();
-    var groups = splitArrayByChunkSize(new Array(no_fish), no_groups);
+  $('#select_if_divide_flow').on("change", function(e) {
+    var if_split = $(this).val();
+    $('#flow_divider_options').html("");
 
-    $('#workgroup_preview').html("");
-
-    $.each(groups, function(i, element){
-      var group_size = element.length;
-      var templateData = {
-        'group_size_text' : group_size.toString()+" PECES"
+    if (if_split == "1"){
+      if ( countNoFish() > 0 ){
+        addFlowDividerTemplate();
+        $('[name="identification[no_fish]"]').each(function (i, element) {
+          var no_fish = parseInt($(element).val()) || 0;
+          var templateData = {
+            'group_size_text' : no_fish.toString()+" PECES",
+            'group_count': (i+1).toString()
+          };
+          addWorkGroupTemplate(templateData);
+        });
+      } else {
+        toastr.error('Es necesario completar la identificación de peces para poder subdividir el flujo de trabajo.', 'Aviso');
+        $(this).find('option[value="0"]').prop('selected', true);
       }
-      addWorkGroupTemplate(templateData);
-    });
-
+    }
   });
 
   $('#exam_select').on("select2:unselecting", function (e) {
@@ -206,7 +211,7 @@ function refreshNoFish() {
     $(element).val(no_fish);
   });
 
-  $('#flow_divider').trigger('change');
+  // $('#flow_divider').trigger('change');
 }
 
 function splitArrayByChunkSize(arr, n) {
@@ -268,7 +273,15 @@ function addWorkGroupTemplate(data){
   var templateFn = _.template(groupTemplate);
   var templateHTML = templateFn(data);
 
-  $("#workgroup_preview").append(templateHTML);
+  $("#flowdivider_by_identification").append(templateHTML);
+}
+
+function addFlowDividerTemplate(){
+  var dividerTemplate = document.getElementById("flowdivider_options_template").innerHTML;
+  var templateFn = _.template(dividerTemplate);
+  var templateHTML = templateFn();
+
+  $("#flow_divider_options").append(templateHTML);
 }
 // Initial Data and Config
 

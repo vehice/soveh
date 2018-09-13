@@ -23,7 +23,7 @@
     <div class="float-md-right">
       <div class="dropdown dropleft">
           <button type="button" class="btn btn-info btn-lg btn-block dropdown-toggle" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-            Nuevo Ingreso
+            Nuevo Caso
           </button>
           <div class="dropdown-menu dropdown-menu-left" aria-labelledby="dropdownMenuButton">
             <a href="/ingresos/new" class="dropdown-item">
@@ -52,35 +52,26 @@
           <table class="table table-striped table-bordered zero-configuration">
             <thead>
               <tr>
-                <th>Subflujo</th>
-                <th>Nro Ingreso</th>
+                <th>Id</th>
+                <th>Nro Caso</th>
+                <th>Subflujos</th>
                 <th>Cliente</th>
-                <th>Paso</th>
+                <th>Fecha Inicio</th>
+                <th>Progreso</th>
               </tr>
             </thead>
             <tbody>
               {% for entryForm in entryForm_list %}
-                {% if forloop.first %}
                   <tr>
-                    <td class="details-control">
-                      <center>
-                        <button type="button" class="btn btn-success btn-sm">
-                          <i class="ft-plus"></i>
-                        </button>
-                      </center>
+                    <td>{{ entryForm.content_object.id }}</td>
+                    <td><strong>{{ entryForm.content_object.no_caso }}</strong></td>
+                    <td>
+                      {{ entryForm.content_object.get_subflow }}
                     </td>
-                    <td>{{ entryForm.content_object.id }}</td>
                     <td>{{ entryForm.content_object.customer }}</td>
-                    <td>--</td>
-                  </tr>
-                {% else %}
-                  <tr>
-                    <td></td>
-                    <td>{{ entryForm.content_object.id }}</td>
-                    <td>{{ entryForm.content_object.customer }}</td>
+                    <td>{{ entryForm.content_object.created_at|date:"d/m/Y" }}</td>
                     <td><a href="workflow/{{ entryForm.id }}/{{ entryForm.state.step.tag }}">{{ entryForm.state.step }}</a></td>
                   </tr>
-                {% endif %}
               {% endfor %}
             </tbody>
           </table>
@@ -94,7 +85,7 @@
 <script type="text/javascript">
 
   function format ( d ) {
-    console.log(d);
+    // console.log(d);
 // `d` is the original data object for the row
     return ' <table width="100%" class="table table-xs table-borderless" style="margin: 0% !important;">'+
         '<tr class="bg-teal bg-lighten-5">'+
@@ -117,13 +108,13 @@
       language: {
         url: "https://cdn.datatables.net/plug-ins/1.10.16/i18n/Spanish.json"
       },
-      "order": [[1, 'asc']]
+      "order": [[0, 'desc']]
     });
 
     $('.zero-configuration tbody').on('click', 'td.details-control', function () {
         var tr = $(this).closest('tr');
         var row = tableChildRows.row( tr );
-        console.log(row);
+        // console.log(row);
 
         if ( row.child.isShown() ) {
           row.child.hide();
