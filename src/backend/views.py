@@ -76,6 +76,8 @@ class ENTRYFORM(View):
         if id:
             entryform = EntryForm.objects.values().get(pk=id)
             entryform_object = EntryForm.objects.get(pk=id)
+            cacuca = entryform_object.get_subflow
+            entryform["subflow"] = cacuca
             identifications = list(
                 Identification.objects.filter(
                     entryform=entryform['id']).values())
@@ -504,147 +506,309 @@ def step_1_entryform(request):
 
     # Check if user wants split flow
     if strtobool(var_post.get('select_if_divide_flow')):
+        if var_post.get('flow_divide_option') == "1":
+            identification_cage = var_post.getlist("identification[cage]")
+            identification_group = var_post.getlist("identification[group]")
+            identification_no_container = var_post.getlist(
+                "identification[no_container]")
+            identification_no_fish = var_post.getlist("identification[no_fish]")
 
-        identification_cage = var_post.getlist("identification[cage]")
-        identification_group = var_post.getlist("identification[group]")
-        identification_no_container = var_post.getlist(
-            "identification[no_container]")
-        identification_no_fish = var_post.getlist("identification[no_fish]")
+            zip_identification = list(zip(identification_cage, identification_group,
+                                    identification_no_container,
+                                    identification_no_fish))
 
-        zip_identification = list(zip(identification_cage, identification_group,
-                                identification_no_container,
-                                identification_no_fish))
-
-        for i in range(len(zip_identification)):
-            # First identification is first subflow and it had some data saved before.
-            # Next iterations need to create an entire EntryForm based in the first one.
-            if i == 0:
-                entryform.identification_set.all().delete()
-                identificacion = Identification.objects.create(
-                    entryform_id=entryform.id,
-                    cage=zip_identification[i][0],
-                    group=zip_identification[i][1],
-                    no_container=zip_identification[i][2],
-                    no_fish=zip_identification[i][3],
-                )
-
-                analysis_id = [
-                    v for k, v in var_post.items() if k.startswith("analysis[id]")
-                ]
-                analysis_no_fish = [
-                    v for k, v in var_post.items() if k.startswith("analysis[no_fish]")
-                ]
-                analysis_organ = [
-                    var_post.getlist(k) for k, v in var_post.items()
-                    if k.startswith("analysis[organ]")
-                ]
-
-                zip_analysis = zip(analysis_id, analysis_no_fish, analysis_organ)
-
-                analyses_qs = entryform.analysisform_set.all()
-
-                for analysis in analyses_qs:
-                    analysis.forms.get().delete()
-
-                analyses_qs.delete()
-
-                flow = Flow.objects.get(pk=2)
-
-                for values in zip_analysis:
-                    analysis = AnalysisForm.objects.create(
+            for i in range(len(zip_identification)):
+                # First identification is first subflow and it had some data saved before.
+                # Next iterations need to create an entire EntryForm based in the first one.
+                if i == 0:
+                    entryform.identification_set.all().delete()
+                    identificacion = Identification.objects.create(
                         entryform_id=entryform.id,
-                        exam_id=values[0],
+                        cage=zip_identification[i][0],
+                        group=zip_identification[i][1],
+                        no_container=zip_identification[i][2],
                         no_fish=zip_identification[i][3],
                     )
 
-                    analysis.organs.set(values[2])
+                    analysis_id = [
+                        v for k, v in var_post.items() if k.startswith("analysis[id]")
+                    ]
+                    analysis_no_fish = [
+                        v for k, v in var_post.items() if k.startswith("analysis[no_fish]")
+                    ]
+                    analysis_organ = [
+                        var_post.getlist(k) for k, v in var_post.items()
+                        if k.startswith("analysis[organ]")
+                    ]
 
-                    Form.objects.create(
-                        content_object=analysis,
-                        flow=flow,
-                        state=flow.step_set.all()[0].state,
-                        parent_id=entryform.forms.first().id)
+                    zip_analysis = zip(analysis_id, analysis_no_fish, analysis_organ)
 
-            else:
-                flow_aux = Flow.objects.get(pk=1)
-                entryform_aux = EntryForm.objects.create()
-                form_aux = Form.objects.create(
-                    content_object=entryform_aux, flow=flow_aux, state=flow_aux.step_set.all()[1:2].first().state)
-                entryform_aux.specie_id = var_post.get('specie')
-                entryform_aux.watersource_id = var_post.get('watersource')
-                entryform_aux.fixative_id = var_post.get('fixative')
-                entryform_aux.larvalstage_id = var_post.get('larvalstage')
-                entryform_aux.observation = var_post.get('observation')
-                entryform_aux.customer_id = var_post.get('customer')
-                entryform_aux.no_order = var_post.get('no_order')
-                entryform_aux.created_at = var_post.get('created_at_submit')
-                entryform_aux.sampled_at = var_post.get('sampled_at_submit')
-                entryform_aux.center = var_post.get('center')
-                entryform_aux.no_caso = entryform.no_caso
+                    analyses_qs = entryform.analysisform_set.all()
 
-                entryform_aux.save()
+                    for analysis in analyses_qs:
+                        analysis.forms.get().delete()
 
-                questions_id = [
-                    v for k, v in var_post.items() if k.startswith("question['id']")
-                ]
-                answers = [
-                    v for k, v in var_post.items() if k.startswith("question['answer']")
-                ]
-                zip_question = zip(questions_id, answers)
+                    analyses_qs.delete()
 
-                entryform_aux.answerreceptioncondition_set.all().delete()
-                for values in zip_question:
-                    answerquestion = AnswerReceptionCondition.objects.create(
+                    flow = Flow.objects.get(pk=2)
+
+                    for values in zip_analysis:
+                        analysis = AnalysisForm.objects.create(
+                            entryform_id=entryform.id,
+                            exam_id=values[0],
+                            no_fish=zip_identification[i][3],
+                        )
+
+                        analysis.organs.set(values[2])
+
+                        Form.objects.create(
+                            content_object=analysis,
+                            flow=flow,
+                            state=flow.step_set.all()[0].state,
+                            parent_id=entryform.forms.first().id)
+
+                else:
+                    flow_aux = Flow.objects.get(pk=1)
+                    entryform_aux = EntryForm.objects.create()
+                    form_aux = Form.objects.create(
+                        content_object=entryform_aux, flow=flow_aux, state=flow_aux.step_set.all()[1:2].first().state)
+                    entryform_aux.specie_id = var_post.get('specie')
+                    entryform_aux.watersource_id = var_post.get('watersource')
+                    entryform_aux.fixative_id = var_post.get('fixative')
+                    entryform_aux.larvalstage_id = var_post.get('larvalstage')
+                    entryform_aux.observation = var_post.get('observation')
+                    entryform_aux.customer_id = var_post.get('customer')
+                    entryform_aux.no_order = var_post.get('no_order')
+                    entryform_aux.created_at = var_post.get('created_at_submit')
+                    entryform_aux.sampled_at = var_post.get('sampled_at_submit')
+                    entryform_aux.center = var_post.get('center')
+                    entryform_aux.no_caso = entryform.no_caso
+
+                    entryform_aux.save()
+
+                    questions_id = [
+                        v for k, v in var_post.items() if k.startswith("question['id']")
+                    ]
+                    answers = [
+                        v for k, v in var_post.items() if k.startswith("question['answer']")
+                    ]
+                    zip_question = zip(questions_id, answers)
+
+                    entryform_aux.answerreceptioncondition_set.all().delete()
+                    for values in zip_question:
+                        answerquestion = AnswerReceptionCondition.objects.create(
+                            entryform_id=entryform_aux.id,
+                            question_id=values[0],
+                            answer=values[1],
+                        )
+
+                    entryform_aux.identification_set.all().delete()
+                    identificacion = Identification.objects.create(
                         entryform_id=entryform_aux.id,
-                        question_id=values[0],
-                        answer=values[1],
-                    )
-
-                entryform_aux.identification_set.all().delete()
-                identificacion = Identification.objects.create(
-                    entryform_id=entryform_aux.id,
-                    cage=zip_identification[i][0],
-                    group=zip_identification[i][1],
-                    no_container=zip_identification[i][2],
-                    no_fish=zip_identification[i][3],
-                )
-
-                analysis_id = [
-                    v for k, v in var_post.items() if k.startswith("analysis[id]")
-                ]
-                analysis_no_fish = [
-                    v for k, v in var_post.items() if k.startswith("analysis[no_fish]")
-                ]
-                analysis_organ = [
-                    var_post.getlist(k) for k, v in var_post.items()
-                    if k.startswith("analysis[organ]")
-                ]
-
-                zip_analysis = zip(analysis_id, analysis_no_fish, analysis_organ)
-
-                analyses_qs = entryform_aux.analysisform_set.all()
-
-                for analysis in analyses_qs:
-                    analysis.forms.get().delete()
-
-                analyses_qs.delete()
-
-                flow = Flow.objects.get(pk=2)
-
-                for values in zip_analysis:
-                    analysis = AnalysisForm.objects.create(
-                        entryform_id=entryform_aux.id,
-                        exam_id=values[0],
+                        cage=zip_identification[i][0],
+                        group=zip_identification[i][1],
+                        no_container=zip_identification[i][2],
                         no_fish=zip_identification[i][3],
                     )
 
-                    analysis.organs.set(values[2])
+                    analysis_id = [
+                        v for k, v in var_post.items() if k.startswith("analysis[id]")
+                    ]
+                    analysis_no_fish = [
+                        v for k, v in var_post.items() if k.startswith("analysis[no_fish]")
+                    ]
+                    analysis_organ = [
+                        var_post.getlist(k) for k, v in var_post.items()
+                        if k.startswith("analysis[organ]")
+                    ]
 
-                    Form.objects.create(
-                        content_object=analysis,
-                        flow=flow,
-                        state=flow.step_set.all()[0].state,
-                        parent_id=entryform_aux.forms.first().id)
+                    zip_analysis = zip(analysis_id, analysis_no_fish, analysis_organ)
+
+                    analyses_qs = entryform_aux.analysisform_set.all()
+
+                    for analysis in analyses_qs:
+                        analysis.forms.get().delete()
+
+                    analyses_qs.delete()
+
+                    flow = Flow.objects.get(pk=2)
+
+                    for values in zip_analysis:
+                        analysis = AnalysisForm.objects.create(
+                            entryform_id=entryform_aux.id,
+                            exam_id=values[0],
+                            no_fish=zip_identification[i][3],
+                        )
+
+                        analysis.organs.set(values[2])
+
+                        Form.objects.create(
+                            content_object=analysis,
+                            flow=flow,
+                            state=flow.step_set.all()[0].state,
+                            parent_id=entryform_aux.forms.first().id)
+
+        elif var_post.get('flow_divide_option') == "2":
+            identification_id = var_post.getlist("identification[id]")
+            identification_cage = var_post.getlist("identification[cage]")
+            identification_group = var_post.getlist("identification[group]")
+            identification_no_container = var_post.getlist("identification[no_container]")
+            identification_no_fish = var_post.getlist("identification[no_fish]")
+
+            zip_identification = list(zip(identification_cage, 
+                                    identification_group,
+                                    identification_no_container,
+                                    identification_no_fish,
+                                    identification_id))
+            subflow_groups = [
+                var_post.getlist(k) for k, v in var_post.items()
+                if k.startswith("subflow_select[group]")
+            ]
+
+            # print (subflow_groups)
+            # print (zip_identification)
+            for i in range(len(subflow_groups)):
+                if i == 0:
+                    total_no_fish = 0
+                    entryform.identification_set.all().delete()
+                    for j in range(len(zip_identification)):
+                        new_no_fish = 0
+                        for item in subflow_groups[i]:
+                            if item.split("_")[0] == zip_identification[j][4]:
+                                new_no_fish += 1
+                        identificacion = Identification.objects.create(
+                            entryform_id=entryform.id,
+                            cage=zip_identification[j][0],
+                            group=zip_identification[j][1],
+                            no_container=zip_identification[j][2],
+                            no_fish=new_no_fish,
+                        )
+                        total_no_fish += new_no_fish
+
+                    analysis_id = [
+                        v for k, v in var_post.items() if k.startswith("analysis[id]")
+                    ]
+                    analysis_no_fish = [
+                        v for k, v in var_post.items() if k.startswith("analysis[no_fish]")
+                    ]
+                    analysis_organ = [
+                        var_post.getlist(k) for k, v in var_post.items()
+                        if k.startswith("analysis[organ]")
+                    ]
+
+                    zip_analysis = zip(analysis_id, analysis_no_fish, analysis_organ)
+
+                    analyses_qs = entryform.analysisform_set.all()
+
+                    for analysis in analyses_qs:
+                        analysis.forms.get().delete()
+
+                    analyses_qs.delete()
+
+                    flow = Flow.objects.get(pk=2)
+
+                    for values in zip_analysis:
+                        analysis = AnalysisForm.objects.create(
+                            entryform_id=entryform.id,
+                            exam_id=values[0],
+                            no_fish=total_no_fish,
+                        )
+
+                        analysis.organs.set(values[2])
+
+                        Form.objects.create(
+                            content_object=analysis,
+                            flow=flow,
+                            state=flow.step_set.all()[0].state,
+                            parent_id=entryform.forms.first().id)
+
+                else:
+                    flow_aux = Flow.objects.get(pk=1)
+                    entryform_aux = EntryForm.objects.create()
+                    form_aux = Form.objects.create(
+                        content_object=entryform_aux, flow=flow_aux, state=flow_aux.step_set.all()[1:2].first().state)
+                    entryform_aux.specie_id = var_post.get('specie')
+                    entryform_aux.watersource_id = var_post.get('watersource')
+                    entryform_aux.fixative_id = var_post.get('fixative')
+                    entryform_aux.larvalstage_id = var_post.get('larvalstage')
+                    entryform_aux.observation = var_post.get('observation')
+                    entryform_aux.customer_id = var_post.get('customer')
+                    entryform_aux.no_order = var_post.get('no_order')
+                    entryform_aux.created_at = var_post.get('created_at_submit')
+                    entryform_aux.sampled_at = var_post.get('sampled_at_submit')
+                    entryform_aux.center = var_post.get('center')
+                    entryform_aux.no_caso = entryform.no_caso
+
+                    entryform_aux.save()
+
+                    questions_id = [
+                        v for k, v in var_post.items() if k.startswith("question['id']")
+                    ]
+                    answers = [
+                        v for k, v in var_post.items() if k.startswith("question['answer']")
+                    ]
+                    zip_question = zip(questions_id, answers)
+
+                    entryform_aux.answerreceptioncondition_set.all().delete()
+                    for values in zip_question:
+                        answerquestion = AnswerReceptionCondition.objects.create(
+                            entryform_id=entryform_aux.id,
+                            question_id=values[0],
+                            answer=values[1],
+                        )
+
+                    entryform_aux.identification_set.all().delete()
+                    total_no_fish = 0
+                    for j in range(len(zip_identification)):
+                        new_no_fish = 0
+                        for item in subflow_groups[i]:
+                            if item.split("_")[0] == zip_identification[j][4]:
+                                new_no_fish += 1
+                        identificacion = Identification.objects.create(
+                            entryform_id=entryform_aux.id,
+                            cage=zip_identification[j][0],
+                            group=zip_identification[j][1],
+                            no_container=zip_identification[j][2],
+                            no_fish=new_no_fish,
+                        )
+                        total_no_fish += new_no_fish
+
+                    analysis_id = [
+                        v for k, v in var_post.items() if k.startswith("analysis[id]")
+                    ]
+                    analysis_no_fish = [
+                        v for k, v in var_post.items() if k.startswith("analysis[no_fish]")
+                    ]
+                    analysis_organ = [
+                        var_post.getlist(k) for k, v in var_post.items()
+                        if k.startswith("analysis[organ]")
+                    ]
+
+                    zip_analysis = zip(analysis_id, analysis_no_fish, analysis_organ)
+
+                    analyses_qs = entryform_aux.analysisform_set.all()
+
+                    for analysis in analyses_qs:
+                        analysis.forms.get().delete()
+
+                    analyses_qs.delete()
+
+                    flow = Flow.objects.get(pk=2)
+
+                    for values in zip_analysis:
+                        analysis = AnalysisForm.objects.create(
+                            entryform_id=entryform_aux.id,
+                            exam_id=values[0],
+                            no_fish=total_no_fish,
+                        )
+
+                        analysis.organs.set(values[2])
+
+                        Form.objects.create(
+                            content_object=analysis,
+                            flow=flow,
+                            state=flow.step_set.all()[0].state,
+                            parent_id=entryform_aux.forms.first().id)
 
     else:
         identification_cage = var_post.getlist("identification[cage]")

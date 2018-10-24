@@ -41,11 +41,13 @@ function init_step_1() {
   });
 
   $('#identification_group').on("click", "#add_identification", function (e) {
-    addIdentificationTemplate();
-  })
+    addIdentificationTemplate({
+      temp_id : Math.random().toString(36).replace('0.', '')
+    });
+  });
 
   $('#identification_group').on("click", "#delete_identification", function (e) {
-    $(this).closest("#identification").remove();
+    $(this).closest(".identification").remove();
     refreshNoFish();
   })
 
@@ -90,6 +92,54 @@ function init_step_1() {
     }
   });
 
+  $(document).on('click', '#FlowDividerOptions a', function (e) {
+    if (e.target.id === 'base_flowdivider_by_identification') {
+      $('#flow_divide_option').val(1);
+      $('[name="identification[no_fish]"]').each(function (i, element) {
+        var no_fish = parseInt($(element).val()) || 0;
+        var templateData = {
+          'group_size_text' : no_fish.toString()+" PECES",
+          'group_count': (i+1).toString()
+        };
+        addWorkGroupTemplateByIdentity(templateData);
+      });
+    } else {
+      $('#flow_divide_option').val(2);
+      var group_data = getManualGroupsData();
+      $.each(group_data, function(i, item){
+        var aux = {
+          "group_fishes" : item,
+          "group_nro" : i+1
+        };
+        addWorkGroupTemplateByManual(aux);
+      });
+
+      $('.fishSelection').select2({
+        'placeholder': "Por favor selecciona los peces"
+      });
+
+      $('.fishSelection').on('select2:select', function (e) {
+        var id = e.params.data.id;
+        $(".fishSelection > option[value='"+id+"']").each(function (i, element) {
+          $(element).prop("disabled", true);
+        });
+        $('.fishSelection').select2({
+          'placeholder': "Por favor selecciona los peces"
+        });
+      });
+
+      $('.fishSelection').on('select2:unselect', function (e) {
+        var id = e.params.data.id;
+        $(".fishSelection > option[value='"+id+"']").each(function (i, element) {
+          $(element).prop("disabled", false);
+        });
+        $('.fishSelection').select2({
+          'placeholder': "Por favor selecciona los peces"
+        });
+      });
+    }
+  });
+  
   $('#select_if_divide_flow').on("change", function(e) {
     var if_split = $(this).val();
     $('#flow_divider_options').html("");
@@ -97,19 +147,47 @@ function init_step_1() {
     if (if_split == "1"){
       if ( countNoFish() > 0 ){
         addFlowDividerTemplate();
-        $('[name="identification[no_fish]"]').each(function (i, element) {
-          var no_fish = parseInt($(element).val()) || 0;
-          var templateData = {
-            'group_size_text' : no_fish.toString()+" PECES",
-            'group_count': (i+1).toString()
-          };
-          addWorkGroupTemplate(templateData);
-        });
+        $('#FlowDividerOptions li:first-child a').trigger('click');
       } else {
         toastr.error('Es necesario completar la identificación de peces para poder subdividir el flujo de trabajo.', 'Aviso');
         $(this).find('option[value="0"]').prop('selected', true);
       }
     }
+  });
+
+  $(document).on('change', '#flowdivider_manual_group_quantity', function(e){
+    var group_data = getManualGroupsData();
+    $.each(group_data, function(i, item){
+      var aux = {
+        "group_fishes" : item,
+        "group_nro" : i+1
+      };
+      addWorkGroupTemplateByManual(aux);
+    });
+
+    $('.fishSelection').select2({
+      'placeholder': "Por favor selecciona los peces"
+    });
+
+    $('.fishSelection').on('select2:select', function (e) {
+      var id = e.params.data.id;
+      $(".fishSelection > option[value='"+id+"']").each(function (i, element) {
+        $(element).prop("disabled", true);
+      });
+      $('.fishSelection').select2({
+        'placeholder': "Por favor selecciona los peces"
+      });
+    });
+
+    $('.fishSelection').on('select2:unselect', function (e) {
+      var id = e.params.data.id;
+      $(".fishSelection > option[value='"+id+"']").each(function (i, element) {
+        $(element).prop("disabled", false);
+      });
+      $('.fishSelection').select2({
+        'placeholder': "Por favor selecciona los peces"
+      });
+    });
   });
 
   $('#exam_select').on("select2:unselecting", function (e) {
@@ -120,6 +198,31 @@ function init_step_1() {
     var unselected_value = e.params.args.data.id;
     $('#exam_group').find('[data-id="' + unselected_value + '"]').remove();
   });
+
+  function getManualGroupsData() {
+    var group_quantity = parseInt(parseFloat($('#flowdivider_manual_group_quantity').val()));
+    var group_data = [];
+    for (var i = 1; i <= group_quantity; i++) {
+      var select = [];
+      $('[name="identification[no_fish]"]').each(function (i, element) {
+        var no_fish = parseInt($(element).val()) || 0;
+        var identification_id = $(element).closest('.identification').get(0).id;
+        var cage = $(element).closest('.identification').find('[name="identification[cage]"]').val();
+        var group = $(element).closest('.identification').find('[name="identification[group]"]').val();
+        // console.log(identification_id);
+        for (var j = 1; j <= no_fish; j++) {
+          select.push({
+            'identification_id' : identification_id,
+            'fish_num' : j,
+            'cage': cage,
+            'group': group
+          });
+        }
+      });
+      group_data.push(select);
+    }
+    return group_data;
+  }
 
   function loadData() {
     var entryform_id = $('#entryform_id').val();
@@ -252,10 +355,11 @@ function addAnalysisTemplate(data) {
 
 }
 
-function addIdentificationTemplate() {
+function addIdentificationTemplate(data) {
   var identificationTemplate = document.getElementById("identification_template").innerHTML;
 
-  var templateHTML = _.template(identificationTemplate)();
+  var templateFn = _.template(identificationTemplate);
+  var templateHTML = templateFn(data);
 
   $("#identification_group").append(templateHTML);
 }
@@ -268,12 +372,20 @@ function addQuestionReceptionTemplate(data) {
   $("#question_reception").append(templateHTML);
 }
 
-function addWorkGroupTemplate(data){
+function addWorkGroupTemplateByIdentity(data){
   var groupTemplate = document.getElementById("flowgroup_template").innerHTML;
   var templateFn = _.template(groupTemplate);
   var templateHTML = templateFn(data);
 
   $("#flowdivider_by_identification").append(templateHTML);
+}
+
+function addWorkGroupTemplateByManual(data) {
+  var groupTemplate = document.getElementById("group_content_manual_template").innerHTML;
+  var templateFn = _.template(groupTemplate);
+  var templateHTML = templateFn(data);
+
+  $("#flowdivider_manual_groups").append(templateHTML);
 }
 
 function addFlowDividerTemplate(){
@@ -286,17 +398,21 @@ function addFlowDividerTemplate(){
 // Initial Data and Config
 
 function initialConf() {
-  addIdentificationTemplate();
+  addIdentificationTemplate({
+    temp_id : Math.random().toString(36).replace('0.', '')
+  });
 
   $("#order_number").hide();
   $("#center").hide();
 
   $('#datetime_created_at').datetimepicker({
     locale: 'es',
+    keepOpen: false
   });
 
   $('#datetime_sampled_at').datetimepicker({
     locale: 'es',
+    keepOpen: false
   });
 
   $('#datetime_created_at').on("dp.change", function (e) {

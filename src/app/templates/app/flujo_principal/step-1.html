@@ -164,6 +164,7 @@
             <option value="1">Sí</option>
         </select>
       </div>
+      <input type="hidden" value="0" name="flow_divide_option" id="flow_divide_option"/>
       <div class="col-md-12" id="flow_divider_options"></div>
     </div>
   </div>
@@ -204,7 +205,8 @@
 </script>
 
 <script id="identification_template" type="text/x-lodash-template">
-<div class="row" id="identification">
+<div class="row identification" id="<%= temp_id %>">
+  <input type="hidden" value="<%= temp_id %>" name="identification[id]">
   <div class="col-md-3">
     <div class="form-group">
       <label for="cage">Estanque/Jaula</label>
@@ -265,11 +267,22 @@
   <div class="badge badge-pill badge-success p-2 m-1"><strong>PARTE <%= group_count %>: <%= group_size_text %></strong></div>
 </script>
 
+<script id="group_content_manual_template" type="text/x-lodash-template">
+  <div class="col-md-12 pt-1 pb-1">
+    <label>Peces grupo <%= group_nro %></label>
+    <select class="select2 form-control fishSelection" name="subflow_select[group][<%= group_nro %>]" multiple="multiple">
+      <% _.each(group_fishes, function (fish) { %>
+        <option value="<%= fish.identification_id %>_<%= fish.fish_num %>"><%= fish.cage %>_<%= fish.group %>_P<%= fish.fish_num %> </option>
+      <% }); %>
+    </select>
+  </div>
+</script>
+
 <script id="flowdivider_options_template" type="text/x-lodash-template">
-  <ul class="nav nav-tabs nav-top-border no-hover-bg">
+  <ul class="nav nav-tabs nav-top-border no-hover-bg" id="FlowDividerOptions">
     <li class="nav-item">
-      <a class="nav-link active" id="base_flowdivider_by_identification" data-toggle="tab" aria-controls="flowdivider_by_identification" href="#flowdivider_by_identification" aria-expanded="true">
-        Subdividir por jaulas
+      <a class="nav-link" id="base_flowdivider_by_identification" data-toggle="tab" aria-controls="flowdivider_by_identification" href="#flowdivider_by_identification" aria-expanded="true">
+        Subdividir por estanque/jaula
       </a>
     </li>
     <li class="nav-item">
@@ -279,9 +292,19 @@
     </li>
   </ul>
   <div class="tab-content px-1 pt-1">
-    <div role="tabpanel" class="tab-pane active" id="flowdivider_by_identification" aria-expanded="true" aria-labelledby="base_flowdivider_by_identification">
+    <div role="tabpanel" class="tab-pane" id="flowdivider_by_identification" aria-labelledby="base_flowdivider_by_identification">
     </div>
-    <div class="tab-pane" id="flowdivider_by_manual" aria-labelledby="base_flowdivider_by_manual">
+    <div role="tabpanel" class="tab-pane" id="flowdivider_by_manual" aria-labelledby="base_flowdivider_by_manual">
+      <div class="row">
+        <div class="col-sm-3 text-right pt-1">
+          <label for="flowdivider_manual_group_quantity" class="control-label"><h5>¿Cuántos grupos desea realizar?</h5></label>
+        </div>
+        <div class="col-sm-2">
+          <input id="flowdivider_manual_group_quantity" name="flowdivider_manual_group_quantity" class="form-control" type="number" min="2" value="2" />
+        </div>
+      </div>
+      <div class="col-md-12" id="flowdivider_manual_groups">
+      </div>
     </div>
   </div>
 </script>

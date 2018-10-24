@@ -10,17 +10,18 @@ class Profile(models.Model):
 
 
 class UserProfile(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    user = models.OneToOneField(User, on_delete=models.CASCADE, verbose_name="Usuario")
     role = models.CharField(max_length=250, null=True, blank=True)
     rut = models.CharField(max_length=250, null=True, blank=True)
-    phone = models.CharField(max_length=250, null=True, blank=True)
+    phone = models.CharField(max_length=250, null=True, blank=True, verbose_name="Teléfono")
     state = models.IntegerField(default=1, null=True, blank=True)
-    signature = models.FileField(upload_to='signatures', blank=True, null=True)
+    signature = models.FileField(upload_to='signatures', blank=True, null=True, verbose_name="Firma Digital")
     confirmation_code = models.CharField(max_length=250, null=True, blank=True)
-    profile = models.ForeignKey(Profile, null=True, on_delete=models.SET_NULL)
+    profile = models.ForeignKey(Profile, null=True, on_delete=models.SET_NULL, verbose_name="Rol")
 
     def __str__(self):
-        return self.user.username
+        return self.profile.name
 
     class Meta:
-        default_permissions = ()
+        verbose_name = "Perfil de Usuario"
+        verbose_name_plural = "Perfiles de Usuario"

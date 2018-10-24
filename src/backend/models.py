@@ -25,50 +25,66 @@ class LarvalStage(models.Model):
 
 
 class Fixative(models.Model):
-    name = models.CharField(max_length=250, null=True, blank=True)
+    name = models.CharField(max_length=250, null=True, blank=True, verbose_name="Nombre")
 
     def __str__(self):
         return self.name
 
+    class Meta:
+        verbose_name = "Fijador"
+        verbose_name_plural = "Fijadores"
 
 class Exam(models.Model):
-    name = models.CharField(max_length=250, null=True, blank=True)
-    stain = models.CharField(max_length=250, null=True, blank=True)
+    name = models.CharField(max_length=250, null=True, blank=True, verbose_name="Nombre")
+    stain = models.CharField(max_length=250, null=True, blank=True, verbose_name="Tinción")
 
     def __str__(self):
         return self.name
 
+    class Meta:
+        verbose_name = "Exámen"
+        verbose_name_plural = "Exámenes"
 
 class Organ(models.Model):
-    name = models.CharField(max_length=250, null=True, blank=True)
+    name = models.CharField(max_length=250, null=True, blank=True, verbose_name="Nombre")
 
     def __str__(self):
         return self.name
+
+    class Meta:
+        verbose_name = "Órgano"
+        verbose_name_plural = "Órganos"
 
 
 class OrganLocation(models.Model):
     name = models.CharField(max_length=250, null=True, blank=True)
-    organs = models.ManyToManyField(Organ)
+    organs = models.ManyToManyField(Organ, verbose_name="Órganos")
 
     def __str__(self):
         return self.name
-
 
 class Pathology(models.Model):
-    name = models.CharField(max_length=250, null=True, blank=True)
-    organs = models.ManyToManyField(Organ)
+    name = models.CharField(max_length=250, null=True, blank=True, verbose_name="Patología")
+    organs = models.ManyToManyField(Organ, verbose_name="Órganos")
 
     def __str__(self):
         return self.name
+
+    class Meta:
+        verbose_name = "Patología"
+        verbose_name_plural = "Patologías"
 
 
 class Diagnostic(models.Model):
     name = models.CharField(max_length=250, null=True, blank=True)
-    organs = models.ManyToManyField(Organ)
+    organs = models.ManyToManyField(Organ, verbose_name="Órganos")
 
     def __str__(self):
         return self.name
 
+    class Meta:
+        verbose_name = "Patología"
+        verbose_name_plural = "Patologías"
 
 class DiagnosticDistribution(models.Model):
     name = models.CharField(max_length=250, null=True, blank=True)
@@ -97,14 +113,18 @@ class QuestionReceptionCondition(models.Model):
 
 
 class Customer(models.Model):
-    TYPE_CUSTOMER = (('l', 'Laboratory'), ('s', 'Salmon Farming'))
-    name = models.CharField(max_length=250, null=True, blank=True)
-    company = models.CharField(max_length=250, null=True, blank=True)
+    TYPE_CUSTOMER = (('l', 'Laboratorio'), ('s', 'Salmonera'))
+    name = models.CharField(max_length=250, null=True, blank=True, verbose_name="Nombre")
+    company = models.CharField(max_length=250, null=True, blank=True, verbose_name="Compañía / Empresa")
     type_customer = models.CharField(
-        max_length=1, null=True, blank=True, choices=TYPE_CUSTOMER)
+        max_length=1, null=True, blank=True, choices=TYPE_CUSTOMER, verbose_name="Tipo de Cliente")
+
 
     def __str__(self):
         return self.name
+
+    class Meta:
+        verbose_name = "Cliente"
 
 
 class EntryForm(models.Model):
@@ -150,10 +170,7 @@ class EntryForm(models.Model):
         if subflows.count() > 1:
             for i in range(len(subflows)):
                 if subflows[i].pk == self.pk:
-                    try:
-                        return self.no_caso + "-" + str(i+1)
-                    except:
-                        return "SIN NO_CASO"
+                    return str(i+1)
         else:
             return "N/A"
 

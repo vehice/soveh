@@ -76,10 +76,14 @@ $("#workflow_form").steps({
         if (currentIndex > newIndex)
         {
           previous_step = true;
+          var disform = $("#step_" + newIndex + " :input").find(':disabled').prop('disabled', false);
           form_data = $("#step_" + newIndex + " :input").serialize();
+          disform.prop('disabled', true);
         } else {
           previous_step = false;
+          var disform = $("#step_" + currentIndex + " :input").find(':disabled').prop('disabled', false);
           form_data = $("#step_" + currentIndex + " :input").serialize();
+          disform.attr('disabled', true);
         }
 
         var url = Urls.workflow();
@@ -139,7 +143,11 @@ $("#workflow_form").steps({
     {
       event.preventDefault();
       var url = Urls.entryform();
-      var form_data = ($("form").serialize())
+      var disform = $("form").find(':disabled').prop('disabled', false);
+      var form_data = ($("form").serialize());
+      disform.prop('disabled', true);
+
+      console.log(form_data);
 
       $.ajax({
         type: "POST",
@@ -154,8 +162,6 @@ $("#workflow_form").steps({
       })
     }
 });
-
-$()
 
 $(window).on('load', function (e) {
   // If para cargar un paso en especifico

@@ -3,19 +3,26 @@ from .models import Specie, WaterSource, Fixative, Exam, Customer, LarvalStage, 
 QuestionReceptionCondition, EntryForm, AnswerReceptionCondition, Organ, Slice, \
 Diagnostic, DiagnosticDistribution, DiagnosticIntensity, Pathology, OrganLocation
 
-admin.site.register(Specie)
-admin.site.register(WaterSource)
+# admin.site.register(Customer)
+
+class CustomExam(admin.ModelAdmin):
+    list_display = ('name', 'stain')
+
+admin.site.register(Exam, CustomExam)
+
+class CustomCustomer(admin.ModelAdmin):
+    list_display = ('name', 'company', 'type_customer')
+
+admin.site.register(Customer, CustomCustomer)
+
 admin.site.register(Fixative)
-admin.site.register(Exam)
-admin.site.register(Customer)
-admin.site.register(LarvalStage)
-admin.site.register(QuestionReceptionCondition)
-admin.site.register(AnswerReceptionCondition)
-admin.site.register(EntryForm)
-admin.site.register(Slice)
+
 admin.site.register(Organ)
-admin.site.register(OrganLocation)
-admin.site.register(Diagnostic)
-admin.site.register(DiagnosticDistribution)
-admin.site.register(DiagnosticIntensity)
-admin.site.register(Pathology)
+
+class OrgansInline(admin.TabularInline):
+    model = Pathology.organs.through
+
+@admin.register(Pathology)
+class CustomPathology(admin.ModelAdmin):
+    inlines = (OrgansInline,)
+    exclude = ('organs',)

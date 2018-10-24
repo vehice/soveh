@@ -90,6 +90,7 @@ function loadCassetteTable(data) {
 }
 
 function populateCassetteTable(data, no_cassette) {
+  // console.log(data);
   var organs = data.organs;
   var cassette_index = 0;
 
@@ -99,14 +100,19 @@ function populateCassetteTable(data, no_cassette) {
     var identification_id = item.id;
 
     var array_index = _.range(1, no_fish + 1);
-    var id_muestra = data.entryform.no_caso + '-E_' + item.cage + '-G_' + item.group;
+    var id_muestra = data.entryform.no_caso + '-' + item.cage + '-' + item.group;
 
     $.each(array_index, function (i, item) {
       var row = {};
 
       row.identification_id = identification_id;
       row.sample_id = id_muestra;
-      row.cassette_name = data.entryform.no_caso + '-C' + item;
+      console.log(data.entryform);
+      if ( data.entryform.subflow != "N/A" ){
+        row.cassette_name = data.entryform.no_caso + '-' + data.entryform.subflow + '_C' + item;
+      } else {
+        row.cassette_name = data.entryform.no_caso + '_C' + item;
+      }
       row.cassette_organs = organs;
       row.cassette_index = cassette_index;
 
