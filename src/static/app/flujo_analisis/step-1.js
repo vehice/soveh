@@ -27,6 +27,15 @@ function init_step_1() {
   });
 }
 
+$(document).on('click', '.start_stain_all', function (e) {
+  $("input[type=checkbox][id^='stain[start_stain]']" ).trigger('click');
+});
+
+$(document).on('click', '.end_stain_all', function (e) {
+  $("input[type=checkbox][id^='stain[end_stain]']" ).trigger('click');
+});
+
+
 function loadStainTable(data) {
   if ($.fn.DataTable.isDataTable('#stain_table')) {
     $('#stain_table').DataTable().clear().destroy();

@@ -23,6 +23,22 @@ $(document).on('change', '#block_table :checkbox', function (e) {
   }
 })
 
+$(document).on('click', '.block_start_all', function (e) {
+  $("input[type=checkbox][id^='block_start_block']" ).trigger('click');
+});
+
+$(document).on('click', '.block_end_all', function (e) {
+  $("input[type=checkbox][id^='block_end_block']" ).trigger('click');
+});
+
+$(document).on('click', '.slice_start_all', function (e) {
+  $("input[type=checkbox][id^='block_start_slice']" ).trigger('click');
+});
+
+$(document).on('click', '.slice_end_all', function (e) {
+  $("input[type=checkbox][id^='block_end_slice']" ).trigger('click');
+});
+
 function loadBlockTable(data) {
   if ($.fn.DataTable.isDataTable('#block_table')) {
     $('#block_table').DataTable().clear().destroy();
