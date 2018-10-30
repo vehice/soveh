@@ -113,7 +113,7 @@ class QuestionReceptionCondition(models.Model):
 
 
 class Customer(models.Model):
-    TYPE_CUSTOMER = (('l', 'Laboratorio'), ('s', 'Salmonera'))
+    TYPE_CUSTOMER = (('l', 'Laboratorio'), ('e', 'Empresa'))
     name = models.CharField(max_length=250, null=True, blank=True, verbose_name="Nombre")
     company = models.CharField(max_length=250, null=True, blank=True, verbose_name="Compañía / Empresa")
     type_customer = models.CharField(

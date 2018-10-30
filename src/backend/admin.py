@@ -21,6 +21,8 @@ admin.site.register(Organ)
 
 class OrgansInline(admin.TabularInline):
     model = Pathology.organs.through
+    verbose_name_plural = "Órganos Relacionados"
+    verbose_name = "Órgano"
 
 @admin.register(Pathology)
 class CustomPathology(admin.ModelAdmin):
