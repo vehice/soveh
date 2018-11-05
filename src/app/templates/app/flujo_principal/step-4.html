@@ -29,7 +29,8 @@
   <div href="/workflow/<%= form_id %>/<%= current_step_tag %>" class="list-group-item list-group-item-action">
     <div class="media-body">
       <h4 class="list-group-item-heading"><%= exam_name %>
-        <a><span class="font-medium-4 float-right pt-1">Descargar PDF</span></a>
+        <%= exam_name %>
+        <a href="/download-report/<%= form_id %>"><span class="font-medium-4 float-right pt-1">Descargar PDF</span></a>
       </h4>
       <p class="list-group-item-text">Análisis Finalizado</p>
     </div>

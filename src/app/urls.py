@@ -11,10 +11,6 @@ urlpatterns = [
     url(r'^analisis$', views.show_analisis, name='analisis'),
     url(r'^ingresos$', views.show_ingresos, name='ingresos'),
     url(r'^ingresos/new$', views.new_ingreso, name='ingresos_new'),
+    url(r'^template-report/(?P<id>\d+)$', views.template_report, name='template_report'),
+    url(r'^download-report/(?P<id>\d+)$', views.download_report, name='download_report'),
 ]
-
-if settings.DEBUG:
-    import debug_toolbar
-    urlpatterns = [
-        url(r'^__debug__/', include(debug_toolbar.urls)),
-    ] + urlpatterns

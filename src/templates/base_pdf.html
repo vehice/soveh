@@ -1,0 +1,28 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimal-ui">
+  <meta name="description" content="Analisis Histologicos Vehice">
+  <meta name="keywords" content="">
+  <meta name="author" content="PIXINVENT">
+  <title>Vehice</title>
+  <link rel="apple-touch-icon" href="{% static 'assets/images/ico/apple-icon-120.png' %}">
+  <link rel="shortcut icon" type="image/x-icon" href="{% static 'assets/images/ico/favicon.ico' %}">
+  <link rel="stylesheet" type="text/css" href="{% static 'assets/css/bootstrap3-theme.min.css' %}">
+  {% block stylesheets %}{% endblock stylesheets %}
+</head>
+
+<body class="{% block bodyclass %}{% endblock bodyclass %}" style="background-color: white;">
+  {% block body %}{% endblock body %}
+  <script src="{% static 'assets/js/core/libraries/jquery.min.js' %}" type="text/javascript"></script>
+  <script src="{% static 'assets/js/core/libraries/bootstrap3.min.js' %}" type="text/javascript"></script>
+  <script src="{% url 'js_reverse' %}" type="text/javascript"></script>
+  <script>
+  </script> {% block scripts %}{% endblock scripts %}
+</body>
+
+</html>
