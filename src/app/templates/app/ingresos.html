@@ -64,7 +64,7 @@
               </tr>
             </thead>
             <tbody>
-              {% for entryForm in entryForm_list %}
+              {% for entryForm in entryForm_list|dictsort:"content_object.no_caso" %}
                   <tr>
                     <!-- <td>{{ entryForm.content_object.id }}</td> -->
                     <td><strong>{{ entryForm.content_object.no_caso }}</strong></td>

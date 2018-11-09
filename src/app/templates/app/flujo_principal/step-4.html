@@ -14,23 +14,38 @@
 
 <script id="analysis_element" type="text/x-lodash-template">
 <% if (!form_closed)  { %>
-  <a href="/workflow/<%= form_id %>/<%= current_step_tag %>" class="list-group-item list-group-item-action">
+  
+  <div href="/workflow/<%= form_id %>/<%= current_step_tag %>" class="list-group-item list-group-item-action">
     <div class="media-body">
-      <h4 class="list-group-item-heading"><%= exam_name %>
-        <span class="font-medium-4 float-right pt-1">Tincion: <%= exam_stain %></span>
-      </h4>
-      <p class="list-group-item-text"><%= no_slice %> cortes</p>
+      <% if (current_step == 4) { %>
+        <h4 class="list-group-item-heading"><%= exam_name %>:
+          <a class="btn btn-primary btn-sm" target="_blank" href="/workflow/<%= form_id %>/<%= current_step_tag %>"><i class="fa fa-plus"></i> Ingresar Hallazgos </a>
+          <span class="font-medium-4 float-right pt-1">Tincion: <%= exam_name %></span>
+        </h4>
+      <% } else { %>
+        <h4 class="list-group-item-heading">
+          <%= exam_name %>: 
+          <a target="_blank" href="/workflow/<%= form_id %>/<%= current_step_tag %>"><i class="fa fa-external-link"></i> Entrar al análisis </a>
+          <span class="font-medium-4 float-right pt-1">Tincion: <%= exam_name %></span>
+        </h4>
+      <% } %>
+
+      <% if (current_step == 4) { %>
+        <p class="list-group-item-text"><%= no_slice %> cortes - <a target="_blank" href="/download-report/<%= form_id %>"><span class="font-medium-0 ">Previsualizar Informe</span></a></p>
+       <% } else { %>
+        <p class="list-group-item-text"><%= no_slice %> cortes</p>
+      <% } %>
       <div class="progress" style="height: 18px;">
         <div class="progress-bar" role="progressbar" style="width:<%= percentage_step %>%" aria-describedby="example-caption-2"> <%= current_step %> de <%= total_step  %> pasos</div>
       </div>
     </div>
-  </a>
+  </div>
 <% } else { %>
   <div href="/workflow/<%= form_id %>/<%= current_step_tag %>" class="list-group-item list-group-item-action">
     <div class="media-body">
       <h4 class="list-group-item-heading"><%= exam_name %>
         <%= exam_name %>
-        <a href="/download-report/<%= form_id %>"><span class="font-medium-4 float-right pt-1">Descargar PDF</span></a>
+        <a target="_blank" href="/download-report/<%= form_id %>"><span class="font-medium-4 float-right pt-1">Descargar PDF</span></a>
       </h4>
       <p class="list-group-item-text">Análisis Finalizado</p>
     </div>

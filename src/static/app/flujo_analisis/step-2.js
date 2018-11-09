@@ -23,6 +23,14 @@ function init_step_2() {
   });
 }
 
+$(document).on('click', '.start_scan_all', function (e) {
+  $("input[type=checkbox][id^='scan[start_scan]']" ).trigger('click');
+});
+
+$(document).on('click', '.end_scan_all', function (e) {
+  $("input[type=checkbox][id^='scan[end_scan]']" ).trigger('click');
+});
+
 
 function loadScanTable(data) {
   if ($.fn.DataTable.isDataTable('#scan_table')) {
