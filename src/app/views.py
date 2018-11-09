@@ -116,6 +116,7 @@ def make_pdf_file(id):
             'margin-bottom': "5mm",
             'no-stop-slow-scripts': '',
             'load-error-handling': "ignore",
+            'disable-javascript': ''
         }
 
     urlsitio = settings.SITE_URL +'/template-report/' + str(id)

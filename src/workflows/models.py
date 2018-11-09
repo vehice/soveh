@@ -67,7 +67,7 @@ class Step(models.Model):
         ordering = ['order']
 
     def __str__(self):
-        return self.name + ' - ' + self.flow.name
+        return self.name
 
 
 class Form(models.Model):
