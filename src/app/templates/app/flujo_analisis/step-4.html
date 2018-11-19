@@ -9,16 +9,16 @@
 
     <h4 class="form-section">
       <i class="ft-user"></i> Generación Informe
-      <div class="float-right"><a href="/workflow/{{form_parent_id}}/step_4"><i class="fa fa-external-link"></i> Volver a listado de análisis</a></div>
     </h4>
     <div>
-      <table id="diagnostic_table" class="table table-striped table-bordered">
+      <table id="diagnostic_table" class="table table-condensed table-bordered" width="100%" cellpadding="0" cellspacing="0" border="0">
         <thead>
           <tr>
+            <th>Muestra</th>
             <th>Corte</th>
-            <th>Jaula</th>
             <th>Organos</th>
-            <th>Hallazgo</th>
+            <th><center>Hallazgos</center></th>
+            <th><center>Opciónes</center></th>
           </tr>
         </thead>
         <tbody>
@@ -133,7 +133,7 @@
                 <th>Diagnóstico</th>
                 <th>Distribución</th>
                 <th>Intensidad</th>
-                <th>Eliminar</th>
+                <th>Opciónes</th>
               </tr>
             </thead>
             <tbody>
@@ -151,18 +151,25 @@
 <script id="diagnostic_row" type="text/x-lodash-template">
   <tr>
     <td>
+      <%= identification %>
+    </td>
+    <td>
       <%= slice_name %>
       <input type="hidden" name="store[slice_id][<%= store_index %>]" value="<%= slice_id %>" >
     </td>
     <td>
-      <%= identification_cage %>
-    </td>
-    <td>
       <%= organs %>
     </td>
+    <td>
+      <center>
+        <div class="badge bg-blue-grey badge-lg round paths_count">
+          <strong><%= paths %></strong>
+        </div>
+      </center>
+    </td>
     <td class="text-center">
-        <a id="new_pathology_link" data-slice-id="<%= slice_id %>" <i class="ft-plus-circle"></i></a>
-        <a id="show_pathology_link" data-slice-id="<%= slice_id %>" <i class="ft-edit"></i></a>
+        <a title="Agregar nuevo hallazgo" id="new_pathology_link" data-slice-id="<%= slice_id %>" <i class="fa fa-plus fa-fw fa-2x"></i></a>
+        <a title="Editar hallazgos" id="show_pathology_link" data-slice-id="<%= slice_id %>" <i class="fa fa-edit fa-fw fa-2x"></i></a>
     </td>
   </tr>
 </script>
@@ -188,7 +195,7 @@
       <%= diagnostic_intensity %>
     </td>
     <td class="text-center">
-      <a id="remove_pathology" data-report-id="<%= report_id %>" <i class="ft-delete"></i></a>
+      <a title="Eliminar hallazgo" id="remove_pathology" data-report-id="<%= report_id %>" <i class="fa fa-trash fa-fw fa-2x"></i></a>
     </td>
   </tr>
 </script>

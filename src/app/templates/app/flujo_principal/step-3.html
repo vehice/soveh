@@ -15,18 +15,18 @@
     </div>
     <div id="block_group">
       <div class="table-responsive">
-        <table id="block_table" class="table table-striped table-bordered" style="width:100% !important;">
+        <table id="block_table" class="table table-bordered table-condensed" width="100%" cellpadding="0" cellspacing="0" border="0">
           <thead>
             <tr>
               <th>Muestra</th>
               <th>Cassette</th>
               <th>Organos</th>
               <th>Nro Cortes</th>
-              <th>Inicio Bloque <br> <span class="btn btn-sm btn-success block_start_all"><small>Seleccionar todos</small></span></th>
-              <th>Fin Bloque <br> <span class="btn btn-sm btn-success block_end_all"><small>Seleccionar todos</small></span></th>
-              <th>Inicio Corte <br> <span class="btn btn-sm btn-success slice_start_all"><small>Seleccionar todos</small></span></th>
-              <th>Fin Corte <br> <span class="btn btn-sm btn-success slice_end_all"><small>Seleccionar todos</small></span></th>
-              <th>Ver Cortes</th>
+              <th>Inicio Bloque <br> <span class="btn btn-sm btn-success square block_start_all"><i class="fa fa-check-square-o"></i> Todos</span></th>
+              <th>Fin Bloque <br> <span class="btn btn-sm btn-success square block_end_all"><i class="fa fa-check-square-o"></i> Todos</span></th>
+              <th>Inicio Corte <br> <span class="btn btn-sm btn-success square slice_start_all"><i class="fa fa-check-square-o"></i> Todos</span></th>
+              <th>Fin Corte <br> <span class="btn btn-sm btn-success square slice_end_all"><i class="fa fa-check-square-o"></i> Todos</span></th>
+              <th>Opciónes</th>
             </tr>
           </thead>
           <tbody>
@@ -71,7 +71,7 @@
       <input type="hidden" name="block_end_slice_<%= block_index %>" value="<%= end_slice %>" />
     </td>
     <td>
-      <span id="slice-info" data-trigger="hover" data-toggle="popover" data-html="true"  title="Info Corte" data-content="<%= slice_info %>"><i class="ft-eye"></i></span>
+      <span id="slice-info" data-trigger="hover" data-toggle="popover" data-html="true" title="Visualizar Cortes" data-content="<%= slice_info %>"><i class="fa fa-search-plus fa-fw fa-2x"></i></span>
       <% _.each( analyses, function( analysis ){ %>
         <input type="hidden" name="analyses" value="<%= analysis %>" >
       <% }); %>

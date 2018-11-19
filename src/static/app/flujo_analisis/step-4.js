@@ -68,24 +68,32 @@ function init_step_4() {
     var url = Urls.report();
     var form_data = $("#new_pathology :input").serialize();
     var pathology = $('#pathology_select').find(':selected').text();
+    lockScreen(1);
     $.ajax({
       type: "POST",
       url: url,
       data: form_data,
     })
-      .done(function (data) {
-        if (data.ok) {
-          var pathology_cell = $("#pathology_table .select #pathology");
-          $(pathology_cell).append(pathology + " ");
+    .done(function (data) {
+      if (data.ok) {
+        var pathology_cell = $("#pathology_table .select #pathology");
+        $(pathology_cell).append(pathology + " ");
 
-          $('#new_pathology').modal('hide');
-        } else {
-
-        }
-      })
-      .fail(function () {
-        console.log("Fail")
-      })
+        $('#new_pathology').modal('hide');
+        toastr.success('', 'Hallazgo ingresado exitosamente.');
+        setTimeout(function() {
+          location.reload();
+        }, 3000);
+      } else {
+        toastr.error('', 'Error al ingresar hallazgo. Favor intentar nuevamente!');
+        setTimeout(function() {
+          location.reload();
+        }, 3000);
+      }
+    })
+    .fail(function () {
+      toastr.error('', 'Error al ingresar hallazgo. Favor intentar nuevamente!');
+    })
   });
 
   $(document).on('click', '#show_pathology_link', function (e) {
@@ -110,6 +118,7 @@ function init_step_4() {
     var report_id = $(this).data("report-id");
     var url = Urls.report_by_id(report_id);
 
+    lockScreen(1);
     $.ajax({
       type: "DELETE",
       url: url,
@@ -117,6 +126,12 @@ function init_step_4() {
       .done(function (data) {
         if (data.ok) {
           $("#show_pathologies").modal("hide");
+          toastr.success('', 'Hallazgo eliminado exitosamente.');
+          setTimeout(function() {
+            location.reload();
+          }, 3000);
+        } else {
+          toastr.error('', 'No ha sido posible eliminar el hallazgo. Favor intente nuevamente.');
         }
       })
       .fail(function () {
@@ -208,7 +223,7 @@ function loadDiagnosticTable(data) {
     paginate: false,
     autoWidth: false,
     columnDefs: [
-      { "width": "10%", "targets": 3 }
+      { "width": "7%", "targets": 3 }
     ],
     language: {
       url: "https://cdn.datatables.net/plug-ins/1.10.16/i18n/Spanish.json"
@@ -224,7 +239,9 @@ function populateDiagnosticTable(data) {
     row.slice_name = item.slice_name;
     row.organs = item.organs.join(', ');
     row.store_index = i;
-    row.identification_cage = 'E-' + item.identification_cage;
+    row.identification = item.identification;
+    // row.identification_cage = 'E-' + item.identification_cage;
+    row.paths = item.paths_count;
 
     addDiagnosticRow(row)
   });

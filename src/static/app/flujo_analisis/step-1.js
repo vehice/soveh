@@ -65,7 +65,8 @@ function populateStainTable(data) {
     row.slice_id = item.slice_id;
     row.slice_name = item.slice_name;
     row.stain_index = i;
-    row.identification_cage = 'E-' + item.identification_cage;
+    row.identification = item.identification;
+    // row.identification_cage = 'E-' + item.identification_cage;
     row.start_stain = item.start_stain;
     row.end_stain = item.end_stain;
 

@@ -64,7 +64,8 @@ function populateScanTable(data) {
     row.slice_id = item.slice_id;
     row.slice_name = item.slice_name;
     row.scan_index = i;
-    row.identification_cage = 'E-' + item.identification_cage;
+    // row.identification_cage = 'E-' + item.identification_cage;
+    row.identification = item.identification;
     row.start_scan = item.start_scan;
     row.end_scan = item.end_scan;
     row.slice_store = item.slice_store;

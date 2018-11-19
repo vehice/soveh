@@ -10,12 +10,13 @@
       <div class="breadcrumb-wrapper col-12">
         <ol class="breadcrumb">
           <li class="breadcrumb-item">
-            <a href="/">Home</a>
+            <a href="/">INICIO</a>
           </li>
           <li class="breadcrumb-item">
-            <a href="#">Ingresos</a>
+            <a href="#">CASOS</a>
           </li>
-          <li class="breadcrumb-item active">{{entryform_id}}
+          <li class="breadcrumb-item active">
+            {{form.content_object.no_caso}}
           </li>
         </ol>
       </div>
@@ -28,7 +29,7 @@
   <div class="col-12">
     <div class="card">
       <div class="card-header">
-        <h4 class="card-title"> Ingresando nuevo caso N° {{form.content_object.no_caso}}</h4>
+        <center><h3> <strong>CASO N° {{form.content_object.no_caso}}</strong></h3></center>
       </div>
       <div class="card-content">
         <div class="card-body">
@@ -63,6 +64,7 @@ $("#workflow_form").steps({
     transitionEffect: "fade",
     titleTemplate: '<span class="step">#index#</span> #title#',
     labels: {
+        previous: 'Deshacer y Volver',
         next: 'Continuar',
         finish: 'Finalizar'
     },
@@ -98,9 +100,12 @@ $("#workflow_form").steps({
         })
         .done(function (data) {
           response = data;
+          console.log("done");
+          console.log(response);
         })
-        .fail(function () {
-          console.log("Fail")
+        .fail(function (data) {
+          console.log(data);
+          console.log("Fail");
         })
 
         if (response.next_step_permission) {
@@ -147,7 +152,7 @@ $("#workflow_form").steps({
       var form_data = ($("form").serialize());
       disform.prop('disabled', true);
 
-      console.log(form_data);
+      // console.log(form_data);
 
       $.ajax({
         type: "POST",
@@ -174,6 +179,7 @@ $(window).on('load', function (e) {
     form.steps("setStep", step_wizard);
 
     window[step_tag_function]();
+
   {% else %}
     set_state = false;
 

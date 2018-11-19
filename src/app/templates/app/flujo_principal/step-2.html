@@ -26,7 +26,7 @@
         <div class="form-group">
         </div>
       </div>
-      <div class="col-md-6">
+      <!-- <div class="col-md-6">
         <div class="form-group">
           <label for="date3">Nro muestras por cassettes</label>
           <select class="select2 form-control" id="no_cassette" name="cassette">
@@ -36,15 +36,16 @@
             <option value='4'>x4</option>
           </select>
         </div>
-      </div>
+      </div> -->
     </div>
     <div id="cassette_group">
-      <table id="cassettes_table" class="table table-striped table-bordered" width="100%">
+      <table id="cassettes_table" class="table table-bordered table-hover table-condensed" width="100%">
         <thead>
           <tr>
             <th>Muestra</th>
             <th>Cassette</th>
             <th>Organos</th>
+            <th></th>
           </tr>
         </thead>
         <tbody>
@@ -56,23 +57,27 @@
 
 <script id="cassette_row" type="text/x-lodash-template">
   <tr>
+    <input type="hidden" name="cassette[sample_id][<%= cassette_index %>]" value="<%= sample_id %>" >
+    <input type="hidden" name="cassette[sample_no][<%= cassette_index %>]" value="<%= sample_no %>" >
+    <input type="hidden" name="cassette[identification_id][<%= cassette_index %>]" value="<%= identification_id %>" >
+    <input type="hidden" name="cassette[cassette_name][<%= cassette_index %>]" value="<%= cassette_name %>" >
     <td>
       <%= sample_id %>
-      <input type="hidden" name="cassette[sample_id][<%= cassette_index %>]" value="<%= sample_id %>" >
-      <input type="hidden" name="cassette[identification_id][<%= cassette_index %>]" value="<%= identification_id %>" >
     </td>
     <td>
       <%= cassette_name %>
-      <input type="hidden" name="cassette[cassette_name][<%= cassette_index %>]" value="<%= cassette_name %>" >
     </td>
     <td style="width:40%">
-      <select class="select2" style="width:100%" id="cassette-organ"
+      <select class="select2 form-control form-control-sm" style="width:100%"
         data-sample-id="<%= sample_id %>" data-cassette-name="<%= cassette_name %>"
         name="cassette[organ][<%= cassette_index %>]" multiple="multiple">
         <% _.each( cassette_organs, function( organ ){ %>
           <option value=<%= organ.value %>> <%= organ.name %> </option>
         <% }); %>
       </select>
+    </td>
+    <td>
+      <button title="Añadir cassette a la muestra" tooltip="" type="button" data-cassette="<%= cassette_index %>" class="btn btn-icon btn-secondary add_cassette_to_sample"><i class="fa fa-plus"></i></button>
     </td>
   </tr>
 </script>

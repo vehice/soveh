@@ -11,6 +11,8 @@ function init_step_2() {
   })
     .done(function (data) {
       data_step_2 = data
+      // console.log("esta es la data");
+      // console.log(data_step_2);
 
       loadCassetteTable(data_step_2);
       loadData(data_step_2);
@@ -47,6 +49,7 @@ function init_step_2() {
 
       $("#no_cassette").val(1)
     }
+    // console.log(entryform.cassettes);
 
     $.each(entryform.cassettes, function (i, item) {
       $('div[attr1="value1"][attr2="value2"]')
@@ -61,15 +64,74 @@ $(document).on('change', '#no_cassette', function (e) {
   loadCassetteTable(data_step_2);
 })
 
+$(document).on('click', '.add_cassette_to_sample', function (e) {
+  var parent_tr = $(this).closest('tr');
+  parent_tr.find('select[name*="cassette[organ]"]').select2('destroy');
+  var clone_tr = parent_tr.clone();
+  var current_cassette_index = parseInt($(this).data('cassette'));
+  var new_cassette_index = current_cassette_index + 1;
+  // console.log(clone_tr)
+
+  clone_tr.find("input[name*='cassette[identification_id]["+current_cassette_index+"]']").
+    prop('name', 'cassette[identification_id]['+new_cassette_index+']');
+  clone_tr.find("input[name*='cassette[sample_id]["+current_cassette_index+"]']").
+    prop('name', 'cassette[sample_id]['+new_cassette_index+']');
+  clone_tr.find("input[name*='cassette[sample_no]["+current_cassette_index+"]']").
+    prop('name', 'cassette[sample_no]['+new_cassette_index+']');
+  clone_tr.find("input[name*='cassette[cassette_name]["+current_cassette_index+"]']").
+    prop('name', 'cassette[cassette_name]['+new_cassette_index+']');
+  clone_tr.find(".add_cassette_to_sample").remove();
+  clone_tr.insertAfter(parent_tr);
+  clone_tr.addClass("bg-success bg-accent-1");
+  parent_tr.find('select[name*="cassette[organ]"]').select2();
+
+  var new_index = clone_tr.index();
+  // console.log(new_index);
+  var table_size = $('#cassettes_table tr').length;
+  
+  for (i = new_index + 1; i < table_size; i++) { 
+    $('#cassettes_table tr:eq('+i+')')
+      .find('input[name*="cassette[identification_id]"]')
+      .prop('name', 'cassette[identification_id]['+(i-1).toString()+']');
+
+    $('#cassettes_table tr:eq('+i+')')
+      .find('input[name*="cassette[sample_id]"]')
+      .prop('name', 'cassette[sample_id]['+(i-1).toString()+']');
+
+    $('#cassettes_table tr:eq('+i+')')
+      .find('input[name*="cassette[sample_no]"]')
+      .prop('name', 'cassette[sample_no]['+(i-1).toString()+']')
+      .val(i);
+
+    $('#cassettes_table tr:eq('+i+')')
+      .find('select[name*="cassette[organ]"]')
+      .prop('name', 'cassette[organ]['+(i-1).toString()+']').select2();
+
+    var cassette_name = $('#cassettes_table tr:eq('+i+')')
+      .find('input[name*="cassette[cassette_name]"]')
+      .val();
+
+    $('#cassettes_table tr:eq('+i+')')
+      .find('input[name*="cassette[cassette_name]"]')
+      .prop('name', 'cassette[cassette_name]['+(i-1).toString()+']')
+      .val(cassette_name.replace('C'+(i-1).toString(), 'C'+(i).toString()));
+
+    $('#cassettes_table tr:eq('+i+') td:eq(1)')
+      .text(cassette_name.replace('C'+(i-1).toString(), 'C'+(i).toString()));
+  }
+
+  toastr.success('Se asignó un nuevo cassette exitosamente.', 'Listo!');
+});
+
 function loadCassetteTable(data) {
-  var no_cassette = $('#no_cassette').val();
+  // var no_cassette = 1;
 
   if ($.fn.DataTable.isDataTable('#cassettes_table')) {
     // TODO: Fix efecto al destruir la tabla
     $('#cassettes_table').DataTable().clear().destroy();
   }
 
-  populateCassetteTable(data, no_cassette);
+  populateCassetteTable(data);
 
   $('#cassettes_table').DataTable({
     ordering: false,
@@ -89,29 +151,30 @@ function loadCassetteTable(data) {
   $('[name*="cassette[organ]"]').trigger('change');
 }
 
-function populateCassetteTable(data, no_cassette) {
+function populateCassetteTable(data) {
   // console.log(data);
   var organs = data.organs;
   var cassette_index = 0;
-
+  var fish_count_start = 1;
   $.each(data.identifications, function (i, item) {
 
-    var no_fish = item.no_fish * no_cassette;
     var identification_id = item.id;
 
-    var array_index = _.range(1, no_fish + 1);
-    var id_muestra = data.entryform.no_caso + '-' + item.cage + '-' + item.group;
+    var array_index = _.range(fish_count_start, fish_count_start + item.no_fish);
 
-    $.each(array_index, function (i, item) {
+    var id_muestra = data.entryform.no_caso + '-' + item.cage + '-' + item.group;
+    fish_count_start = item.no_fish + 1;
+
+    $.each(array_index, function (j, item2) {
       var row = {};
 
       row.identification_id = identification_id;
-      row.sample_id = id_muestra;
-      console.log(data.entryform);
+      row.sample_id = id_muestra + "-M" + (j+1).toString();
+      row.sample_no = item2;
       if ( data.entryform.subflow != "N/A" ){
-        row.cassette_name = data.entryform.no_caso + '-' + data.entryform.subflow + '_C' + item;
+        row.cassette_name = data.entryform.no_caso + '-' + data.entryform.subflow + '_C' + item2;
       } else {
-        row.cassette_name = data.entryform.no_caso + '_C' + item;
+        row.cassette_name = data.entryform.no_caso + '_C' + item2;
       }
       row.cassette_organs = organs;
       row.cassette_index = cassette_index;

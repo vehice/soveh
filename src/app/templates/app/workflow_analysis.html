@@ -5,20 +5,22 @@
 {% block content_header %}
 <div class="content-header row">
   <div class="content-header-left col-md-6 col-12 mb-2">
-    <h3 class="content-header-title mb-0">Nuevo Ingreso</h3>
+    <!-- <h3 class="content-header-title mb-0">Nuevo Ingreso</h3> -->
     <div class="row breadcrumbs-top">
       <div class="breadcrumb-wrapper col-12">
         <ol class="breadcrumb">
           <li class="breadcrumb-item">
-            <a href="/">Home</a>
+            <a href="/">INICIO</a>
           </li>
           <li class="breadcrumb-item">
-            <a href="/ingresos">Ingresos</a>
+            <a href="#">CASOS</a>
+          </li>
+          <li class="breadcrumb-item active">
+            {{form.content_object.entryform.no_caso}}
           </li>
           <li class="breadcrumb-item">
-            <a href="/ingresos/{{form_parent_id}}">CASO: {{form_parent_id}}</a>
+            ANÁLISIS
           </li>
-          <li class="breadcrumb-item active">Analisis</li>
         </ol>
       </div>
     </div>
@@ -30,7 +32,9 @@
   <div class="col-12">
     <div class="card">
       <div class="card-header">
-        <h4 class="card-title"> Analisis {{ exam_name }} </h4>
+        <div class="float-left"><h3> <strong>Analisis {{ exam_name }} </strong></h3></div>
+        <div class="float-right"><a href="/workflow/{{form_parent_id}}/step_4"><h3><i class="fa fa-arrow-left fa-fw"></i> <strong>Volver a listado de análisis </strong></h3></a></div>
+        <center><h3> <strong>CASO N° {{form.content_object.entryform.no_caso}}</strong></h3></center>
       </div>
       <div class="card-content">
         <div class="card-body">
@@ -65,6 +69,7 @@ $("#workflow_form").steps({
     transitionEffect: "fade",
     titleTemplate: '<span class="step">#index#</span> #title#',
     labels: {
+        previous: 'Deshacer y Volver',
         next: 'Continuar',
         finish: 'Finalizar'
     },
@@ -117,7 +122,7 @@ $("#workflow_form").steps({
           toastr.error('No puedes continuar ya que no tienes permisos para los siguientes pasos.', 'No tienes permisos');
           setTimeout(function() {
             window.location.href = '/ingresos'
-          }, 1000);
+          }, 2000);
         }
 
         if(!previous_step) {

@@ -19,13 +19,13 @@
     <div class="media-body">
       <% if (current_step == 4) { %>
         <h4 class="list-group-item-heading"><%= exam_name %>:
-          <a class="btn btn-primary btn-sm" target="_blank" href="/workflow/<%= form_id %>/<%= current_step_tag %>"><i class="fa fa-plus"></i> Ingresar Hallazgos </a>
+          <a class="btn btn-primary btn-sm" href="/workflow/<%= form_id %>/<%= current_step_tag %>"><i class="fa fa-plus"></i> Ingresar Hallazgos </a>
           <span class="font-medium-4 float-right pt-1">Tincion: <%= exam_name %></span>
         </h4>
       <% } else { %>
         <h4 class="list-group-item-heading">
           <%= exam_name %>: 
-          <a target="_blank" href="/workflow/<%= form_id %>/<%= current_step_tag %>"><i class="fa fa-external-link"></i> Entrar al análisis </a>
+          <a href="/workflow/<%= form_id %>/<%= current_step_tag %>"><i class="fa fa-external-link"></i> Entrar al análisis </a>
           <span class="font-medium-4 float-right pt-1">Tincion: <%= exam_name %></span>
         </h4>
       <% } %>

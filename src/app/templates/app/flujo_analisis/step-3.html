@@ -11,8 +11,8 @@
       <table id="store_table" class="table table-striped table-bordered">
         <thead>
           <tr>
+            <th>Muestra</th>
             <th>Corte</th>
-            <th>Jaula</th>
             <th>Identificación Caja</th>
           </tr>
         </thead>
@@ -27,11 +27,11 @@
 <script id="store_row" type="text/x-lodash-template">
   <tr>
     <td>
-      <%= slice_name %>
-      <input type="hidden" name="store[slice_id][<%= store_index %>]" value="<%= slice_id %>" >
+      <%= identification %>
     </td>
     <td>
-      <%= identification_cage %>
+      <%= slice_name %>
+      <input type="hidden" name="store[slice_id][<%= store_index %>]" value="<%= slice_id %>" >
     </td>
     <td>
       <input name="store[box_id][<%= store_index %>]" class="form-control" value="<%= box_id %>">

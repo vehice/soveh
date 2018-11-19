@@ -20,6 +20,7 @@ urlpatterns = [
         csrf_exempt(views.WORKFLOW.as_view()),
         name='workflow_open_step'),
     path('workflow', csrf_exempt(views.WORKFLOW.as_view()), name='workflow'),
+    path('workflow/<int:form_id>', csrf_exempt(views.WORKFLOW.as_view()), name='workflow_w_id'),
     path(
         'analysis-entry-form/<int:entry_form>',
         csrf_exempt(views.ANALYSIS.as_view()),

@@ -167,6 +167,7 @@ class CASSETTE(View):
                     'end_block': slice_new.end_block,
                     'start_slice': slice_new.start_slice,
                     'end_slice': slice_new.end_slice,
+                    'slice_name': slice_new.slice_name
                 })
 
             cassettes.append({
@@ -185,6 +186,7 @@ class CASSETTE(View):
 
 class ANALYSIS(View):
     def get(self, request, entry_form=None):
+        print ("Entro a analiss")
         analyses_qs = AnalysisForm.objects.filter(entryform=entry_form)
         analyses = []
 
@@ -214,9 +216,9 @@ class ANALYSIS(View):
                 'current_step': current_step,
                 'total_step': total_step,
                 'percentage_step': percentage_step,
-                'form_closed': form.form_closed
+                'form_closed': form.form_closed,
+                # 'no_caso': analisys.entry_form.no_caso
             })
-
         data = {'analyses': analyses}
 
         return JsonResponse(data)
@@ -230,30 +232,34 @@ class SLICE(View):
         for slice_new in slices_qs:
             slice_id = slice_new.id
             slice_name = slice_new.slice_name
-            identification_cage = slice_new.cassettes.first(
-            ).identifications.first().cage
+            # identification_cage = slice_new.cassettes.first(
+            # ).identifications.first().cage
             analysis = slice_new.analysis.first()
+            cassett = slice_new.cassettes.first()
             organs = [organ.name for organ in analysis.organs.all()]
+            paths_count = Report.objects.filter(slice_id=slice_new.pk).count()
 
             slices.append({
                 'slice_id': slice_new.id,
                 'slice_name': slice_new.slice_name,
-                'identification_cage': identification_cage,
+                'identification': cassett.sample_id,
                 'start_scan': slice_new.start_scan,
                 'end_scan': slice_new.end_scan,
                 'start_stain': slice_new.start_stain,
                 'end_stain': slice_new.end_stain,
                 'slice_store': slice_new.slice_store,
                 'box_id': slice_new.box_id,
-                'organs': organs
+                'organs': organs,
+                'paths_count': paths_count
             })
-
+        # print ("slice")
         data = {'slices': slices}
 
         return JsonResponse(data)
 
 
 class WORKFLOW(View):
+    http_method_names = ['get', 'post', 'delete']
     def get(self, request, form_id, step_tag):
         form = Form.objects.get(pk=form_id)
         object_form_id = form.content_object.id
@@ -333,6 +339,10 @@ class WORKFLOW(View):
 
             return JsonResponse({'redirect_flow': True})
 
+    def delete(self, request, form_id):
+        Form.objects.get(pk=form_id).delete()
+        # object_form_id = form.content_object.id
+        return JsonResponse({'ok': True})
 
 class REPORT(View):
     def get(self, request, slice_id):
@@ -881,17 +891,25 @@ def step_2_entryform(request):
         v for k, v in var_post.items()
         if k.startswith("cassette[cassette_name]")
     ]
+
+    print (cassette_name)
     cassette_organs = [
         var_post.getlist(k) for k, v in var_post.items()
         if k.startswith("cassette[organ]")
     ]
+
+    print (cassette_organs)
     cassette_identification_id = [
         var_post.getlist(k) for k, v in var_post.items()
         if k.startswith("cassette[identification_id]")
     ]
 
+    print (cassette_identification_id)
+
     zip_cassettes = zip(cassette_sample_id, cassette_name, cassette_organs,
                         cassette_identification_id)
+
+
 
     entryform.cassette_set.all().delete()
     for values in zip_cassettes:

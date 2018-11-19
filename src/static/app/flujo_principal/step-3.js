@@ -57,7 +57,7 @@ function loadBlockTable(data) {
   $('#block_table').DataTable({
     ordering: false,
     paginate: false,
-    scrollX: true,
+    // scrollX: true,
     language: {
       url: "https://cdn.datatables.net/plug-ins/1.10.16/i18n/Spanish.json"
     },
@@ -91,9 +91,8 @@ function populateBlockTable(data) {
     }
 
     row.slice_info = "<ol>";
-    var cage = row.sample_id.split("-")[1].split("_")[1]
-    $.each(data.exams, function (i, item) {
-      row.slice_info += "<li><p><strong>Cassette:</strong> " + row.cassette_name + " /<strong> Jaula: </strong>" + cage + " /<strong> Tinci&oacute;n: </strong>" + item.stain + "</p></li>"
+    $.each(data.exams, function (i, elem) {
+      row.slice_info += "<li><p><strong>Cassette:</strong> " + row.cassette_name + " <strong> </br>Muestra: </strong>" + row.sample_id + " <strong> </br>Corte: </strong>" +item.slices[i].slice_name+ " <strong> </br>Tinci&oacute;n: </strong>" + elem.stain + "</p></li>"
     })
     row.slice_info += "</ol>";
 

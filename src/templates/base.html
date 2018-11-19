@@ -59,6 +59,7 @@
   <script src="{% static 'assets/vendors/js/forms/select/select2.full.min.js' %}" type="text/javascript"></script>
   <script src="{% static 'assets/vendors/js/forms/toggle/switchery.min.js' %}" type="text/javascript"></script>
   <script src="{% static 'assets/js/scripts/forms/switch.js' %}" type="text/javascript"></script>
+  <script src="{% static 'assets/vendors/js/ui/blockUI.min.js' %}" type="text/javascript"></script>
   <script src="{% static 'assets/vendors/js/extensions/toastr.min.js' %}" type="text/javascript"></script>
 
   <!-- END PAGE VENDOR JS-->
@@ -69,6 +70,27 @@
   <!-- END STACK JS-->
 
   <script>
+
+    function lockScreen(enable){
+      if (enable) {
+        $.blockUI({
+          message: '<div class="ft-refresh-cw icon-spin font-medium-1"></div>',
+          // timeout: timeout , //unblock after 2 seconds
+          overlayCSS: {
+              backgroundColor: '#fff',
+              opacity: 0.8,
+              cursor: 'wait'
+          },
+          css: {
+              border: 0,
+              padding: 0,
+              backgroundColor: 'transparent'
+          }
+        });
+      } else {
+        $.unblockUI();
+      }
+    }
   </script> {% block scripts %}{% endblock scripts %}
 </body>
 

@@ -50,11 +50,11 @@ def show_ingresos(request):
     up = UserProfile.objects.filter(user=request.user).first()
 
     if up.user.is_staff:
-        form = Form.objects.filter(content_type__model='entryform').order_by('-id')
+        form = Form.objects.filter(content_type__model='entryform').order_by('-object_id')
     else:
         form = Form.objects.filter(
             content_type__model='entryform',
-            state__step__actors__profile=up.profile).order_by('-id')
+            state__step__actors__profile=up.profile).order_by('-object_id')
 
     return render(request, 'app/ingresos.html', {'entryForm_list': form})
 

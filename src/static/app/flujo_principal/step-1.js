@@ -209,7 +209,6 @@ function init_step_1() {
         var identification_id = $(element).closest('.identification').get(0).id;
         var cage = $(element).closest('.identification').find('[name="identification[cage]"]').val();
         var group = $(element).closest('.identification').find('[name="identification[group]"]').val();
-        // console.log(identification_id);
         for (var j = 1; j <= no_fish; j++) {
           select.push({
             'identification_id' : identification_id,

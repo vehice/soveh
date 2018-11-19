@@ -37,7 +37,8 @@
           </a>
         </div>
       </div> -->
-      <a href="/ingresos/new" class="btn btn-info btn-lg btn-block">
+      <a href="/ingresos/new" class="btn btn-success btn-lg round">
+        <i class="fa fa-plus"></i>
         Nuevo Caso
       </a>
     </div>
@@ -61,11 +62,12 @@
                 <th>Cliente</th>
                 <th>Fecha Inicio</th>
                 <th>Etapa en curso</th>
+                <th>Opciones</th>
               </tr>
             </thead>
             <tbody>
-              {% for entryForm in entryForm_list|dictsort:"content_object.id" %}
-                  <tr>
+              {% for entryForm in entryForm_list %}
+                  <tr id="form-{{ entryForm.id }}">
                     <!-- <td>{{ entryForm.content_object.id }}</td> -->
                     <td><strong>{{ entryForm.content_object.no_caso }}</strong></td>
                     <td>
@@ -75,9 +77,14 @@
                         {{ entryForm.content_object.get_subflow }}
                       {% endif %}
                     </td>
-                    <td>{{ entryForm.content_object.customer }}</td>
+                    <td>{{ entryForm.content_object.customer|default:"" }}</td>
                     <td>{{ entryForm.content_object.created_at|date:"d/m/Y" }}</td>
                     <td><a href="workflow/{{ entryForm.id }}/{{ entryForm.state.step.tag }}">{{ entryForm.state.step }}</a></td>
+                    <td>
+                      <div class="btn-group" role="group" aria-label="Opciones">
+                        <button type="button" data-id="{{ entryForm.id }}" class="btn btn-danger btn-sm deleteFlow"><i class="fa fa-trash"></i> Eliminar</button>
+                      </div>
+                    </td>
                   </tr>
               {% endfor %}
             </tbody>
@@ -91,48 +98,38 @@
 {% endblock content %} {% block scripts %}
 <script type="text/javascript">
 
-  function format ( d ) {
-    // console.log(d);
-// `d` is the original data object for the row
-    return ' <table width="100%" class="table table-xs table-borderless" style="margin: 0% !important;">'+
-        '<tr class="bg-teal bg-lighten-5">'+
-            '<td>1.1</td>'+
-            '<td><a href="#">Paso 2 - Flujo Ingreso</a></td>'+
-        '</tr>'+
-        '<tr class="bg-teal bg-lighten-5">'+
-            '<td>1.2</td>'+
-            '<td><a href="#">Paso 4 - Flujo Ingreso</a></td>'+
-        '</tr>'+
-        '<tr class="bg-teal bg-lighten-5">'+
-            '<td>1.3</td>'+
-            '<td><a href="#">Paso 1 - Flujo Análisis</a></td>'+
-        '</tr>'+
-    '</table>';
-    }
+  $(document).on('click', '.deleteFlow', function(e){
+    var form_id = $(this).data('id');
+    var url = Urls.workflow_w_id(form_id);
+    lockScreen(1);
+    $.ajax({
+      type: "DELETE",
+      url: url,
+      async: false,
+    })
+    .done(function (data) {
+      response = data;
+      if (response.ok) {
+        toastr.success('', 'Se ha eliminado el caso exitosamente.');
+        var timer = setTimeout(function() {
+          window.location='/ingresos'
+        }, 2000);
+      } else {
+        toastr.error('', 'No ha sido posible eliminar el caso.');
+      }
+    })
+    .fail(function (data) {
+      toastr.error('', 'No ha sido posible eliminar el caso.');
+    });
+  });
 
   $(document).ready(function () {
     var tableChildRows = $('.zero-configuration').DataTable({
       language: {
         url: "https://cdn.datatables.net/plug-ins/1.10.16/i18n/Spanish.json"
       },
-      // "order": [[0, 'desc']]
+      ordering: false,
     });
-
-    $('.zero-configuration tbody').on('click', 'td.details-control', function () {
-        var tr = $(this).closest('tr');
-        var row = tableChildRows.row( tr );
-        // console.log(row);
-
-        if ( row.child.isShown() ) {
-          row.child.hide();
-          tr.removeClass('shown');
-        }
-        else {
-          row.child( format(row.data()) ).show();
-          tr.addClass('shown');
-        }
-    });
-
   });
 
 
