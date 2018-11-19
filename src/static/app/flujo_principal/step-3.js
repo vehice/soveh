@@ -93,7 +93,7 @@ function populateBlockTable(data) {
     // console.log(item.slices);
     row.slice_info = "<ol>";
     $.each(data.exams, function (i, elem) {
-      row.slice_info += "<li><p><strong>Cassette:</strong> " + row.cassette_name + " <strong> </br>Muestra: </strong>" + row.sample_id + " <strong> </br>Corte: </strong>" +row.cassette_name+"-S"+(i+1).toString()+" <strong> </br>Tinci&oacute;n: </strong>" + elem.stain + "</p></li>"
+      row.slice_info += "<li><p><strong>Cassette:</strong> " + row.cassette_name + " <strong> </br>Muestra: </strong>" + row.sample_id + " <strong> </br>Corte: </strong>" +row.cassette_name+"-S"+(i+1).toString()+" <strong> </br>An&aacute;lisis: </strong>" + elem.name + "</p></li>"
     })
     row.slice_info += "</ol>";
 
