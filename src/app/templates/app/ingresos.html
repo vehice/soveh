@@ -99,27 +99,52 @@
 <script type="text/javascript">
 
   $(document).on('click', '.deleteFlow', function(e){
-    var form_id = $(this).data('id');
-    var url = Urls.workflow_w_id(form_id);
-    lockScreen(1);
-    $.ajax({
-      type: "DELETE",
-      url: url,
-      async: false,
-    })
-    .done(function (data) {
-      response = data;
-      if (response.ok) {
-        toastr.success('', 'Se ha eliminado el caso exitosamente.');
-        var timer = setTimeout(function() {
-          window.location='/ingresos'
-        }, 2000);
-      } else {
-        toastr.error('', 'No ha sido posible eliminar el caso.');
+    swal({
+      title: "Confirmación",
+      text: "¿Está seguro que desea eliminar este caso definitivamente?",
+      icon: "warning",
+      showCancelButton: true,
+      buttons: {
+        cancel: {
+            text: "No, cancelar!",
+            value: null,
+            visible: true,
+            className: "btn-warning",
+            closeModal: true,
+        },
+        confirm: {
+            text: "Sí, eliminar!",
+            value: true,
+            visible: true,
+            className: "",
+            closeModal: true,
+        }
       }
-    })
-    .fail(function (data) {
-      toastr.error('', 'No ha sido posible eliminar el caso.');
+    }).then(isConfirm => {
+      if (isConfirm) {
+        var form_id = $(this).data('id');
+        var url = Urls.workflow_w_id(form_id);
+        lockScreen(1);
+        $.ajax({
+          type: "DELETE",
+          url: url,
+          async: false,
+        })
+        .done(function (data) {
+          response = data;
+          if (response.ok) {
+            toastr.success('', 'Se ha eliminado el caso exitosamente.');
+            var timer = setTimeout(function() {
+              window.location='/ingresos'
+            }, 2000);
+          } else {
+            toastr.error('', 'No ha sido posible eliminar el caso.');
+          }
+        })
+        .fail(function (data) {
+          toastr.error('', 'No ha sido posible eliminar el caso.');
+        });
+      }
     });
   });
 

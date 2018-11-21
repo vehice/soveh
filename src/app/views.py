@@ -129,7 +129,7 @@ def download_report(request, id):
     entryform_id = form.content_object.id
     pdf = make_pdf_file(entryform_id)
     response = HttpResponse(pdf, content_type='application/pdf')
-    response['Content-Disposition'] = 'inline;filename=testing_informe.pdf'
+    response['Content-Disposition'] = 'attachment; filename="informe.pdf"'
 
     return response
 
