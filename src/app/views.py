@@ -113,7 +113,6 @@ def make_pdf_file(id):
             'margin-left': "5mm",
             'margin-right': "5mm",
             'margin-bottom': "5mm",
-            'no-stop-slow-scripts': '',
             'load-error-handling': "ignore",
             'disable-javascript': ''
         }
