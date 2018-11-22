@@ -18,20 +18,21 @@
   <div href="/workflow/<%= form_id %>/<%= current_step_tag %>" class="list-group-item list-group-item-action">
     <div class="media-body">
       <% if (current_step == 4) { %>
-        <h4 class="list-group-item-heading"><%= exam_name %>:
-          <a class="btn btn-primary btn-sm" href="/workflow/<%= form_id %>/<%= current_step_tag %>"><i class="fa fa-plus"></i> Ingresar Hallazgos </a>
-          <span class="font-medium-4 float-right pt-1">Tincion: <%= exam_name %></span>
-        </h4>
+        <div class="row">
+          <div class="col-sm-4 font-medium-4 text-left"><%= exam_name %></div>
+          <div class="col-sm-4 font-medium-4 text-center"><a class="btn btn-outline-secondary square" href="/workflow/<%= form_id %>/<%= current_step_tag %>"><i class="fa fa-plus"></i> Ingresar Hallazgos </a></div>
+          <div class="col-sm-4 font-medium-4 text-right">Tinción: <%= exam_name %></div>
+        </div>
       <% } else { %>
-        <h4 class="list-group-item-heading">
-          <%= exam_name %>: 
-          <a href="/workflow/<%= form_id %>/<%= current_step_tag %>"><i class="fa fa-external-link"></i> Entrar al análisis </a>
-          <span class="font-medium-4 float-right pt-1">Tincion: <%= exam_name %></span>
-        </h4>
+        <div class="row">
+          <div class="col-sm-4 font-medium-4 text-left"><%= exam_name %></div>
+          <div class="col-sm-4 font-medium-4 text-center"><a class="btn btn-outline-secondary square" href="/workflow/<%= form_id %>/<%= current_step_tag %>"><i class="fa fa-arrow-right"></i> Ir al análisis </a></div>
+          <div class="col-sm-4 font-medium-4 text-right">Tinción: <%= exam_name %></div>
+        </div>
       <% } %>
 
       <% if (current_step == 4) { %>
-        <p class="list-group-item-text"><%= no_slice %> cortes - <a target="_blank" href="/download-report/<%= form_id %>"><span class="font-medium-0 ">Previsualizar Informe</span></a></p>
+        <p class="list-group-item-text"><%= no_slice %> cortes - <a href="/preview-report/<%= form_id %>"><span class="font-medium-0 ">Previsualizar Informe</span></a></p>
        <% } else { %>
         <p class="list-group-item-text"><%= no_slice %> cortes</p>
       <% } %>
@@ -43,10 +44,11 @@
 <% } else { %>
   <div href="/workflow/<%= form_id %>/<%= current_step_tag %>" class="list-group-item list-group-item-action">
     <div class="media-body">
-      <h4 class="list-group-item-heading"><%= exam_name %>
-        <%= exam_name %>
-        <a target="_blank" href="/download-report/<%= form_id %>"><span class="font-medium-4 float-right pt-1">Descargar PDF</span></a>
-      </h4>
+      <div class="row">
+        <div class="col-sm-4 font-medium-4 text-left"><%= exam_name %></div>
+        <div class="col-sm-4 font-medium-4 text-center"><a class="btn btn-outline-secondary square" target="_blank" href="/download-report/<%= form_id %>"><i class="fa fa-download"></i> Descargar Informe</a></div>
+        <div class="col-sm-4 font-medium-4 text-right">Tinción: <%= exam_name %></div>
+      </div>
       <p class="list-group-item-text">Análisis Finalizado</p>
     </div>
   </div>

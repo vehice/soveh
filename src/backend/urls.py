@@ -42,5 +42,9 @@ urlpatterns = [
     path(
         'organs-slice/<int:slice_id>',
         csrf_exempt(views.organs_by_slice),
-        name="organs_by_slice")
+        name="organs_by_slice"),
+    path(
+        'analysis/<int:analysisform_id>',
+        csrf_exempt(views.set_analysis_comments),
+        name="set_analysis_comments")
 ]

@@ -1,231 +1,177 @@
 {% extends 'base_pdf.html' %}
 {% load static %}
 {% block stylesheets %}
+
 <style type="text/css">
-    .text-white {
-        color: white !important;
-    }
-/*     {
-      @include float-left;
-    }*/
-/*    .bold{
-        font-weight: bold;
-    }
-    .table_width{
-        width: 98%;
-    }
-    .font_header{
-        font-size: 12px !important;
-        font-family: 'Source Sans Pro' !important;
-        color: #333 !important;
-    }
-
-    .font_table{
-        font-size: 12px !important;
-        font-family: 'Source Sans Pro' !important;
-        color: #333 !important;
-    }
-
-    .table_padding td, .table_padding th{
-        padding-top: 2px !important;
-        padding-left: 2px !important;
-        padding-right: 2px !important;
-        padding-bottom: 2px !important;
-    }
-
-    .table_description{
-        vertical-align: middle;
-        text-align: center;
-        padding-top: 10px !important;
-        padding-bottom: 10px !important;
-
-    }
-    .table_description table{
-        border: 1px solid #000000;
-        background-color: #ffc689;
-        margin-right: auto;
-        margin-left: auto;
-        width: 500px;
-    }*/
-
-/*    table {
-        page-break-inside: auto !important;
-        table-layout:fixed;
-        word-wrap: break-word;
-    }
-
-    thead {
-        display: table-header-group !important;
-    }
-
-    tfoot {
-        display: table-row-group !important;
-    }
-
-    tr {
-        page-break-inside: avoid !important;
-        page-break-after: auto !important;
-    }
-
-    td, th {
-        page-break-inside: avoid !important;
-    }
-    */
-.container {
+  .text-white {
+    color: white !important;
+  }
+  .container {
     font-family: "Verdana" !important;
-}
-
+  }
 </style>
+
 {% endblock stylesheets %}
 
 {% block body %}
 <div class="container">
-    <div class="row">
-        <div class="col-xs-12">
-            <!-- <img src="..." class="rounded float-left" alt="..."> -->
-            <img alt="" src="{% static 'assets/images/logo/logo.png' %}" class="img-fluid float-left">
-        </div>
+  <div class="row" style="page-break-inside: avoid !important;">
+    <div class="col-xs-12">
+      <!-- <img src="..." class="rounded float-left" alt="..."> -->
+      <img alt="" src="{% static 'assets/images/logo/logo.png' %}" class="img-fluid float-left">
     </div>
+  </div>
 
-    <div class="row">
-        <div class="col-xs-12" style="padding-top:5% !important; padding-bottom:3% !important;">
-            <center><h3 class="text-danger"><strong>INFORME RESULTADOS</strong></h3></center>
-        </div>
-        <div class="col-xs-12">
-            <table class="table table-bordered" style="font-size:18px !important;">
-                <tbody>
-                    <tr>
-                        <td class="danger col-xs-3">N° Caso</td>
-                        <td colspan="2">{{ report.0.analysis.entryform.no_caso}}</td>
-                    </tr>
-                    <tr>
-                        <td class="danger">Empresa</td>
-                        <td colspan="2">{{ report.0.analysis.entryform.customer.name}}</td>
-                    </tr>
-                    <tr>
-                        <td class="danger">Centro</td>
-                        <td colspan="2">{{ report.0.analysis.entryform.center|default:""}}</td>
-                    </tr>
-                    <tr>
-                        <td class="danger">Especie - E° Desarrollo</td>
-                        <td>
-                            {{ report.0.analysis.entryform.specie.name }}
-                        </td>
-                        <td>
-                            {{ report.0.analysis.entryform.larvalstage.name }}
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="danger">Estanque/Jaula</td>
-                        <td colspan="2">
-                            {% for ident in report.0.analysis.entryform.identification_set.all %}
-                                {{ ident.cage }} / {{ ident.group }} -
-                            {% endfor %}
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="danger">Fuente de agua</td>
-                        <td colspan="2">{{ report.0.analysis.entryform.watersource.name }}</td>
-                    </tr>
-                    <tr>
-                        <td class="danger">Análisis</td>
-                        <td colspan="2">{{ report.0.analysis.exam.name }} {{ report.0.analysis.entryform.larvalstage.name }}</td>
-                    </tr>
-                    <tr>
-                        <td class="danger">Fecha muestreo</td>
-                        <td colspan="2">{{ report.0.analysis.entryform.sampled_at }}</td>
-                    </tr>
-                    <tr>
-                        <td class="danger">Fecha de recepción</td>
-                        <td colspan="2">{{ report.0.analysis.entryform.created_at }}</td>
-                    </tr>
-                    <tr>
-                        <td class="danger">Fecha informe</td>
-                        <td colspan="2"></td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
+  <div class="row" style="page-break-inside: avoid !important;">
+    <div class="col-xs-12" style="padding-top:5% !important; padding-bottom:3% !important;">
+      <center><h3 class="text-danger"><strong>INFORME RESULTADOS</strong></h3></center>
     </div>
+    <div class="col-xs-12">
+      <table class="table table-bordered">
+        <tbody>
+          <tr>
+            <td class="danger col-xs-3">N° Caso</td>
+            <td colspan="2">{{ report.0.analysis.entryform.no_caso}}</td>
+          </tr>
+          <tr>
+            <td class="danger">Empresa</td>
+            <td colspan="2">{{ report.0.analysis.entryform.customer.name}}</td>
+          </tr>
+          <tr>
+            <td class="danger">Centro</td>
+            <td colspan="2">{{ report.0.analysis.entryform.center|default:""}}</td>
+          </tr>
+          <tr>
+            <td class="danger">Especie - E° Desarrollo</td>
+            <td>
+              {{ report.0.analysis.entryform.specie.name }}
+            </td>
+            <td>
+              {{ report.0.analysis.entryform.larvalstage.name }}
+            </td>
+          </tr>
+          <tr>
+            <td class="danger">Estanque/Jaula</td>
+            <td colspan="2">
+              {% for ident in report.0.analysis.entryform.identification_set.all %}
+              {{ ident.cage }} / {{ ident.group }} -
+              {% endfor %}
+            </td>
+          </tr>
+          <tr>
+            <td class="danger">Fuente de agua</td>
+            <td colspan="2">{{ report.0.analysis.entryform.watersource.name }}</td>
+          </tr>
+          <tr>
+            <td class="danger">Análisis</td>
+            <td colspan="2">{{ report.0.analysis.exam.name }} {{ report.0.analysis.entryform.larvalstage.name }}</td>
+          </tr>
+          <tr>
+            <td class="danger">Fecha muestreo</td>
+            <td colspan="2">{{ report.0.analysis.entryform.sampled_at }}</td>
+          </tr>
+          <tr>
+            <td class="danger">Fecha de recepción</td>
+            <td colspan="2">{{ report.0.analysis.entryform.created_at }}</td>
+          </tr>
+          <tr>
+            <td class="danger">Fecha informe</td>
+            <td colspan="2"></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
 
-    <div class="row">
-        <div class="col-xs-12" style="padding-top:5% !important; padding-bottom:3% !important;">
-            <center><h3 class="text-danger"><strong>HALLAZGOS HISTOLÓGICOS</strong></h3></center>
-        </div>
-        <div class="col-xs-12">
-            <div class="">
-                <table class="table table-bordered">
-                    <thead class="bg-danger text-white">
-                        <tr>
-                            <!-- <th>MUESTRA</th> -->
-                            <th>ANÁLISIS</th>
-                            <th>HALLAZGO</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <!-- <td>{{report.0.analysis.entryform.name}}</td> -->
-                            <td>{{report.0.analysis.exam.name}}</td>
-                            <td>
-                                {% regroup report by organ.name as organ_list %}
-                                <ul>
-                                    {% for organ in organ_list %}
-                                        <li><strong><u>{{ organ.grouper }}:</u></strong>
-                                            Se observa
-                                            {% for item in organ.list %}
-                                                {{ item.pathology.name }} en {{ item.organ_location.name }} {{ item.diagnostic_intensity.name }} (Muestra {{item.slice.cassettes.all.0.cassette_name}}),
-                                            {% endfor %}
-                                            
-                                        </li>
-                                    {% endfor %}
-                                </ul>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
+  <div class="row" style="page-break-inside: avoid !important;">
+    <div class="col-xs-12" style="padding-top:5% !important; padding-bottom:3% !important;">
+      <center><h3 class="text-danger"><strong>HALLAZGOS HISTOLÓGICOS</strong></h3></center>
     </div>
+    <div class="col-xs-12">
+      <div class="">
+        <table class="table table-bordered">
+          <thead class="bg-danger text-white">
+            <tr>
+              <!-- <th>MUESTRA</th> -->
+              <th>ANÁLISIS</th>
+              <th>HALLAZGO</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <!-- <td>{{report.0.analysis.entryform.name}}</td> -->
+              <td>{{report.0.analysis.exam.name}}</td>
+              <td>
+                {% regroup report by organ.name as organ_list %}
+                <ul>
+                  {% for organ in organ_list %}
+                  <li><strong><u>{{ organ.grouper }}:</u></strong>
+                    Se observa
+                    {% for item in organ.list %}
+                    {{ item.pathology.name }} en {{ item.organ_location.name }} {{ item.diagnostic_intensity.name }} (Muestra {{item.slice.cassettes.all.0.cassette_name}}),
+                    {% endfor %}
 
-    <div class="row">
-        <div class="col-xs-12" style="padding-top:5% !important; padding-bottom:3% !important;">
-            <center><h3 class="text-danger"><strong>DIAGNÓSTICO</strong></h3></center>
-        </div>
-        <div class="col-xs-12">
-            <div class="">
-                <table class="table table-bordered">
-                    <thead class="bg-danger text-white">
-                        <tr>
-                            <!-- <th>MUESTRA</th> -->
-                            <th>ANÁLISIS</th>
-                            <th>DIAGNÓSTICO</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <!-- <td>{{report.0.analysis.entryform.name}}</td> -->
-                            <td>{{report.0.analysis.exam.name}}</td>
-                            <td>
-                                {% regroup report by organ.name as organ_list %}
-                                <ul>
-                                    {% for organ in organ_list %}
-                                        <li><strong><u>{{ organ.grouper }}:</u></strong>
-                                            <ul>
-                                                {% for item in organ.list %}
-                                                    <li>{{ item.diagnostic.name.title }} en {{ item.organ_location.name }} {{ item.diagnostic_intensity.name }} (Muestra {{item.slice.cassettes.all.0.cassette_name}}) </li>
-                                                {% endfor %}
-                                            </ul>
-                                            
-                                        </li>
-                                    {% endfor %}
-                                </ul>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
+                  </li>
+                  {% endfor %}
+                </ul>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
+  </div>
+
+  <div class="row" style="page-break-inside: avoid !important;">
+    <div class="col-xs-12" style="padding-top:5% !important; padding-bottom:3% !important;">
+      <center><h3 class="text-danger"><strong>DIAGNÓSTICO</strong></h3></center>
+    </div>
+    <div class="col-xs-12">
+      <div class="">
+        <table class="table table-bordered">
+          <thead class="bg-danger text-white">
+            <tr>
+              <!-- <th>MUESTRA</th> -->
+              <th>ANÁLISIS</th>
+              <th>DIAGNÓSTICO</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <!-- <td>{{report.0.analysis.entryform.name}}</td> -->
+              <td>{{report.0.analysis.exam.name}}</td>
+              <td>
+                {% regroup report by organ.name as organ_list %}
+                <ul>
+                  {% for organ in organ_list %}
+                  <li><strong><u>{{ organ.grouper }}:</u></strong>
+                    <ul>
+                      {% for item in organ.list %}
+                      <li>{{ item.diagnostic.name.title }} en {{ item.organ_location.name }} {{ item.diagnostic_intensity.name }} (Muestra {{item.slice.cassettes.all.0.cassette_name}}) </li>
+                      {% endfor %}
+                    </ul>
+
+                  </li>
+                  {% endfor %}
+                </ul>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="row" style="page-break-inside: avoid !important;">
+    <div class="col-xs-12" style="padding-top:5% !important; padding-bottom:3% !important;">
+      <center><h3 class="text-danger"><strong>COMENTARIOS</strong></h3></center>
+    </div>
+    <div class="col-xs-12">
+      <div class="jumbotron">
+        <p>{{ report.0.analysis.comments|default:"" }}</p>
+      </div>
+    </div>
+  </div>
 </div>
 
 {% endblock body %}

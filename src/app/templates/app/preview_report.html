@@ -1,0 +1,246 @@
+{% extends 'layout.html' %}
+{% load static %}
+{% block stylesheets %}
+  <style type="text/css">
+    .text-white {
+      color: white !important;
+    }
+
+    .container {
+      font-family: "Verdana" !important;
+    }
+
+  </style>
+{% endblock stylesheets %}
+{% block content_header %}
+<div class="content-header row">
+  <div class="content-header-left col-md-6 col-12 mb-2">
+    <h3 class="content-header-title mb-0">Ingreso</h3>
+    <div class="row breadcrumbs-top">
+      <div class="breadcrumb-wrapper col-12">
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item">
+            <a href="/">INICIO</a>
+          </li>
+          <li class="breadcrumb-item">
+            <a href="#">CASOS</a>
+          </li>
+          <li class="breadcrumb-item active">
+            {{ report.0.analysis.entryform.no_caso }}
+          </li>
+        </ol>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock content_header %}
+
+{% block content %}
+<div class="row">
+  <div class="col-md-10 offset-md-1">
+    <div class="card">
+      <div class="card-header">
+        <div class="col-md-12">
+            <!-- <img src="..." class="rounded float-left" alt="..."> -->
+            <img alt="" src="{% static 'assets/images/logo/logo.png' %}" class="img-fluid float-left" width="200px">
+            <div class="float-right"><a href="/workflow/{{form_parent_id}}/step_4"><h3><i class="fa fa-arrow-left fa-fw"></i> <strong>Volver a listado de análisis </strong></h3></a></div>
+        </div>
+      </div>
+
+      <div class="card-content">
+        <div class="card-body">
+  
+          <div class="col-md-12" style="padding-bottom:3% !important;">
+              <center><h3 class="text-danger"><strong>INFORME RESULTADOS</strong></h3></center>
+          </div>
+          <div class="col-md-12">
+              <table class="table table-bordered">
+                  <tbody>
+                      <tr>
+                          <td class="danger">N° Caso</td>
+                          <td colspan="2">{{ report.0.analysis.entryform.no_caso}}</td>
+                      </tr>
+                      <tr>
+                          <td class="danger">Empresa</td>
+                          <td colspan="2">{{ report.0.analysis.entryform.customer.name}}</td>
+                      </tr>
+                      <tr>
+                          <td class="danger">Centro</td>
+                          <td colspan="2">{{ report.0.analysis.entryform.center|default:""}}</td>
+                      </tr>
+                      <tr>
+                          <td class="danger">Especie - E° Desarrollo</td>
+                          <td>
+                              {{ report.0.analysis.entryform.specie.name }}
+                          </td>
+                          <td>
+                              {{ report.0.analysis.entryform.larvalstage.name }}
+                          </td>
+                      </tr>
+                      <tr>
+                          <td class="danger">Estanque/Jaula</td>
+                          <td colspan="2">
+                              {% for ident in report.0.analysis.entryform.identification_set.all %}
+                                  {{ ident.cage }} / {{ ident.group }} -
+                              {% endfor %}
+                          </td>
+                      </tr>
+                      <tr>
+                          <td class="danger">Fuente de agua</td>
+                          <td colspan="2">{{ report.0.analysis.entryform.watersource.name }}</td>
+                      </tr>
+                      <tr>
+                          <td class="danger">Análisis</td>
+                          <td colspan="2">{{ report.0.analysis.exam.name }} {{ report.0.analysis.entryform.larvalstage.name }}</td>
+                      </tr>
+                      <tr>
+                          <td class="danger">Fecha muestreo</td>
+                          <td colspan="2">{{ report.0.analysis.entryform.sampled_at }}</td>
+                      </tr>
+                      <tr>
+                          <td class="danger">Fecha de recepción</td>
+                          <td colspan="2">{{ report.0.analysis.entryform.created_at }}</td>
+                      </tr>
+                      <tr>
+                          <td class="danger">Fecha informe</td>
+                          <td colspan="2"></td>
+                      </tr>
+                  </tbody>
+              </table>
+          </div>
+          <div class="col-md-12" style="padding-top:5% !important; padding-bottom:3% !important;">
+              <center><h3 class="text-danger"><strong>HALLAZGOS HISTOLÓGICOS</strong></h3></center>
+          </div>
+          <div class="col-md-12">
+              <div class="">
+                  <table class="table table-bordered">
+                      <thead class="bg-danger text-white">
+                          <tr>
+                              <!-- <th>MUESTRA</th> -->
+                              <th>ANÁLISIS</th>
+                              <th>HALLAZGO</th>
+                          </tr>
+                      </thead>
+                      <tbody>
+                          <tr>
+                              <!-- <td>{{report.0.analysis.entryform.name}}</td> -->
+                              <td>{{report.0.analysis.exam.name}}</td>
+                              <td>
+                                  {% regroup report by organ.name as organ_list %}
+                                  <ul>
+                                      {% for organ in organ_list %}
+                                          <li><strong><u>{{ organ.grouper }}:</u></strong>
+                                              Se observa
+                                              {% for item in organ.list %}
+                                                  {{ item.pathology.name }} en {{ item.organ_location.name }} {{ item.diagnostic_intensity.name }} (Muestra {{item.slice.cassettes.all.0.cassette_name}}),
+                                              {% endfor %}
+                                              
+                                          </li>
+                                      {% endfor %}
+                                  </ul>
+                              </td>
+                          </tr>
+                      </tbody>
+                  </table>
+              </div>
+          </div>
+
+          <div class="col-md-12" style="padding-top:5% !important; padding-bottom:3% !important;">
+              <center><h3 class="text-danger"><strong>DIAGNÓSTICO</strong></h3></center>
+          </div>
+          <div class="col-md-12">
+              <div class="">
+                  <table class="table table-bordered">
+                      <thead class="bg-danger text-white">
+                          <tr>
+                              <!-- <th>MUESTRA</th> -->
+                              <th>ANÁLISIS</th>
+                              <th>DIAGNÓSTICO</th>
+                          </tr>
+                      </thead>
+                      <tbody>
+                          <tr>
+                              <!-- <td>{{report.0.analysis.entryform.name}}</td> -->
+                              <td>{{report.0.analysis.exam.name}}</td>
+                              <td>
+                                  {% regroup report by organ.name as organ_list %}
+                                  <ul>
+                                      {% for organ in organ_list %}
+                                          <li><strong><u>{{ organ.grouper }}:</u></strong>
+                                              <ul>
+                                                  {% for item in organ.list %}
+                                                      <li>{{ item.diagnostic.name.title }} en {{ item.organ_location.name }} {{ item.diagnostic_intensity.name }} (Muestra {{item.slice.cassettes.all.0.cassette_name}}) </li>
+                                                  {% endfor %}
+                                              </ul>
+                                              
+                                          </li>
+                                      {% endfor %}
+                                  </ul>
+                              </td>
+                          </tr>
+                      </tbody>
+                  </table>
+              </div>
+          </div>
+
+          <div class="col-md-12" style="padding-top:5% !important; padding-bottom:3% !important;">
+            <center><h3 class="text-danger"><strong>COMENTARIOS</strong></h3></center>
+          </div>
+          <div class="col-md-12">
+            <div class="input-group">
+              <textarea class="form-control" id="analysis_comments" rows="5" aria-describedby="save_comments" placeholder="Ingrese comentarios aquí">{{report.0.analysis.comments|default:""}}</textarea>
+              <div class="input-group-append" id="save_comments">
+                <button class="btn btn-outline-primary save_analysis_comments" data-id="{{report.0.analysis.pk}}" type="button">Guardar</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-md-12" style="padding-top:5% !important; padding-bottom:3% !important;">
+            <center><h3 class="text-danger"><strong>IMÁGENES</strong></h3></center>
+          </div>
+          <div class="col-md-12">
+            --
+          </div>
+
+        </div>
+    </div>
+</div>
+
+{% endblock content %}
+
+{% block scripts %}
+
+<script src="{% url 'js_reverse' %}" type="text/javascript"></script>
+
+<script>
+  
+  $(document).on('click', '.save_analysis_comments', function(e){
+    var analysisform_id = $(this).data('id');
+    var comments = $('#analysis_comments').val();
+    var url = Urls.set_analysis_comments(analysisform_id);
+    lockScreen(1);
+    $.ajax({
+      type: "POST",
+      url: url,
+      data: {'comments': comments},
+      async: false,
+    })
+    .done(function (data) {
+      if (data.ok){
+        toastr.success('Se han guardado los comentarios exitosamente.', 'Bien hecho!');
+        setTimeout(function() {
+          location.reload();
+        }, 3000);
+      } else {
+        lockScreen(0);
+        toastr.error('Lo sentimos!', 'No ha sido posible guardar los comentarios. Favor contacte un administrador o reintente.');
+      }
+    })
+    .fail(function () {
+      lockScreen(0);
+      toastr.error('Lo sentimos!', 'No ha sido posible guardar los comentarios. Favor contacte un administrador o reintente.');
+    });
+  });
+
+</script>
+{% endblock scripts %}

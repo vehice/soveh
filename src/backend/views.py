@@ -434,6 +434,16 @@ def organs_by_slice(request, slice_id=None):
 
         return JsonResponse(data)
 
+def set_analysis_comments(request, analysisform_id):
+    try:
+        analysis = AnalysisForm.objects.get(pk=analysisform_id)
+        comments = request.POST.get('comments')
+        print (comments)
+        analysis.comments = comments
+        analysis.save()
+        return JsonResponse({'ok': True})
+    except:
+        return JsonResponse({'ok': False})
 
 # Any process function must to have a switcher for choice which method will be call
 def process_entryform(request):

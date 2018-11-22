@@ -212,6 +212,7 @@ class AnalysisForm(models.Model):
     organs = models.ManyToManyField(Organ)
     no_fish = models.IntegerField(null=True, blank=True)
     forms = GenericRelation(Form)
+    comments = models.TextField(blank=True, null=True)
 
 
 class Cassette(models.Model):
