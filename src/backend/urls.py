@@ -46,5 +46,16 @@ urlpatterns = [
     path(
         'analysis/<int:analysisform_id>',
         csrf_exempt(views.set_analysis_comments),
-        name="set_analysis_comments")
+        name="set_analysis_comments"),
+    path(
+        'images/<int:report_id>',
+        csrf_exempt(views.IMAGES.as_view()),
+        name='images',
+    ),
+    # path(
+    #     'images/<int:image_id>',
+    #     csrf_exempt(views.IMAGES.as_view()),
+    #     'images_w_id'
+    # ),
+
 ]

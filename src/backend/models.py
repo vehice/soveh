@@ -244,6 +244,7 @@ class Slice(models.Model):
 
 class Img(models.Model):
     file = models.ImageField(upload_to='vehice_images')
+    desc = models.TextField(blank=True, null=True)
     time_stamp = models.DateTimeField(auto_now_add=True)
 
     @property

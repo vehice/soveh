@@ -17,8 +17,8 @@
             <th>Muestra</th>
             <th>Corte</th>
             <th>Organos</th>
-            <th><center>Hallazgos</center></th>
-            <th><center>Opciónes</center></th>
+            <th><center>Nro hallazgos</center></th>
+            <th><center>Opciónes hallazgos</center></th>
           </tr>
         </thead>
         <tbody>
@@ -133,6 +133,7 @@
                 <th>Diagnóstico</th>
                 <th>Distribución</th>
                 <th>Intensidad</th>
+                <th>Imágenes</th>
                 <th>Opciónes</th>
               </tr>
             </thead>
@@ -146,6 +147,9 @@
       </div>
     </div>
   </div>
+</div>
+
+<div id="uploader">
 </div>
 
 <script id="diagnostic_row" type="text/x-lodash-template">
@@ -194,9 +198,14 @@
     <td>
       <%= diagnostic_intensity %>
     </td>
+    <td id="image-box-<%= report_id %>">
+      <% _.each( images, function( img ){ %>
+        <a target="_blank" href="<%= img.url %>"> <%= img.name %></a></br>
+      <% }); %>
+    </td>
     <td class="text-center">
       <a title="Eliminar hallazgo" id="remove_pathology" data-report-id="<%= report_id %>" <i class="fa fa-trash fa-fw fa-2x"></i></a>
-      <!-- <a title="Cargar Imágen" id="load_img" data-report-id="<%= report_id %>" <i class="fa fa-upload fa-fw fa-2x"></i></a> -->
+      <a title="Cargar Imágen" id="load_img" data-id="<%= report_id %>" <i class="fa fa-upload fa-fw fa-2x"></i></a>
     </td>
   </tr>
 </script>

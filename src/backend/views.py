@@ -356,6 +356,14 @@ class REPORT(View):
                 diagnostic = report.diagnostic.name if report.diagnostic else ""
                 diagnostic_distribution = report.diagnostic_distribution.name if report.diagnostic_distribution else ""
                 diagnostic_intensity = report.diagnostic_intensity.name if report.diagnostic_intensity else ""
+                image_list = []
+                for img in report.images.all():
+                    image_list.append({
+                        'name': img.file.name.split("/")[-1],
+                        'url': img.file.url,
+                        'id': img.id
+                    })
+
                 reports.append({
                     "report_id": report.id,
                     "organ": organ,
@@ -364,6 +372,7 @@ class REPORT(View):
                     "diagnostic": diagnostic,
                     "diagnostic_distribution": diagnostic_distribution,
                     "diagnostic_intensity": diagnostic_intensity,
+                    "images": image_list
                 })
 
             data = {'reports': reports}
@@ -409,12 +418,15 @@ class IMAGES(View):
         try:
             if report_id:
                 report = Report.objects.get(pk=report_id)
+                var_post = request.POST.copy()
+                desc = var_post.get('comments')
                 img_file = request.FILES['file']
                 img = Img.objects.create(
                     file = img_file,
+                    desc = desc,
                 )
                 report.images.add(img)
-                return JsonResponse({'ok': True})
+                return JsonResponse({'ok': True, 'img_url': img.file.url, 'img_name': img.file.name.split('/')[-1]})
             else:
                 return JsonResponse({'ok': False})
         except:

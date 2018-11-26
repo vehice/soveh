@@ -139,6 +139,69 @@ function init_step_4() {
       })
   });
 
+  $(document).on('click', '#load_img', function(e) {
+    var report_id = $(this).data('id');
+    var url = Urls.images(report_id);
+    var temp = "";
+    temp += '<div class="modal fade" id="load_images_modal" role="dialog">';
+    temp += '<div class="modal-dialog" role="document"><div class="modal-content"> <div class="modal-header"> <h3 class="modal-title"> Cargador de imágen </h3></div>';
+    temp += '<div class="modal-body">';
+    temp += '<div class="col-md-12"><form id="mydropzone" action="'+url+'" class="dropzone needsclick">';
+    temp += '<div class="dz-message" data-dz-message>';
+    temp += '<center><span><h3>Arrastra o selecciona la imágen que deseas cargar</h3></span></center>';
+    temp += '</div>';    
+    temp += '</form></div><div class="col-md-12"><p><h5><strong>Observaciónes</strong></h5></p>';
+    temp += '<div class="col-md-12"><textarea rows="3" class="form-control textarea-comments"></textarea></div>';
+    temp += '</div></div>';
+    temp += '<div class="modal-footer">';
+    temp += '<input type="reset" class="btn btn-secondary" data-dismiss="modal" value="Salir">';
+    temp += '<input type="button" class="btn btn-primary submit-file" value="Cargar Imágen""></div></div></div>';
+
+    $('#uploader').html(temp);
+    $("#mydropzone").dropzone({
+      autoProcessQueue: false,
+      acceptedFiles: ".png, .jpeg, .jpg",
+      init: function() {
+        var submitButton = document.querySelector(".submit-file")
+        myDropzone = this;
+        submitButton.addEventListener("click", function() {
+          myDropzone.processQueue();
+        });
+        this.on('sending', function(file, xhr, formData){
+          lockScreen(1);
+          var value = $('.textarea-comments').val();
+          formData.append('comments', value);
+        });
+
+        this.on("success", function(file, responseText) {
+          if (responseText.ok) {
+            toastr.success('', 'Imágen cargada exitosamente.');
+            $('.textarea-comments').val("");
+            this.removeFile(file);
+            $('#image-box-'+report_id).append('<a target="_blank" href="'+responseText.img_url+'">'+responseText.img_name+'</a>');
+          } else {
+            toastr.error('', 'No ha sido posible cargar la imágen. Intente nuevamente.');
+          }
+          lockScreen(0);
+        });
+
+        this.on("error", function(file, response) {
+          this.removeFile(file);
+          bootbox.hideAll();
+          toastr.error('', 'No ha sido posible cargar la imágen. Intente nuevamente.');
+          lockScreen(0);
+        });
+
+        this.on("addedfile", function() {
+          if (this.files[1]!=null){
+            this.removeFile(this.files[0]);
+          }
+        });
+      },
+    });
+    $('#load_images_modal').modal('show');
+  });
+
 }
 
 function initializeSelect2NewPathologyModal() {
@@ -287,6 +350,7 @@ function populatePathologyTable(data) {
     row.organ = item.organ
     row.organ_location = item.organ_location;
     row.pathology = item.pathology;
+    row.images = item.images;
 
     addPathologyRow(row)
   });
