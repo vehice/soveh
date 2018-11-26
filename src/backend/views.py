@@ -351,7 +351,7 @@ class REPORT(View):
             reports = []
             for report in report_qs:
                 organ = report.organ.name if report.organ else ""
-                organ_location = report.organ_location.name if report.organ else ""
+                organ_location = report.organ_location.name if report.organ_location else ""
                 pathology = report.pathology.name if report.pathology else ""
                 diagnostic = report.diagnostic.name if report.diagnostic else ""
                 diagnostic_distribution = report.diagnostic_distribution.name if report.diagnostic_distribution else ""
