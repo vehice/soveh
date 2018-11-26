@@ -12,7 +12,6 @@ from .models import *
 from workflows.models import *
 from accounts.models import *
 
-
 class CUSTOMER(View):
     http_method_names = ['post']
 
@@ -345,27 +344,26 @@ class WORKFLOW(View):
         return JsonResponse({'ok': True})
 
 class REPORT(View):
+
     def get(self, request, slice_id):
         if slice_id:
             report_qs = Report.objects.filter(slice=slice_id)
-
             reports = []
             for report in report_qs:
+                organ = report.organ.name if report.organ else ""
+                organ_location = report.organ_location.name if report.organ else ""
+                pathology = report.pathology.name if report.pathology else ""
+                diagnostic = report.diagnostic.name if report.diagnostic else ""
+                diagnostic_distribution = report.diagnostic_distribution.name if report.diagnostic_distribution else ""
+                diagnostic_intensity = report.diagnostic_intensity.name if report.diagnostic_intensity else ""
                 reports.append({
-                    "report_id":
-                    report.id,
-                    "organ":
-                    report.organ.name,
-                    "organ_location":
-                    report.organ_location.name,
-                    "pathology":
-                    report.pathology.name,
-                    "diagnostic":
-                    report.diagnostic.name,
-                    "diagnostic_distribution":
-                    report.diagnostic_distribution.name,
-                    "diagnostic_intensity":
-                    report.diagnostic_intensity.name
+                    "report_id": report.id,
+                    "organ": organ,
+                    "organ_location": organ_location,
+                    "pathology": pathology,
+                    "diagnostic": diagnostic,
+                    "diagnostic_distribution": diagnostic_distribution,
+                    "diagnostic_intensity": diagnostic_intensity,
                 })
 
             data = {'reports': reports}
@@ -405,6 +403,22 @@ class REPORT(View):
 
         return JsonResponse({'ok': True})
 
+class IMAGES(View):
+    
+    def post(self, request, report_id):
+        try:
+            if report_id:
+                report = Report.objects.get(pk=report_id)
+                img_file = request.FILES['file']
+                img = Img.objects.create(
+                    file = img_file,
+                )
+                report.images.add(img)
+                return JsonResponse({'ok': True})
+            else:
+                return JsonResponse({'ok': False})
+        except:
+             return JsonResponse({'ok': False})
 
 def organs_by_slice(request, slice_id=None):
     if slice_id:

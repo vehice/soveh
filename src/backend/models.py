@@ -242,6 +242,13 @@ class Slice(models.Model):
     entryform = models.ForeignKey(
         EntryForm, null=True, on_delete=models.SET_NULL)
 
+class Img(models.Model):
+    file = models.ImageField(upload_to='vehice_images')
+    time_stamp = models.DateTimeField(auto_now_add=True)
+
+    @property
+    def is_new(self):
+        return timezone.now() - timedelta(minutes=1) <= self.time_stamp
 
 class Report(models.Model):
     analysis = models.ForeignKey(
@@ -258,3 +265,4 @@ class Report(models.Model):
         DiagnosticDistribution, null=True, on_delete=models.SET_NULL)
     diagnostic_intensity = models.ForeignKey(
         DiagnosticIntensity, null=True, on_delete=models.SET_NULL)
+    images = models.ManyToManyField(Img)
