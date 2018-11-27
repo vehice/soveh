@@ -156,6 +156,7 @@ class EntryForm(models.Model):
     sampled_at = models.DateTimeField(null=True, blank=True)
     forms = GenericRelation(Form)
     flag_subflow = models.BooleanField(default=False)
+    responsible = models.CharField(max_length=250, null=True, blank=True)
 
     def __str__(self):
         return str(self.pk)

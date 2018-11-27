@@ -66,6 +66,7 @@ function init_step_4() {
 
   $(document).on('click', '#new_pathology_save', function (e) {
     var url = Urls.report();
+    var form_id = $(this).data('form');
     var form_data = $("#new_pathology :input").serialize();
     var pathology = $('#pathology_select').find(':selected').text();
     lockScreen(1);
@@ -82,12 +83,12 @@ function init_step_4() {
         $('#new_pathology').modal('hide');
         toastr.success('', 'Hallazgo ingresado exitosamente.');
         setTimeout(function() {
-          location.reload();
+          window.location.href = "/workflow/"+form_id+"/step_4";
         }, 3000);
       } else {
         toastr.error('', 'Error al ingresar hallazgo. Favor intentar nuevamente!');
         setTimeout(function() {
-          location.reload();
+          window.location.href = "/workflow/"+form_id+"/step_4";
         }, 3000);
       }
     })

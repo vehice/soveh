@@ -48,7 +48,10 @@ def show_analisis(request):
 @login_required
 def show_ingresos(request):
     up = UserProfile.objects.filter(user=request.user).first()
-
+    check_forms = Form.objects.filter(content_type__model='entryform', state__id=1)
+    for f in check_forms:
+        if Identification.objects.filter(entryform=f.content_object).count() == 0:
+            f.delete()
     if up.user.is_staff:
         form = Form.objects.filter(content_type__model='entryform').order_by('-object_id')
     else:
@@ -64,7 +67,7 @@ def show_ingresos_by_id(request, form_id):
     up = UserProfile.objects.filter(user=request.user).first()
 
     if up.user.is_staff:
-        form = Form.objects.filter(content_type__model='entryform')
+        form =  Form.objects.filter(content_type__model='entryform')
     else:
         form = Form.objects.filter(
             content_type__model='entryform',

@@ -75,8 +75,8 @@ class ENTRYFORM(View):
         if id:
             entryform = EntryForm.objects.values().get(pk=id)
             entryform_object = EntryForm.objects.get(pk=id)
-            cacuca = entryform_object.get_subflow
-            entryform["subflow"] = cacuca
+            subflow = entryform_object.get_subflow
+            entryform["subflow"] = subflow
             identifications = list(
                 Identification.objects.filter(
                     entryform=entryform['id']).values())
@@ -532,6 +532,7 @@ def step_1_entryform(request):
     entryform.created_at = var_post.get('created_at_submit')
     entryform.sampled_at = var_post.get('sampled_at_submit')
     entryform.center = var_post.get('center')
+    entryform.responsible = var_post.get('responsible')
     entryform.save()
 
     questions_id = [
