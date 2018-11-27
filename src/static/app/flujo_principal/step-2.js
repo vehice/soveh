@@ -11,14 +11,11 @@ function init_step_2() {
   })
     .done(function (data) {
       data_step_2 = data
-      // console.log("esta es la data");
-      // console.log(data_step_2);
 
       loadCassetteTable(data_step_2);
       loadData(data_step_2);
     })
     .fail(function () {
-      console.log("Fail")
     })
 
   $('#datetime_processor_loaded_at').datetimepicker({
@@ -33,7 +30,6 @@ function init_step_2() {
 
   function loadData(data) {
     var entryform = data.entryform;
-
     if (entryform.cassettes.length > 0) {
       var nro_fish_total = _.sumBy(entryform.identifications, 'no_fish');
       var nro_cassette = entryform.cassettes.length
@@ -49,7 +45,6 @@ function init_step_2() {
 
       $("#no_cassette").val(1)
     }
-    // console.log(entryform.cassettes);
 
     $.each(entryform.cassettes, function (i, item) {
       $('div[attr1="value1"][attr2="value2"]')
@@ -70,7 +65,6 @@ $(document).on('click', '.add_cassette_to_sample', function (e) {
   var clone_tr = parent_tr.clone();
   var current_cassette_index = parseInt($(this).data('cassette'));
   var new_cassette_index = current_cassette_index + 1;
-  // console.log(clone_tr)
 
   clone_tr.find("input[name*='cassette[identification_id]["+current_cassette_index+"]']").
     prop('name', 'cassette[identification_id]['+new_cassette_index+']');
@@ -86,7 +80,6 @@ $(document).on('click', '.add_cassette_to_sample', function (e) {
   parent_tr.find('select[name*="cassette[organ]"]').select2();
 
   var new_index = clone_tr.index();
-  // console.log(new_index);
   var table_size = $('#cassettes_table tr').length;
   
   for (i = new_index + 1; i < table_size; i++) { 
@@ -152,20 +145,19 @@ function loadCassetteTable(data) {
 }
 
 function populateCassetteTable(data) {
-  // console.log(data);
   var organs = data.organs;
   var cassette_index = 0;
   var fish_count_start = 1;
   $.each(data.identifications, function (i, item) {
-
     var identification_id = item.id;
 
     var array_index = _.range(fish_count_start, fish_count_start + item.no_fish);
 
     var id_muestra = data.entryform.no_caso + '-' + item.cage + '-' + item.group;
-    fish_count_start = item.no_fish + 1;
+    // fish_count_start = fish_count_start + 1;
 
     $.each(array_index, function (j, item2) {
+      fish_count_start = fish_count_start + 1;
       var row = {};
 
       row.identification_id = identification_id;
