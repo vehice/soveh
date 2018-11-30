@@ -59,6 +59,44 @@ $(document).on('change', '#no_cassette', function (e) {
   loadCassetteTable(data_step_2);
 })
 
+$(document).on('click', '.remove_cassette', function (e) {
+  var cassette_index = $(this).data('cassette');
+  $('#cassettes_table tr:eq('+(cassette_index + 1)+')').remove();
+
+  var table_size = $('#cassettes_table tr').length;
+  for (i = cassette_index + 1; i < table_size; i++) {
+    $('#cassettes_table tr:eq('+i+')')
+      .find('input[name*="cassette[identification_id]"]')
+      .prop('name', 'cassette[identification_id]['+(i-1).toString()+']');
+
+    $('#cassettes_table tr:eq('+i+')')
+      .find('input[name*="cassette[sample_id]"]')
+      .prop('name', 'cassette[sample_id]['+(i-1).toString()+']');
+
+    $('#cassettes_table tr:eq('+i+')')
+      .find('input[name*="cassette[sample_no]"]')
+      .prop('name', 'cassette[sample_no]['+(i-1).toString()+']')
+      .val(i);
+
+    $('#cassettes_table tr:eq('+i+')')
+      .find('select[name*="cassette[organ]"]')
+      .prop('name', 'cassette[organ]['+(i-1).toString()+']').select2();
+
+    var cassette_name = $('#cassettes_table tr:eq('+(i-1)+')')
+      .find('input[name*="cassette[cassette_name]"]')
+      .val();
+
+    $('#cassettes_table tr:eq('+i+')')
+      .find('input[name*="cassette[cassette_name]"]')
+      .prop('name', 'cassette[cassette_name]['+(i-1).toString()+']')
+      .val(cassette_name.replace('C'+(i-1).toString(), 'C'+(i).toString()));
+
+    $('#cassettes_table tr:eq('+i+') td:eq(1)')
+      .text(cassette_name.replace('C'+(i-1).toString(), 'C'+(i).toString()));
+  }
+  toastr.success('Cassette eliminado correctamente.', 'Listo!');
+});
+
 $(document).on('click', '.add_cassette_to_sample', function (e) {
   var parent_tr = $(this).closest('tr');
   parent_tr.find('select[name*="cassette[organ]"]').select2('destroy');
@@ -75,6 +113,7 @@ $(document).on('click', '.add_cassette_to_sample', function (e) {
   clone_tr.find("input[name*='cassette[cassette_name]["+current_cassette_index+"]']").
     prop('name', 'cassette[cassette_name]['+new_cassette_index+']');
   clone_tr.find(".add_cassette_to_sample").remove();
+  clone_tr.find('td:eq(3)').append('<button title="Eliminar Cassette" tooltip="" type="button" data-cassette="'+new_cassette_index+'" class="btn btn-icon btn-danger remove_cassette"><i class="fa fa-trash"></i></button>');
   clone_tr.insertAfter(parent_tr);
   clone_tr.addClass("bg-success bg-accent-1");
   parent_tr.find('select[name*="cassette[organ]"]').select2();
