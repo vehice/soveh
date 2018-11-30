@@ -8,7 +8,7 @@
       <i class="ft-user"></i> Informacion General
     </h4>
     <div class="row">
-      <div class="col-md-6">
+      <div class="col-sm-6">
         <div class="form-group">
           <label for="customer">
             Cliente :
@@ -17,22 +17,13 @@
             <option></option>
           </select>
         </div>
-      </div>
-      <div class="col-md-6">
-        <div class="form-group">
-          <label>Fecha / Hora Recepción : </label>
-          <div class='input-group date' id='datetime_created_at'>
-            <input type="text" class="form-control" name="created_at" />
-            <div class="input-group-append">
-              <span class="input-group-text">
-                <span class="fa fa-calendar"></span>
-              </span>
-            </div>
-          </div>
-          <input type="hidden" name="created_at_submit" id="created_at_submit" />
+        <div class="form-group" id="company">
+          <label for="company">
+            Empresa :
+            <!-- <span class="danger">*</span> -->
+          </label>
+          <input class="form-control" name="company" id="company_input">
         </div>
-      </div>
-      <div class="col-md-6">
         <div class="form-group" id="center">
           <label for="center">
             Centro :
@@ -46,14 +37,27 @@
           </label>
           <input type='text' class="form-control" id="order_number_input" name="no_order" />
         </div>
-        <div class="form-group" id="responsible">
-          <label for="responsible">
-            Responsable :
+        <div class="form-group" id="request_number">
+          <label for="request_number">
+            Nro Solicitud Interna :
           </label>
-          <input type='text' class="form-control" id="responsible_input" name="responsible" />
+          <input type='text' class="form-control" id="request_number_input" name="no_request" />
         </div>
+
       </div>
-      <div class="col-md-6">
+      <div class="col-sm-6">
+        <div class="form-group">
+          <label>Fecha / Hora Recepción : </label>
+          <div class='input-group date' id='datetime_created_at'>
+            <input type="text" class="form-control" name="created_at" />
+            <div class="input-group-append">
+              <span class="input-group-text">
+                <span class="fa fa-calendar"></span>
+              </span>
+            </div>
+          </div>
+          <input type="hidden" name="created_at_submit" id="created_at_submit" />
+        </div>
         <div class="form-group">
           <label>Fecha / Hora Muestreo : </label>
           <div class='input-group date' id='datetime_sampled_at'>
@@ -66,10 +70,12 @@
           </div>
           <input type="hidden" name="sampled_at_submit" id="sampled_at_submit" />
         </div>
-      </div>
-      <div class="col-md-6">
-      </div>
-      <div class="col-md-6">
+        <div class="form-group" id="responsible">
+          <label for="responsible">
+            Responsable :
+          </label>
+          <input type='text' class="form-control" id="responsible_input" name="responsible" />
+        </div>
         <div class="form-group">
           <label for="phoneNumber3">Fijador :</label>
           <select class="select2 form-control" id="fixtative_select" name="fixative">
@@ -82,7 +88,7 @@
       <i class="ft-droplet"></i> Detalle Muestra
     </h4>
     <div class="row">
-      <div class="col-md-6">
+      <div class="col-sm-6">
         <div class="form-group">
           <label for="date3">Especie :</label>
           <select class="select2 form-control" id="specie_select" name="specie">
@@ -90,7 +96,7 @@
           </select>
         </div>
       </div>
-      <div class="col-md-6">
+      <div class="col-sm-6">
         <div class="form-group">
           <label for="phoneNumber3">Estado Desarrollo :</label>
           <select class="select2 form-control" id="larvalstage_select" name="larvalstage">
@@ -98,7 +104,7 @@
           </select>
         </div>
       </div>
-      <div class="col-md-6">
+      <div class="col-sm-6">
         <div class="form-group">
           <label for="date3">Fuente Agua :</label>
           <select class="select2 form-control" id="watersource_select" name="watersource">
@@ -114,14 +120,14 @@
       <i class="ft-file-text"></i> Condiciones de Recepción
     </h4>
     <div class="row">
-      <div class="col-md-12" id="question_reception">
+      <div class="col-sm-12" id="question_reception">
       </div>
     </div>
     <h4 class="form-section">
       <i class="ft-clipboard"></i> Identificación
     </h4>
     <div class="row">
-      <div class="col-md-12">
+      <div class="col-sm-12">
         <div class="form-group">
           <label for="date3">Observaciones</label>
           <textarea rows="5" class="form-control" name="observation" id="observation" placeholder="Observaciones / Anamnesis"></textarea>
@@ -130,7 +136,7 @@
     </div>
     <div id="identification_group">
       <div class="row">
-        <div class="col-md-3">
+        <div class="col-sm-3">
           <div class="form-group">
             <button class="btn_white_letter btn btn-success form-control" id="add_identification" type="button">Añadir Indetificación</button>
           </div>
@@ -141,7 +147,7 @@
       <i class="ft-search"></i> Análisis
     </h4>
     <div class="row">
-      <div class="col-md-12">
+      <div class="col-sm-12">
         <div class="form-group">
           <label for="exam">Seleccione los análisis:</label>
           <select class="select2 form-control" id="exam_select" multiple="multiple">
@@ -155,7 +161,7 @@
       <i class="ft-grid"></i> Subdividir Flujo de Trabajo
     </h4>
     <div class="row">
-      <div class="col-md-6">
+      <div class="col-sm-6">
         <div class="alert alert-warning mb-2" role="alert">
           <strong>Aviso Importante!</strong>
           Si eliges subdividir este flujo de trabajo para realizar procesos en paralelo te recordamos
@@ -163,7 +169,7 @@
           en el futuro los subflujos asociados.
         </div>
       </div>
-      <div class="col-md-6">
+      <div class="col-sm-6">
         <label for="flow_divider">¿Desea dividir en trabajo en partes o trabajar con grupos de peces por separado?. </label>
         <select class="form-control" id="select_if_divide_flow" name="select_if_divide_flow">
             <option selected value="0">No</option>
@@ -171,27 +177,27 @@
         </select>
       </div>
       <input type="hidden" value="0" name="flow_divide_option" id="flow_divide_option"/>
-      <div class="col-md-12" id="flow_divider_options"></div>
+      <div class="col-sm-12" id="flow_divider_options"></div>
     </div>
   </div>
 </fieldset>
 
 <script id="analysis_template" type="text/x-lodash-template">
   <div data-id="<%= analysis_id %>" class="row">
-    <div class="col-md-4">
+    <div class="col-sm-4">
       <div class="form-group">
         <label for="date3">Análisis</label>
         <input value="<%= analysis_name %>" class="form-control" disabled>
         <input type="hidden" value="<%= analysis_id %>" name="analysis[id][<%= analysis_index %>]" class="form-control">
       </div>
     </div>
-    <div class="col-md-2">
+    <div class="col-sm-2">
       <div class="form-group">
         <label for="date3">No. Peces</label>
         <input class="form-control" name="analysis[no_fish][<%= analysis_index %>]" value="<%= analysis_fish %>" >
       </div>
     </div>
-    <div class="col-md-4">
+    <div class="col-sm-4">
       <div class="form-group">
         <label for="date3">Órganos</label>
         <select class="select2 form-control" id="analysis-organ" name="analysis[organ][<%= analysis_index %>]" multiple="multiple">
@@ -201,7 +207,7 @@
         </select>
       </div>
     </div>
-    <div class="col-md-1 text-center">
+    <div class="col-sm-1 text-center">
       <div class="form-group">
         <label for="date3">&nbsp;</label>
         <button class="btn_white_letter btn btn-danger form-control" id="delete_analysis" type="button">x</button>
@@ -213,31 +219,31 @@
 <script id="identification_template" type="text/x-lodash-template">
 <div class="row identification" id="<%= temp_id %>">
   <input type="hidden" value="<%= temp_id %>" name="identification[id]">
-  <div class="col-md-3">
+  <div class="col-sm-3">
     <div class="form-group">
       <label for="cage">Estanque/Jaula</label>
       <input type="text" value="" name="identification[cage]" class="form-control">
     </div>
   </div>
-  <div class="col-md-3">
+  <div class="col-sm-3">
     <div class="form-group">
       <label for="group">Grupo</label>
       <input name="identification[group]" class="form-control">
     </div>
   </div>
-  <div class="col-md-2">
+  <div class="col-sm-2">
     <div class="form-group">
       <label for="no_fish">No. Peces</label>
       <input name="identification[no_fish]" class="form-control">
     </div>
   </div>
-  <div class="col-md-2">
+  <div class="col-sm-2">
     <div class="form-group">
       <label for="no_container">No. Contenedores</label>
       <input name="identification[no_container]" class="form-control">
     </div>
   </div>
-  <div class="offset-md-1 col-md-1 text-center">
+  <div class="offset-sm-1 col-sm-1 text-center">
     <div class="form-group">
       <label for="delete">&nbsp;</label>
       <button class="btn_white_letter btn btn-danger form-control" id="delete_identification" type="button">x</button>
@@ -248,8 +254,8 @@
 
 <script id="questionReception_template" type="text/x-lodash-template">
   <div class="form-group row">
-    <label class="col-md-6 label-control"> <%= question_text %> </label>
-    <div class="col-md-4">
+    <label class="col-sm-6 label-control"> <%= question_text %> </label>
+    <div class="col-sm-4">
       <div class="input-group">
         <div class="d-inline-block custom-control custom-radio">
           <input type="radio" name="question['answer'][<%= question_index %>]" class="custom-control-input" value="si" id="question_<%= question_id %>_si">
@@ -274,7 +280,7 @@
 </script>
 
 <script id="group_content_manual_template" type="text/x-lodash-template">
-  <div class="col-md-12 pt-1 pb-1">
+  <div class="col-sm-12 pt-1 pb-1">
     <label>Peces grupo <%= group_nro %></label>
     <select class="select2 form-control fishSelection" name="subflow_select[group][<%= group_nro %>]" multiple="multiple">
       <% _.each(group_fishes, function (fish) { %>
@@ -309,7 +315,7 @@
           <input id="flowdivider_manual_group_quantity" name="flowdivider_manual_group_quantity" class="form-control" type="number" min="2" value="2" />
         </div>
       </div>
-      <div class="col-md-12" id="flowdivider_manual_groups">
+      <div class="col-sm-12" id="flowdivider_manual_groups">
       </div>
     </div>
   </div>

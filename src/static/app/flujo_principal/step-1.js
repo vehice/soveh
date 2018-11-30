@@ -21,24 +21,24 @@ function init_step_1() {
 
   // Events
 
-  $('#customer_select').on("change", function (e) {
-    var customer_type = $('#customer_select').find(':selected').data('type-customer')
+  // $('#customer_select').on("change", function (e) {
+  //   var customer_type = $('#customer_select').find(':selected').data('type-customer')
 
-    if (customer_type === 'l') {
-      $("#center_input").val("");
-      $("#center").hide();
-      $("#order_number_input").val("")
-      $("#order_number").show()
-    } else if ((customer_type === 's')) {
-      $("#center_input").val("");
-      $("#center").show();
-      $("#order_number_input").val("")
-      $("#order_number").hide()
-    } else {
-      $("#center").hide();
-      $("#order_number").hide()
-    }
-  });
+  //   if (customer_type === 'l') {
+  //     $("#center_input").val("");
+  //     $("#center").hide();
+  //     $("#order_number_input").val("")
+  //     $("#order_number").show()
+  //   } else if ((customer_type === 's')) {
+  //     $("#center_input").val("");
+  //     $("#center").show();
+  //     $("#order_number_input").val("")
+  //     $("#order_number").hide()
+  //   } else {
+  //     $("#center").hide();
+  //     $("#order_number").hide()
+  //   }
+  // });
 
   $('#identification_group').on("click", "#add_identification", function (e) {
     addIdentificationTemplate({
@@ -241,6 +241,7 @@ function init_step_1() {
 
         $('#observation').val(entryform.observation);
         $('#order_number_input').val(entryform.no_order);
+        $('#request_number_input').val(entryform.no_request);
 
         if (entryform.created_at) {
           $('[name="created_at"]').val(moment(entryform.created_at).format("DD/MM/YYYY HH:MM") || "");
@@ -401,8 +402,8 @@ function initialConf() {
     temp_id : Math.random().toString(36).replace('0.', '')
   });
 
-  $("#order_number").hide();
-  $("#center").hide();
+  // $("#order_number").hide();
+  // $("#center").hide();
 
   $('#datetime_created_at').datetimepicker({
     locale: 'es',

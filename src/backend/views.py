@@ -533,6 +533,8 @@ def step_1_entryform(request):
     entryform.sampled_at = var_post.get('sampled_at_submit')
     entryform.center = var_post.get('center')
     entryform.responsible = var_post.get('responsible')
+    entryform.company = var_post.get('company')
+    entryform.no_request = var_post.get('no_request')
     entryform.save()
 
     questions_id = [
