@@ -529,8 +529,14 @@ def step_1_entryform(request):
     entryform.observation = var_post.get('observation')
     entryform.customer_id = var_post.get('customer')
     entryform.no_order = var_post.get('no_order')
-    entryform.created_at = var_post.get('created_at_submit')
-    entryform.sampled_at = var_post.get('sampled_at_submit')
+    try: 
+        entryform.created_at = var_post.get('created_at_submit') 
+    except: 
+        pass
+    try: 
+        entryform.sampled_at = var_post.get('sampled_at_submit') 
+    except:
+        pass
     entryform.center = var_post.get('center')
     entryform.responsible = var_post.get('responsible')
     entryform.company = var_post.get('company')

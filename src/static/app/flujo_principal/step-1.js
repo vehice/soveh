@@ -307,6 +307,15 @@ function countNoFish() {
   return no_fish
 }
 
+function countSelectedFishes(){
+  var no_fish = 0
+  $('[name*="analysis[no_fish]"]').each(function (i, element) {
+    no_fish += parseInt($(element).val()) || 0
+  });
+
+  return no_fish
+}
+
 function refreshNoFish() {
   var no_fish = countNoFish()
 
@@ -315,6 +324,18 @@ function refreshNoFish() {
   });
 
   // $('#flow_divider').trigger('change');
+}
+
+function validate_step_1(){
+  
+  // Validate no_fishes selected
+  if ( countSelectedFishes() < countNoFish() ) {
+    $('[name*="analysis[no_fish]"]').focus();
+    toastr.error('Has dejado muestras sin utilizar. Le recomendamos asignar todas las muestras ingresadas', 'Ups!', {positionClass: 'toast-top-full-width', containerId: 'toast-bottom-full-width'});
+    return false
+  } else {
+    return true
+  }
 }
 
 function splitArrayByChunkSize(arr, n) {
