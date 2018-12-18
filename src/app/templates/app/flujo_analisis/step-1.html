@@ -18,7 +18,8 @@
           <table id="stain_table" class="table table-condensed table-bordered" width="100%" cellpadding="0" cellspacing="0" border="0">
             <thead>
               <tr>
-                <th>Muestra</th>
+                <th>No. Muestra</th>
+                <th>Identificación</th>
                 <th>Corte</th>
                 <th>Inicio Tinción <br> <span class="btn btn-sm btn-success square start_stain_all"><i class="fa fa-check-square-o"></i> Todos</span></th>
                 <th>Fin Tinción <br> <span class="btn btn-sm btn-success square end_stain_all"><i class="fa fa-check-square-o"></i> Todos</span></th>
@@ -36,7 +37,10 @@
   <script id="stain_row" type="text/x-lodash-template">
     <tr data-index="<%= stain_index %>">
       <td>
-        <%= identification %>
+        <%= sample_index %>
+      </td>
+      <td>
+        <%= sample_identification %>
       </td>
       <td>
         <%= slice_name %>

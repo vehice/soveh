@@ -106,6 +106,8 @@ function init_step_4() {
       url: url,
     })
       .done(function (data) {
+        $('.showSummaryBtn').removeClass("hidden");
+        fillSummary(data);
         loadPathologyTable(data)
 
         $("#show_pathologies").modal("show");
@@ -297,14 +299,15 @@ function loadDiagnosticTable(data) {
 
 function populateDiagnosticTable(data) {
   $.each(data.slices, function (i, item) {
+
     var row = {};
 
-    row.slice_id = item.slice_id;
+    row.slice_id = item.id;
     row.slice_name = item.slice_name;
-    row.organs = item.organs.join(', ');
+    row.sample_index = item.sample.index;
+    row.organs = item.organs;
     row.store_index = i;
-    row.identification = item.identification;
-    // row.identification_cage = 'E-' + item.identification_cage;
+    row.sample_identification = item.sample.identification.cage + '-' + item.sample.identification.group;
     row.paths = item.paths_count;
 
     addDiagnosticRow(row)

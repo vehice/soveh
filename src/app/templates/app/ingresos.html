@@ -82,13 +82,69 @@
                     <td><a href="workflow/{{ entryForm.id }}/{{ entryForm.state.step.tag }}">{{ entryForm.state.step }}</a></td>
                     <td>
                       <div class="btn-group" role="group" aria-label="Opciones">
-                        <button type="button" data-id="{{ entryForm.id }}" class="btn btn-danger btn-sm deleteFlow"><i class="fa fa-trash"></i> Eliminar</button>
+                        <button class="btn btn-sm btn-primary showSummaryBtn" data-id="{{ entryForm.content_object.pk }}"><i class="fa fa-list fa-fx"></i> Resúmen</button>
+                        <button type="button" data-id="{{ entryForm.id }}" class="btn btn-danger btn-sm deleteFlow"><i class="fa fa-trash fa-fx"></i> Eliminar</button>
                       </div>
                     </td>
                   </tr>
               {% endfor %}
             </tbody>
           </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade text-left" id="show_summary" role="dialog">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title" id="title">Resúmen Caso <span class="NoCasoSummary"></span></h3>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body" style="font-size:12px !important; max-height: calc(100vh - 150px); overflow-y:scroll;">
+        
+        <h6 class="form-section"> Información general</h6>
+        <div class="row generalInfo">
+          <div class="col-sm-4 summaryClient">
+          </div>
+          <div class="col-sm-4 summaryCompany">
+          </div>
+          <div class="col-sm-4 summaryCenter">
+          </div>
+          <div class="col-sm-4 summaryResponsible">
+          </div>
+          <div class="col-sm-4 summaryReception">
+          </div>
+          <div class="col-sm-4 sumarrySampling">
+          </div>
+          <div class="col-sm-4 summaryNoOrder">
+          </div>
+          <div class="col-sm-4 summaryNoRequest">
+          </div>
+          <div class="col-sm-4 summaryFixative">
+          </div>
+        </div>
+        <hr>
+        <h6 class="form-section mt-2"> Detalle</h6>
+        <div class="row ">
+          <div class="col-sm-4 summarySpecie">
+          </div>
+          <div class="col-sm-4 summaryDevStatus">
+          </div>
+          <div class="col-sm-4 summaryWaterSource">
+          </div>
+        </div>
+        <hr>
+        <h6 class="form-section mt-2"> Identificación</h6>
+        <div class="row summaryIdentification">
+        </div>
+        <hr>
+        <h6 class="form-section mt-2"> Muestras</h6>
+        <div class="row summarySamples">
         </div>
       </div>
     </div>
@@ -156,6 +212,72 @@
       ordering: false,
     });
   });
+
+  $(document).on('click', '.showSummaryBtn', function(e){
+    var entryform_id = $(this).data('id');
+    fillSummary(entryform_id);
+    $("#show_summary").modal("show");
+  });
+
+  function fillSummary(entryform_id){
+    console.log(entryform_id)
+    var url = Urls.entryform_id(entryform_id);
+
+    $.ajax({
+      type: "GET",
+      url: url,
+      async: false,
+    })
+    .done(function (data) {
+      $('.NoCasoSummary').html(data.entryform.no_caso);
+      $('.summaryClient').html('<b>Cliente</b>: '+ data.entryform.customer);
+      $('.summaryCompany').html('<b>Empresa</b>: '+ data.entryform.company);
+      $('.summaryCenter').html('<b>Centro</b>: '+ data.entryform.center);
+      $('.summaryResponsible').html('<b>Responsable</b>: '+ data.entryform.responsible);
+      $('.summaryReception').html('<b>Fecha recepción</b>: '+ moment(data.entryform.created_at).format("DD/MM/YYYY HH:MM") );
+      $('.sumarrySampling').html('<b>Fecha muestreo</b>: '+ moment(data.entryform.sampled_at).format("DD/MM/YYYY HH:MM") );
+      $('.summaryNoOrder').html('<b>No. orden</b>: '+ data.entryform.no_order);
+      $('.summaryNoRequest').html('<b>No. solicitud</b>: '+ data.entryform.no_request);
+      $('.summaryFixative').html('<b>Fijador</b>: '+ data.entryform.fixative);
+      
+      $('.summarySpecie').html('<b>Especie</b>: '+ data.entryform.specie);  
+      $('.summaryDevStatus').html('<b>Estado de desarrollo</b>: '+ data.entryform.larvalstage);  
+      $('.summaryWaterSource').html('<b>Fuente de agua</b>: '+ data.entryform.watersource);
+
+      var tpl_identification = '<div class="col-sm-12"><table class="table table-bordered table-xs">';
+      tpl_identification += '<thead><tr><th>Estanque/Jaula</th><th>Grupo</th><th>No. Peces</th><th>No. Contenedores</th></tr></thead><tbody>';
+
+      $.each(data.entryform.identifications, function(i, item){
+        tpl_identification += '<tr>';
+        tpl_identification += '<td>'+ item.cage +'</td>';
+        tpl_identification += '<td>'+ item.group +'</td>';
+        tpl_identification += '<td>'+ item.no_fish +'</td>';
+        tpl_identification += '<td>'+ item.no_container +'</td>';
+        tpl_identification += '</tr>';
+      });
+
+      tpl_identification += '</tbody></table></div>';
+      $('.summaryIdentification').html(tpl_identification);
+
+      var tpl_samples = '<div class="col-sm-12"><table class="table table-bordered table-xs">';
+      tpl_samples += '<thead><tr><th>No. Muestra</th><th>Identificación</th><th>Análisis</th><th>Órganos</th></tr></thead><tbody>';
+
+      $.each(data.samples, function(i, item){
+        var exams = item.exams_set;
+        var organs = item.organs_set;
+        tpl_samples += '<tr>';
+        tpl_samples += '<td>'+ item.index +'</td>';
+        tpl_samples += '<td>'+ item.identification.cage +'-'+item.identification.group+'</td>';
+        tpl_samples += '<td>'+ Object.keys(exams).map(function(k){return exams[k].name}).join(", ") +'</td>';
+        tpl_samples += '<td>'+ Object.keys(organs).map(function(k){return organs[k].name}).join(", ") +'</td>';
+        tpl_samples += '</tr>';
+      });
+
+      tpl_samples += '</tbody></table></div>';
+      $('.summarySamples').html(tpl_samples);
+    });
+
+  }
 
 
 </script> {% endblock scripts %}

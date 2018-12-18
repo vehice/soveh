@@ -7,38 +7,16 @@ function init_step_1() {
     type: "GET",
     url: url,
   })
-    .done(function (data) {
-      console.log("PASOOOO 1");
-      initialData(data);
-      initialConf();
-      loadData();
+  .done(function (data) {
+    initialData(data);
+    initialConf();
+    loadData();
 
-      organs = data.organs;
-    })
-    .fail(function () {
-      console.log("Fail")
-    })
-
-  // Events
-
-  // $('#customer_select').on("change", function (e) {
-  //   var customer_type = $('#customer_select').find(':selected').data('type-customer')
-
-  //   if (customer_type === 'l') {
-  //     $("#center_input").val("");
-  //     $("#center").hide();
-  //     $("#order_number_input").val("")
-  //     $("#order_number").show()
-  //   } else if ((customer_type === 's')) {
-  //     $("#center_input").val("");
-  //     $("#center").show();
-  //     $("#order_number_input").val("")
-  //     $("#order_number").hide()
-  //   } else {
-  //     $("#center").hide();
-  //     $("#order_number").hide()
-  //   }
-  // });
+    organs = data.organs;
+  })
+  .fail(function () {
+    console.log("Fail")
+  });
 
   $('#identification_group').on("click", "#add_identification", function (e) {
     addIdentificationTemplate({
@@ -59,20 +37,61 @@ function init_step_1() {
     var selected = $(this).find("option:selected").val();
   });
 
-  $('#exam_select').on("select2:select", function (e) {
-    var analysis_name = e.params.data.text;
-    var analysis_id = e.params.data.id;
+  $('#loadSamplesToAnalysis').on("click", function (e) {
     var no_fish = countNoFish();
-    var analysis_organs = organs;
-    var analysis_index = $(this).select2('data').length
 
-    var templateData = {
-      'analysis_id': analysis_id, 'analysis_name': analysis_name,
-      'analysis_fish': no_fish, 'analysis_organs': analysis_organs,
-      'analysis_index': analysis_index
-    };
+    if ( no_fish <= 0 ) {
+      toastr.error(
+        'Debes identificar muestras para poder continuar.', 
+        'Ups!', 
+        {positionClass: 'toast-top-full-width', containerId: 'toast-bottom-full-width'}
+      );
+      $('input[name="identification[no_fish]"]').focus();
+      return false;
+    }
 
-    addAnalysisTemplate(templateData);
+    if ( $('#exam_select :selected').length <= 0 ) {
+      toastr.error(
+        'Debes seleccionar al menos un análisis para asignar muestras.', 
+        'Ups!', 
+        {positionClass: 'toast-top-full-width', containerId: 'toast-bottom-full-width'}
+      );
+      $('#exam_select').focus();
+      return false;
+    }
+    $('#exam_group').html('<center><i class="fa fa-cog spinner font-large-3"></i></center>');
+
+    var analysis = [];
+    $.each($('#exam_select :selected'), function(i) {
+      analysis.push({
+        'id' : $(this).val(),
+        'name' : $(this).text()
+      });
+    });
+
+    var samples = [];
+    var sample_index_start = 1;
+
+    $('.identification').each(function(i) {
+      var id_temp = $(this).find('input[name="identification[id]"]').val();
+      var cage = $(this).find('input[name="identification[cage]"]').val();
+      var group = $(this).find('input[name="identification[group]"]').val();
+      var no_fish = parseInt($(this).find('input[name="identification[no_fish]"]').val()) || 0;
+      var j;
+      for (j = sample_index_start; j < (no_fish + sample_index_start); j++) { 
+        samples.push({
+          'identification_id' : id_temp,
+          'cage' : cage,
+          'group' : group,
+          'sample_index' : j,
+          'analysis' : analysis,
+          'organs' : organs
+        });
+      }
+      sample_index_start = no_fish + 1;
+    });
+
+    addAnalysisTemplate({'data': samples});
   });
 
   $("#exam_group").on("click", function (e) {
@@ -194,9 +213,6 @@ function init_step_1() {
     if (e.params.args.originalEvent) {
       e.params.args.originalEvent.stopPropagation();
     }
-
-    var unselected_value = e.params.args.data.id;
-    $('#exam_group').find('[data-id="' + unselected_value + '"]').remove();
   });
 
   function getManualGroupsData() {
@@ -242,6 +258,9 @@ function init_step_1() {
         $('#observation').val(entryform.observation);
         $('#order_number_input').val(entryform.no_order);
         $('#request_number_input').val(entryform.no_request);
+        $('#company_input').val(entryform.company);
+        $('#center_input').val(entryform.center);
+        $('#responsible_input').val(entryform.responsible);
 
         if (entryform.created_at) {
           $('[name="created_at"]').val(moment(entryform.created_at).format("DD/MM/YYYY HH:MM") || "");
@@ -286,7 +305,10 @@ function init_step_1() {
 
         var exams_id = _.map(entryform.analyses, 'exam_id');
 
-        $("#exam_select").val(exams_id).trigger("change");
+        if (exams_id.length > 0) {        
+          $("#exam_select").val(exams_id).trigger("change");
+          $('#loadSamplesToAnalysis').click();
+        }
 
       })
       .fail(function () {
@@ -295,6 +317,45 @@ function init_step_1() {
   }
 }
 
+function validate_step_1(){
+  var no_fish = countNoFish();
+  
+  // Validates Identifications
+  if ( no_fish <= 0 ) {
+    toastr.error(
+      'Para continuar debes tener las muestras identificadas.', 
+      'Ups!', 
+      {positionClass: 'toast-top-full-width', containerId: 'toast-bottom-full-width'}
+    );
+    $('input[name="identification[no_fish]"]').focus();
+    return false;
+  }
+
+  // Validates exam selection
+  if ( $('#exam_select :selected').length <= 0 ) {
+    toastr.error(
+      'Para continuar debes tener seleccionado al menos un análisis.', 
+      'Ups!', 
+      {positionClass: 'toast-top-full-width', containerId: 'toast-bottom-full-width'}
+    );
+    $('#exam_select').focus();
+    return false;
+  }
+
+  // Validates samples asignation
+  if ( $('input[name*="sample[index]"').length <= 0) {
+    toastr.error(
+      'Para continuar debes asignar los examenes seleccionados a las muestras ingresadas.', 
+      'Ups!', 
+      {positionClass: 'toast-top-full-width', containerId: 'toast-bottom-full-width'}
+    );
+    $('#loadSamplesToAnalysis').focus();
+    return false;
+  }
+
+  return true;
+  
+}
 
 // Function for events
 
@@ -324,18 +385,6 @@ function refreshNoFish() {
   });
 
   // $('#flow_divider').trigger('change');
-}
-
-function validate_step_1(){
-  
-  // Validate no_fishes selected
-  if ( countSelectedFishes() < countNoFish() ) {
-    $('[name*="analysis[no_fish]"]').focus();
-    toastr.error('Has dejado muestras sin utilizar. Le recomendamos asignar todas las muestras ingresadas', 'Ups!', {positionClass: 'toast-top-full-width', containerId: 'toast-bottom-full-width'});
-    return false
-  } else {
-    return true
-  }
 }
 
 function splitArrayByChunkSize(arr, n) {
@@ -371,9 +420,22 @@ function addAnalysisTemplate(data) {
   var templateFn = _.template(analysisTemplate);
   var templateHTML = templateFn(data);
 
-  $("#exam_group").append(templateHTML)
-  $('[name*="analysis[organ]"]').select2();
+  $("#exam_group").html(templateHTML)
+  $('.samples_organs').select2();
+  $('.samples_analysis').select2();
 
+  $('.samples_organs').on("select2:unselecting", function (e) {
+    if (e.params.args.originalEvent) {
+      e.params.args.originalEvent.stopPropagation();
+    }
+  });
+
+  $('.samples_analysis').on("select2:unselecting", function (e) {
+    if (e.params.args.originalEvent) {
+      e.params.args.originalEvent.stopPropagation();
+    }
+  });
+  
 }
 
 function addIdentificationTemplate(data) {
@@ -478,7 +540,7 @@ function initialData(data) {
   loadLarvalStages(data.larvalStages)
   loadWaterSources(data.waterSources)
   loadExams(data.exams)
-  loadOrgans(data.organs)
+  // loadOrgans(data.organs)
   loadQuestions(data.questionReceptionCondition)
 }
 
@@ -537,16 +599,17 @@ function loadExams(exams) {
   });
 }
 
-function loadOrgans(organs) {
-  $.each(organs, function (i, item) {
-    $('#analysis-select').append($('<option>', {
-      value: item.id,
-      text: item.name
-    }));
-  });
-}
+// function loadOrgans(organs) {
+//   $.each(organs, function (i, item) {
+//     $('#analysis-select').append($('<option>', {
+//       value: item.id,
+//       text: item.name
+//     }));
+//   });
+// }
 
 function loadQuestions(questionReceptionCondition) {
+  $("#question_reception").html("");
   $.each(questionReceptionCondition, function (i, item) {
     var data = { 'question_id': item.id, 'question_text': item.text, 'question_index': i }
     addQuestionReceptionTemplate(data);

@@ -40,7 +40,7 @@
 <script id="block_dyeing_row" type="text/x-lodash-template">
   <tr data-index="<%= block_index %>">
     <td>
-      <%= sample_id %>
+      <%= sample_index %>
       <input type="hidden" name="cassette_sample_id_<%= block_index %>]" value="<%= sample_id %>" >
     </td>
     <td>
@@ -72,9 +72,6 @@
     </td>
     <td>
       <span id="slice-info" data-trigger="hover" data-toggle="popover" data-html="true" title="Visualizar Cortes" data-content="<%= slice_info %>"><i class="fa fa-search-plus fa-fw fa-2x"></i></span>
-      <% _.each( analyses, function( analysis ){ %>
-        <input type="hidden" name="analyses" value="<%= analysis %>" >
-      <% }); %>
     </td>
   </tr>
 </script>

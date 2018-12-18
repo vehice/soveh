@@ -14,10 +14,11 @@
       <table id="diagnostic_table" class="table table-condensed table-bordered" width="100%" cellpadding="0" cellspacing="0" border="0">
         <thead>
           <tr>
-            <th>Muestra</th>
+            <th>No. Muestra</th>
+            <th>Identificación</th>
             <th>Corte</th>
             <th>Organos</th>
-            <th><center>Nro hallazgos</center></th>
+            <th><center>No. hallazgos</center></th>
             <th><center>Opciónes hallazgos</center></th>
           </tr>
         </thead>
@@ -153,16 +154,21 @@
 </div>
 
 <script id="diagnostic_row" type="text/x-lodash-template">
-  <tr>
+  <tr data-index="<%= store_index %>">
     <td>
-      <%= identification %>
+      <%= sample_index %>
+    </td>
+    <td>
+      <%= sample_identification %>
     </td>
     <td>
       <%= slice_name %>
       <input type="hidden" name="store[slice_id][<%= store_index %>]" value="<%= slice_id %>" >
     </td>
     <td>
-      <%= organs %>
+      <% _.each( organs, function( organ ){ %>
+        <%= organ.name %>,
+      <% }); %>
     </td>
     <td>
       <center>

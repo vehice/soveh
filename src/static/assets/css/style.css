@@ -7,3 +7,9 @@
 {
     background-color: #f4f5f7
 }
+
+.toast {
+    opacity: 1 !important;
+   -ms-filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=100);
+   filter: alpha(opacity=100);
+ }

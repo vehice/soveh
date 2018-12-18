@@ -8,6 +8,9 @@ function init_step_4() {
     async: false,
   })
     .done(function (data) {
+      $('.showSummaryBtn').removeClass("hidden");
+      fillSummary(data);
+
       loadAnalysisData(data);
     })
     .fail(function () {

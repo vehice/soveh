@@ -17,7 +17,8 @@
       <table id="scan_table" class="table table-condensed table-bordered" width="100%" cellpadding="0" cellspacing="0" border="0">
         <thead>
           <tr>
-            <th>Muestra</th>
+            <th>No. Muestra</th>
+            <th>Identificación</th>
             <th>Corte</th>
             <th>Inicio Digitalizacion <br> <span class="btn btn-sm btn-success square start_scan_all"><i class="fa fa-check-square-o"></i> Todos</span></th>
             <th>Fin Digitalizacion <br> <span class="btn btn-sm btn-success square end_scan_all"><i class="fa fa-check-square-o"></i> Todos</span></th>
@@ -35,7 +36,10 @@
 <script id="scan_row" type="text/x-lodash-template">
   <tr data-index="<%= scan_index %>">
     <td>
-      <%= identification %>
+      <%= sample_index %>
+    </td>
+    <td>
+      <%= sample_identification %>
     </td>
     <td>
       <%= slice_name %>

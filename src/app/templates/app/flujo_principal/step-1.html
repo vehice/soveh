@@ -8,7 +8,7 @@
       <i class="ft-user"></i> Informacion General
     </h4>
     <div class="row">
-      <div class="col-sm-6">
+      <div class="col-md-6">
         <div class="form-group">
           <label for="customer">
             Cliente :
@@ -146,16 +146,21 @@
     <h4 class="form-section">
       <i class="ft-search"></i> Análisis
     </h4>
-    <div class="row">
+    <div class="row mb-4">
       <div class="col-sm-12">
-        <div class="form-group">
-          <label for="exam">Seleccione los análisis:</label>
-          <select class="select2 form-control" id="exam_select" multiple="multiple">
+        <p><label for="exam">Seleccione los análisis:</label></p>
+        <div class="input-group">
+          <select class="select2 form-control" id="exam_select" name="analysis" multiple="multiple">
           </select>
+          <div class="input-group-append" id="button-addon2">
+            <button class="btn btn-success" id="loadSamplesToAnalysis" type="button">Cargar Asignación</button>
+          </div>
         </div>
       </div>
-    </div>
-    <div id="exam_group">
+      <div class="col-sm-12">
+        <div id="exam_group">
+        </div>
+      </div>
     </div>
     <h4 class="form-section">
       <i class="ft-grid"></i> Subdividir Flujo de Trabajo
@@ -183,36 +188,45 @@
 </fieldset>
 
 <script id="analysis_template" type="text/x-lodash-template">
-  <div data-id="<%= analysis_id %>" class="row">
-    <div class="col-sm-4">
-      <div class="form-group">
-        <label for="date3">Análisis</label>
-        <input value="<%= analysis_name %>" class="form-control" disabled>
-        <input type="hidden" value="<%= analysis_id %>" name="analysis[id][<%= analysis_index %>]" class="form-control">
-      </div>
-    </div>
-    <div class="col-sm-2">
-      <div class="form-group">
-        <label for="date3">No. Peces</label>
-        <input class="form-control" name="analysis[no_fish][<%= analysis_index %>]" value="<%= analysis_fish %>" >
-      </div>
-    </div>
-    <div class="col-sm-4">
-      <div class="form-group">
-        <label for="date3">Órganos</label>
-        <select class="select2 form-control" id="analysis-organ" name="analysis[organ][<%= analysis_index %>]" multiple="multiple">
-          <% _.each(analysis_organs, function (organ) { %>
-            <option value=<%= organ.id %>> <%= organ.name %> </option>
-          <% }); %>
-        </select>
-      </div>
-    </div>
-    <div class="col-sm-1 text-center">
-      <div class="form-group">
-        <label for="date3">&nbsp;</label>
-        <button class="btn_white_letter btn btn-danger form-control" id="delete_analysis" type="button">x</button>
-      </div>
-    </div>
+  <div class="table-responsive" style="font-size:12px !important;">
+    <table class="table table-xs mt-2">
+      <thead>
+        <tr>
+          <th>Nº Muestra</th>
+          <th>Identificación</th>
+          <th>Análisis</th>
+          <th>Órganos</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% _.each(data, function (sample) { %>
+          <tr>
+            <td>
+                <input type="hidden" value="<%= sample.sample_index %>" name="sample[index][<%= sample.sample_index %>]">
+                <%= sample.sample_index %>
+            </td>
+            <td>
+                <input type="hidden" value="<%= sample.identification_id %>" name="sample[identification][<%= sample.sample_index %>]">
+                <%= sample.cage %>-<%= sample.group %>-<%= sample.sample_index %>
+            </td>
+            <td>
+                <select class="select2 form-control samples_analysis" style="width:100% !important;" name="sample[analysis][<%= sample.sample_index %>]" multiple="multiple">
+                  <% _.each(sample.analysis, function (exam) { %>
+                    <option selected value=<%= exam.id %>> <%= exam.name %> </option>
+                  <% }); %>
+                </select>
+            </td>
+            <td>
+                <select class="select2 form-control samples_organs" style="width:100% !important;" name="sample[organs][<%= sample.sample_index %>]" multiple="multiple">
+                  <% _.each(sample.organs, function (organ) { %>
+                    <option selected value=<%= organ.id %>> <%= organ.name %> </option>
+                  <% }); %>
+                </select>
+            </td>
+          </tr>
+        <% }); %>
+      </tbody>
+    </table>
   </div>
 </script>
 
@@ -234,13 +248,13 @@
   <div class="col-sm-2">
     <div class="form-group">
       <label for="no_fish">No. Peces</label>
-      <input name="identification[no_fish]" class="form-control">
+      <input name="identification[no_fish]" type="number" value="0" min="1" class="form-control">
     </div>
   </div>
   <div class="col-sm-2">
     <div class="form-group">
       <label for="no_container">No. Contenedores</label>
-      <input name="identification[no_container]" class="form-control">
+      <input name="identification[no_container]" type="number" value="1" min="1" class="form-control">
     </div>
   </div>
   <div class="offset-sm-1 col-sm-1 text-center">
