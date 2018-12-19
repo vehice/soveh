@@ -219,7 +219,7 @@
             <td>
                 <select class="select2 form-control samples_organs" style="width:100% !important;" name="sample[organs][<%= sample.sample_index %>]" multiple="multiple">
                   <% _.each(sample.organs, function (organ) { %>
-                    <option selected value=<%= organ.id %>> <%= organ.name %> </option>
+                    <option value=<%= organ.id %>> <%= organ.name %> </option>
                   <% }); %>
                 </select>
             </td>
