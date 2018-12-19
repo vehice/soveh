@@ -106,8 +106,8 @@ function init_step_4() {
       url: url,
     })
       .done(function (data) {
-        $('.showSummaryBtn').removeClass("hidden");
-        fillSummary(data);
+        // $('.showSummaryBtn').removeClass("hidden");
+        // fillSummary(data);
         loadPathologyTable(data)
 
         $("#show_pathologies").modal("show");
