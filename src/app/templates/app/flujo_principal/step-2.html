@@ -42,8 +42,9 @@
       <table id="cassettes_table" class="table table-bordered table-hover table-condensed" width="100%">
         <thead>
           <tr>
-            <th>Muestra</th>
-            <th>Cassette</th>
+            <th>No. Muestra</th>
+            <th>Identificación</th>
+            <th>Nombre Cassette</th>
             <th>Organos</th>
             <th></th>
           </tr>
@@ -58,21 +59,21 @@
 <script id="cassette_row" type="text/x-lodash-template">
   <tr>
     <input type="hidden" name="cassette[sample_id][<%= cassette_index %>]" value="<%= sample_id %>" >
-    <input type="hidden" name="cassette[sample_no][<%= cassette_index %>]" value="<%= sample_no %>" >
-    <input type="hidden" name="cassette[identification_id][<%= cassette_index %>]" value="<%= identification_id %>" >
     <input type="hidden" name="cassette[cassette_name][<%= cassette_index %>]" value="<%= cassette_name %>" >
     <td>
-      <%= sample_id %>
+      <%= sample_index %>
+    </td>
+    <td>
+      <%= sample_name %>
     </td>
     <td>
       <%= cassette_name %>
     </td>
     <td style="width:40%">
       <select class="select2 form-control form-control-sm" style="width:100%"
-        data-sample-id="<%= sample_id %>" data-cassette-name="<%= cassette_name %>"
         name="cassette[organ][<%= cassette_index %>]" multiple="multiple">
-        <% _.each( cassette_organs, function( organ ){ %>
-          <option value=<%= organ.value %>> <%= organ.name %> </option>
+        <% _.each( organs, function( organ ){ %>
+          <option value=<%= organ.id %>> <%= organ.name %> </option>
         <% }); %>
       </select>
     </td>

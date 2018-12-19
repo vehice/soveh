@@ -8,6 +8,8 @@ function init_step_3() {
     async: false,
   })
     .done(function (data) {
+      $('.showSummaryBtn').removeClass("hidden");
+      fillSummary(data);
       loadBlockTable(data);
     })
     .fail(function () {
@@ -65,20 +67,20 @@ function loadBlockTable(data) {
 }
 
 function populateBlockTable(data) {
-  var analyses = data.analyses;
 
   $.each(data.cassettes, function (i, item) {
     var row = {};
 
-    row.sample_id = item.sample_id;
-    row.cassette_name = item.cassette_name
-    row.cassette_pk = item.id
-    row.organs = item.organs.join(", ")
-    row.no_slice = item.no_slice
+    row.sample_id = item.sample.id;
+    row.sample_index = item.sample.index;
+    row.cassette_name = item.cassette_name;
+    row.cassette_pk = item.id;
+    row.cassette_index = item.index;
+    row.organs = item.organs_set.join(", ")
+    row.no_slice = item.sample.exams_set.length;
     row.block_index = i;
-    row.analyses = analyses;
 
-    if (item.slices.length > 0) {
+    if (item.slices_set.length > 0) {
       row.start_block = item.slices[0].start_block;
       row.end_block = item.slices[0].end_block;
       row.start_slice = item.slices[0].start_slice;
@@ -90,16 +92,15 @@ function populateBlockTable(data) {
       row.end_slice = "";
     }
 
-    // console.log(item.slices);
     row.slice_info = "<ol>";
-    $.each(data.exams, function (i, elem) {
-      row.slice_info += "<li><p><strong>Cassette:</strong> " + row.cassette_name + " <strong> </br>Muestra: </strong>" + row.sample_id + " <strong> </br>Corte: </strong>" +row.cassette_name+"-S"+(i+1).toString()+" <strong> </br>An&aacute;lisis: </strong>" + elem.name + "</p></li>"
+    $.each(item.sample.exams_set, function (i, elem) {
+      row.slice_info += "<li><p><strong>Cassette:</strong> " + row.cassette_name + " <strong> </br>Muestra: </strong>" + row.sample_index + " <strong> </br>Corte: </strong>" +row.cassette_name+"-S"+(i+1).toString()+" <strong> </br>An&aacute;lisis: </strong>" + elem.name + "</p></li>"
     })
     row.slice_info += "</ol>";
 
     addBlockRow(row)
 
-    if (item.slices.length > 0) {
+    if (item.slices_set.length > 0) {
       $("[data-index='" + i + "']").find(".switchery").trigger("click");
     }
   });

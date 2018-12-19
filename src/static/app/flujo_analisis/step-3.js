@@ -6,7 +6,10 @@ function init_step_3() {
     url: url,
   })
     .done(function (data) {
-      loadStoreTable(data)
+      $('.showSummaryBtn').removeClass("hidden");
+      fillSummary(data);
+      loadStoreTable(data);
+      
     })
     .fail(function () {
       console.log("Fail")
@@ -33,11 +36,11 @@ function populateStoreTable(data) {
   $.each(data.slices, function (i, item) {
     var row = {};
 
-    row.slice_id = item.slice_id;
+    row.slice_id = item.id;
     row.slice_name = item.slice_name;
+    row.sample_index = item.sample.index;
     row.store_index = i;
-    // row.identification_cage = 'E-' + item.identification_cage;
-    row.identification = item.identification;
+    row.sample_identification = item.sample.identification.cage + '-' + item.sample.identification.group;
     row.box_id = item.box_id
 
     addStoreRow(row)

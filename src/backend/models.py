@@ -177,18 +177,6 @@ class EntryForm(models.Model):
         else:
             return "N/A"
 
-class Identification(models.Model):
-    entryform = models.ForeignKey(
-        EntryForm, null=True, on_delete=models.SET_NULL)
-    cage = models.CharField(max_length=250, null=True, blank=True)
-    no_fish = models.IntegerField(null=True, blank=True)
-    no_container = models.IntegerField(null=True, blank=True)
-    group = models.CharField(max_length=250, null=True, blank=True)
-
-    def __str__(self):
-        return str(self.pk)
-
-
 class AnswerReceptionCondition(models.Model):
     ANSWER = (('si', 'Si'), ('no', 'No'), ('n/a', 'N/A'))
 
@@ -212,8 +200,7 @@ class AnalysisForm(models.Model):
     entryform = models.ForeignKey(
         EntryForm, null=True, on_delete=models.SET_NULL)
     exam = models.ForeignKey(Exam, null=True, on_delete=models.SET_NULL)
-    organs = models.ManyToManyField(Organ)
-    no_fish = models.IntegerField(null=True, blank=True)
+    # no_fish = models.IntegerField(null=True, blank=True)
     forms = GenericRelation(Form)
     comments = models.TextField(blank=True, null=True)
 
@@ -221,10 +208,10 @@ class AnalysisForm(models.Model):
 class Cassette(models.Model):
     entryform = models.ForeignKey(
         EntryForm, null=True, on_delete=models.SET_NULL)
-    sample_id = models.CharField(max_length=250, null=True, blank=True)
+    index = models.IntegerField(null=True, blank=True)
     cassette_name = models.CharField(max_length=250, null=True, blank=True)
     processor_loaded_at = models.DateTimeField(null=True, blank=True)
-    identifications = models.ManyToManyField(Identification)
+    # identifications = models.ManyToManyField(Identification)
     organs = models.ManyToManyField(Organ)
 
 
@@ -240,10 +227,11 @@ class Slice(models.Model):
     box_id = models.CharField(max_length=250, null=True, blank=True)
     end_stain = models.DateTimeField(null=True, blank=True)
     slice_store = models.CharField(max_length=250, null=True, blank=True)
-    cassettes = models.ManyToManyField(Cassette)
-    analysis = models.ManyToManyField(AnalysisForm)
+    cassette = models.ForeignKey(Cassette, null=True, on_delete=models.SET_NULL)
+    analysis = models.ForeignKey(AnalysisForm, null=True, on_delete=models.SET_NULL)
     entryform = models.ForeignKey(
         EntryForm, null=True, on_delete=models.SET_NULL)
+    index = models.IntegerField(null=True, blank=True)
 
 class Img(models.Model):
     file = models.ImageField(upload_to='vehice_images')
@@ -270,3 +258,28 @@ class Report(models.Model):
     diagnostic_intensity = models.ForeignKey(
         DiagnosticIntensity, null=True, on_delete=models.SET_NULL)
     images = models.ManyToManyField(Img)
+
+class Identification(models.Model):
+    entryform = models.ForeignKey(
+        EntryForm, null=True, on_delete=models.SET_NULL)
+    cage = models.CharField(max_length=250, null=True, blank=True)
+    no_fish = models.IntegerField(null=True, blank=True)
+    no_container = models.IntegerField(null=True, blank=True)
+    group = models.CharField(max_length=250, null=True, blank=True)
+    temp_id = models.CharField(max_length=250, null=True, blank=True)
+
+    def __str__(self):
+        return str(self.pk)
+
+class Sample(models.Model):
+    entryform = models.ForeignKey(
+        EntryForm, null=True, on_delete=models.SET_NULL)
+    index = models.IntegerField(null=True, blank=True)
+    exams = models.ManyToManyField(Exam)
+    organs = models.ManyToManyField(Organ)
+    cassettes = models.ManyToManyField(Cassette)
+    identification = models.ForeignKey(Identification, null=True, on_delete=models.SET_NULL)
+
+    def __str__(self):
+        return str(self.index)
+

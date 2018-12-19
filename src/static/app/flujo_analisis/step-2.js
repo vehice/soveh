@@ -5,12 +5,14 @@ function init_step_2() {
     type: "GET",
     url: url,
   })
-    .done(function (data) {
-      loadScanTable(data)
-    })
-    .fail(function () {
-      console.log("Fail")
-    })
+  .done(function (data) {
+    loadScanTable(data);
+    $('.showSummaryBtn').removeClass("hidden");
+    fillSummary(data);
+  })
+  .fail(function () {
+    console.log("Fail")
+  });
 
   // Events
 
@@ -31,6 +33,20 @@ $(document).on('click', '.end_scan_all', function (e) {
   $("input[type=checkbox][id^='scan[end_scan]']" ).trigger('click');
 });
 
+$(document).on('click', '.showSummary', function (e) {
+  // console.log("ASDASDAS");
+  swal({
+    title: 'Resúmen del caso',
+    type: 'info',
+    html:
+      'You can use <b>bold text</b>, ' +
+      '<a href="//github.com">links</a> ' +
+      'and other HTML tags',
+    showCloseButton: true,
+    showCancelButton: false,
+    focusConfirm: false,
+  });
+});
 
 function loadScanTable(data) {
   if ($.fn.DataTable.isDataTable('#scan_table')) {
@@ -60,12 +76,11 @@ function loadScanTable(data) {
 function populateScanTable(data) {
   $.each(data.slices, function (i, item) {
     var row = {};
-
-    row.slice_id = item.slice_id;
+    row.slice_id = item.id;
+    row.sample_index = item.sample.index;
     row.slice_name = item.slice_name;
     row.scan_index = i;
-    // row.identification_cage = 'E-' + item.identification_cage;
-    row.identification = item.identification;
+    row.sample_identification = item.sample.identification.cage + '-' + item.sample.identification.group;
     row.start_scan = item.start_scan;
     row.end_scan = item.end_scan;
     row.slice_store = item.slice_store;

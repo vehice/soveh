@@ -11,7 +11,8 @@
       <table id="store_table" class="table table-striped table-bordered">
         <thead>
           <tr>
-            <th>Muestra</th>
+            <th>No. Muestra</th>
+            <th>Identificación</th>
             <th>Corte</th>
             <th>Identificación Caja</th>
           </tr>
@@ -25,9 +26,12 @@
 
 
 <script id="store_row" type="text/x-lodash-template">
-  <tr>
+  <tr data-index="<%= store_index %>">
     <td>
-      <%= identification %>
+      <%= sample_index %>
+    </td>
+    <td>
+      <%= sample_identification %>
     </td>
     <td>
       <%= slice_name %>

@@ -9,12 +9,14 @@ function init_step_1() {
     type: "GET",
     url: url,
   })
-    .done(function (data) {
-      loadStainTable(data)
-    })
-    .fail(function () {
-      console.log("Fail")
-    })
+  .done(function (data) {
+    $('.showSummaryBtn').removeClass("hidden");
+    fillSummary(data);
+    loadStainTable(data)
+  })
+  .fail(function () {
+    console.log("Fail")
+  });
 
   // Events
 
@@ -59,13 +61,15 @@ function loadStainTable(data) {
 }
 
 function populateStainTable(data) {
+  // console.log(data);
   $.each(data.slices, function (i, item) {
     var row = {};
 
-    row.slice_id = item.slice_id;
+    row.slice_id = item.id;
+    row.sample_index = item.sample.index;
     row.slice_name = item.slice_name;
     row.stain_index = i;
-    row.identification = item.identification;
+    row.sample_identification = item.sample.identification.cage + '-' + item.sample.identification.group;
     // row.identification_cage = 'E-' + item.identification_cage;
     row.start_stain = item.start_stain;
     row.end_stain = item.end_stain;
