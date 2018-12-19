@@ -78,7 +78,8 @@ function init_step_1() {
       var group = $(this).find('input[name="identification[group]"]').val();
       var no_fish = parseInt($(this).find('input[name="identification[no_fish]"]').val()) || 0;
       var j;
-      for (j = sample_index_start; j < (no_fish + sample_index_start); j++) { 
+      var end_index = no_fish + sample_index_start;
+      for (j = sample_index_start; j < end_index; j++) { 
         samples.push({
           'identification_id' : id_temp,
           'cage' : cage,
@@ -88,9 +89,9 @@ function init_step_1() {
           'organs' : organs
         });
       }
-      sample_index_start = no_fish + 1;
-    });
+      sample_index_start = end_index;
 
+    });
     addAnalysisTemplate({'data': samples});
   });
 
