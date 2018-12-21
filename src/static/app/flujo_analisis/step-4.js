@@ -84,12 +84,12 @@ function init_step_4() {
         toastr.success('', 'Hallazgo ingresado exitosamente.');
         setTimeout(function() {
           window.location.href = "/workflow/"+form_id+"/step_4";
-        }, 3000);
+        }, 1500);
       } else {
         toastr.error('', 'Error al ingresar hallazgo. Favor intentar nuevamente!');
         setTimeout(function() {
           window.location.href = "/workflow/"+form_id+"/step_4";
-        }, 3000);
+        }, 1500);
       }
     })
     .fail(function () {

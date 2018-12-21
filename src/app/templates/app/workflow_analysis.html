@@ -305,7 +305,11 @@ $("#workflow_form").steps({
             step = newIndex + 1
             function_name = "init_step_" + step;
           }
-          window[function_name]();
+          if (step == 5) {
+            window.location.href = document.URL.replace('step_'+(currentIndex+1), 'step_5');
+          } else {
+            window[function_name]();
+          }
         } else {
           toastr.error('No puedes continuar ya que no tienes permisos para los siguientes pasos.', 'No tienes permisos');
           setTimeout(function() {
