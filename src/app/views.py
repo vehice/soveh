@@ -135,14 +135,14 @@ def download_report(request, id):
     return response
 
 def template_report(request, id):
-    from django.forms.models import model_to_dict
     report = Report.objects.filter(analysis_id=int(id))
-
-    return render(request, 'app/template_report.html',{'report': report})
+    report_final = ReportFinal.objects.filter(analysis_id=int(id)).last()
+    return render(request, 'app/template_report.html',{'report': report, 'report_final':report_final })
 
 @login_required
 def preview_report(request, id):
     form = Form.objects.get(pk=int(id))
     entryform_id = form.content_object.id
     report = Report.objects.filter(analysis_id=int(entryform_id))
-    return render(request, 'app/preview_report.html', {'report': report, 'form_parent_id': form.parent.id})
+
+    return render(request, 'app/preview_report.html', {'report': report, 'form_id': form.pk, 'form_parent_id': form.parent.id})

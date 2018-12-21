@@ -28,12 +28,13 @@
 </div>
 {% endblock content_header %}
 {% block content %}
+
 <div class="row">
   <div class="col-12">
     <div class="card">
       <div class="card-header">
         <div class="float-left"><h3> <strong>Analisis {{ exam_name }} </strong></h3></div>
-        <div class="float-right"><a href="/workflow/{{form_parent_id}}/step_4"><h3><i class="fa fa-arrow-left fa-fw"></i> <strong>Volver a listado de análisis </strong></h3></a></div>
+        <div class="float-right"><a href="/workflow/{{form_parent_id}}/step_4"><h3><i class="fa fa-arrow-left fa-fw"></i> <strong>Volver a todos los análisis </strong></h3></a></div>
         <div class="row">
           <div class="col-sm-12">
             <center>
@@ -57,6 +58,129 @@
       </div>
     </div>
   </div>
+</div>
+
+<div class="modal fade text-left" id="new_pathology" role="dialog">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title" id="title">Nuevo Hallazgo</h3>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <!-- <form action="#" name="new_pathology_form" > -->
+        <input type="hidden" id="analysis_id" name="analysis_id" value="{{analysis_id}}" >
+        <input type="hidden" id="slice_id" name="slice_id" >
+        <div class="modal-body">
+          <div class="row">
+            <div class="col-md-6">
+              <div class="form-group">
+                <label for="customer">
+                  Organo :
+                </label>
+                <select class="form-control" style="width: 100%" name="organ" id="organ_select">
+                  <option></option>
+                </select>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="form-group">
+                <label for="customer">
+                  Localización :
+                </label>
+                <select class="select2 form-control" style="width: 100%" name="organ_location" id="organ_location_select">
+                  <option></option>
+                </select>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="form-group">
+                <label for="customer">
+                  Hallazgo :
+                </label>
+                <select class="select2 form-control" style="width: 100%" name="pathology" id="pathology_select">
+                  <option></option>
+                </select>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="form-group">
+                <label for="customer">
+                  Diagnóstico :
+                </label>
+                <select class="select2 form-control" style="width: 100%" name="diagnostic" id="diagnostic_select">
+                  <option></option>
+                </select>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="form-group">
+                <label for="customer">
+                  Distribución Diagnóstico :
+                </label>
+                <select class="select2 form-control" style="width: 100%" name="diagnostic_distribution" id="diagnostic_distribution_select">
+                  <option></option>
+                </select>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="form-group">
+                <label for="customer">
+                  Intensidad Diagnóstico :
+                </label>
+                <select class="select2 form-control" style="width: 100%" name="diagnostic_intensity" id="diagnostic_intensity_select">
+                  <option></option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <input type="reset" class="btn btn-secondary" data-dismiss="modal" value="Cerrar">
+          <input type="button" class="btn btn-primary" data-form="{{form_id}}" value="Guardar" id="new_pathology_save">
+        </div>
+      <!-- </form> -->
+    </div>
+  </div>
+</div>
+
+<div class="modal fade text-left" id="show_pathologies" role="dialog">
+  <div class="modal-dialog modal-xl" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title" id="title">Listado de Hallazgos</h3>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="table-responsive">
+          <table id="pathology_table" class="table table-striped table-bordered">
+            <thead>
+              <tr>
+                <th>Órgano</th>
+                <th>Localización</th>
+                <th>Hallazgo</th>
+                <th>Diagnóstico</th>
+                <th>Distribución</th>
+                <th>Intensidad</th>
+                <th>Imágenes</th>
+                <th>Opciónes</th>
+              </tr>
+            </thead>
+            <tbody>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <input type="reset" class="btn btn-secondary" data-dismiss="modal" value="Cerrar">
+      </div>
+    </div>
+  </div>
+</div>
+<div id="uploader">
 </div>
 
 <div class="modal fade text-left" id="show_summary" role="dialog">
@@ -203,6 +327,7 @@ $("#workflow_form").steps({
     },
     onFinishing: function (event, currentIndex)
     {
+      fillInputsFromSummernotes();
       var url = Urls.workflow();
       var form_closed = true;
       var form_parent_id = $("#step_" + currentIndex).children("#form_parent_id").val();
@@ -262,7 +387,7 @@ $("#workflow_form").steps({
 $(window).on('load', function (e) {
   // If para cargar un paso en especifico
   {% if set_step_tag and set_step_tag != "step_1" %}
-    console.log("SET STEP TAG DESPUES DEL CAMBIO")
+    // console.log("SET STEP TAG DESPUES DEL CAMBIO")
     set_state = true;
     var step_wizard = parseInt("{{ set_step_tag }}".split("_")[1]) - 1; // Se resta 1 para igualar a los indices del plugin
     var step_tag_function = "init_{{ set_step_tag }}";

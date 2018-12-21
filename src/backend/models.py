@@ -57,34 +57,38 @@ class Organ(models.Model):
 
 
 class OrganLocation(models.Model):
-    name = models.CharField(max_length=250, null=True, blank=True)
+    name = models.CharField(max_length=250, null=True, blank=True, verbose_name="Nombre de localización")
     organs = models.ManyToManyField(Organ, verbose_name="Órganos")
 
     def __str__(self):
         return self.name
+    
+    class Meta:
+        verbose_name = "Localización"
+        verbose_name_plural = "Localizaciones"
 
 class Pathology(models.Model):
-    name = models.CharField(max_length=250, null=True, blank=True, verbose_name="Patología")
+    name = models.CharField(max_length=250, null=True, blank=True, verbose_name="Nombre del hallazgo")
     organs = models.ManyToManyField(Organ, verbose_name="Órganos")
 
     def __str__(self):
         return self.name
 
     class Meta:
-        verbose_name = "Patología"
-        verbose_name_plural = "Patologías"
+        verbose_name = "Hallazgo"
+        verbose_name_plural = "Hallazgos"
 
 
 class Diagnostic(models.Model):
-    name = models.CharField(max_length=250, null=True, blank=True)
+    name = models.CharField(max_length=250, null=True, blank=True, verbose_name="Nombre del diagnóstico")
     organs = models.ManyToManyField(Organ, verbose_name="Órganos")
 
     def __str__(self):
         return self.name
 
     class Meta:
-        verbose_name = "Patología"
-        verbose_name_plural = "Patologías"
+        verbose_name = "Diagnóstico"
+        verbose_name_plural = "Diagnósticos"
 
 class DiagnosticDistribution(models.Model):
     name = models.CharField(max_length=250, null=True, blank=True)
@@ -204,6 +208,29 @@ class AnalysisForm(models.Model):
     forms = GenericRelation(Form)
     comments = models.TextField(blank=True, null=True)
 
+class Identification(models.Model):
+    entryform = models.ForeignKey(
+        EntryForm, null=True, on_delete=models.SET_NULL)
+    cage = models.CharField(max_length=250, null=True, blank=True)
+    no_fish = models.IntegerField(null=True, blank=True)
+    no_container = models.IntegerField(null=True, blank=True)
+    group = models.CharField(max_length=250, null=True, blank=True)
+    temp_id = models.CharField(max_length=250, null=True, blank=True)
+
+    def __str__(self):
+        return str(self.pk)
+
+class Sample(models.Model):
+    entryform = models.ForeignKey(
+        EntryForm, null=True, on_delete=models.SET_NULL)
+    index = models.IntegerField(null=True, blank=True)
+    exams = models.ManyToManyField(Exam)
+    organs = models.ManyToManyField(Organ)
+    # cassette = models.ForeignKey(Cassette, null=True, on_delete=models.SET_NULL)
+    identification = models.ForeignKey(Identification, null=True, on_delete=models.SET_NULL)
+
+    def __str__(self):
+        return str(self.index)
 
 class Cassette(models.Model):
     entryform = models.ForeignKey(
@@ -212,6 +239,7 @@ class Cassette(models.Model):
     cassette_name = models.CharField(max_length=250, null=True, blank=True)
     processor_loaded_at = models.DateTimeField(null=True, blank=True)
     # identifications = models.ManyToManyField(Identification)
+    sample = models.ForeignKey(Sample, null=True, on_delete=models.SET_NULL)
     organs = models.ManyToManyField(Organ)
 
 
@@ -258,28 +286,12 @@ class Report(models.Model):
     diagnostic_intensity = models.ForeignKey(
         DiagnosticIntensity, null=True, on_delete=models.SET_NULL)
     images = models.ManyToManyField(Img)
+    identification = models.ForeignKey(
+        Identification, null=True, on_delete=models.SET_NULL)
 
-class Identification(models.Model):
-    entryform = models.ForeignKey(
-        EntryForm, null=True, on_delete=models.SET_NULL)
-    cage = models.CharField(max_length=250, null=True, blank=True)
-    no_fish = models.IntegerField(null=True, blank=True)
-    no_container = models.IntegerField(null=True, blank=True)
-    group = models.CharField(max_length=250, null=True, blank=True)
-    temp_id = models.CharField(max_length=250, null=True, blank=True)
-
-    def __str__(self):
-        return str(self.pk)
-
-class Sample(models.Model):
-    entryform = models.ForeignKey(
-        EntryForm, null=True, on_delete=models.SET_NULL)
-    index = models.IntegerField(null=True, blank=True)
-    exams = models.ManyToManyField(Exam)
-    organs = models.ManyToManyField(Organ)
-    cassettes = models.ManyToManyField(Cassette)
-    identification = models.ForeignKey(Identification, null=True, on_delete=models.SET_NULL)
-
-    def __str__(self):
-        return str(self.index)
-
+class ReportFinal(models.Model):
+    analysis = models.ForeignKey(
+        AnalysisForm, null=True, on_delete=models.SET_NULL)
+    box_findings = models.TextField(null=True, blank=True)
+    box_diagnostics = models.TextField(null=True, blank=True)
+    box_comments = models.TextField(null=True, blank=True)

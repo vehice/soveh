@@ -149,7 +149,7 @@ function init_step_4() {
     temp += '<div class="modal fade" id="load_images_modal" role="dialog">';
     temp += '<div class="modal-dialog" role="document"><div class="modal-content"> <div class="modal-header"> <h3 class="modal-title"> Cargador de imágen </h3></div>';
     temp += '<div class="modal-body">';
-    temp += '<div class="col-md-12"><form id="mydropzone" action="'+url+'" class="dropzone needsclick">';
+    temp += '<div class="col-md-12"><form id="mydropzone2" action="'+url+'" class="dropzone needsclick">';
     temp += '<div class="dz-message" data-dz-message>';
     temp += '<center><span><h3>Arrastra o selecciona la imágen que deseas cargar</h3></span></center>';
     temp += '</div>';    
@@ -161,10 +161,11 @@ function init_step_4() {
     temp += '<input type="button" class="btn btn-primary submit-file" value="Cargar Imágen""></div></div></div>';
 
     $('#uploader').html(temp);
-    $("#mydropzone").dropzone({
+    $("#mydropzone2").dropzone({
       autoProcessQueue: false,
       acceptedFiles: ".png, .jpeg, .jpg",
       init: function() {
+        console.log("goladfkasjdkasd")
         var submitButton = document.querySelector(".submit-file")
         myDropzone = this;
         submitButton.addEventListener("click", function() {
@@ -288,6 +289,7 @@ function loadDiagnosticTable(data) {
     ordering: false,
     paginate: false,
     autoWidth: false,
+    searching: false,
     columnDefs: [
       { "width": "7%", "targets": 3 }
     ],

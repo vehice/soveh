@@ -43,11 +43,14 @@
         <div class="col-md-12">
           <!-- <img src="..." class="rounded float-left" alt="..."> -->
           <img alt="" src="{% static 'assets/images/logo/logo.png' %}" class="img-fluid float-left" width="200px">
-          <div class="float-right"><a href="/workflow/{{form_parent_id}}/step_4"><h3><i class="fa fa-arrow-left fa-fw"></i> <strong>Volver a listado de análisis </strong></h3></a></div>
+          <div class="float-right"><a href="/workflow/{{form_id}}/step_4"><h3><i class="fa fa-arrow-left fa-fw"></i> <strong>Atrás</strong></h3></a></div>
         </div>
       </div>
       <div class="card-content">
         <div class="card-body">
+          <div class="col-md-12" style="padding-bottom:3% !important;">
+            <center><h2 class="blue"><strong><u>VISTA PREVIA</u></strong></h2></center>
+            </div>
           <div class="col-md-12" style="padding-bottom:3% !important;">
             <center><h3 class="text-danger"><strong>INFORME RESULTADOS</strong></h3></center>
           </div>
@@ -77,11 +80,14 @@
                 </tr>
                 <tr>
                   <td class="danger">Estanque/Jaula</td>
-                  <td colspan="2">
+                  <td>
                     {% for ident in report.0.analysis.entryform.identification_set.all %}
-                    {{ ident.cage }} / {{ ident.group }} -
+                      ({{ ident.cage }}/{{ ident.group }}) -
                     {% endfor %}
                   </td>
+                  <td>
+                      Nº Solicitud: {{report.0.analysis.entryform.no_request}}
+                    </td>
                 </tr>
                 <tr>
                   <td class="danger">Fuente de agua</td>
@@ -113,30 +119,39 @@
             <table class="table table-bordered">
               <thead class="bg-danger text-white">
                 <tr>
-                  <!-- <th>MUESTRA</th> -->
-                  <th>ANÁLISIS</th>
+                  <th>IDENTIFICACIÓN</th>
+                  <th>TINCIÓN</th>
                   <th>HALLAZGO</th>
                 </tr>
               </thead>
               <tbody>
-                <tr>
-                  <!-- <td>{{report.0.analysis.entryform.name}}</td> -->
-                  <td>{{report.0.analysis.exam.name}}</td>
-                  <td>
-                    {% regroup report by organ.name as organ_list %}
-                    <ul>
-                      {% for organ in organ_list %}
-                      <li><strong><u>{{ organ.grouper }}:</u></strong>
-                        Se observa
-                        {% for item in organ.list %}
-                        {{ item.pathology.name }} en {{ item.organ_location.name }} {{ item.diagnostic_intensity.name }} (Muestra {{item.slice.cassettes.all.0.cassette_name}}),
-                        {% endfor %}
-
-                      </li>
-                      {% endfor %}
-                    </ul>
-                  </td>
-                </tr>
+                {% regroup report by identification as new_group %}
+                  {% for gr in new_group %}
+                    <tr>
+                      <td>
+                          {{ gr.grouper.cage }} - {{ gr.grouper.group }}
+                      </td>
+                      <td>
+                          {{ gr.list.0.analysis.exam.name }}
+                      </td>
+                      <td>
+                        <ul>
+                          {% regroup gr.list|dictsort:"organ.name" by organ.name as by_organ %}
+                              {% for organ in by_organ %}
+                                <li><strong><u>{{ organ.grouper }}:</u></strong>
+                                  <ul>
+                                    {% for item in organ.list %}
+                                      <li>
+                                        Se observa {{ item.pathology.name }} en {{ item.organ_location.name }} {{ item.diagnostic_intensity.name }} (Muestra {{item.slice.cassette.sample.index}}),
+                                      </li>
+                                    {% endfor %}
+                                  </ul>
+                              </li>
+                              {% endfor %}                                                  
+                        </ul>
+                      </td>
+                    </tr>
+                  {% endfor %}                
               </tbody>
             </table>
           </div>
@@ -145,47 +160,27 @@
           </div>
           <div class="col-md-12">
             <div class="">
-              <table class="table table-bordered">
-                <thead class="bg-danger text-white">
-                  <tr>
-                    <!-- <th>MUESTRA</th> -->
-                    <th>ANÁLISIS</th>
-                    <th>DIAGNÓSTICO</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <!-- <td>{{report.0.analysis.entryform.name}}</td> -->
-                    <td>{{report.0.analysis.exam.name}}</td>
-                    <td>
-                      {% regroup report by organ.name as organ_list %}
-                      <ul>
-                        {% for organ in organ_list %}
-                        <li><strong><u>{{ organ.grouper }}:</u></strong>
-                          <ul>
-                            {% for item in organ.list %}
-                            <li>{{ item.diagnostic.name.title }} en {{ item.organ_location.name }} {{ item.diagnostic_intensity.name }} (Muestra {{item.slice.cassettes.all.0.cassette_name}}) </li>
-                            {% endfor %}
-                          </ul>
-
-                        </li>
+              <ul>
+              {% regroup report|dictsort:"organ.name" by organ.name as new_group %}
+                {% for organ in new_group %}
+                  <li><strong><u>{{ organ.grouper }}</u>:</strong>
+                  {% regroup organ.list|dictsort:"diagnostic.name" by diagnostic.name as by_diag %}
+                    <ul>
+                    {% for diag in by_diag %}
+                        <li>{{ diag.list.0.pathology.name }} en {{ diag.list.0.organ_location.name }} {{ diag.list.0.diagnostic_intensity.name }}. 
+                        Muestras (
+                        {% for fin in diag.list %}
+                          
+                            {{fin.slice.cassette.sample.index}},
+                          
                         {% endfor %}
-                      </ul>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-          <div class="col-md-12" style="padding-top:5% !important; padding-bottom:3% !important;">
-            <center><h3 class="text-danger"><strong>COMENTARIOS</strong></h3></center>
-          </div>
-          <div class="col-md-12">
-            <div class="input-group">
-              <textarea class="form-control" id="analysis_comments" rows="5" aria-describedby="save_comments" placeholder="Ingrese comentarios aquí">{{report.0.analysis.comments|default:""}}</textarea>
-              <div class="input-group-append" id="save_comments">
-                <button class="btn btn-outline-primary save_analysis_comments" data-id="{{report.0.analysis.pk}}" type="button">Guardar</button>
-              </div>
+                        ) </li>
+                    
+                    {% endfor %}
+                    </ul>
+                  </li>
+                {% endfor %}       
+              </ul>
             </div>
           </div>
           <div class="col-md-12" style="padding-top:5% !important; padding-bottom:3% !important;">
@@ -205,6 +200,7 @@
                   </div>
                 {% endfor %}
               {% endfor %}
+            </div>
           </div>
         </div>
       </div>

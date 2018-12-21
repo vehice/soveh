@@ -15,6 +15,10 @@ class CustomCustomer(admin.ModelAdmin):
 
 admin.site.register(Customer, CustomCustomer)
 
+admin.site.register(Diagnostic)
+
+admin.site.register(OrganLocation)
+
 admin.site.register(Fixative)
 
 admin.site.register(Organ)

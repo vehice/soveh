@@ -131,8 +131,7 @@ $("#workflow_form").steps({
       if(!set_state) {
         var previous_step = false;
         var form_data;
-        // console.log(currentIndex);
-        // console.log(newIndex);
+
         if (currentIndex == 0){
           var resp = validate_step_1();
           if (!resp) {
@@ -171,15 +170,11 @@ $("#workflow_form").steps({
         })
         .done(function (data) {
           response = data;
-          console.log("done");
-          console.log(response);
         })
         .fail(function (data) {
-          console.log(data);
           console.log("Fail");
         })
 
-        console.log(response);
         if (response.next_step_permission) {
           var step;
           var function_name;
@@ -244,7 +239,6 @@ $("#workflow_form").steps({
 $(window).on('load', function (e) {
     // If para cargar un paso en especifico
   {% if set_step_tag and set_step_tag != "step_1" %}
-    console.log("SET STEP TAG DESPUES DEL CAMBIO")
     set_state = true;
     var step_wizard = parseInt("{{ set_step_tag }}".split("_")[1]) - 1; // Se resta 1 para igualar a los indices del plugin
     var step_tag_function = "init_{{ set_step_tag }}";

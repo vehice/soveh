@@ -90,10 +90,10 @@ class ENTRYFORM(View):
             
             samples_as_dict = []
             for s in samples:
-                s_dict = model_to_dict(s, exclude=['organs', 'exams', 'cassettes', 'identification'])
+                s_dict = model_to_dict(s, exclude=['organs', 'exams', 'identification'])
                 organs = s.organs.all().values()
                 exams = s.exams.all().values()
-                cassettes = s.cassettes.all().values()
+                cassettes = Cassette.objects.filter(sample=s).values()
                 s_dict['organs_set'] = list(organs)
                 s_dict['exams_set'] = list(exams)
                 s_dict['cassettes_set'] = list(cassettes)
@@ -168,8 +168,9 @@ class CASSETTE(View):
             for slice in Slice.objects.filter(cassette=cassette):
                 slices.append(model_to_dict(slice))
 
-            sample = cassette.sample_set.all().values().first()
-            sample['identification'] = model_to_dict(Identification.objects.get(pk=sample['identification_id']))
+            sample = model_to_dict(cassette.sample, exclude=["exams", "organs"])
+            # print(sample)
+            sample['identification'] = model_to_dict(Identification.objects.get(pk=sample['identification']))
             sample_exams = [model_to_dict(exam) for exam in Sample.objects.get(pk=sample['id']).exams.all() ]
             sample['exams_set'] = sample_exams
 
@@ -199,10 +200,10 @@ class CASSETTE(View):
         
         samples_as_dict = []
         for s in samples:
-            s_dict = model_to_dict(s, exclude=['organs', 'exams', 'cassettes', 'identification'])
+            s_dict = model_to_dict(s, exclude=['organs', 'exams', 'identification'])
             organs_set = s.organs.all().values()
             exams_set = s.exams.all().values()
-            cassettes_set = s.cassettes.all().values()
+            cassettes_set = Cassette.objects.filter(sample=s).values()
             s_dict['organs_set'] = list(organs_set)
             s_dict['exams_set'] = list(exams_set)
             s_dict['cassettes_set'] = list(cassettes_set)
@@ -277,10 +278,10 @@ class ANALYSIS(View):
         
         samples_as_dict = []
         for s in samples:
-            s_dict = model_to_dict(s, exclude=['organs', 'exams', 'cassettes', 'identification'])
+            s_dict = model_to_dict(s, exclude=['organs', 'exams', 'identification'])
             organs_set = s.organs.all().values()
             exams_set = s.exams.all().values()
-            cassettes_set = s.cassettes.all().values()
+            cassettes_set = Cassette.objects.filter(sample=s).values()
             s_dict['organs_set'] = list(organs_set)
             s_dict['exams_set'] = list(exams_set)
             s_dict['cassettes_set'] = list(cassettes_set)
@@ -315,7 +316,7 @@ class SLICE(View):
             slice_as_dict = model_to_dict(slice_new, exclude=['cassette'])
             slice_as_dict['cassette'] = model_to_dict(slice_new.cassette, exclude=['organs'])
             slice_as_dict['organs'] = list(slice_new.cassette.organs.all().values())
-            sample = slice_new.cassette.sample_set.all().first()
+            sample = slice_new.cassette.sample
             slice_as_dict['sample'] = model_to_dict(sample, exclude=['exams', 'organs', 'cassettes'])
             slice_as_dict['sample']['identification'] = model_to_dict(sample.identification)
             slice_as_dict['paths_count'] = Report.objects.filter(slice_id=slice_new.pk).count()
@@ -338,7 +339,7 @@ class SLICE(View):
             s_dict = model_to_dict(s, exclude=['organs', 'exams', 'cassettes', 'identification'])
             organs_set = s.organs.all().values()
             exams_set = s.exams.all().values()
-            cassettes_set = s.cassettes.all().values()
+            cassettes_set = Cassette.objects.filter(sample=s).values()
             s_dict['organs_set'] = list(organs_set)
             s_dict['exams_set'] = list(exams_set)
             s_dict['cassettes_set'] = list(cassettes_set)
@@ -381,13 +382,16 @@ class WORKFLOW(View):
             }
         elif (form.content_type.name == 'analysis form'):
             route = 'app/workflow_analysis.html'
+            reports = Report.objects.filter(analysis_id=int(object_form_id))
+
             data = {
                 'form': form,
                 'form_id': form_id,
                 'analysis_id': object_form_id,
                 'set_step_tag': step_tag,
                 'exam_name': form.content_object.exam.name,
-                'form_parent_id': form.parent.id
+                'form_parent_id': form.parent.id,
+                'report': reports
             }
 
         return render(request, route, data)
@@ -441,6 +445,8 @@ class WORKFLOW(View):
                 'next_step_permission': next_step_permission
             })
         else:
+            process_answer = call_process_method(form.content_type.model,
+                                                     request)
             form.form_closed = True
             form.save()
 
@@ -453,7 +459,7 @@ class WORKFLOW(View):
 
 class REPORT(View):
 
-    def get(self, request, slice_id):
+    def get(self, request, slice_id=None, analysis_id=None):
         if slice_id:
             report_qs = Report.objects.filter(slice=slice_id)
             reports = []
@@ -485,6 +491,72 @@ class REPORT(View):
 
             data = {'reports': reports}
 
+        if analysis_id:
+            report_qs = Report.objects.filter(analysis_id=analysis_id)
+            reports = []
+            for report in report_qs:
+                image_list = []
+                for img in report.images.all():
+                    image_list.append({
+                        'name': img.file.name.split("/")[-1],
+                        'url': img.file.url,
+                        'id': img.id
+                    })
+
+                reports.append({
+                    "report_id": report.id,
+                    "organ": model_to_dict(report.organ),
+                    "organ_location": model_to_dict(report.organ_location, exclude=["organs"]),
+                    "pathology": model_to_dict(report.pathology, exclude=["organs"]),
+                    "diagnostic": model_to_dict(report.diagnostic, exclude=["organs"]),
+                    "diagnostic_distribution": model_to_dict(report.diagnostic_distribution, exclude=["organs"]),
+                    "diagnostic_intensity": model_to_dict(report.diagnostic_intensity, exclude=["organs"]),
+                    "images": image_list,
+                    "identification": model_to_dict(report.identification),
+                    "analysis": model_to_dict(report.analysis, exclude=["exam"]),
+                    "exam": model_to_dict(report.analysis.exam)
+                })
+            
+            analysis_form = AnalysisForm.objects.get(pk=analysis_id)
+            entryform = EntryForm.objects.values().get(pk=analysis_form.entryform.pk)
+            entryform_object = EntryForm.objects.get(pk=analysis_form.entryform.pk)
+            subflow = entryform_object.get_subflow
+            entryform["subflow"] = subflow
+            identifications = list(
+                Identification.objects.filter(
+                    entryform=entryform['id']).values())
+            
+            samples = Sample.objects.filter(
+                    entryform=entryform['id']).order_by('index')
+            
+            samples_as_dict = []
+            for s in samples:
+                s_dict = model_to_dict(s, exclude=['organs', 'exams', 'cassettes', 'identification'])
+                organs_set = s.organs.all().values()
+                exams_set = s.exams.all().values()
+                cassettes_set = Cassette.objects.filter(sample=s).values()
+                s_dict['organs_set'] = list(organs_set)
+                s_dict['exams_set'] = list(exams_set)
+                s_dict['cassettes_set'] = list(cassettes_set)
+                s_dict['identification'] = model_to_dict(s.identification)
+                samples_as_dict.append(s_dict)
+
+            entryform["identifications"] = list(
+                entryform_object.identification_set.all().values())
+            entryform["answer_questions"] = list(
+                entryform_object.answerreceptioncondition_set.all().values())
+            entryform["analyses"] = list(
+                entryform_object.analysisform_set.all().values())
+            entryform["cassettes"] = list(
+                entryform_object.cassette_set.all().values())
+            entryform["customer"] = entryform_object.customer.name
+            entryform["larvalstage"] = entryform_object.larvalstage.name
+            entryform["fixative"] = entryform_object.fixative.name
+            entryform["watersource"] = entryform_object.watersource.name
+            entryform["specie"] = entryform_object.specie.name
+            # print(reports)
+
+            data = {'reports': reports, "entryform": entryform}
         return JsonResponse(data)
 
     def post(self, request):
@@ -499,6 +571,7 @@ class REPORT(View):
         diagnostic_distribution_id = var_post.get('diagnostic_distribution')
         diagnostic_intensity_id = var_post.get('diagnostic_intensity')
 
+        slice = Slice.objects.get(pk=slice_id)
         report = Report.objects.create(
             analysis_id=analysis_id,
             slice_id=slice_id,
@@ -508,6 +581,7 @@ class REPORT(View):
             diagnostic_id=diagnostic_id,
             diagnostic_distribution_id=diagnostic_distribution_id,
             diagnostic_intensity_id=diagnostic_intensity_id,
+            identification=slice.cassette.sample.identification
         )
         report.save()
 
@@ -572,7 +646,6 @@ def set_analysis_comments(request, analysisform_id):
     try:
         analysis = AnalysisForm.objects.get(pk=analysisform_id)
         comments = request.POST.get('comments')
-        print (comments)
         analysis.comments = comments
         analysis.save()
         return JsonResponse({'ok': True})
@@ -611,6 +684,7 @@ def process_analysisform(request):
         'step_2': step_2_analysisform,
         'step_3': step_3_analysisform,
         'step_4': step_4_analysisform,
+        'step_5': step_5_analysisform,
     }
 
     method = switcher.get(step_tag)
@@ -681,6 +755,8 @@ def step_1_entryform(request):
         list(v) for k, v in dict(var_post).items() if k.startswith("sample[organs]")
     ]
 
+    # print (sample_organs)
+
     zip_samples = zip(sample_index, sample_identification, sample_analysis, sample_organs)
 
     if strtobool(var_post.get('select_if_divide_flow')):
@@ -721,8 +797,6 @@ def step_1_entryform(request):
 
                     zip_analysis = zip(analysis_id, analysis_no_fish, analysis_organ)
                     
-                    print (zip_analysis)
-
                     analyses_qs = entryform.analysisform_set.all()
 
                     for analysis in analyses_qs:
@@ -804,7 +878,7 @@ def step_1_entryform(request):
 
                     zip_analysis = zip(analysis_id, analysis_no_fish, analysis_organ)
                     
-                    print (zip_analysis)
+                    # print (zip_analysis)
 
                     analyses_qs = entryform_aux.analysisform_set.all()
 
@@ -1016,7 +1090,7 @@ def step_1_entryform(request):
             )
         entryform.sample_set.all().delete()
         for values in zip_samples:
-            print (values)
+            # print (values)
             sample = Sample.objects.create(
                 entryform_id=entryform.id,
                 index=int(values[0][0]),
@@ -1083,11 +1157,11 @@ def step_2_entryform(request):
             entryform_id=entryform.id,
             processor_loaded_at=processor_loaded_at,
             cassette_name=values[1],
-            index=count
+            index=count,
+            sample=sample
         )
         cassette.organs.set(values[2])
         cassette.save()
-        sample.cassettes.add(cassette)
         count += 1
 
 def step_3_entryform(request):
@@ -1172,7 +1246,6 @@ def step_1_analysisform(request):
     zip_stain = zip(stain_slice_id, stain_start_stain, stain_end_stain)
 
     for values in zip_stain:
-        print (values)
         slice_new = Slice.objects.get(pk=values[0])
         slice_new.start_stain = values[1]
         slice_new.end_stain = values[2]
@@ -1229,6 +1302,20 @@ def step_3_analysisform(request):
 def step_4_analysisform(request):
     print("Step 4 Analysis Form")
 
+def step_5_analysisform(request):
+    var_post = request.POST.copy()
+
+    analysis_id = var_post.get('analysis_id')
+    box_findings = var_post.get('box-findings').replace("\\r\\n", "")
+    box_diagnostic = var_post.get('box-diagnostics').replace("\\r\\n", "")
+    box_comments = var_post.get('box-comments').replace("\\r\\n", "")
+    # print (var_post)
+    ReportFinal.objects.create(
+        analysis_id=analysis_id,
+        box_findings=box_findings,
+        box_diagnostics=box_diagnostic,
+        box_comments=box_comments,
+    )
 
 # Generic function for call any process method for any model_form
 def call_process_method(model_name, request):
