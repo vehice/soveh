@@ -47,10 +47,26 @@ function init_step_5() {
       // ["view", ["fullscreen", "codeview", "help"]]
   ],
   });
+
+  $('#summernote-tablas').summernote({
+    toolbar: [
+      ["style", ["style"]],
+      ["font", ["bold", "underline", "clear"]],
+      ["fontname", ["fontname"]],
+      ["color", ["color"]],
+      ["para", ["ul", "ol", "paragraph"]],
+      ["table", ["table"]],
+      //["insert", ["link", "picture", "video"]],
+      // ["view", ["fullscreen", "codeview", "help"]]
+  ],
+  });
+
+  $('.table-hallazgos').find('tr:last').css('color', 'red').css('font-weight', 'bolder');
 }
 
 function fillInputsFromSummernotes(){
   $('#box-findings').val($('#summernote-hallazgos').summernote('code'));
   $('#box-diagnostics').val($('#summernote-diagnosticos').summernote('code'));
   $('#box-comments').val($('#summernote-comentarios').summernote('code'));
+  $('#box-tables').val($('#summernote-tablas').summernote('code'));
 }

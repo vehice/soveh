@@ -125,7 +125,7 @@
                 </tr>
               </thead>
               <tbody>
-                {% regroup report by identification as new_group %}
+                {% regroup report|dictsort:"identification.id" by identification as new_group %}
                   {% for gr in new_group %}
                     <tr>
                       <td>
@@ -167,12 +167,10 @@
                   {% regroup organ.list|dictsort:"diagnostic.name" by diagnostic.name as by_diag %}
                     <ul>
                     {% for diag in by_diag %}
-                        <li>{{ diag.list.0.pathology.name }} en {{ diag.list.0.organ_location.name }} {{ diag.list.0.diagnostic_intensity.name }}. 
+                        <li>{{ diag.list.0.diagnostic.name.title }} {{ diag.list.0.diagnostic_distribution.name }} {{ diag.list.0.diagnostic_intensity.name }}. 
                         Muestras (
                         {% for fin in diag.list %}
-                          
                             {{fin.slice.cassette.sample.index}},
-                          
                         {% endfor %}
                         ) </li>
                     
@@ -202,6 +200,50 @@
               {% endfor %}
             </div>
           </div>
+          <div class="col-md-12" style="padding-top:5% !important; padding-bottom:3% !important;">
+            <center><h3 class="text-danger"><strong>Principales hallazgos histológicos</strong></h3></center>
+          </div>
+          <div class="col-md-12">
+            <div class="row">
+              {% for key, values in reports2.items %}
+                <div class="col-md-12 mb-3">
+                  <table class="table table-bordered table-hallazgos">
+                    <thead>
+                      <tr>
+                        {% for head in values.0 %}
+                          <th> <center>{{head}} </center></th>
+                        {% endfor %}
+                      </tr>
+                      
+                    </thead>
+                    <tbody>
+                      {% for val in values %}
+                        {% if forloop.counter0 != 0 %}
+                          <tr>
+                            {% for row in val %}
+                              <td><center>
+                                {% if row == "leve" %}
+                                  +
+                                {% elif row == "moderada" %}
+                                  ++
+                                {% elif row == "severa" %}
+                                  +++
+                                {% else %}
+                                  {{ row.upper }}
+                                {% endif %}
+                              </center></td>
+                            {% endfor %}
+                          </tr>
+                        {% endif %}
+                      {% endfor %}
+
+                    </tbody>
+                  </table>
+                  <center><span class="text-danger">Intensidad: Leve +; Moderada ++; Severa +++ </span></center>
+                </div>
+              {% endfor %}
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -213,6 +255,10 @@
     <script src="{% url 'js_reverse' %}" type="text/javascript"></script>
 
     <script>
+
+      $( document ).ready(function() {
+        $('.table-hallazgos').find('tr:last').css('color', 'red').css('font-weight', 'bolder');
+      });
 
       $(document).on('click', '.save_analysis_comments', function(e){
         var analysisform_id = $(this).data('id');

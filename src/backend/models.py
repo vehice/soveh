@@ -295,3 +295,4 @@ class ReportFinal(models.Model):
     box_findings = models.TextField(null=True, blank=True)
     box_diagnostics = models.TextField(null=True, blank=True)
     box_comments = models.TextField(null=True, blank=True)
+    box_tables = models.TextField(null=True, blank=True)

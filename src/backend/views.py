@@ -383,6 +383,50 @@ class WORKFLOW(View):
         elif (form.content_type.name == 'analysis form'):
             route = 'app/workflow_analysis.html'
             reports = Report.objects.filter(analysis_id=int(object_form_id))
+            from collections import defaultdict
+
+            res = defaultdict(list)
+            for report in reports:
+                res[report.identification_id].append(report)
+
+            data = {}
+            for key, value in res.items():
+                samples = Sample.objects.filter(identification_id=key).order_by('index')
+                matrix = []
+                first_column = ["MUESTRA / HALLAZGO", ""]
+                first_column = first_column + list(map(lambda x: x.identification.cage+"-"+x.identification.group+"-"+str(x.index), samples))
+                matrix.append(first_column + [""])
+                
+                res2 = defaultdict(list)
+                for elem in value:
+                    res2[elem.pathology.name + " en " + elem.organ_location.name].append(elem)
+
+                for key2, value2 in res2.items():
+                    column = [value2[0].organ.name, key2]
+                    samples_by_index = {}
+                    
+                    for sam in samples:
+                        samples_by_index[sam.index] = []
+
+                    for item in value2:
+                        if item.identification_id == key:
+                            samples_by_index[item.slice.cassette.sample.index].append(item.diagnostic_intensity.name)
+
+                    aux = []
+                    count_hallazgos = 0
+                    for k, v in samples_by_index.items():
+                        if len(v) > 0:
+                            aux.append(v[0])
+                            count_hallazgos += 1
+                        else:
+                            aux.append("")
+
+                    column = column + aux
+                    percent = int(round((count_hallazgos*100) / len(samples),0))
+                    column.append(str(percent) +"%")
+                    matrix.append(column)
+
+                data[key] = list(zip(*matrix))
 
             data = {
                 'form': form,
@@ -391,7 +435,8 @@ class WORKFLOW(View):
                 'set_step_tag': step_tag,
                 'exam_name': form.content_object.exam.name,
                 'form_parent_id': form.parent.id,
-                'report': reports
+                'report': reports,
+                'reports2': data
             }
 
         return render(request, route, data)
@@ -1309,12 +1354,14 @@ def step_5_analysisform(request):
     box_findings = var_post.get('box-findings').replace("\\r\\n", "")
     box_diagnostic = var_post.get('box-diagnostics').replace("\\r\\n", "")
     box_comments = var_post.get('box-comments').replace("\\r\\n", "")
+    box_tables = var_post.get('box-tables').replace("\\r\\n", "")
     # print (var_post)
     ReportFinal.objects.create(
         analysis_id=analysis_id,
         box_findings=box_findings,
         box_diagnostics=box_diagnostic,
         box_comments=box_comments,
+        box_tables=box_tables
     )
 
 # Generic function for call any process method for any model_form

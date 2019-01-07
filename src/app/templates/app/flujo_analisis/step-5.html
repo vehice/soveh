@@ -125,6 +125,10 @@
                         </tr>
                       {% endfor %}                
                   </tbody>
+
+                  <tfood>
+                    
+                  </tfood>
                 </table>
               </div>
               <div class="col-md-12" style="padding-top:5% !important; padding-bottom:3% !important;">
@@ -180,6 +184,54 @@
                       </div>
                     {% endfor %}
                   {% endfor %}
+                </div>
+              </div>
+
+              <input type="hidden" name="box-tables" id="box-tables">
+              <div id="summernote-tablas">
+                <div class="col-md-12" style="padding-top:5% !important; padding-bottom:3% !important;">
+                  <center><h3 class="text-danger"><strong>Principales hallazgos histológicos</strong></h3></center>
+                </div>
+                <div class="col-md-12">
+                  <div class="row">
+                    {% for key, values in reports2.items %}
+                      <div class="col-md-12" style="margin-bottom: 3% !important;">
+                        <table class="table table-bordered table-hallazgos">
+                          <thead>
+                            <tr>
+                              {% for head in values.0 %}
+                                <th> <center>{{head}} </center></th>
+                              {% endfor %}
+                            </tr>
+                            
+                          </thead>
+                          <tbody>
+                            {% for val in values %}
+                              {% if forloop.counter0 != 0 %}
+                                <tr>
+                                  {% for row in val %}
+                                    <td><center>
+                                      {% if row == "leve" %}
+                                        +
+                                      {% elif row == "moderada" %}
+                                        ++
+                                      {% elif row == "severa" %}
+                                        +++
+                                      {% else %}
+                                        {{ row.upper }}
+                                      {% endif %}
+                                    </center></td>
+                                  {% endfor %}
+                                </tr>
+                              {% endif %}
+                            {% endfor %}
+      
+                          </tbody>
+                        </table>
+                        <center><span class="text-danger">Intensidad: Leve +; Moderada ++; Severa +++ </span></center>
+                      </div>
+                    {% endfor %}
+                  </div>
                 </div>
               </div>
             </div>
