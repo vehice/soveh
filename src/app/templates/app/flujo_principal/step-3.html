@@ -5,73 +5,80 @@
     <input type="hidden" id="form_id" name="form_id" value="{{form_id}}" >
     <input type="hidden" id="entryform_id" name="entryform_id" value="{{entryform_id}}" >
     <h4 class="form-section">
-      <i class="ft-user"></i> Armado Bloque + Corte
+      <i class="ft-user"></i> Cargar Procesador Tejido
     </h4>
     <div class="row">
       <div class="col-md-6">
         <div class="form-group">
+          <label>Fecha / Hora Procesado Tejido : </label>
+          <div class='input-group date' id='datetime_processor_loaded_at'>
+            <input type="text" class="form-control" name="processor_loaded_at" />
+            <div class="input-group-append">
+              <span class="input-group-text">
+                <span class="fa fa-calendar"></span>
+              </span>
+            </div>
+          </div>
+          <input type="hidden" name="processor_loaded_at_submit" id="processor_loaded_at_submit" />
         </div>
       </div>
-    </div>
-    <div id="block_group">
-      <div class="table-responsive">
-        <table id="block_table" class="table table-bordered table-condensed" width="100%" cellpadding="0" cellspacing="0" border="0">
-          <thead>
-            <tr>
-              <th>Muestra</th>
-              <th>Cassette</th>
-              <th>Organos</th>
-              <th>Nro Cortes</th>
-              <th>Inicio Bloque <br> <span class="btn btn-sm btn-success square block_start_all"><i class="fa fa-check-square-o"></i> Todos</span></th>
-              <th>Fin Bloque <br> <span class="btn btn-sm btn-success square block_end_all"><i class="fa fa-check-square-o"></i> Todos</span></th>
-              <th>Inicio Corte <br> <span class="btn btn-sm btn-success square slice_start_all"><i class="fa fa-check-square-o"></i> Todos</span></th>
-              <th>Fin Corte <br> <span class="btn btn-sm btn-success square slice_end_all"><i class="fa fa-check-square-o"></i> Todos</span></th>
-              <th>Opciónes</th>
-            </tr>
-          </thead>
-          <tbody>
-          </tbody>
-        </table>
+      <div class="col-md-6">
+        <div class="form-group">
+        </div>
       </div>
+      <!-- <div class="col-md-6">
+        <div class="form-group">
+          <label for="date3">Nro muestras por cassettes</label>
+          <select class="select2 form-control" id="no_cassette" name="cassette">
+            <option value='1' selected>x1</option>
+            <option value='2'>x2</option>
+            <option value='3'>x3</option>
+            <option value='4'>x4</option>
+          </select>
+        </div>
+      </div> -->
+    </div>
+    <div id="cassette_group">
+      <table id="cassettes_table" class="table table-bordered table-hover table-condensed" width="100%">
+        <thead>
+          <tr>
+            <th>No. Muestra</th>
+            <th>Identificación</th>
+            <th>Nombre Cassette</th>
+            <th>Organos</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+        </tbody>
+        </table>
     </div>
   </div>
 </fieldset>
 
-<script id="block_dyeing_row" type="text/x-lodash-template">
-  <tr data-index="<%= block_index %>">
+<script id="cassette_row" type="text/x-lodash-template">
+  <tr>
+    <input type="hidden" name="cassette[sample_id][<%= cassette_index %>]" value="<%= sample_id %>" >
+    <input type="hidden" name="cassette[cassette_name][<%= cassette_index %>]" value="<%= cassette_name %>" >
     <td>
       <%= sample_index %>
-      <input type="hidden" name="cassette_sample_id_<%= block_index %>]" value="<%= sample_id %>" >
+    </td>
+    <td>
+      <%= sample_name %>
     </td>
     <td>
       <%= cassette_name %>
-      <input type="hidden" name="block_cassette_pk_<%= block_index %>" value="<%= cassette_pk %>" >
-      <input type="hidden" name="block_cassette_name_<%= block_index %>" value="<%= cassette_name %>" >
+    </td>
+    <td style="width:40%">
+      <select class="select2 form-control form-control-sm" style="width:100%"
+        name="cassette[organ][<%= cassette_index %>]" multiple="multiple">
+        <% _.each( organs, function( organ ){ %>
+          <option value=<%= organ.id %>> <%= organ.name %> </option>
+        <% }); %>
+      </select>
     </td>
     <td>
-      <%= organs %>
-    </td>
-    <td>
-      <%= no_slice %>
-    </td>
-    <td>
-      <input type="checkbox" id="block_start_block_<%= block_index %>" class="switchery" />
-      <input type="hidden" name="block_start_block_<%= block_index %>" value="<%= start_block %>"  />
-    </td>
-    <td>
-      <input type="checkbox" id="block_end_block_<%= block_index %>" class="switchery" />
-      <input type="hidden" name="block_end_block_<%= block_index %>" value="<%= end_block %>" />
-    </td>
-    <td>
-      <input type="checkbox" id="block_start_slice_<%= block_index %>" class="switchery" />
-      <input type="hidden" name="block_start_slice_<%= block_index %>" value="<%= start_slice %>" />
-    </td>
-    <td>
-      <input type="checkbox" id="block_end_slice_<%= block_index %>" class="switchery" />
-      <input type="hidden" name="block_end_slice_<%= block_index %>" value="<%= end_slice %>" />
-    </td>
-    <td>
-      <span id="slice-info" data-trigger="hover" data-toggle="popover" data-html="true" title="Visualizar Cortes" data-content="<%= slice_info %>"><i class="fa fa-search-plus fa-fw fa-2x"></i></span>
+      <button title="Añadir cassette a la muestra" tooltip="" type="button" data-cassette="<%= cassette_index %>" class="btn btn-icon btn-secondary add_cassette_to_sample"><i class="fa fa-plus"></i></button>
     </td>
   </tr>
 </script>

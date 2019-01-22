@@ -11,230 +11,188 @@ function init_step_2() {
   })
   .done(function (data) {
     data_step_2 = data
-    // console.log(data_step_2);
     $('.showSummaryBtn').removeClass("hidden");
     fillSummary(data);
-
-    if ($.fn.DataTable.isDataTable('#cassettes_table')) {
-      // TODO: Fix efecto al destruir la tabla
-      $('#cassettes_table').DataTable().clear().destroy();
-    }
-
-    loadCassetteData(data_step_2);
-
-    $('#cassettes_table').DataTable({
-      ordering: false,
-      paginate: false,
-      columnDefs: [
-        { "width": "20%", "targets": 0 },
-        { "width": "20%", "targets": 1 },
-        { "width": "60%", "targets": 2 }
-      ],
-      language: {
-        url: "https://cdn.datatables.net/plug-ins/1.10.16/i18n/Spanish.json"
-      },
-    });
-  
-    $('[name*="cassette[organ]"]').select2();
-    $('[name*="cassette[organ]"] > option').prop('selected', 'selected');
-    $('[name*="cassette[organ]"]').trigger('change');
-    
-    $('[name*="cassette[organ]"]').on("select2:unselecting", function (e) {
-      if (e.params.args.originalEvent) {
-        e.params.args.originalEvent.stopPropagation();
-      }
-    });
+    initialData(data);
+    loadData(data);
   })
   .fail(function () {
   })
 
-  $('#datetime_processor_loaded_at').datetimepicker({
-    locale: 'es',
+  $('#exam_select').select2();
+  
+  $('#exam_select').on("select2:select", function (e) {
+    var data = e.params.data;
+    addExamToSamples(data);
   });
 
-  $('#datetime_processor_loaded_at').on("dp.change", function (e) {
-    if (e.date) {
-      $("#processor_loaded_at_submit").val(e.date.format());
+  $('#exam_select').on("select2:unselect", function (e) {
+    var data = e.params.data;
+    removeExamFromSamples(data);
+  });
+
+  $('#exam_select').on("select2:unselecting", function (e) {
+    if (e.params.args.originalEvent) {
+      e.params.args.originalEvent.stopPropagation();
     }
   });
 }
 
-function validate_step_2(){  
-  // Validates date
-  if ( $('input[name="processor_loaded_at"').val() == "") {
+function loadExams(exams) {
+  $("#exam_select").html("");
+  $.each(exams, function (i, item) {
+    $('#exam_select').append($('<option>', {
+      value: item.id,
+      text: item.name
+    }));
+  });
+}
+
+function loadSamples(samples, organs){
+  $("#samples_table tbody").html("");
+  $.each(samples, function (i, item){
+    addSampleRow(item, organs);
+  });
+
+  $('.samples_organs').select2();
+  $('.samples_exams').select2();
+
+  $('.samples_exams').on("select2:unselecting", function (e) {
+    if (e.params.args.originalEvent) {
+      e.params.args.originalEvent.stopPropagation();
+    }
+  });
+  
+}
+
+function initialData(data) {
+  loadSamples(data.samples, data.organs);
+  loadExams(data.exams);
+}
+
+function loadData(data){
+
+  // Fill analyses
+  $.each(data.entryform.analyses, function(i, item){
+    $('#exam_select option[value="'+item.exam_id+'"]').prop('selected', true);
+  });
+
+  // Fill exams and organs per samples
+  $.each(data.samples, function(i, item){
+    $.each(item.exams_set, function(j, item2){
+      var selected_exam = new Option(item2.name, item2.id, true, true);
+      $('#sample-'+item.id+' .samples_exams').append(selected_exam).trigger('change');
+    });
+
+    $.each(item.organs_set, function(k, item3){
+      var selected_organ = new Option(item3.name, item3.id, true, true);
+      $('#sample-'+item.id+' .samples_organs').append(selected_organ).trigger('change');
+    });
+  });
+}
+
+function addExamToSamples(exam){
+  $('#samples_table .samples_exams').each( function(i){
+    var new_exam = new Option(exam.text, exam.id, true, true);
+    $(this).append(new_exam).trigger('change');
+  }); 
+}
+
+function removeExamFromSamples(exam){
+  $('#samples_table .samples_exams').each( function(i){
+    $(this).find("option[value='"+ exam.id+"']").remove();
+    $(this).trigger('change');
+  }); 
+}
+
+function initialConf() {
+  $('#exam_select').select2();
+}
+
+function validate_step_2(){
+  // Validates exam selection
+  if ( $('#exam_select :selected').length <= 0 ) {
     toastr.error(
-      'Para continuar debes ingresar la fecha y hora del procesado de tejido.', 
+      'Para continuar debes tener seleccionado al menos un análisis.', 
       'Ups!', 
       {positionClass: 'toast-top-full-width', containerId: 'toast-bottom-full-width'}
     );
-    $('input[name="processor_loaded_at"').focus();
+    $('#exam_select').focus();
     return false;
   }
-  return true;
-}
 
-$(document).on('click', '.remove_cassette', function (e) {
-  var cassette_index = $(this).data('cassette');
-  $('#cassettes_table tr:eq('+(cassette_index)+')').remove();
-
-  var table_size = $('#cassettes_table tr').length;
-
-  for (i = cassette_index; i < table_size; i++) {
-    
-    old_index = i + 1;
-
-    $('#cassettes_table tr:eq('+i+')').find("input[name*='cassette[sample_id]["+old_index+"]']").
-      prop('name', 'cassette[sample_id]['+i+']');
-
-    $('#cassettes_table tr:eq('+i+')').find("select[name*='cassette[organ]["+old_index+"]']").
-      prop('name', 'cassette[organ]['+i+']');
-
-    current_cassette_name = $('#cassettes_table tr:eq('+i+')').find("td:eq(2)").text();
-    new_cassette_name = $.trim(
-      current_cassette_name.replace('C'+old_index.toString(), 
-        'C'+(i).toString()
-      )
-    );
-
-    $('#cassettes_table tr:eq('+i+')').find("td:eq(2)").
-      text(new_cassette_name);
-
-    $('#cassettes_table tr:eq('+i+')').find("input[name*='cassette[cassette_name]["+old_index+"]']").
-      prop('name', 'cassette[cassette_name]['+i+']');
-
-    $('#cassettes_table tr:eq('+i+')').find("input[name*='cassette[cassette_name]["+i+"]']").
-      val(new_cassette_name);
-
-    $('#cassettes_table tr:eq('+i+')').find('.add_cassette_to_sample').
-      attr('data-cassette', i);
-
-  }
-  toastr.success('Cassette eliminado correctamente.', 'Listo!');
-});
-
-$(document).on('click', '.add_cassette_to_sample', function (e) {
-  var parent_tr = $(this).closest('tr');
-  parent_tr.find('select[name*="cassette[organ]"]').select2('destroy');
-  var clone_tr = parent_tr.clone();
-  var current_cassette_index = parseInt($(this).data('cassette'));
-  var new_cassette_index = current_cassette_index + 1;
-  
-  clone_tr.find("input[name*='cassette[sample_id]["+current_cassette_index+"]']").
-    prop('name', 'cassette[sample_id]['+new_cassette_index+']');
-
-  clone_tr.find("select[name*='cassette[organ]["+current_cassette_index+"]']").
-    prop('name', 'cassette[organ]['+new_cassette_index+']');
-
-  current_cassette_name = clone_tr.find("td:eq(2)").text();
-  new_cassette_name = $.trim(
-    current_cassette_name.replace('C'+current_cassette_index.toString(), 
-      'C'+(new_cassette_index).toString()
-    )
-  );
-  clone_tr.find("td:eq(2)").
-    text(new_cassette_name);
-
-  clone_tr.find("input[name*='cassette[cassette_name]["+current_cassette_index+"]']").
-    prop('name', 'cassette[cassette_name]['+new_cassette_index+']');
-
-  clone_tr.find("input[name*='cassette[cassette_name]["+new_cassette_index+"]']").
-  val(new_cassette_name);
-
-
-  clone_tr.find(".add_cassette_to_sample").remove();
-  clone_tr.find('td:eq(4)').append('<button title="Eliminar Cassette" tooltip="" type="button" data-cassette="'+new_cassette_index+'" class="btn btn-icon btn-danger remove_cassette"><i class="fa fa-trash"></i></button>');
-  clone_tr.insertAfter(parent_tr);
-  clone_tr.addClass("bg-success bg-accent-1");
-  parent_tr.find('select[name*="cassette[organ]"]').select2();
-  clone_tr.find('select[name*="cassette[organ]"]').find('option').prop('selected', 'selected').end().select2();
-
-  var new_index = clone_tr.index() + 1;
-  var table_size = $('#cassettes_table tr').length;
-
-  for (i = new_index + 1; i < table_size; i++) {
-    
-    old_index = i - 1;
-
-    $('#cassettes_table tr:eq('+i+')').find("input[name*='cassette[sample_id]["+old_index+"]']").
-      prop('name', 'cassette[sample_id]['+i+']');
-
-    $('#cassettes_table tr:eq('+i+')').find("select[name*='cassette[organ]["+old_index+"]']").
-      prop('name', 'cassette[organ]['+i+']');
-
-    current_cassette_name = $('#cassettes_table tr:eq('+i+')').find("td:eq(2)").text();
-    new_cassette_name = $.trim(
-      current_cassette_name.replace('C'+old_index.toString(), 
-        'C'+(i).toString()
-      )
-    );
-
-    $('#cassettes_table tr:eq('+i+')').find("td:eq(2)").
-      text(new_cassette_name);
-
-    $('#cassettes_table tr:eq('+i+')').find("input[name*='cassette[cassette_name]["+old_index+"]']").
-      prop('name', 'cassette[cassette_name]['+i+']');
-
-    $('#cassettes_table tr:eq('+i+')').find("input[name*='cassette[cassette_name]["+i+"]']").
-      val(new_cassette_name);
-
-    $('#cassettes_table tr:eq('+i+')').find('.add_cassette_to_sample').
-      attr('data-cassette', i);
-  }
-
-  toastr.success('Se asignó un nuevo cassette exitosamente.', 'Listo!');
-
-});
-
-function loadCassetteData(data) {
-  console.log(data);
-  if (data.entryform.cassettes.length > 0){
-    $('[name="processor_loaded_at"]').val(moment(data.entryform.cassettes[0].processor_loaded_at).format("DD/MM/YYYY HH:MM") || "");
-    $('#processor_loaded_at_submit').val(data.entryform.cassettes[0].processor_loaded_at);
-
-    $.each(data.samples, function (i, sample) {
-      $.each(sample.cassettes_set, function (j, cassette) {
-        var row = {
-          'sample_id' : sample.id,
-          'sample_index' : sample.index,
-          'cassette_index' : cassette.index,
-          'cassette_name' : cassette.cassette_name,
-          'sample_name' : sample.identification.cage+'-'+sample.identification.group,
-          'organs': sample.organs_set
-        };
-        addCasseteRow(row);
-      });
-    });   
-  } else {
-
-    $('[name="processor_loaded_at"]').val("");
-    $('#processor_loaded_at_submit').val("");
-
-    cassette_preffix = "";
-    if ( data.entryform.subflow != "N/A" ){
-      cassette_preffix = data.entryform.no_caso + '-' + data.entryform.subflow + '_C';
-    } else {
-      cassette_preffix = data.entryform.no_caso + '_C';
+  // Validates sample exam assignation
+  var missing_exams_select = false;
+  $('#samples_table .samples_exams').each( function(i){
+    if ( $(this).find(":selected").length <= 0 ){
+      $(this).focus();
+      missing_exams_select = true;
+      return false;
     }
+  });
 
-    $.each(data.samples, function (i, sample) {
-      var row = {
-        'sample_id' : sample.id,
-        'sample_index' : sample.index,
-        'cassette_index' : sample.index,
-        'cassette_name' : cassette_preffix + '' +sample.index,
-        'sample_name' : sample.identification.cage+'-'+sample.identification.group,
-        'organs': sample.organs_set
-      };
-      addCasseteRow(row);
-    });   
+  if (missing_exams_select){
+    toastr.error(
+      'Para continuar debes asignar al menos un análisis a realizar por muestra.', 
+      'Ups!', 
+      {positionClass: 'toast-top-full-width', containerId: 'toast-bottom-full-width'}
+    );
+    return false;
   }
+
+  // Validates sample organ assignation
+  var missing_organs_select = false;
+  $('#samples_table .samples_organs').each( function(i){
+    if ( $(this).find(":selected").length <= 0 ){
+      $(this).focus();
+      missing_organs_select = true;
+      return false;
+    }
+  });
+
+  if (missing_organs_select){
+    toastr.error(
+      'Para continuar es necesario definir el o los organos por muestra.', 
+      'Ups!', 
+      {positionClass: 'toast-top-full-width', containerId: 'toast-bottom-full-width'}
+    );
+    return false;
+  }
+
+  return true;
+ 
 }
 
-function addCasseteRow(data) {
-  var cassetteRowTemplate = document.getElementById("cassette_row").innerHTML;
 
-  var templateFn = _.template(cassetteRowTemplate);
+function addAnalysisTemplate(data) {
+  var analysisTemplate = document.getElementById("analysis_template").innerHTML;
+
+  var templateFn = _.template(analysisTemplate);
   var templateHTML = templateFn(data);
 
-  $("#cassettes_table tbody").append(templateHTML)
+  $("#exam_group").html(templateHTML)
+  $('.samples_organs').select2();
+  $('.samples_analysis').select2();
+
+  $('.samples_organs').on("select2:unselecting", function (e) {
+    if (e.params.args.originalEvent) {
+      e.params.args.originalEvent.stopPropagation();
+    }
+  });
+
+  $('.samples_analysis').on("select2:unselecting", function (e) {
+    if (e.params.args.originalEvent) {
+      e.params.args.originalEvent.stopPropagation();
+    }
+  });
+  
+}
+
+function addSampleRow(sample, organs) {
+  var sampleRowTemplate = document.getElementById("sample_row").innerHTML;
+
+  var templateFn = _.template(sampleRowTemplate);
+  var templateHTML = templateFn({'sample': sample, 'organs': organs});
+
+  $("#samples_table tbody").append(templateHTML)
 }

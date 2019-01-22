@@ -156,8 +156,7 @@ $("#workflow_form").steps({
           form_data = $("#step_" + currentIndex + " :input").serialize();
           disform.attr('disabled', true);
         }
-        // console.log(form_data);
-        // return false;
+        
         var url = Urls.workflow();
         var id_next_step = $("#step_" + newIndex).children("#step_id").val();
 
@@ -260,9 +259,9 @@ $(document).on('click', '.showSummaryBtn', function(e){
 });
 
 function fillSummary(data){
-  // console.log(data);
+  console.log(data);
   $('.NoCasoSummary').html(data.entryform.no_caso);
-  $('.summaryClient').html('<b>Cliente</b>: '+ data.entryform.customer);
+  $('.summaryClient').html('<b>Cliente</b>: '+ data.entryform.customer.name);
   $('.summaryCompany').html('<b>Empresa</b>: '+ data.entryform.company);
   $('.summaryCenter').html('<b>Centro</b>: '+ data.entryform.center);
   $('.summaryResponsible').html('<b>Responsable</b>: '+ data.entryform.responsible);
@@ -270,11 +269,11 @@ function fillSummary(data){
   $('.sumarrySampling').html('<b>Fecha muestreo</b>: '+ moment(data.entryform.sampled_at).format("DD/MM/YYYY HH:MM") );
   $('.summaryNoOrder').html('<b>No. orden</b>: '+ data.entryform.no_order);
   $('.summaryNoRequest').html('<b>No. solicitud</b>: '+ data.entryform.no_request);
-  $('.summaryFixative').html('<b>Fijador</b>: '+ data.entryform.fixative);
+  $('.summaryFixative').html('<b>Fijador</b>: '+ data.entryform.fixative.name);
   
-  $('.summarySpecie').html('<b>Especie</b>: '+ data.entryform.specie);  
-  $('.summaryDevStatus').html('<b>Estado de desarrollo</b>: '+ data.entryform.larvalstage);  
-  $('.summaryWaterSource').html('<b>Fuente de agua</b>: '+ data.entryform.watersource);
+  $('.summarySpecie').html('<b>Especie</b>: '+ data.entryform.specie.name);  
+  $('.summaryDevStatus').html('<b>Estado de desarrollo</b>: '+ data.entryform.larvalstage.name);  
+  $('.summaryWaterSource').html('<b>Fuente de agua</b>: '+ data.entryform.watersource.name);
 
   var tpl_identification = '<div class="col-sm-12"><table class="table table-bordered table-xs">';
   tpl_identification += '<thead><tr><th>Estanque/Jaula</th><th>Grupo</th><th>No. Peces</th><th>No. Contenedores</th></tr></thead><tbody>';

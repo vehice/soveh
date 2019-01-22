@@ -1,6 +1,6 @@
 function init_step_4() {
   var entryform_id = $('#entryform_id').val();
-  var url = Urls.analysis_entryform_id(entryform_id);
+  var url = Urls.cassette_entryform_id(entryform_id);
 
   $.ajax({
     type: "GET",
@@ -10,44 +10,107 @@ function init_step_4() {
     .done(function (data) {
       $('.showSummaryBtn').removeClass("hidden");
       fillSummary(data);
-
-      loadAnalysisData(data);
+      loadBlockTable(data);
     })
     .fail(function () {
       console.log("Fail")
     })
 }
 
-function loadAnalysisData(data) {
-  $("#analysis_group").empty();
+$(document).on('change', '#block_table :checkbox', function (e) {
+  if (e.target.checked) {
+    $("[name='" + e.target.id + "']").val(moment().format());
+  } else {
+    $("[name='" + e.target.id + "']").val("");
+  }
+})
 
-  populateAnalysisData(data);
-}
+$(document).on('click', '.block_start_all', function (e) {
+  $("input[type=checkbox][id^='block_start_block']" ).trigger('click');
+});
 
-function populateAnalysisData(data) {
-  $.each(data.analyses, function (i, item) {
+$(document).on('click', '.block_end_all', function (e) {
+  $("input[type=checkbox][id^='block_end_block']" ).trigger('click');
+});
 
-    var row = {};
+$(document).on('click', '.slice_start_all', function (e) {
+  $("input[type=checkbox][id^='block_start_slice']" ).trigger('click');
+});
 
-    row.form_id = item.form_id;
-    row.exam_name = item.exam_name;
-    row.exam_stain = item.exam_stain;
-    row.no_slice = item.slices.length;
-    row.current_step = item.current_step;
-    row.total_step = item.total_step;
-    row.percentage_step = item.percentage_step;
-    row.current_step_tag = item.current_step_tag;
-    row.form_closed = item.form_closed;
+$(document).on('click', '.slice_end_all', function (e) {
+  $("input[type=checkbox][id^='block_end_slice']" ).trigger('click');
+});
 
-    addAnalysisElement(row)
+function loadBlockTable(data) {
+  if ($.fn.DataTable.isDataTable('#block_table')) {
+    $('#block_table').DataTable().clear().destroy();
+  }
+
+  populateBlockTable(data);
+
+  var elems = Array.prototype.slice.call(document.querySelectorAll('.switchery'));
+
+  elems.forEach(function (html) {
+    new Switchery(html);
+  });
+
+  $('[data-toggle="popover"]').popover();
+
+  $('#block_table').DataTable({
+    ordering: false,
+    paginate: false,
+    // scrollX: true,
+    language: {
+      url: "https://cdn.datatables.net/plug-ins/1.10.16/i18n/Spanish.json"
+    },
   });
 }
 
-function addAnalysisElement(data) {
-  var analysisElementTemplate = document.getElementById("analysis_element").innerHTML;
+function populateBlockTable(data) {
 
-  var templateFn = _.template(analysisElementTemplate);
+  $.each(data.cassettes, function (i, item) {
+    var row = {};
+
+    row.sample_id = item.sample.id;
+    row.sample_index = item.sample.index;
+    row.cassette_name = item.cassette_name;
+    row.cassette_pk = item.id;
+    row.cassette_index = item.index;
+    row.organs = item.organs_set.join(", ")
+    row.no_slice = item.sample.exams_set.length;
+    row.block_index = i;
+
+    if (item.slices_set.length > 0) {
+      row.start_block = item.slices[0].start_block;
+      row.end_block = item.slices[0].end_block;
+      row.start_slice = item.slices[0].start_slice;
+      row.end_slice = item.slices[0].end_slice;
+    } else {
+      row.start_block = "";
+      row.end_block = "";
+      row.start_slice = "";
+      row.end_slice = "";
+    }
+
+    row.slice_info = "<ol>";
+    $.each(item.sample.exams_set, function (i, elem) {
+      row.slice_info += "<li><p><strong>Cassette:</strong> " + row.cassette_name + " <strong> </br>Muestra: </strong>" + row.sample_index + " <strong> </br>Corte: </strong>" +row.cassette_name+"-S"+(i+1).toString()+" <strong> </br>An&aacute;lisis: </strong>" + elem.name + "</p></li>"
+    })
+    row.slice_info += "</ol>";
+
+    addBlockRow(row)
+
+    if (item.slices_set.length > 0) {
+      $("[data-index='" + i + "']").find(".switchery").trigger("click");
+    }
+  });
+}
+
+function addBlockRow(data) {
+  var blockRowTemplate = document.getElementById("block_dyeing_row").innerHTML;
+
+  var templateFn = _.template(blockRowTemplate);
   var templateHTML = templateFn(data);
 
-  $("#analysis_group").append(templateHTML)
+  $("#block_table tbody").append(templateHTML)
 }

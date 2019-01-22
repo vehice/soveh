@@ -5,38 +5,73 @@
     <input type="hidden" id="form_id" name="form_id" value="{{form_id}}" >
     <input type="hidden" id="entryform_id" name="entryform_id" value="{{entryform_id}}" >
     <h4 class="form-section">
-      <i class="ft-user"></i> Analisis
+      <i class="ft-user"></i> Armado Bloque + Corte
     </h4>
-    <div id="analysis_group" class="list-group list-group-flush media-list">
+    <div class="row">
+      <div class="col-md-6">
+        <div class="form-group">
+        </div>
+      </div>
+    </div>
+    <div id="block_group">
+      <div class="table-responsive">
+        <table id="block_table" class="table table-bordered table-condensed" width="100%" cellpadding="0" cellspacing="0" border="0">
+          <thead>
+            <tr>
+              <th>Muestra</th>
+              <th>Cassette</th>
+              <th>Organos</th>
+              <th>Nro Cortes</th>
+              <th>Inicio Bloque <br> <span class="btn btn-sm btn-success square block_start_all"><i class="fa fa-check-square-o"></i> Todos</span></th>
+              <th>Fin Bloque <br> <span class="btn btn-sm btn-success square block_end_all"><i class="fa fa-check-square-o"></i> Todos</span></th>
+              <th>Inicio Corte <br> <span class="btn btn-sm btn-success square slice_start_all"><i class="fa fa-check-square-o"></i> Todos</span></th>
+              <th>Fin Corte <br> <span class="btn btn-sm btn-success square slice_end_all"><i class="fa fa-check-square-o"></i> Todos</span></th>
+              <th>Opciónes</th>
+            </tr>
+          </thead>
+          <tbody>
+          </tbody>
+        </table>
+      </div>
     </div>
   </div>
 </fieldset>
 
-<script id="analysis_element" type="text/x-lodash-template">
-<% if (!form_closed)  { %> 
-  <div href="/workflow/<%= form_id %>/<%= current_step_tag %>" class="list-group-item list-group-item-action">
-    <div class="media-body">
-      <div class="row">
-        <div class="col-sm-4 font-medium-4 text-left"><%= exam_name %></div>
-        <div class="col-sm-4 font-medium-4 text-center"><a class="btn btn-outline-secondary square" href="/workflow/<%= form_id %>/<%= current_step_tag %>"><i class="fa fa-arrow-right"></i> Ir al análisis </a></div>
-        <div class="col-sm-4 font-medium-4 text-right">Tinción: <%= exam_name %></div>
-      </div>
-      <p class="list-group-item-text"><%= no_slice %> cortes</p>
-      <div class="progress" style="height: 18px;">
-        <div class="progress-bar" role="progressbar" style="width:<%= percentage_step %>%" aria-describedby="example-caption-2"> <%= current_step %> de <%= total_step  %> pasos</div>
-      </div>
-    </div>
-  </div>
-<% } else { %>
-  <div href="/workflow/<%= form_id %>/<%= current_step_tag %>" class="list-group-item list-group-item-action">
-    <div class="media-body">
-      <div class="row">
-        <div class="col-sm-4 font-medium-4 text-left"><%= exam_name %></div>
-        <div class="col-sm-4 font-medium-4 text-center"><a class="btn btn-outline-secondary square" target="_blank" href="/download-report/<%= form_id %>"><i class="fa fa-download"></i> Descargar Informe</a></div>
-        <div class="col-sm-4 font-medium-4 text-right">Tinción: <%= exam_name %></div>
-      </div>
-      <p class="list-group-item-text">Análisis Finalizado</p>
-    </div>
-  </div>
-<% } %>
+<script id="block_dyeing_row" type="text/x-lodash-template">
+  <tr data-index="<%= block_index %>">
+    <td>
+      <%= sample_index %>
+      <input type="hidden" name="cassette_sample_id_<%= block_index %>]" value="<%= sample_id %>" >
+    </td>
+    <td>
+      <%= cassette_name %>
+      <input type="hidden" name="block_cassette_pk_<%= block_index %>" value="<%= cassette_pk %>" >
+      <input type="hidden" name="block_cassette_name_<%= block_index %>" value="<%= cassette_name %>" >
+    </td>
+    <td>
+      <%= organs %>
+    </td>
+    <td>
+      <%= no_slice %>
+    </td>
+    <td>
+      <input type="checkbox" id="block_start_block_<%= block_index %>" class="switchery" />
+      <input type="hidden" name="block_start_block_<%= block_index %>" value="<%= start_block %>"  />
+    </td>
+    <td>
+      <input type="checkbox" id="block_end_block_<%= block_index %>" class="switchery" />
+      <input type="hidden" name="block_end_block_<%= block_index %>" value="<%= end_block %>" />
+    </td>
+    <td>
+      <input type="checkbox" id="block_start_slice_<%= block_index %>" class="switchery" />
+      <input type="hidden" name="block_start_slice_<%= block_index %>" value="<%= start_slice %>" />
+    </td>
+    <td>
+      <input type="checkbox" id="block_end_slice_<%= block_index %>" class="switchery" />
+      <input type="hidden" name="block_end_slice_<%= block_index %>" value="<%= end_slice %>" />
+    </td>
+    <td>
+      <span id="slice-info" data-trigger="hover" data-toggle="popover" data-html="true" title="Visualizar Cortes" data-content="<%= slice_info %>"><i class="fa fa-search-plus fa-fw fa-2x"></i></span>
+    </td>
+  </tr>
 </script>

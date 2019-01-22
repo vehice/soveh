@@ -108,16 +108,21 @@ class ENTRYFORM(View):
                 entryform_object.analysisform_set.all().values())
             entryform["cassettes"] = list(
                 entryform_object.cassette_set.all().values())
-            entryform["customer"] = entryform_object.customer.name
-            entryform["larvalstage"] = entryform_object.larvalstage.name
-            entryform["fixative"] = entryform_object.fixative.name
-            entryform["watersource"] = entryform_object.watersource.name
-            entryform["specie"] = entryform_object.specie.name
+            entryform["customer"] = model_to_dict(entryform_object.customer) if entryform_object.customer else None
+            entryform["larvalstage"] = model_to_dict(entryform_object.larvalstage) if entryform_object.larvalstage else None
+            entryform["fixative"] = model_to_dict(entryform_object.fixative) if entryform_object.fixative else None
+            entryform["watersource"] = model_to_dict(entryform_object.watersource) if entryform_object.watersource else None
+            entryform["specie"] = model_to_dict(entryform_object.specie) if entryform_object.specie else None
+
+            exams_set = list(Exam.objects.all().values())
+            organs_set = list(Organ.objects.all().values())
 
             data = {
                 'entryform': entryform,
                 'identifications': identifications,
                 'samples': samples_as_dict,
+                'exams': exams_set,
+                'organs': organs_set
             }
         else:
             species = list(Specie.objects.all().values())
@@ -758,11 +763,11 @@ def step_1_entryform(request):
     entryform.customer_id = var_post.get('customer')
     entryform.no_order = var_post.get('no_order')
     try:
-        entryform.created_at = datetime.strptime(var_post.get('created_at_submit'), '%Y-%m-%dT%H:%M:%S%z')
+        entryform.created_at = datetime.strptime(var_post.get('created_at_submit'), '%d/%m/%Y %H:%M')
     except: 
         pass
     try:
-        entryform.sampled_at = datetime.strptime(var_post.get('sampled_at_submit'), '%Y-%m-%dT%H:%M:%S%z')
+        entryform.sampled_at = datetime.strptime(var_post.get('sampled_at_submit'), '%d/%m/%Y %H:%M')
     except:
         pass
     entryform.center = var_post.get('center')
@@ -787,22 +792,23 @@ def step_1_entryform(request):
             answer=values[1],
         )
 
-    sample_index = [
-        list(v) for k, v in dict(var_post).items() if k.startswith("sample[index]")
-    ]
-    sample_identification = [
-        list(v) for k, v in dict(var_post).items() if k.startswith("sample[identification]")
-    ]
-    sample_analysis = [
-        list(v) for k, v in dict(var_post).items() if k.startswith("sample[analysis]")
-    ]
-    sample_organs = [
-        list(v) for k, v in dict(var_post).items() if k.startswith("sample[organs]")
-    ]
+    # sample_index = [
+    #     list(v) for k, v in dict(var_post).items() if k.startswith("sample[index]")
+    # ]
+    # sample_identification = [
+    #     list(v) for k, v in dict(var_post).items() if k.startswith("sample[identification]")
+    # ]
+    # sample_analysis = [
+    #     list(v) for k, v in dict(var_post).items() if k.startswith("sample[analysis]")
+    # ]
 
-    # print (sample_organs)
+    # sample_organs = [
+    #     list(v) for k, v in dict(var_post).items() if k.startswith("sample[organs]")
+    # ]
 
-    zip_samples = zip(sample_index, sample_identification, sample_analysis, sample_organs)
+    # # print (sample_organs)
+
+    # zip_samples = zip(sample_index, sample_identification, sample_analysis, sample_organs)
 
     if strtobool(var_post.get('select_if_divide_flow')):
         if var_post.get('flow_divide_option') == "1":
@@ -829,42 +835,42 @@ def step_1_entryform(request):
                         no_fish=zip_identification[i][3],
                     )
 
-                    analysis_id = [
-                        v for k, v in var_post.items() if k.startswith("analysis[id]")
-                    ]
-                    analysis_no_fish = [
-                        v for k, v in var_post.items() if k.startswith("analysis[no_fish]")
-                    ]
-                    analysis_organ = [
-                        var_post.getlist(k) for k, v in var_post.items()
-                        if k.startswith("analysis[organ]")
-                    ]
+                    # analysis_id = [
+                    #     v for k, v in var_post.items() if k.startswith("analysis[id]")
+                    # ]
+                    # analysis_no_fish = [
+                    #     v for k, v in var_post.items() if k.startswith("analysis[no_fish]")
+                    # ]
+                    # analysis_organ = [
+                    #     var_post.getlist(k) for k, v in var_post.items()
+                    #     if k.startswith("analysis[organ]")
+                    # ]
 
-                    zip_analysis = zip(analysis_id, analysis_no_fish, analysis_organ)
+                    # zip_analysis = zip(analysis_id, analysis_no_fish, analysis_organ)
                     
-                    analyses_qs = entryform.analysisform_set.all()
+                    # analyses_qs = entryform.analysisform_set.all()
 
-                    for analysis in analyses_qs:
-                        analysis.forms.get().delete()
+                    # for analysis in analyses_qs:
+                    #     analysis.forms.get().delete()
 
-                    analyses_qs.delete()
+                    # analyses_qs.delete()
 
-                    flow = Flow.objects.get(pk=2)
+                    # flow = Flow.objects.get(pk=2)
 
-                    for values in zip_analysis:
-                        analysis = AnalysisForm.objects.create(
-                            entryform_id=entryform.id,
-                            exam_id=values[0],
-                            no_fish=zip_identification[i][3],
-                        )
+                    # for values in zip_analysis:
+                    #     analysis = AnalysisForm.objects.create(
+                    #         entryform_id=entryform.id,
+                    #         exam_id=values[0],
+                    #         no_fish=zip_identification[i][3],
+                    #     )
 
-                        analysis.organs.set(values[2])
+                    #     analysis.organs.set(values[2])
 
-                        Form.objects.create(
-                            content_object=analysis,
-                            flow=flow,
-                            state=flow.step_set.all()[0].state,
-                            parent_id=entryform.forms.first().id)
+                    #     Form.objects.create(
+                    #         content_object=analysis,
+                    #         flow=flow,
+                    #         state=flow.step_set.all()[0].state,
+                    #         parent_id=entryform.forms.first().id)
 
                 else:
                     flow_aux = Flow.objects.get(pk=1)
@@ -1124,6 +1130,8 @@ def step_1_entryform(request):
                                 identification_no_fish, identification_id)
 
         entryform.identification_set.all().delete()
+        entryform.sample_set.all().delete()
+        sample_index = 1
         for values in zip_identification:
             identificacion = Identification.objects.create(
                 entryform_id=entryform.id,
@@ -1133,47 +1141,107 @@ def step_1_entryform(request):
                 no_fish=values[3],
                 temp_id=values[4]
             )
-        entryform.sample_set.all().delete()
-        for values in zip_samples:
-            # print (values)
-            sample = Sample.objects.create(
-                entryform_id=entryform.id,
-                index=int(values[0][0]),
-                identification=Identification.objects.filter(entryform__id=entryform.id, temp_id=values[1][0]).first(),
-            )
-            for organ in values[3]:
-                sample.organs.add(organ)
 
-            for exam in values[2]:
-                sample.exams.add(exam)
+            for i in range(int(values[3])):
+                sample = Sample.objects.create(
+                    entryform_id=entryform.id,
+                    index=sample_index,
+                    identification=identificacion
+                )
+                sample_index += 1
+        # entryform.sample_set.all().delete()
+        # for values in zip_samples:
+        #     # print (values)
+        #     sample = Sample.objects.create(
+        #         entryform_id=entryform.id,
+        #         index=int(values[0][0]),
+        #         identification=Identification.objects.filter(entryform__id=entryform.id, temp_id=values[1][0]).first(),
+        #     )
+        #     for organ in values[3]:
+        #         sample.organs.add(organ)
+
+        #     for exam in values[2]:
+        #         sample.exams.add(exam)
             
-            sample.save()
+        #     sample.save()
 
-        exams_to_do = var_post.getlist("analysis")
+        # exams_to_do = var_post.getlist("analysis")
 
-        analyses_qs = entryform.analysisform_set.all()
+        # analyses_qs = entryform.analysisform_set.all()
 
-        for analysis in analyses_qs:
-            analysis.forms.get().delete()
+        # for analysis in analyses_qs:
+        #     analysis.forms.get().delete()
 
-        analyses_qs.delete()
+        # analyses_qs.delete()
 
-        flow = Flow.objects.get(pk=2)
+        # flow = Flow.objects.get(pk=2)
 
-        # print(exams_to_do)
-        for exam in exams_to_do:
-            analysis_form = AnalysisForm.objects.create(
-                entryform_id=entryform.id,
-                exam_id=exam,
-            )
+        # # print(exams_to_do)
+        # for exam in exams_to_do:
+        #     analysis_form = AnalysisForm.objects.create(
+        #         entryform_id=entryform.id,
+        #         exam_id=exam,
+        #     )
 
-            Form.objects.create(
-                content_object=analysis_form,
-                flow=flow,
-                state=flow.step_set.all()[0].state,
-                parent_id=entryform.forms.first().id)
+        #     Form.objects.create(
+        #         content_object=analysis_form,
+        #         flow=flow,
+        #         state=flow.step_set.all()[0].state,
+        #         parent_id=entryform.forms.first().id)
 
 def step_2_entryform(request):
+    var_post = request.POST.copy()
+
+    entryform = EntryForm.objects.get(pk=var_post.get('entryform_id'))
+    
+    exams_to_do = var_post.getlist("analysis")
+    analyses_qs = entryform.analysisform_set.all()
+
+    for analysis in analyses_qs:
+        analysis.forms.get().delete()
+
+    analyses_qs.delete()
+
+    flow = Flow.objects.get(pk=2)
+
+    # print(exams_to_do)
+    for exam in exams_to_do:
+        analysis_form = AnalysisForm.objects.create(
+            entryform_id=entryform.id,
+            exam_id=exam,
+        )
+
+        Form.objects.create(
+            content_object=analysis_form,
+            flow=flow,
+            state=flow.step_set.all()[0].state,
+            parent_id=entryform.forms.first().id)
+
+    sample_id = [
+        v for k, v in var_post.items() if k.startswith("sample[id]")
+    ]
+    sample_exams = [
+        list(v) for k, v in dict(var_post).items() if k.startswith("sample[exams]")
+    ]
+    sample_organs = [
+        list(v) for k, v in dict(var_post).items() if k.startswith("sample[organs]")
+    ]
+
+    zip_samples = zip(sample_id, sample_exams, sample_organs)
+
+    for values in zip_samples:
+        sample = Sample.objects.get(pk=int(values[0]))
+        sample.exams.clear()
+        for exam in values[1]:
+            sample.exams.add(exam)
+
+        sample.organs.clear()
+        for organ in values[2]:
+            sample.organs.add(organ)
+        
+        sample.save()
+
+def step_3_entryform(request):
     var_post = request.POST.copy()
 
     entryform = EntryForm.objects.get(pk=var_post.get('entryform_id'))
@@ -1209,7 +1277,7 @@ def step_2_entryform(request):
         cassette.save()
         count += 1
 
-def step_3_entryform(request):
+def step_4_entryform(request):
     var_post = request.POST.copy()
 
     entryform = EntryForm.objects.get(pk=var_post.get('entryform_id'))
@@ -1271,7 +1339,7 @@ def step_3_entryform(request):
             )
             slice_new.save()
 
-def step_4_entryform(request):
+def step_5_entryform(request):
     print("step_4")
 
 

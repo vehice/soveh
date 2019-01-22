@@ -33,85 +33,6 @@ function init_step_1() {
     refreshNoFish();
   })
 
-  $('#exam_select').on('change', function (e) {
-    var selected = $(this).find("option:selected").val();
-  });
-
-  $('#loadSamplesToAnalysis').on("click", function (e) {
-    var no_fish = countNoFish();
-
-    if ( no_fish <= 0 ) {
-      toastr.error(
-        'Debes identificar muestras para poder continuar.', 
-        'Ups!', 
-        {positionClass: 'toast-top-full-width', containerId: 'toast-bottom-full-width'}
-      );
-      $('input[name="identification[no_fish]"]').focus();
-      return false;
-    }
-
-    if ( $('#exam_select :selected').length <= 0 ) {
-      toastr.error(
-        'Debes seleccionar al menos un análisis para asignar muestras.', 
-        'Ups!', 
-        {positionClass: 'toast-top-full-width', containerId: 'toast-bottom-full-width'}
-      );
-      $('#exam_select').focus();
-      return false;
-    }
-    $('#exam_group').html('<center><i class="fa fa-cog spinner font-large-3"></i></center>');
-
-    var analysis = [];
-    $.each($('#exam_select :selected'), function(i) {
-      analysis.push({
-        'id' : $(this).val(),
-        'name' : $(this).text()
-      });
-    });
-
-    var samples = [];
-    var sample_index_start = 1;
-
-    $('.identification').each(function(i) {
-      var id_temp = $(this).find('input[name="identification[id]"]').val();
-      var cage = $(this).find('input[name="identification[cage]"]').val();
-      var group = $(this).find('input[name="identification[group]"]').val();
-      var no_fish = parseInt($(this).find('input[name="identification[no_fish]"]').val()) || 0;
-      var j;
-      var end_index = no_fish + sample_index_start;
-      for (j = sample_index_start; j < end_index; j++) { 
-        samples.push({
-          'identification_id' : id_temp,
-          'cage' : cage,
-          'group' : group,
-          'sample_index' : j,
-          'analysis' : analysis,
-          'organs' : organs
-        });
-      }
-      sample_index_start = end_index;
-
-    });
-    addAnalysisTemplate({'data': samples});
-  });
-
-  $("#exam_group").on("click", function (e) {
-    if (e.target.id === 'delete_analysis') {
-      var analysis_id = $(e.target).closest("[data-id]").data("id").toString();
-      var analysis_select = $('#exam_select')
-      var values_analysis_select = analysis_select.val();
-
-      if (values_analysis_select) {
-        var i = values_analysis_select.indexOf(analysis_id);
-        if (i >= 0) {
-          values_analysis_select.splice(i, 1);
-          analysis_select.val(values_analysis_select).change();
-        }
-      }
-      $(e.target).closest("[data-id]").remove()
-    }
-  });
-
   $(document).on('click', '#FlowDividerOptions a', function (e) {
     if (e.target.id === 'base_flowdivider_by_identification') {
       $('#flow_divide_option').val(1);
@@ -210,12 +131,6 @@ function init_step_1() {
     });
   });
 
-  $('#exam_select').on("select2:unselecting", function (e) {
-    if (e.params.args.originalEvent) {
-      e.params.args.originalEvent.stopPropagation();
-    }
-  });
-
   function getManualGroupsData() {
     var group_quantity = parseInt(parseFloat($('#flowdivider_manual_group_quantity').val()));
     var group_data = [];
@@ -247,75 +162,128 @@ function init_step_1() {
       type: "GET",
       url: url,
     })
-      .done(function (data) {
-        var entryform = data.entryform;
+    .done(function (data) {
+      var entryform = data.entryform;
 
-        $('#customer_select').val(entryform.customer_id).trigger('change');
-        $('#fixtative_select').val(entryform.fixative_id).trigger('change');
-        $('#larvalstage_select').val(entryform.larvalstage_id).trigger('change');
-        $('#watersource_select').val(entryform.watersource_id).trigger('change');
-        $('#specie_select').val(entryform.specie_id).trigger('change');
+      // $('#customer_select').val(entryform.customer_id).trigger('change');
+      $('#fixtative_select').val(entryform.fixative_id).trigger('change');
+      $('#specie_select').val(entryform.specie_id).trigger('change');
 
-        $('#observation').val(entryform.observation);
-        $('#order_number_input').val(entryform.no_order);
-        $('#request_number_input').val(entryform.no_request);
-        $('#company_input').val(entryform.company);
-        $('#center_input').val(entryform.center);
-        $('#responsible_input').val(entryform.responsible);
+      $('#observation').val(entryform.observation);
+      $('#order_number_input').val(entryform.no_order);
+      $('#request_number_input').val(entryform.no_request);
+      $('#company_input').val(entryform.company);
+      $('#center_input').val(entryform.center);
+      $('#responsible_input').val(entryform.responsible);
 
-        if (entryform.created_at) {
-          $('[name="created_at"]').val(moment(entryform.created_at).format("DD/MM/YYYY HH:MM") || "");
-        } else {
-          $('[name="created_at"]').val("");
+      if (entryform.created_at) {
+        $('[name="created_at"]').val(moment(entryform.created_at).format("DD/MM/YYYY HH:MM") || "");
+      } else {
+        $('[name="created_at"]').val("");
+      }
+      if (entryform.sampled_at) {
+        $('[name="sampled_at"]').val(moment(entryform.sampled_at).format("DD/MM/YYYY HH:MM") || "");
+      } else {
+        $('[name="sampled_at"]').val("");
+      }
+
+      $('#created_at_submit').val(entryform.created_at);
+      $('#sampled_at_submit').val(entryform.sampled_at);
+
+      $.each(entryform.answer_questions, function (i, item) {
+        var question_id = item.question_id
+        var answer = item.answer
+
+        $("#question_" + question_id + "_" + answer).prop('checked', true);
+      });
+
+      var identification_size = entryform.identifications.length;
+
+      if (identification_size > 1) {
+        for (var i = 1; i < identification_size; i++) {
+          $("#add_identification").trigger("click");
         }
-        if (entryform.sampled_at) {
-          $('[name="sampled_at"]').val(moment(entryform.sampled_at).format("DD/MM/YYYY HH:MM") || "");
-        } else {
-          $('[name="sampled_at"]').val("");
-        }
+      }
 
-        $('#created_at_submit').val(entryform.created_at);
-        $('#sampled_at_submit').val(entryform.sampled_at);
+      var identifications_cage = $('[name="identification[cage]"]');
+      var identifications_group = $('[name="identification[group]"]');
+      var identifications_no_fish = $('[name="identification[no_fish]"]');
+      var identifications_no_container = $('[name="identification[no_container]"]')
 
-        $.each(entryform.answer_questions, function (i, item) {
-          var question_id = item.question_id
-          var answer = item.answer
+      $.each(entryform.identifications, function (i, item) {
+        $(identifications_cage[i]).val(item.cage);
+        $(identifications_group[i]).val(item.group);
+        $(identifications_no_fish[i]).val(item.no_fish);
+        $(identifications_no_container[i]).val(item.no_container);
+      });
 
-          $("#question_" + question_id + "_" + answer).prop('checked', true);
-        });
-
-        var identification_size = entryform.identifications.length;
-
-        if (identification_size > 1) {
-          for (var i = 1; i < identification_size; i++) {
-            $("#add_identification").trigger("click");
-          }
-        }
-
-        var identifications_cage = $('[name="identification[cage]"]');
-        var identifications_group = $('[name="identification[group]"]');
-        var identifications_no_fish = $('[name="identification[no_fish]"]');
-        var identifications_no_container = $('[name="identification[no_container]"]')
-
-        $.each(entryform.identifications, function (i, item) {
-          $(identifications_cage[i]).val(item.cage);
-          $(identifications_group[i]).val(item.group);
-          $(identifications_no_fish[i]).val(item.no_fish);
-          $(identifications_no_container[i]).val(item.no_container);
-        });
-
-        var exams_id = _.map(entryform.analyses, 'exam_id');
-
-        if (exams_id.length > 0) {        
-          $("#exam_select").val(exams_id).trigger("change");
-          $('#loadSamplesToAnalysis').click();
-        }
-
-      })
-      .fail(function () {
-        console.log("Fail")
-      })
+    })
+    .fail(function () {
+      console.log("Fail")
+    })
   }
+
+  function initialData(data) {
+    loadCustomers(data.customers)
+    loadFixtatives(data.fixtatives)
+    loadSpecies(data.species)
+    loadLarvalStages(data.larvalStages)
+    loadWaterSources(data.waterSources)
+    // loadExams(data.exams)
+    // loadOrgans(data.organs)
+    loadQuestions(data.questionReceptionCondition)
+  }
+
+  function initialConf() {
+    addIdentificationTemplate({
+      temp_id : Math.random().toString(36).replace('0.', '')
+    });
+  
+    $('#datetime_created_at').datetimepicker({
+      locale: 'es',
+      keepOpen: false,
+      format:'DD/MM/YYYY HH:mm'
+    });
+  
+    $('#datetime_sampled_at').datetimepicker({
+      locale: 'es',
+      keepOpen: false,
+      format:'DD/MM/YYYY HH:mm'
+    });
+  
+    // $('#datetime_created_at').on("dp.change", function (e) {
+    //   if (e.date) {
+    //     $("#created_at_submit").val(e.date.format());
+    //   }
+    // });
+  
+    // $('#datetime_sampled_at').on("dp.change", function (e) {
+    //   if (e.date) {
+    //     $("#sampled_at_submit").val(e.date.format());
+    //   }
+    // });
+  
+    $('#customer_select').select2({
+      placeholder: "Porfavor seleccione un cliente"
+    });
+  
+    $('#fixtative_select').select2({
+      placeholder: "Porfavor seleccione un fijador"
+    });
+  
+    $('#specie_select').select2({
+      placeholder: "Porfavor seleccione una especie"
+    });
+  
+    $('#larvalstage_select').select2({
+      placeholder: "Porfavor seleccione un estadio desarrollo"
+    });
+  
+    $('#watersource_select').select2({
+      placeholder: "Porfavor seleccione una fuente de agua"
+    });
+  }
+  
 }
 
 function validate_step_1(){
@@ -332,27 +300,27 @@ function validate_step_1(){
     return false;
   }
 
-  // Validates exam selection
-  if ( $('#exam_select :selected').length <= 0 ) {
-    toastr.error(
-      'Para continuar debes tener seleccionado al menos un análisis.', 
-      'Ups!', 
-      {positionClass: 'toast-top-full-width', containerId: 'toast-bottom-full-width'}
-    );
-    $('#exam_select').focus();
-    return false;
-  }
+  // // Validates exam selection
+  // if ( $('#exam_select :selected').length <= 0 ) {
+  //   toastr.error(
+  //     'Para continuar debes tener seleccionado al menos un análisis.', 
+  //     'Ups!', 
+  //     {positionClass: 'toast-top-full-width', containerId: 'toast-bottom-full-width'}
+  //   );
+  //   $('#exam_select').focus();
+  //   return false;
+  // }
 
-  // Validates samples asignation
-  if ( $('input[name*="sample[index]"').length <= 0) {
-    toastr.error(
-      'Para continuar debes asignar los examenes seleccionados a las muestras ingresadas.', 
-      'Ups!', 
-      {positionClass: 'toast-top-full-width', containerId: 'toast-bottom-full-width'}
-    );
-    $('#loadSamplesToAnalysis').focus();
-    return false;
-  }
+  // // Validates samples asignation
+  // if ( $('input[name*="sample[index]"').length <= 0) {
+  //   toastr.error(
+  //     'Para continuar debes asignar los examenes seleccionados a las muestras ingresadas.', 
+  //     'Ups!', 
+  //     {positionClass: 'toast-top-full-width', containerId: 'toast-bottom-full-width'}
+  //   );
+  //   $('#loadSamplesToAnalysis').focus();
+  //   return false;
+  // }
 
   return true;
   
@@ -415,29 +383,29 @@ function splitArrayByChunkSize(arr, n) {
 
 // Template management
 
-function addAnalysisTemplate(data) {
-  var analysisTemplate = document.getElementById("analysis_template").innerHTML;
+// function addAnalysisTemplate(data) {
+//   var analysisTemplate = document.getElementById("analysis_template").innerHTML;
 
-  var templateFn = _.template(analysisTemplate);
-  var templateHTML = templateFn(data);
+//   var templateFn = _.template(analysisTemplate);
+//   var templateHTML = templateFn(data);
 
-  $("#exam_group").html(templateHTML)
-  $('.samples_organs').select2();
-  $('.samples_analysis').select2();
+//   $("#exam_group").html(templateHTML)
+//   $('.samples_organs').select2();
+//   $('.samples_analysis').select2();
 
-  $('.samples_organs').on("select2:unselecting", function (e) {
-    if (e.params.args.originalEvent) {
-      e.params.args.originalEvent.stopPropagation();
-    }
-  });
+//   $('.samples_organs').on("select2:unselecting", function (e) {
+//     if (e.params.args.originalEvent) {
+//       e.params.args.originalEvent.stopPropagation();
+//     }
+//   });
 
-  $('.samples_analysis').on("select2:unselecting", function (e) {
-    if (e.params.args.originalEvent) {
-      e.params.args.originalEvent.stopPropagation();
-    }
-  });
+//   $('.samples_analysis').on("select2:unselecting", function (e) {
+//     if (e.params.args.originalEvent) {
+//       e.params.args.originalEvent.stopPropagation();
+//     }
+//   });
   
-}
+// }
 
 function addIdentificationTemplate(data) {
   var identificationTemplate = document.getElementById("identification_template").innerHTML;
@@ -481,69 +449,6 @@ function addFlowDividerTemplate(){
 }
 // Initial Data and Config
 
-function initialConf() {
-  addIdentificationTemplate({
-    temp_id : Math.random().toString(36).replace('0.', '')
-  });
-
-  // $("#order_number").hide();
-  // $("#center").hide();
-
-  $('#datetime_created_at').datetimepicker({
-    locale: 'es',
-    keepOpen: false
-  });
-
-  $('#datetime_sampled_at').datetimepicker({
-    locale: 'es',
-    keepOpen: false
-  });
-
-  $('#datetime_created_at').on("dp.change", function (e) {
-    if (e.date) {
-      $("#created_at_submit").val(e.date.format());
-    }
-  });
-
-  $('#datetime_sampled_at').on("dp.change", function (e) {
-    if (e.date) {
-      $("#sampled_at_submit").val(e.date.format());
-    }
-  });
-
-  $('#exam_select').select2();
-
-  $('#customer_select').select2({
-    placeholder: "Porfavor seleccione un cliente"
-  });
-
-  $('#fixtative_select').select2({
-    placeholder: "Porfavor seleccione un fijador"
-  });
-
-  $('#specie_select').select2({
-    placeholder: "Porfavor seleccione una especie"
-  });
-
-  $('#larvalstage_select').select2({
-    placeholder: "Porfavor seleccione un estadio desarrollo"
-  });
-
-  $('#watersource_select').select2({
-    placeholder: "Porfavor seleccione una fuente de agua"
-  });
-}
-
-function initialData(data) {
-  loadCustomers(data.customers)
-  loadFixtatives(data.fixtatives)
-  loadSpecies(data.species)
-  loadLarvalStages(data.larvalStages)
-  loadWaterSources(data.waterSources)
-  loadExams(data.exams)
-  // loadOrgans(data.organs)
-  loadQuestions(data.questionReceptionCondition)
-}
 
 function loadCustomers(customers) {
   $.each(customers, function (i, item) {
@@ -591,14 +496,14 @@ function loadWaterSources(waterSources) {
   });
 }
 
-function loadExams(exams) {
-  $.each(exams, function (i, item) {
-    $('#exam_select').append($('<option>', {
-      value: item.id,
-      text: item.name
-    }));
-  });
-}
+// function loadExams(exams) {
+//   $.each(exams, function (i, item) {
+//     $('#exam_select').append($('<option>', {
+//       value: item.id,
+//       text: item.name
+//     }));
+//   });
+// }
 
 // function loadOrgans(organs) {
 //   $.each(organs, function (i, item) {

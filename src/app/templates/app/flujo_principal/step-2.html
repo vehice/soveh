@@ -5,80 +5,54 @@
     <input type="hidden" id="form_id" name="form_id" value="{{form_id}}" >
     <input type="hidden" id="entryform_id" name="entryform_id" value="{{entryform_id}}" >
     <h4 class="form-section">
-      <i class="ft-user"></i> Cargar Procesador Tejido
+      <i class="ft-search"></i> Servicios
     </h4>
     <div class="row">
-      <div class="col-md-6">
-        <div class="form-group">
-          <label>Fecha / Hora Procesado Tejido : </label>
-          <div class='input-group date' id='datetime_processor_loaded_at'>
-            <input type="text" class="form-control" name="processor_loaded_at" />
-            <div class="input-group-append">
-              <span class="input-group-text">
-                <span class="fa fa-calendar"></span>
-              </span>
-            </div>
-          </div>
-          <input type="hidden" name="processor_loaded_at_submit" id="processor_loaded_at_submit" />
-        </div>
-      </div>
-      <div class="col-md-6">
-        <div class="form-group">
-        </div>
-      </div>
-      <!-- <div class="col-md-6">
-        <div class="form-group">
-          <label for="date3">Nro muestras por cassettes</label>
-          <select class="select2 form-control" id="no_cassette" name="cassette">
-            <option value='1' selected>x1</option>
-            <option value='2'>x2</option>
-            <option value='3'>x3</option>
-            <option value='4'>x4</option>
+      <div class="col-sm-12">
+        <p><label for="exam">Seleccione los análisis:</label></p>
+        <div class="input-group">
+          <select class="select2" id="exam_select" name="analysis" multiple="multiple" style="width:100%;">
           </select>
         </div>
-      </div> -->
-    </div>
-    <div id="cassette_group">
-      <table id="cassettes_table" class="table table-bordered table-hover table-condensed" width="100%">
-        <thead>
-          <tr>
-            <th>No. Muestra</th>
-            <th>Identificación</th>
-            <th>Nombre Cassette</th>
-            <th>Organos</th>
-            <th></th>
-          </tr>
-        </thead>
-        <tbody>
-        </tbody>
+      </div>
+      <div class="col-sm-12 mt-3">
+        <table class="table table-bordered table-condensed" id="samples_table" style="font-size:13px;">
+          <thead>
+            <tr>
+              <th style="width:5%">Nº Muestra</th>
+              <th style="width:15%">Identificación</th>
+              <th style="width:45%">Análisis</th>
+              <th style="width:30%">Órganos</th>
+            </tr>
+          </thead>
+          <tbody>
+          </tbody>
         </table>
+      </div>
     </div>
+    
   </div>
 </fieldset>
 
-<script id="cassette_row" type="text/x-lodash-template">
-  <tr>
-    <input type="hidden" name="cassette[sample_id][<%= cassette_index %>]" value="<%= sample_id %>" >
-    <input type="hidden" name="cassette[cassette_name][<%= cassette_index %>]" value="<%= cassette_name %>" >
+<script id="sample_row" type="text/x-lodash-template">
+  <tr id="sample-<%= sample.id %>">
     <td>
-      <%= sample_index %>
+        <input type="hidden" value="<%= sample.id %>" name="sample[id][<%= sample.index %>]">
+        <%= sample.index %>
     </td>
     <td>
-      <%= sample_name %>
+        <%= sample.identification.cage %>-<%= sample.identification.group %>
     </td>
     <td>
-      <%= cassette_name %>
-    </td>
-    <td style="width:40%">
-      <select class="select2 form-control form-control-sm" style="width:100%"
-        name="cassette[organ][<%= cassette_index %>]" multiple="multiple">
-        <% _.each( organs, function( organ ){ %>
-          <option value=<%= organ.id %>> <%= organ.name %> </option>
-        <% }); %>
-      </select>
+        <select class="select2 form-control samples_exams" style="width:100% !important;" name="sample[exams][<%= sample.index %>]" multiple="multiple">
+        </select>
     </td>
     <td>
-      <button title="Añadir cassette a la muestra" tooltip="" type="button" data-cassette="<%= cassette_index %>" class="btn btn-icon btn-secondary add_cassette_to_sample"><i class="fa fa-plus"></i></button>
+        <select class="select2 form-control samples_organs" style="width:100% !important;" name="sample[organs][<%= sample.index %>]" multiple="multiple">
+          <% _.each(organs, function (organ) { %>
+            <option value=<%= organ.id %>> <%= _.toUpper(organ.name) %> </option>
+          <% }); %>
+        </select>
     </td>
   </tr>
 </script>
