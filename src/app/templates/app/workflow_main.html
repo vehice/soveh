@@ -276,14 +276,23 @@ function fillSummary(data){
   $('.summaryWaterSource').html('<b>Fuente de agua</b>: '+ data.entryform.watersource.name);
 
   var tpl_identification = '<div class="col-sm-12"><table class="table table-bordered table-xs">';
-  tpl_identification += '<thead><tr><th>Estanque/Jaula</th><th>Grupo</th><th>No. Peces</th><th>No. Contenedores</th></tr></thead><tbody>';
+  tpl_identification += '<thead><tr><th>Estanque/Jaula</th><th>Grupo</th><th>Peces</th><th>Contenedores</th><th>Peso</th><th>C. Extras</th><th>Óptimo</th><th>Obs</th><th>Órganos</th></tr></thead><tbody>';
 
   $.each(data.entryform.identifications, function(i, item){
+    var optimum = "No"
+    if (item.is_optimum){
+      optimum = "Sí"
+    }
     tpl_identification += '<tr>';
     tpl_identification += '<td>'+ item.cage +'</td>';
     tpl_identification += '<td>'+ item.group +'</td>';
     tpl_identification += '<td>'+ item.no_fish +'</td>';
     tpl_identification += '<td>'+ item.no_container +'</td>';
+    tpl_identification += '<td>'+ item.weight +'</td>';
+    tpl_identification += '<td>'+ item.extra_features_detail +'</td>';
+    tpl_identification += '<td>'+ optimum +'</td>';
+    tpl_identification += '<td>'+ item.observation +'</td>';
+    tpl_identification += '<td>'+ Object.keys(item.organs_set).map(function(k){return item.organs_set[k].name}).join(", ") +'</td>';
     tpl_identification += '</tr>';
   });
 

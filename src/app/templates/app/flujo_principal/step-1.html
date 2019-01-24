@@ -116,24 +116,24 @@
         </div>
       </div>
     </div>
-    <h4 class="form-section">
+    <!-- <h4 class="form-section">
       <i class="ft-file-text"></i> Condiciones de Recepción
     </h4>
     <div class="row">
       <div class="col-sm-12" id="question_reception">
       </div>
-    </div>
+    </div> -->
     <h4 class="form-section">
       <i class="ft-clipboard"></i> Identificación
     </h4>
-    <div class="row">
+    <!-- <div class="row">
       <div class="col-sm-12">
         <div class="form-group">
           <label for="date3">Observaciones</label>
           <textarea rows="5" class="form-control" name="observation" id="observation" placeholder="Observaciones / Anamnesis"></textarea>
         </div>
       </div>
-    </div>
+    </div> -->
     <div id="identification_group">
       <div class="row">
         <div class="col-sm-3">
@@ -170,62 +170,84 @@
 </fieldset>
 
 <script id="identification_template" type="text/x-lodash-template">
-<div class="row identification" id="<%= temp_id %>">
-  <input type="hidden" value="<%= temp_id %>" name="identification[id]">
-  <div class="col-sm-3">
-    <div class="form-group">
-      <label for="cage">Estanque/Jaula</label>
-      <input type="text" value="" name="identification[cage]" class="form-control">
+<div class="row identification border p-2 m-2" id="<%= temp_id %>">
+  <div class="col-sm-11 row">
+    <input type="hidden" value="<%= temp_id %>" name="identification[id]">
+    <div class="col-sm-3">
+      <div class="form-group">
+        <label for="cage">Estanque/Jaula</label>
+        <input type="text" value="" name="identification[cage]" class="form-control">
+      </div>
     </div>
-  </div>
-  <div class="col-sm-3">
-    <div class="form-group">
-      <label for="group">Grupo</label>
-      <input name="identification[group]" class="form-control">
+    <div class="col-sm-3">
+      <div class="form-group">
+        <label for="group">Grupo</label>
+        <input name="identification[group]" class="form-control">
+      </div>
     </div>
-  </div>
-  <div class="col-sm-2">
-    <div class="form-group">
-      <label for="no_fish">No. Peces</label>
-      <input name="identification[no_fish]" type="number" value="0" min="1" class="form-control">
+    <div class="col-sm-2">
+      <div class="form-group">
+        <label for="no_fish">No. Peces</label>
+        <input name="identification[no_fish]" type="number" value="0" min="1" class="form-control">
+      </div>
     </div>
-  </div>
-  <div class="col-sm-2">
-    <div class="form-group">
-      <label for="no_container">No. Contenedores</label>
-      <input name="identification[no_container]" type="number" value="1" min="1" class="form-control">
+    <div class="col-sm-2">
+      <div class="form-group">
+        <label for="no_container">No. Contenedores</label>
+        <input name="identification[no_container]" type="number" value="1" min="1" class="form-control">
+      </div>
     </div>
-  </div>
-  <div class="offset-sm-1 col-sm-1 text-center">
-    <div class="form-group">
-      <label for="delete">&nbsp;</label>
-      <button class="btn_white_letter btn btn-danger form-control" id="delete_identification" type="button">x</button>
+    <div class="col-sm-2">
+      <div class="form-group">
+        <label for="wheight">Peso</label>
+        <input name="identification[weight]" value="0.0" class="form-control">
+      </div>
     </div>
-  </div>
-</div>
-</script>
-
-<script id="questionReception_template" type="text/x-lodash-template">
-  <div class="form-group row">
-    <label class="col-sm-6 label-control"> <%= question_text %> </label>
-    <div class="col-sm-4">
-      <div class="input-group">
-        <div class="d-inline-block custom-control custom-radio">
-          <input type="radio" name="question['answer'][<%= question_index %>]" class="custom-control-input" value="si" id="question_<%= question_id %>_si">
-          <label class="custom-control-label" for="question_<%= question_id %>_si">Si</label>
-        </div>
-        <div class="d-inline-block custom-control custom-radio">
-          <input type="radio" name="question['answer'][<%= question_index %>]" class="custom-control-input" value="no" id="question_<%= question_id %>_no">
-          <label class="custom-control-label" for="question_<%= question_id %>_no">No</label>
-        </div>
-        <div class="d-inline-block custom-control custom-radio">
-          <input type="radio" name="question['answer'][<%= question_index %>]" class="custom-control-input" value="na" id="question_<%= question_id %>_na">
-          <label class="custom-control-label" for="question_<%= question_id %>_na">N/A</label>
+    <div class="col-sm-3">
+      <div class="form-group">
+        <label for="wheight">Carácteristicas Extras</label>
+        <textarea name="identification[extra_features_detail]" row="2" class="form-control"></textarea>
+      </div>
+    </div>
+    <div class="col-sm-3">
+      <div class="form-group">
+        <label> ¿Condiciones óptimas? </label>
+        <div class="input-group">
+          <div class="d-inline-block custom-control custom-radio">
+            <input type="radio" name="identification[is_optimal][<%= temp_id %>]" class="custom-control-input" value="si" id="identification[is_optimal][<%= temp_id %>]_si">
+            <label class="custom-control-label" for="identification[is_optimal][<%= temp_id %>]_si">Si</label>
+          </div> &nbsp;&nbsp;&nbsp;
+          <div class="d-inline-block custom-control custom-radio">
+            <input type="radio" name="identification[is_optimal][<%= temp_id %>]" class="custom-control-input" value="no" id="identification[is_optimal][<%= temp_id %>]_no">
+            <label class="custom-control-label" for="identification[is_optimal][<%= temp_id %>]_no">No</label>
+          </div>
         </div>
       </div>
     </div>
-    <input type="hidden" name="question['id'][<%= question_index %>]" value="<%= question_id %>" />
+    <div class="col-sm-3">
+      <div class="form-group">
+        <label>Observaciones</label>
+        <textarea name="identification[observations]" class="form-control" row="2"></textarea>
+      </div>
+    </div>
+    <div class="col-sm-3">
+      <div class="form-group">
+        <label>Órganos</label>
+        <select class="select2 form-control identification_organs" name="identification[organs][<%= temp_id %>]" multiple="multiple">
+          <% _.each(organs, function (organ) { %>
+            <option value="<%= organ.id %>"><%= organ.name %></option>
+          <% }); %>
+        </select>
+      </div>
+    </div>
   </div>
+  <div class="col-sm-1 text-right">
+    <div class="form-group">
+      <label for="delete">&nbsp;</label>
+      <button class="btn btn-danger" id="delete_identification" type="button"><i class="fa fa-close fa-fx fa-1x"></i></button>
+    </div>
+  </div>
+</div>
 </script>
 
 <script id="flowgroup_template" type="text/x-lodash-template">

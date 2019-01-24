@@ -229,7 +229,7 @@
     })
     .done(function (data) {
       $('.NoCasoSummary').html(data.entryform.no_caso);
-      $('.summaryClient').html('<b>Cliente</b>: '+ data.entryform.customer);
+      $('.summaryClient').html('<b>Cliente</b>: '+ data.entryform.customer.name);
       $('.summaryCompany').html('<b>Empresa</b>: '+ data.entryform.company);
       $('.summaryCenter').html('<b>Centro</b>: '+ data.entryform.center);
       $('.summaryResponsible').html('<b>Responsable</b>: '+ data.entryform.responsible);
@@ -237,21 +237,30 @@
       $('.sumarrySampling').html('<b>Fecha muestreo</b>: '+ moment(data.entryform.sampled_at).format("DD/MM/YYYY HH:MM") );
       $('.summaryNoOrder').html('<b>No. orden</b>: '+ data.entryform.no_order);
       $('.summaryNoRequest').html('<b>No. solicitud</b>: '+ data.entryform.no_request);
-      $('.summaryFixative').html('<b>Fijador</b>: '+ data.entryform.fixative);
+      $('.summaryFixative').html('<b>Fijador</b>: '+ data.entryform.fixative.name);
       
-      $('.summarySpecie').html('<b>Especie</b>: '+ data.entryform.specie);  
-      $('.summaryDevStatus').html('<b>Estado de desarrollo</b>: '+ data.entryform.larvalstage);  
-      $('.summaryWaterSource').html('<b>Fuente de agua</b>: '+ data.entryform.watersource);
+      $('.summarySpecie').html('<b>Especie</b>: '+ data.entryform.specie.name);  
+      $('.summaryDevStatus').html('<b>Estado de desarrollo</b>: '+ data.entryform.larvalstage.name);  
+      $('.summaryWaterSource').html('<b>Fuente de agua</b>: '+ data.entryform.watersource.name);
 
       var tpl_identification = '<div class="col-sm-12"><table class="table table-bordered table-xs">';
-      tpl_identification += '<thead><tr><th>Estanque/Jaula</th><th>Grupo</th><th>No. Peces</th><th>No. Contenedores</th></tr></thead><tbody>';
+      tpl_identification += '<thead><tr><th>Estanque/Jaula</th><th>Grupo</th><th>Peces</th><th>Contenedores</th><th>Peso</th><th>C. Extras</th><th>Óptimo</th><th>Obs</th><th>Órganos</th></tr></thead><tbody>';
 
       $.each(data.entryform.identifications, function(i, item){
+        var optimum = "No"
+        if (item.is_optimum){
+          optimum = "Sí"
+        }
         tpl_identification += '<tr>';
         tpl_identification += '<td>'+ item.cage +'</td>';
         tpl_identification += '<td>'+ item.group +'</td>';
         tpl_identification += '<td>'+ item.no_fish +'</td>';
         tpl_identification += '<td>'+ item.no_container +'</td>';
+        tpl_identification += '<td>'+ item.weight +'</td>';
+        tpl_identification += '<td>'+ item.extra_features_detail +'</td>';
+        tpl_identification += '<td>'+ optimum +'</td>';
+        tpl_identification += '<td>'+ item.observation +'</td>';
+        tpl_identification += '<td>'+ Object.keys(item.organs_set).map(function(k){return item.organs_set[k].name}).join(", ") +'</td>';
         tpl_identification += '</tr>';
       });
 

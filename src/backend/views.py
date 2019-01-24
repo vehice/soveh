@@ -97,13 +97,17 @@ class ENTRYFORM(View):
                 s_dict['organs_set'] = list(organs)
                 s_dict['exams_set'] = list(exams)
                 s_dict['cassettes_set'] = list(cassettes)
-                s_dict['identification'] = model_to_dict(s.identification)
+                s_dict['identification'] = model_to_dict(s.identification, exclude=["organs",])
                 samples_as_dict.append(s_dict)
 
-            entryform["identifications"] = list(
-                entryform_object.identification_set.all().values())
-            entryform["answer_questions"] = list(
-                entryform_object.answerreceptioncondition_set.all().values())
+            # entryform["identifications"] = list(
+            #     entryform_object.identification_set.all().values())
+            entryform["identifications"] = []
+            for ident in entryform_object.identification_set.all():
+                ident_json = model_to_dict(ident, exclude=["organs"])
+                ident_json['organs_set'] = list(ident.organs.all().values())
+                entryform["identifications"].append(ident_json)              
+
             entryform["analyses"] = list(
                 entryform_object.analysisform_set.all().values())
             entryform["cassettes"] = list(
@@ -129,8 +133,6 @@ class ENTRYFORM(View):
             larvalStages = list(LarvalStage.objects.all().values())
             fixtatives = list(Fixative.objects.all().values())
             waterSources = list(WaterSource.objects.all().values())
-            questionReceptionCondition = list(
-                QuestionReceptionCondition.objects.filter(status='a').values())
             exams = list(Exam.objects.all().values())
             organs = list(Organ.objects.all().values())
             customers = list(Customer.objects.all().values())
@@ -142,7 +144,6 @@ class ENTRYFORM(View):
                 'waterSources': waterSources,
                 'exams': exams,
                 'organs': organs,
-                'questionReceptionCondition': questionReceptionCondition,
                 'customers': customers,
             }
 
@@ -763,11 +764,11 @@ def step_1_entryform(request):
     entryform.customer_id = var_post.get('customer')
     entryform.no_order = var_post.get('no_order')
     try:
-        entryform.created_at = datetime.strptime(var_post.get('created_at_submit'), '%d/%m/%Y %H:%M')
+        entryform.created_at = datetime.strptime(var_post.get('created_at'), '%d/%m/%Y %H:%M')
     except: 
         pass
     try:
-        entryform.sampled_at = datetime.strptime(var_post.get('sampled_at_submit'), '%d/%m/%Y %H:%M')
+        entryform.sampled_at = datetime.strptime(var_post.get('sampled_at'), '%d/%m/%Y %H:%M')
     except:
         pass
     entryform.center = var_post.get('center')
@@ -776,21 +777,21 @@ def step_1_entryform(request):
     entryform.no_request = var_post.get('no_request')
     entryform.save()
 
-    questions_id = [
-        v for k, v in var_post.items() if k.startswith("question['id']")
-    ]
-    answers = [
-        v for k, v in var_post.items() if k.startswith("question['answer']")
-    ]
-    zip_question = zip(questions_id, answers)
+#    questions_id = [
+#         v for k, v in var_post.items() if k.startswith("question['id']")
+#     ]
+#     answers = [
+#         v for k, v in var_post.items() if k.startswith("question['answer']")
+#     ] 
+#     zip_question = zip(questions_id, answers)
 
-    entryform.answerreceptioncondition_set.all().delete()
-    for values in zip_question:
-        answerquestion = AnswerReceptionCondition.objects.create(
-            entryform_id=entryform.id,
-            question_id=values[0],
-            answer=values[1],
-        )
+#     entryform.answerreceptioncondition_set.all().delete()
+#     for values in zip_question:
+#         answerquestion = AnswerReceptionCondition.objects.create(
+#             entryform_id=entryform.id,
+#             question_id=values[0],
+#             answer=values[1],
+#         )
 
     # sample_index = [
     #     list(v) for k, v in dict(var_post).items() if k.startswith("sample[index]")
@@ -1118,29 +1119,60 @@ def step_1_entryform(request):
                             parent_id=entryform_aux.forms.first().id)
 
     else:
+        # print ( var_post.getlist("identification[cage]"))
+        # print (var_post.getlist("identification[is_optimal]"))
+        optimals = [
+            v for k, v in dict(var_post).items() if k.startswith("identification[is_optimal]")
+        ]
+
+        organs = [
+            list(v) for k, v in dict(var_post).items() if k.startswith("identification[organs]")
+        ]
+        # print (organs)
+
         identification_cage = var_post.getlist("identification[cage]")
         identification_group = var_post.getlist("identification[group]")
         identification_no_container = var_post.getlist(
             "identification[no_container]")
         identification_no_fish = var_post.getlist("identification[no_fish]")
         identification_id = var_post.getlist("identification[id]")
+        identification_weight = var_post.getlist("identification[weight]")
+        identification_extra_features_detail = var_post.getlist("identification[extra_features_detail]")
+        identification_is_optimal = optimals
+        identification_observations = var_post.getlist("identification[observations]")
+        identification_organs = organs
 
         zip_identification = zip(identification_cage, identification_group,
                                 identification_no_container,
-                                identification_no_fish, identification_id)
+                                identification_no_fish, 
+                                identification_id, 
+                                identification_weight,
+                                identification_extra_features_detail, 
+                                identification_is_optimal, 
+                                identification_observations,
+                                identification_organs)
 
         entryform.identification_set.all().delete()
         entryform.sample_set.all().delete()
         sample_index = 1
+        # print (zip_identification)
         for values in zip_identification:
+            print (values)
             identificacion = Identification.objects.create(
                 entryform_id=entryform.id,
                 cage=values[0],
                 group=values[1],
                 no_container=values[2],
                 no_fish=values[3],
-                temp_id=values[4]
+                temp_id=values[4],
+                weight=values[5],
+                extra_features_detail=values[6],
+                is_optimum = True if values[7] == "si" else False,
+                observation = values[8]
             )
+            
+            for org in values[9]:
+                identificacion.organs.add(org)
 
             for i in range(int(values[3])):
                 sample = Sample.objects.create(
@@ -1149,6 +1181,7 @@ def step_1_entryform(request):
                     identification=identificacion
                 )
                 sample_index += 1
+        # print (caaca)
         # entryform.sample_set.all().delete()
         # for values in zip_samples:
         #     # print (values)

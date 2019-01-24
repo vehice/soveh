@@ -106,14 +106,14 @@ class DiagnosticIntensity(models.Model):
         return self.name
 
 
-class QuestionReceptionCondition(models.Model):
-    STATUS = (('a', 'Active'), ('i', 'Inactive'))
+# class QuestionReceptionCondition(models.Model):
+#     STATUS = (('a', 'Active'), ('i', 'Inactive'))
 
-    text = models.CharField(max_length=250, null=True, blank=True)
-    status = models.CharField(max_length=1, choices=STATUS)
+#     text = models.CharField(max_length=250, null=True, blank=True)
+#     status = models.CharField(max_length=1, choices=STATUS)
 
-    def __str__(self):
-        return self.text
+#     def __str__(self):
+#         return self.text
 
 
 class Customer(models.Model):
@@ -150,8 +150,6 @@ class EntryForm(models.Model):
     )
     customer = models.ForeignKey(
         Customer, null=True, on_delete=models.SET_NULL)
-    questionreceptionconditions = models.ManyToManyField(
-        QuestionReceptionCondition, through='AnswerReceptionCondition')
     observation = models.TextField(null=True, blank=True)
     no_order = models.CharField(max_length=250, null=True, blank=True)
     no_caso = models.CharField(max_length=250, null=True, blank=True)
@@ -181,23 +179,45 @@ class EntryForm(models.Model):
         else:
             return "N/A"
 
-class AnswerReceptionCondition(models.Model):
-    ANSWER = (('si', 'Si'), ('no', 'No'), ('n/a', 'N/A'))
-
-    question = models.ForeignKey(
-        QuestionReceptionCondition,
-        null=True,
-        on_delete=models.SET_NULL,
-    )
+class Identification(models.Model):
     entryform = models.ForeignKey(
-        EntryForm,
-        null=True,
-        on_delete=models.SET_NULL,
-    )
-    answer = models.CharField(max_length=3, choices=ANSWER)
+        EntryForm, null=True, on_delete=models.SET_NULL)
+    cage = models.CharField(max_length=250, null=True, blank=True)
+    no_fish = models.IntegerField(null=True, blank=True)
+    no_container = models.IntegerField(null=True, blank=True)
+    weight = models.FloatField(null=True, blank=True)
+    extra_features_detail = models.TextField(null=True, blank=True)
+    is_optimum = models.NullBooleanField()
+    observation = models.TextField(null=True, blank=True)
+    group = models.CharField(max_length=250, null=True, blank=True)
+    temp_id = models.CharField(max_length=250, null=True, blank=True)
+    organs = organs = models.ManyToManyField(Organ)
 
     def __str__(self):
         return str(self.pk)
+
+# class AnswerReceptionCondition(models.Model):
+#     ANSWER = (('si', 'Si'), ('no', 'No'), ('n/a', 'N/A'))
+
+#     question = models.ForeignKey(
+#         QuestionReceptionCondition,
+#         null=True,
+#         on_delete=models.SET_NULL,
+#     )
+#     # entryform = models.ForeignKey(
+#     #     EntryForm,
+#     #     null=True,
+#     #     on_delete=models.SET_NULL,
+#     # )
+#     identification = models.ForeignKey(
+#         Identification,
+#         null=True,
+#         on_delete=models.SET_NULL,
+#     )
+#     answer = models.CharField(max_length=3, choices=ANSWER)
+
+#     def __str__(self):
+#         return str(self.pk)
 
 
 class AnalysisForm(models.Model):
@@ -207,18 +227,6 @@ class AnalysisForm(models.Model):
     # no_fish = models.IntegerField(null=True, blank=True)
     forms = GenericRelation(Form)
     comments = models.TextField(blank=True, null=True)
-
-class Identification(models.Model):
-    entryform = models.ForeignKey(
-        EntryForm, null=True, on_delete=models.SET_NULL)
-    cage = models.CharField(max_length=250, null=True, blank=True)
-    no_fish = models.IntegerField(null=True, blank=True)
-    no_container = models.IntegerField(null=True, blank=True)
-    group = models.CharField(max_length=250, null=True, blank=True)
-    temp_id = models.CharField(max_length=250, null=True, blank=True)
-
-    def __str__(self):
-        return str(self.pk)
 
 class Sample(models.Model):
     entryform = models.ForeignKey(

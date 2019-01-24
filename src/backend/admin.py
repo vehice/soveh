@@ -1,6 +1,5 @@
 from django.contrib import admin
-from .models import Specie, WaterSource, Fixative, Exam, Customer, LarvalStage, \
-QuestionReceptionCondition, EntryForm, AnswerReceptionCondition, Organ, Slice, \
+from .models import Specie, WaterSource, Fixative, Exam, Customer, LarvalStage, EntryForm, Organ, Slice, \
 Diagnostic, DiagnosticDistribution, DiagnosticIntensity, Pathology, OrganLocation
 
 # admin.site.register(Customer)

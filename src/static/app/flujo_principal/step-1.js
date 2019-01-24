@@ -1,5 +1,6 @@
 // Data Template
 var organs;
+var questionReceptionCondition;
 
 function init_step_1() {
   var url = Urls.entryform();
@@ -9,19 +10,23 @@ function init_step_1() {
   })
   .done(function (data) {
     initialData(data);
+    organs = data.organs;
     initialConf();
     loadData();
-
-    organs = data.organs;
+    console.log(data);
   })
   .fail(function () {
     console.log("Fail")
   });
 
   $('#identification_group').on("click", "#add_identification", function (e) {
+    var temp_id = Math.random().toString(36).replace('0.', '');
     addIdentificationTemplate({
-      temp_id : Math.random().toString(36).replace('0.', '')
+      temp_id : temp_id,
+      organs : organs
     });
+    // console.log(organs);
+    // loadQuestions(data.questionReceptionCondition)
   });
 
   $('#identification_group').on("click", "#delete_identification", function (e) {
@@ -164,6 +169,7 @@ function init_step_1() {
     })
     .done(function (data) {
       var entryform = data.entryform;
+      console.log(entryform)
 
       // $('#customer_select').val(entryform.customer_id).trigger('change');
       $('#fixtative_select').val(entryform.fixative_id).trigger('change');
@@ -190,12 +196,13 @@ function init_step_1() {
       $('#created_at_submit').val(entryform.created_at);
       $('#sampled_at_submit').val(entryform.sampled_at);
 
-      $.each(entryform.answer_questions, function (i, item) {
-        var question_id = item.question_id
-        var answer = item.answer
+      // $.each(entryform.answer_questions, function (i, item) {
+      //   var question_id = item.question_id
+      //   var answer = item.answer
+      //   var temp_id = i
 
-        $("#question_" + question_id + "_" + answer).prop('checked', true);
-      });
+      //   $("#question_" + question_id + "_" + answer).prop('checked', true);
+      // });
 
       var identification_size = entryform.identifications.length;
 
@@ -231,12 +238,15 @@ function init_step_1() {
     loadWaterSources(data.waterSources)
     // loadExams(data.exams)
     // loadOrgans(data.organs)
-    loadQuestions(data.questionReceptionCondition)
+    // loadQuestions(data.questionReceptionCondition)
   }
 
   function initialConf() {
+    // console.log("initialconf")
+    var temp_id = Math.random().toString(36).replace('0.', '');
     addIdentificationTemplate({
-      temp_id : Math.random().toString(36).replace('0.', '')
+      temp_id : temp_id,
+      organs : organs
     });
   
     $('#datetime_created_at').datetimepicker({
@@ -414,14 +424,17 @@ function addIdentificationTemplate(data) {
   var templateHTML = templateFn(data);
 
   $("#identification_group").append(templateHTML);
+
+  $('.identification_organs').select2();
 }
 
 function addQuestionReceptionTemplate(data) {
+  console.log(data);
   var questionTemplate = document.getElementById("questionReception_template").innerHTML;
   var templateFn = _.template(questionTemplate);
   var templateHTML = templateFn(data);
 
-  $("#question_reception").append(templateHTML);
+  $("#question_reception_"+data.temp_id).append(templateHTML);
 }
 
 function addWorkGroupTemplateByIdentity(data){
@@ -516,8 +529,9 @@ function loadWaterSources(waterSources) {
 
 function loadQuestions(questionReceptionCondition) {
   $("#question_reception").html("");
+  var temp_id = Math.floor(Math.random() * Math.floor(1000))
   $.each(questionReceptionCondition, function (i, item) {
-    var data = { 'question_id': item.id, 'question_text': item.text, 'question_index': i }
+    var data = { 'question_id': item.id, 'question_text': item.text, 'question_index': i , 'temp_id': temp_id }
     addQuestionReceptionTemplate(data);
   });
 }
