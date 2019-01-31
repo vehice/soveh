@@ -176,7 +176,8 @@ class CASSETTE(View):
 
             sample = model_to_dict(cassette.sample, exclude=["exams", "organs"])
             # print(sample)
-            sample['identification'] = model_to_dict(Identification.objects.get(pk=sample['identification']))
+            # s_dict['identification'] = model_to_dict(s.identification, exclude=["organs",])
+            sample['identification'] = model_to_dict(Identification.objects.get(pk=sample['identification']), exclude=["organs"])
             sample_exams = [model_to_dict(exam) for exam in Sample.objects.get(pk=sample['id']).exams.all() ]
             sample['exams_set'] = sample_exams
 
@@ -213,13 +214,16 @@ class CASSETTE(View):
             s_dict['organs_set'] = list(organs_set)
             s_dict['exams_set'] = list(exams_set)
             s_dict['cassettes_set'] = list(cassettes_set)
-            s_dict['identification'] = model_to_dict(s.identification)
+            s_dict['identification'] = model_to_dict(s.identification, exclude=["organs"])
             samples_as_dict.append(s_dict)
 
-        entryform["identifications"] = list(
-            entryform_object.identification_set.all().values())
-        entryform["answer_questions"] = list(
-            entryform_object.answerreceptioncondition_set.all().values())
+        entryform["identifications"] = []
+        for ident in entryform_object.identification_set.all():
+            ident_json = model_to_dict(ident, exclude=["organs"])
+            ident_json['organs_set'] = list(ident.organs.all().values())
+            entryform["identifications"].append(ident_json)           
+        # entryform["answer_questions"] = list(
+        #     entryform_object.answerreceptioncondition_set.all().values())
         entryform["analyses"] = list(
             entryform_object.analysisform_set.all().values())
         entryform["cassettes"] = list(
@@ -291,13 +295,15 @@ class ANALYSIS(View):
             s_dict['organs_set'] = list(organs_set)
             s_dict['exams_set'] = list(exams_set)
             s_dict['cassettes_set'] = list(cassettes_set)
-            s_dict['identification'] = model_to_dict(s.identification)
+            s_dict['identification'] = model_to_dict(s.identification, exclude=["organs"])
             samples_as_dict.append(s_dict)
 
-        entryform["identifications"] = list(
-            entryform_object.identification_set.all().values())
-        entryform["answer_questions"] = list(
-            entryform_object.answerreceptioncondition_set.all().values())
+        entryform["identifications"] = []
+        for ident in entryform_object.identification_set.all():
+            ident_json = model_to_dict(ident, exclude=["organs"])
+            ident_json['organs_set'] = list(ident.organs.all().values())
+            entryform["identifications"].append(ident_json)           
+
         entryform["analyses"] = list(
             entryform_object.analysisform_set.all().values())
         entryform["cassettes"] = list(
@@ -324,7 +330,7 @@ class SLICE(View):
             slice_as_dict['organs'] = list(slice_new.cassette.organs.all().values())
             sample = slice_new.cassette.sample
             slice_as_dict['sample'] = model_to_dict(sample, exclude=['exams', 'organs', 'cassettes'])
-            slice_as_dict['sample']['identification'] = model_to_dict(sample.identification)
+            slice_as_dict['sample']['identification'] = model_to_dict(sample.identification, exclude=["organs"])
             slice_as_dict['paths_count'] = Report.objects.filter(slice_id=slice_new.pk).count()
             slices.append(slice_as_dict)
 
@@ -333,9 +339,9 @@ class SLICE(View):
         entryform_object = EntryForm.objects.get(pk=analysis_form.entryform.pk)
         subflow = entryform_object.get_subflow
         entryform["subflow"] = subflow
-        identifications = list(
-            Identification.objects.filter(
-                entryform=entryform['id']).values())
+        # identifications = list(
+        #     Identification.objects.filter(
+        #         entryform=entryform['id']).values())
         
         samples = Sample.objects.filter(
                 entryform=entryform['id']).order_by('index')
@@ -349,13 +355,15 @@ class SLICE(View):
             s_dict['organs_set'] = list(organs_set)
             s_dict['exams_set'] = list(exams_set)
             s_dict['cassettes_set'] = list(cassettes_set)
-            s_dict['identification'] = model_to_dict(s.identification)
+            s_dict['identification'] = model_to_dict(s.identification, exclude=["organs"])
             samples_as_dict.append(s_dict)
 
-        entryform["identifications"] = list(
-            entryform_object.identification_set.all().values())
-        entryform["answer_questions"] = list(
-            entryform_object.answerreceptioncondition_set.all().values())
+        entryform["identifications"] = []
+        for ident in entryform_object.identification_set.all():
+            ident_json = model_to_dict(ident, exclude=["organs"])
+            ident_json['organs_set'] = list(ident.organs.all().values())
+            entryform["identifications"].append(ident_json)   
+
         entryform["analyses"] = list(
             entryform_object.analysisform_set.all().values())
         entryform["cassettes"] = list(
