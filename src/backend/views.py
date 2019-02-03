@@ -228,11 +228,11 @@ class CASSETTE(View):
             entryform_object.analysisform_set.all().values())
         entryform["cassettes"] = list(
             entryform_object.cassette_set.all().values())
-        entryform["customer"] = entryform_object.customer.name
-        entryform["larvalstage"] = entryform_object.larvalstage.name
-        entryform["fixative"] = entryform_object.fixative.name
-        entryform["watersource"] = entryform_object.watersource.name
-        entryform["specie"] = entryform_object.specie.name
+        entryform["customer"] = model_to_dict(entryform_object.customer) if entryform_object.customer else None
+        entryform["larvalstage"] = model_to_dict(entryform_object.larvalstage) if entryform_object.larvalstage else None
+        entryform["fixative"] = model_to_dict(entryform_object.fixative) if entryform_object.fixative else None
+        entryform["watersource"] = model_to_dict(entryform_object.watersource) if entryform_object.watersource else None
+        entryform["specie"] = model_to_dict(entryform_object.specie) if entryform_object.specie else None
         
         data = {'cassettes': cassettes, 'exams': exams, 'analyses': analyses, 'entryform':entryform, 'samples': samples_as_dict}
 
@@ -308,11 +308,11 @@ class ANALYSIS(View):
             entryform_object.analysisform_set.all().values())
         entryform["cassettes"] = list(
             entryform_object.cassette_set.all().values())
-        entryform["customer"] = entryform_object.customer.name
-        entryform["larvalstage"] = entryform_object.larvalstage.name
-        entryform["fixative"] = entryform_object.fixative.name
-        entryform["watersource"] = entryform_object.watersource.name
-        entryform["specie"] = entryform_object.specie.name
+        entryform["customer"] = model_to_dict(entryform_object.customer) if entryform_object.customer else None
+        entryform["larvalstage"] = model_to_dict(entryform_object.larvalstage) if entryform_object.larvalstage else None
+        entryform["fixative"] = model_to_dict(entryform_object.fixative) if entryform_object.fixative else None
+        entryform["watersource"] = model_to_dict(entryform_object.watersource) if entryform_object.watersource else None
+        entryform["specie"] = model_to_dict(entryform_object.specie) if entryform_object.specie else None
 
         data = {'analyses': analyses, 'entryform':entryform, 'samples': samples_as_dict}
         
