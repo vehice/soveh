@@ -15,5 +15,6 @@ pylint==1.8.2
 pytz==2018.3
 six==1.11.0
 sqlparse==0.2.4
+wkhtmltopdf==0.2
 wrapt==1.10.11
 yapf==0.21.0
