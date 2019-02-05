@@ -21,8 +21,9 @@
             <tr>
               <th style="width:5%">Nº Muestra</th>
               <th style="width:15%">Identificación</th>
-              <th style="width:45%">Análisis</th>
-              <th style="width:30%">Órganos</th>
+              <th style="width:37%">Análisis</th>
+              <th style="width:37%">Órganos</th>
+              <th style="width:6%">Acciones</th>
             </tr>
           </thead>
           <tbody>
@@ -36,23 +37,46 @@
 
 <script id="sample_row" type="text/x-lodash-template">
   <tr id="sample-<%= sample.id %>">
-    <td>
+    <td id="sampleNro-<%= sample.id %>" rowspan="1">
         <input type="hidden" value="<%= sample.id %>" name="sample[id][<%= sample.index %>]">
         <%= sample.index %>
     </td>
-    <td>
+
+    <td id="sampleIden-<%= sample.id %>" rowspan="1">
         <%= sample.identification.cage %>-<%= sample.identification.group %>
     </td>
-    <td>
-        <select class="select2 form-control samples_exams" style="width:100% !important;" name="sample[exams][<%= sample.index %>]" multiple="multiple">
-        </select>
+
+    <!-- Analisis -->
+    <td class="samples_exams_list">
+      <input class="form-control samples_exams" style="width:100% !important;" data-index="<%= sample.id %>" name="sample[exams][<%= sample.index %>]" disabled/>
+      <!-- </select> -->
     </td>
+
+    <!-- Organs -->
     <td>
-        <select class="select2 form-control samples_organs" style="width:100% !important;" name="sample[organs][<%= sample.index %>]" multiple="multiple">
-          <% _.each(organs, function (organ) { %>
-            <option value=<%= organ.id %>> <%= _.toUpper(organ.name) %> </option>
-          <% }); %>
-        </select>
     </td>
-  </tr>
+
+    <!-- Actions -->
+    <td>
+    </td>
+  </tr> 
+  
+</script>
+
+<script id="add_analisis" type="text/x-lodash-template">
+<tr id="analisis-<%= sampleId %>-<%= sampleIndex %>" class="analis-row" data-sampleid="<%= sampleIndex %>" data-sampleindex="<%= sampleId %>">
+  <td class="samples_exams_list">
+    <input class="form-control samples_exams" style="width:100% !important;" name="sample[exams][<%= sampleIndex %>]" disabled value="<%= analisis %>"/>
+  </td>
+  <td>
+    <select class="select2 form-control organs-select-<%= sampleIndex %>" style="width:100% !important;" name="sample[organs][<%= sampleIndex %>]" multiple="multiple">
+      <% _.each(organs, function (organ) { %>
+        <option value=<%= organ.id %>> <%= _.toUpper(organ.name) %> </option>
+      <% }); %>
+    </select>
+  </td>
+  <td>
+    <a href="javascript:void(0);" class="btn btn-danger" onclick="deleteAnalisis(<%= sampleId %>, <%= sampleIndex %>);"><i class="fa fa-trash "></i></a>
+  </td>
+</tr>
 </script>
