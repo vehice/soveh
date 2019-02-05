@@ -240,6 +240,14 @@ class Sample(models.Model):
     def __str__(self):
         return str(self.index)
 
+class SampleExams(models.Model):
+    sample = models.ForeignKey(Sample, null=True, on_delete=models.SET_NULL)
+    exam = models.ForeignKey(Exam, null=True, on_delete=models.SET_NULL)
+    organ = models.ForeignKey(Organ, null=True, on_delete=models.SET_NULL)
+
+    def __str__(self):
+        return str(self.sample)
+
 class Cassette(models.Model):
     entryform = models.ForeignKey(
         EntryForm, null=True, on_delete=models.SET_NULL)

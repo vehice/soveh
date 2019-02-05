@@ -51,18 +51,38 @@ function loadExams(exams) {
 
 function loadSamples(samples, organs){
   $("#samples_table tbody").html("");
-  $.each(samples, function (i, item){
-    addSampleRow(item, organs);
+  $.each(samples, function (i, v){
+    addSampleRow(v, organs);
+    $.each(v.sample_exams_set, function(j,item){
+      var html = addOrgansOptions(item.exam_name, v.id, item.exam_id);
+      $('#sampleNro-'+v.id)[0].rowSpan = $('#sampleNro-'+v.id)[0].rowSpan + 1; 
+      $('#sampleIden-'+v.id)[0].rowSpan = $('#sampleIden-'+v.id)[0].rowSpan + 1; 
+      $("#sample-"+v.id).after(html);
+
+      $('.organs-select-'+ item.exam_id).select2();
+      $('.organs-select-'+ item.exam_id).on('select2:select', function(e){
+        var values = e.params.data.id;
+        $.each($('.organs-select-'+ item.exam_id), function(i,v){
+          var old_values = $(v).val();
+          old_values.push(values);
+          $(v).val(old_values);
+          $(v).trigger('change');
+        });
+      });
+      $('.organs-select-'+ item.exam_id).val(item.organ_id);
+      $('.organs-select-'+ item.exam_id).trigger('change');
+    });
   });
+ 
 
   $('.samples_organs').select2();
   // $('.samples_exams').select2();
 
-  $('.samples_exams').on("select2:unselecting", function (e) {
-    if (e.params.args.originalEvent) {
-      e.params.args.originalEvent.stopPropagation();
-    }
-  });
+  // $('.samples_exams').on("select2:unselecting", function (e) {
+  //   if (e.params.args.originalEvent) {
+  //     e.params.args.originalEvent.stopPropagation();
+  //   }
+  // });
   
 }
 
@@ -150,7 +170,8 @@ function validate_step_2(){
   // Validates sample exam assignation
   var missing_exams_select = false;
   $('#samples_table .samples_exams').each( function(i){
-    if ( $(this).find(":selected").length <= 0 ){
+    var id = $(this).data('index');
+    if ( $('.analis-row-'+id).length <= 0 ){
       $(this).focus();
       missing_exams_select = true;
       return false;
@@ -168,7 +189,7 @@ function validate_step_2(){
 
   // Validates sample organ assignation
   var missing_organs_select = false;
-  $('#samples_table .samples_organs').each( function(i){
+  $('#samples_table .organs-select').each( function(i){
     if ( $(this).find(":selected").length <= 0 ){
       $(this).focus();
       missing_organs_select = true;

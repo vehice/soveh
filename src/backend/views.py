@@ -90,12 +90,24 @@ class ENTRYFORM(View):
             
             samples_as_dict = []
             for s in samples:
-                s_dict = model_to_dict(s, exclude=['organs', 'exams', 'identification'])
+                s_dict = model_to_dict(s, exclude=['organs', 'sampleexams', 'exams', 'identification'])
                 organs = s.organs.all().values()
-                exams = s.exams.all().values()
+                sampleexams = s.sampleexams_set.all()
+                sampleExa = {}
+                for sE in sampleexams:
+                    try:
+                        sampleExa[sE.exam_id]['organ_id'].append(sE.organ_id)
+                    except:
+                        sampleExa[sE.exam_id]={
+                            'exam_id': sE.exam_id,
+                            'exam_name': sE.exam.name,
+                            'sample_id': sE.sample_id,
+                            'organ_id': [sE.organ_id]
+                        }
                 cassettes = Cassette.objects.filter(sample=s).values()
-                s_dict['organs_set'] = list(organs)
-                s_dict['exams_set'] = list(exams)
+                # s_dict['organs_set'] = list(organs)
+                # s_dict['exams_set'] = list(exams)
+                s_dict['sample_exams_set'] = sampleExa
                 s_dict['cassettes_set'] = list(cassettes)
                 s_dict['identification'] = model_to_dict(s.identification, exclude=["organs",])
                 samples_as_dict.append(s_dict)
@@ -1261,26 +1273,41 @@ def step_2_entryform(request):
     sample_id = [
         v for k, v in var_post.items() if k.startswith("sample[id]")
     ]
-    sample_exams = [
-        list(v) for k, v in dict(var_post).items() if k.startswith("sample[exams]")
-    ]
-    sample_organs = [
-        list(v) for k, v in dict(var_post).items() if k.startswith("sample[organs]")
-    ]
+    # sample_exams = [
+    #     list(v) for k, v in dict(var_post).items() if k.startswith("sample[exams]")
+    # ]
+    # sample_organs = [
+    #     list(v) for k, v in dict(var_post).items() if k.startswith("sample[organs]")
+    # ]
 
-    zip_samples = zip(sample_id, sample_exams, sample_organs)
+    # zip_samples = zip(sample_id, sample_exams, sample_organs)
 
-    for values in zip_samples:
-        sample = Sample.objects.get(pk=int(values[0]))
-        sample.exams.clear()
-        for exam in values[1]:
-            sample.exams.add(exam)
-
-        sample.organs.clear()
-        for organ in values[2]:
-            sample.organs.add(organ)
-        
+    for values in sample_id:
+        sample = Sample.objects.get(pk=int(values))
+        sample.sampleexams_set.all().delete()
         sample.save()
+        sample_exams = [
+            v[0] for k, v in dict(var_post).items() if k.startswith("sample[exams]["+values)
+        ]
+        sample_organs = []
+        for exam in sample_exams:
+            sample_organs = [
+                v for k, v in dict(var_post).items() if k.startswith("sample[organs]["+values+"]["+exam)
+            ]
+            for organ in sample_organs[0]:
+                SampleExams.objects.create(
+                    sample= sample,
+                    exam_id= exam,
+                    organ_id= organ
+                )
+    return
+        # for exam in values[1]:
+        #     sample.exams.add(exam)
+
+        # sample.organs.clear()
+        # for organ in values[2]:
+        #     sample.organs.add(organ)
+        
 
 def step_3_entryform(request):
     var_post = request.POST.copy()

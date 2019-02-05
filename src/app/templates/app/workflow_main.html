@@ -308,8 +308,10 @@ function fillSummary(data){
     tpl_samples += '<tr>';
     tpl_samples += '<td>'+ item.index +'</td>';
     tpl_samples += '<td>'+ item.identification.cage +'-'+item.identification.group+'</td>';
-    tpl_samples += '<td>'+ Object.keys(exams).map(function(k){return exams[k].name}).join(", ") +'</td>';
-    tpl_samples += '<td>'+ Object.keys(organs).map(function(k){return organs[k].name}).join(", ") +'</td>';
+    tpl_samples += '<td></td>';
+    tpl_samples += '<td></td>';
+    // tpl_samples += '<td>'+ Object.keys(exams).map(function(k){return exams[k].name}).join(", ") +'</td>';
+    // tpl_samples += '<td>'+ Object.keys(organs).map(function(k){return organs[k].name}).join(", ") +'</td>';
     tpl_samples += '</tr>';
   });
 
