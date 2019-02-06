@@ -91,7 +91,7 @@ class ENTRYFORM(View):
             samples_as_dict = []
             for s in samples:
                 s_dict = model_to_dict(s, exclude=['organs', 'sampleexams', 'exams', 'identification'])
-                organs = s.organs.all().values()
+                organs = []
                 sampleexams = s.sampleexams_set.all()
                 sampleExa = {}
                 for sE in sampleexams:
@@ -104,8 +104,9 @@ class ENTRYFORM(View):
                             'sample_id': sE.sample_id,
                             'organ_id': [sE.organ_id]
                         }
+                    organs.append(model_to_dict(sE.organ))
                 cassettes = Cassette.objects.filter(sample=s).values()
-                # s_dict['organs_set'] = list(organs)
+                s_dict['organs_set'] = organs
                 # s_dict['exams_set'] = list(exams)
                 s_dict['sample_exams_set'] = sampleExa
                 s_dict['cassettes_set'] = list(cassettes)
@@ -190,7 +191,8 @@ class CASSETTE(View):
             # print(sample)
             # s_dict['identification'] = model_to_dict(s.identification, exclude=["organs",])
             sample['identification'] = model_to_dict(Identification.objects.get(pk=sample['identification']), exclude=["organs"])
-            sample_exams = [model_to_dict(exam) for exam in Sample.objects.get(pk=sample['id']).exams.all() ]
+            # sample_exams = [model_to_dict(exam) for exam in Sample.objects.get(pk=sample['id']).exams.all() ]
+            sample_exams = [ model_to_dict(sampleexam.exam) for sampleexam in Sample.objects.get(pk=sample['id']).sampleexams_set.all() ]
             sample['exams_set'] = sample_exams
 
             # sample['exams_set'] = list(sample.exams.all().values())
@@ -1380,7 +1382,7 @@ def step_4_entryform(request):
 
     for values in zip_block:
         
-        exams = [ exam for exam in Sample.objects.get(pk=values[0]).exams.all() ]
+        exams = [ sampleexam.exam for sampleexam in Sample.objects.get(pk=values[0]).sampleexams_set.all() ]
         slice_index = 0
         cassette = Cassette.objects.get(pk=values[1])
         

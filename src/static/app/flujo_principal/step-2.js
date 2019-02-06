@@ -20,6 +20,12 @@ function init_step_2() {
   .fail(function () {
   })
 
+  if ($('#exam_select').hasClass("select2-hidden-accessible")) {
+    $('#exam_select').select2('destroy');
+    $('#exam_select').off('select2:select');
+    $('#exam_select').off('select2:unselect');
+  }
+
   $('#exam_select').select2();
   
   $('#exam_select').on("select2:select", function (e) {
@@ -54,7 +60,7 @@ function loadSamples(samples, organs){
   $.each(samples, function (i, v){
     addSampleRow(v, organs);
     $.each(v.sample_exams_set, function(j,item){
-      var html = addOrgansOptions(item.exam_name, v.id, item.exam_id);
+      var html = addOrgansOptions(item.exam_name, v.id, item.exam_id, v.id+"-"+($('#sampleNro-'+v.id)[0].rowSpan + 1));
       $('#sampleNro-'+v.id)[0].rowSpan = $('#sampleNro-'+v.id)[0].rowSpan + 1; 
       $('#sampleIden-'+v.id)[0].rowSpan = $('#sampleIden-'+v.id)[0].rowSpan + 1; 
       $("#sample-"+v.id).after(html);
@@ -69,8 +75,9 @@ function loadSamples(samples, organs){
           $(v).trigger('change');
         });
       });
-      $('.organs-select-'+ item.exam_id).val(item.organ_id);
-      $('.organs-select-'+ item.exam_id).trigger('change');
+      
+      $('#'+v.id+"-"+$('#sampleNro-'+v.id)[0].rowSpan).val(item.organ_id);
+      $('#'+v.id+"-"+$('#sampleNro-'+v.id)[0].rowSpan).trigger('change');
     });
   });
  
@@ -244,11 +251,11 @@ function addSampleRow(sample, organs) {
   $("#samples_table tbody").append(templateHTML)
 }
 
-function addOrgansOptions(analisis, sampleId, sampleIndex) {
+function addOrgansOptions(analisis, sampleId, sampleIndex, optionId = null) {
   var sampleRowTemplate = document.getElementById("add_analisis").innerHTML;
 
   var templateFn = _.template(sampleRowTemplate);
-  var templateHTML = templateFn({'organs': organs_list, 'analisis': analisis, 'sampleId': sampleId, 'sampleIndex': sampleIndex});
+  var templateHTML = templateFn({'organs': organs_list, 'analisis': analisis, 'sampleId': sampleId, 'sampleIndex': sampleIndex, 'optionId': optionId});
   return templateHTML;
 }
 

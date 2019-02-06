@@ -241,9 +241,9 @@ class Sample(models.Model):
         return str(self.index)
 
 class SampleExams(models.Model):
-    sample = models.ForeignKey(Sample, null=True, on_delete=models.SET_NULL)
-    exam = models.ForeignKey(Exam, null=True, on_delete=models.SET_NULL)
-    organ = models.ForeignKey(Organ, null=True, on_delete=models.SET_NULL)
+    sample = models.ForeignKey(Sample, null=True, on_delete=models.CASCADE)
+    exam = models.ForeignKey(Exam, null=True, on_delete=models.CASCADE)
+    organ = models.ForeignKey(Organ, null=True, on_delete=models.CASCADE)
 
     def __str__(self):
         return str(self.sample)

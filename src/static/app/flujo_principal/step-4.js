@@ -81,10 +81,10 @@ function populateBlockTable(data) {
     row.block_index = i;
 
     if (item.slices_set.length > 0) {
-      row.start_block = item.slices[0].start_block;
-      row.end_block = item.slices[0].end_block;
-      row.start_slice = item.slices[0].start_slice;
-      row.end_slice = item.slices[0].end_slice;
+      row.start_block = item.slices_set[0].start_block;
+      row.end_block = item.slices_set[0].end_block;
+      row.start_slice = item.slices_set[0].start_slice;
+      row.end_slice = item.slices_set[0].end_slice;
     } else {
       row.start_block = "";
       row.end_block = "";

@@ -207,6 +207,7 @@ $("#workflow_form").steps({
     },
     onFinishing: function (event, currentIndex)
     {
+      alert(1);
         // form.validate().settings.ignore = ":disabled";
         // return form.valid();
     },
@@ -226,6 +227,7 @@ $("#workflow_form").steps({
         data: form_data,
       })
       .done(function () {
+      alert(2);
 
       })
       .fail(function () {

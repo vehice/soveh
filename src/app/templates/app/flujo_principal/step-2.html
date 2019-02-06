@@ -70,7 +70,7 @@
     <input class="form-control" style="width:100% !important;" name="sample[exams][<%= sampleId %>][<%= sampleIndex %>]" hidden value="<%= sampleIndex %>"/>
   </td>
   <td>
-    <select class="select2 form-control organs-select organs-select-<%= sampleIndex %>" style="width:100% !important;" name="sample[organs][<%= sampleId %>][<%= sampleIndex %>]" multiple="multiple">
+    <select id="<%= optionId %>" class="select2 form-control organs-select organs-select-<%= sampleIndex %>" style="width:100% !important;" name="sample[organs][<%= sampleId %>][<%= sampleIndex %>]" multiple="multiple">
       <% _.each(organs, function (organ) { %>
         <option value=<%= organ.id %>> <%= _.toUpper(organ.name) %> </option>
       <% }); %>
