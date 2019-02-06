@@ -96,13 +96,17 @@ class ENTRYFORM(View):
                 sampleExa = {}
                 for sE in sampleexams:
                     try:
-                        sampleExa[sE.exam_id]['organ_id'].append(sE.organ_id)
+                        sampleExa[sE.exam_id]['organ_id'].append({
+                            'name':sE.organ.name,
+                            'id':sE.organ.id})
                     except:
                         sampleExa[sE.exam_id]={
                             'exam_id': sE.exam_id,
                             'exam_name': sE.exam.name,
                             'sample_id': sE.sample_id,
-                            'organ_id': [sE.organ_id]
+                            'organ_id': [{
+                            'name':sE.organ.name,
+                            'id':sE.organ.id}]
                         }
                     organs.append(model_to_dict(sE.organ))
                 cassettes = Cassette.objects.filter(sample=s).values()
@@ -198,7 +202,6 @@ class CASSETTE(View):
             # sample['exams_set'] = list(sample.exams.all().values())
             
             # print (sample)
-
             cassette_as_dict = model_to_dict(cassette, exclude=['organs'])
             cassette_as_dict['slices_set'] = slices
             cassette_as_dict['organs_set'] = organs
@@ -225,6 +228,26 @@ class CASSETTE(View):
             organs_set = s.organs.all().values()
             exams_set = s.exams.all().values()
             cassettes_set = Cassette.objects.filter(sample=s).values()
+            sampleexams = s.sampleexams_set.all()
+            sampleExa = {}
+            for sE in sampleexams:
+                try:
+                    sampleExa[sE.exam_id]['organ_id'].append({
+                            'name':sE.organ.name,
+                            'id':sE.organ.id})
+                except:
+                    sampleExa[sE.exam_id]={
+                        'exam_id': sE.exam_id,
+                        'exam_name': sE.exam.name,
+                        'sample_id': sE.sample_id,
+                        'organ_id': [{
+                            'name':sE.organ.name,
+                            'id':sE.organ.id}]
+                    }
+                # organs.append(model_to_dict(sE.organ))
+            # s_dict['organs_set'] = organs
+            # s_dict['exams_set'] = list(exams)
+            s_dict['sample_exams_set'] = sampleExa
             s_dict['organs_set'] = list(organs_set)
             s_dict['exams_set'] = list(exams_set)
             s_dict['cassettes_set'] = list(cassettes_set)
@@ -305,6 +328,24 @@ class ANALYSIS(View):
             s_dict = model_to_dict(s, exclude=['organs', 'exams', 'identification'])
             organs_set = s.organs.all().values()
             exams_set = s.exams.all().values()
+            sampleexams = s.sampleexams_set.all()
+            sampleExa = {}
+            for sE in sampleexams:
+                try:
+                    sampleExa[sE.exam_id]['organ_id'].append({
+                            'name':sE.organ.name,
+                            'id':sE.organ.id})
+                except:
+                    sampleExa[sE.exam_id]={
+                        'exam_id': sE.exam_id,
+                        'exam_name': sE.exam.name,
+                        'sample_id': sE.sample_id,
+                        'organ_id': [{
+                            'name':sE.organ.name,
+                            'id':sE.organ.id}]
+                    }
+                # organs.append(model_to_dict(sE.organ))
+            s_dict['sample_exams_set'] = sampleExa
             cassettes_set = Cassette.objects.filter(sample=s).values()
             s_dict['organs_set'] = list(organs_set)
             s_dict['exams_set'] = list(exams_set)

@@ -75,8 +75,11 @@ function loadSamples(samples, organs){
           $(v).trigger('change');
         });
       });
-      
-      $('#'+v.id+"-"+$('#sampleNro-'+v.id)[0].rowSpan).val(item.organ_id);
+      var values = [];
+      $.each(item.organ_id, function(j,w){
+        values.push(w.id);
+      });
+      $('#'+v.id+"-"+$('#sampleNro-'+v.id)[0].rowSpan).val(values);
       $('#'+v.id+"-"+$('#sampleNro-'+v.id)[0].rowSpan).trigger('change');
     });
   });

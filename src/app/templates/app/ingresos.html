@@ -271,14 +271,21 @@
       tpl_samples += '<thead><tr><th>No. Muestra</th><th>Identificación</th><th>Análisis</th><th>Órganos</th></tr></thead><tbody>';
 
       $.each(data.samples, function(i, item){
-        var exams = item.exams_set;
-        var organs = item.organs_set;
+        var len = 1;
+        var tpl_exams = ""
+        $.each(item.sample_exams_set, function(j, v){
+          len+=1;
+          tpl_exams += '<tr><td>'+v.exam_name+'</td>';
+          tpl_exams += '<td>'+ Object.keys(v.organ_id).map(function(k){return v.organ_id[k].name}).join(", ") +'</td></tr>';
+        });
         tpl_samples += '<tr>';
-        tpl_samples += '<td>'+ item.index +'</td>';
-        tpl_samples += '<td>'+ item.identification.cage +'-'+item.identification.group+'</td>';
-        tpl_samples += '<td>'+ Object.keys(exams).map(function(k){return exams[k].name}).join(", ") +'</td>';
-        tpl_samples += '<td>'+ Object.keys(organs).map(function(k){return organs[k].name}).join(", ") +'</td>';
+        tpl_samples += '<td rowspan="'+len+'">'+ item.index +'</td>';
+        tpl_samples += '<td rowspan="'+len+'">'+ item.identification.cage +'-'+item.identification.group+'</td>';
+        // tpl_samples += '<td></td>';
+        // tpl_samples += '<td></td>';
         tpl_samples += '</tr>';
+        tpl_samples += tpl_exams;
+        
       });
 
       tpl_samples += '</tbody></table></div>';
