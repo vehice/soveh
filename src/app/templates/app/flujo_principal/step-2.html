@@ -45,19 +45,19 @@
     <td id="sampleIden-<%= sample.id %>" rowspan="1">
         <%= sample.identification.cage %>-<%= sample.identification.group %>
     </td>
-
+  
     <!-- Analisis -->
-    <td class="samples_exams_list">
-      <input class="form-control samples_exams" style="width:100% !important;" data-index="<%= sample.id %>" disabled/>
+    <td class="samples_exams_list samples_exams delete-<%= sample.id %>" data-index="<%= sample.id %>">
+      <!-- <input class="form-control samples_exams" style="width:100% !important;" data-index="<%= sample.id %>" disabled/> -->
       <!-- </select> -->
     </td>
 
     <!-- Organs -->
-    <td>
+    <td class="delete-<%= sample.id %>">
     </td>
 
     <!-- Actions -->
-    <td>
+    <td class="delete-<%= sample.id %>">
     </td>
   </tr> 
   
@@ -65,7 +65,7 @@
 
 <script id="add_analisis" type="text/x-lodash-template">
 <tr id="analisis-<%= sampleId %>-<%= sampleIndex %>" class="analis-row analis-row-<%= sampleId %>" data-sampleid="<%= sampleIndex %>" data-sampleindex="<%= sampleId %>">
-  <td class="samples_exams_list">
+  <td class="samples_exams_list" data-index="<%= sampleId %>">
     <input class="form-control" style="width:100% !important;" readonly value="<%= analisis %>"/>
     <input class="form-control" style="width:100% !important;" name="sample[exams][<%= sampleId %>][<%= sampleIndex %>]" hidden value="<%= sampleIndex %>"/>
   </td>

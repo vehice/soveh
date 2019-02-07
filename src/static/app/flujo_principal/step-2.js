@@ -58,6 +58,7 @@ function loadSamples(samples, organs){
   $.each(samples, function (i, v){
     addSampleRow(v, organs);
     $.each(v.sample_exams_set, function(j,item){
+      $('.delete-'+v.id).hide();
       var html = addOrgansOptions(item.exam_name, item.exam_type, v.id, item.exam_id, v.id+"-"+($('#sampleNro-'+v.id)[0].rowSpan + 1));
       $('#sampleNro-'+v.id)[0].rowSpan = $('#sampleNro-'+v.id)[0].rowSpan + 1; 
       $('#sampleIden-'+v.id)[0].rowSpan = $('#sampleIden-'+v.id)[0].rowSpan + 1; 
@@ -123,19 +124,20 @@ function loadData(data){
 
 function addExamToSamples(exam){
   $('#samples_table .samples_exams').each( function(i){
-    if($(this).val() == "" || $(this).val() == null){
+    // if($(this).val() == "" || $(this).val() == null){
       //show analisis selected
       // var new_exam = new Option(exam.text, exam.id, true, true);
       // $(this).append(new_exam).trigger('change');
       // $(this).val(exam.text);
       // $(this).data('id', exam.id);
       var sampleId = $(this).data('index');
+      $('.delete-'+sampleId).hide();
       $('#sampleNro-'+sampleId)[0].rowSpan = $('#sampleNro-'+sampleId)[0].rowSpan + 1; 
       $('#sampleIden-'+sampleId)[0].rowSpan = $('#sampleIden-'+sampleId)[0].rowSpan + 1; 
       //show organs options
       var html = addOrgansOptions(exam.text, $(exam.element).data('examtype'), sampleId, exam.id);
       $("#sample-"+sampleId).after(html);
-    }
+    // }
   }); 
   $('.organs-select-'+ exam.id).select2();
   $('.organs-select-'+ exam.id).on('select2:select', function(e){
@@ -152,9 +154,12 @@ function addExamToSamples(exam){
 function removeExamFromSamples(exam){
   $('#samples_table .analis-row').each( function(i){
     if($(this).data('sampleid') == exam.id){
-      $('#sampleNro-'+$(this).data('sampleindex'))[0].rowSpan = $('#sampleNro-'+$(this).data('sampleindex'))[0].rowSpan - 1; 
-      $('#sampleIden-'+$(this).data('sampleindex'))[0].rowSpan = $('#sampleIden-'+$(this).data('sampleindex'))[0].rowSpan - 1; 
+      var sampleIndex = $(this).data('sampleindex');
+      $('#sampleNro-'+sampleIndex)[0].rowSpan = $('#sampleNro-'+sampleIndex)[0].rowSpan - 1; 
+      $('#sampleIden-'+sampleIndex)[0].rowSpan = $('#sampleIden-'+sampleIndex)[0].rowSpan - 1; 
       $(this).remove();
+      if($('#sampleIden-'+sampleIndex)[0].rowSpan == 1)
+        $('.delete-'+sampleIndex).show();
     }
   }); 
 }
@@ -270,4 +275,6 @@ function deleteAnalisis(sampleId, sampleIndex){
   $('#analisis-'+sampleId+'-'+sampleIndex).remove();
   $('#sampleNro-'+sampleId)[0].rowSpan = $('#sampleNro-'+sampleId)[0].rowSpan - 1; 
   $('#sampleIden-'+sampleId)[0].rowSpan = $('#sampleIden-'+sampleId)[0].rowSpan - 1; 
+  if($('#sampleIden-'+sampleId)[0].rowSpan == 1)
+        $('.delete-'+sampleId).show();
 }
