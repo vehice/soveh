@@ -34,9 +34,15 @@ class Fixative(models.Model):
         verbose_name = "Fijador"
         verbose_name_plural = "Fijadores"
 
+ANALISIS_TYPE =(
+    (1, "Histológicos"),
+    (2, "No histológicos"),
+    (3, "Planimetrías")
+)
 class Exam(models.Model):
     name = models.CharField(max_length=250, null=True, blank=True, verbose_name="Nombre")
     stain = models.CharField(max_length=250, null=True, blank=True, verbose_name="Tinción")
+    exam_type = models.IntegerField(choices=ANALISIS_TYPE, default=1)
 
     def __str__(self):
         return self.name
