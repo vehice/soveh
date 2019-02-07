@@ -114,8 +114,8 @@
 <script type="text/javascript">
 
 var form = $("#workflow_form");
-
-$("#workflow_form").steps({
+var saltar=false;
+var steps = $("#workflow_form").steps({
     headerTag: "h6",
     bodyTag: "fieldset",
     transitionEffect: "fade",
@@ -142,6 +142,7 @@ $("#workflow_form").steps({
           if (!resp) {
             return false
           }
+          saltar = resp == 5;
         }
         
         if (currentIndex > newIndex)
@@ -205,6 +206,42 @@ $("#workflow_form").steps({
         return true
       }
     },
+    onStepChanged:function (event, currentIndex, prevIndex){
+      if(currentIndex < prevIndex){
+          if (prevIndex == 5){
+              if(saltar){
+                  steps.steps("previous");
+              }
+          }
+          else if (prevIndex == 4){
+              if(saltar){
+                  steps.steps("previous");
+              }
+          }
+          else if (prevIndex == 3){
+              if(saltar){
+                  steps.steps("previous");
+              }
+          }
+          return true; 
+      }
+      if (currentIndex == 2){
+          if(saltar){
+              steps.steps("next");
+          }
+      }
+      else if (currentIndex == 3){
+          if(saltar){
+              steps.steps("next");
+          }
+      }
+      else if (currentIndex == 4){
+          if(saltar){
+              steps.steps("next");
+          }
+      }
+      return true; 
+    }, 
     onFinishing: function (event, currentIndex)
     {
       alert(1);

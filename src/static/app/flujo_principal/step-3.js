@@ -214,18 +214,24 @@ function loadCassetteData(data) {
     } else {
       cassette_preffix = data.entryform.no_caso + '_C';
     }
-
+    var exams = 0;
     $.each(data.samples, function (i, sample) {
-      var row = {
-        'sample_id' : sample.id,
-        'sample_index' : sample.index,
-        'cassette_index' : sample.index,
-        'cassette_name' : cassette_preffix + '' +sample.index,
-        'sample_name' : sample.identification.cage+'-'+sample.identification.group,
-        'organs': sample.organs_set
-      };
-      addCasseteRow(row);
-    });   
+      if(sample.organs_set.length > 0){
+        var row = {
+          'sample_id' : sample.id,
+          'sample_index' : sample.index,
+          'cassette_index' : sample.index,
+          'cassette_name' : cassette_preffix + '' +sample.index,
+          'sample_name' : sample.identification.cage+'-'+sample.identification.group,
+          'organs': sample.organs_set
+        };
+        addCasseteRow(row);
+        exams+=1;
+      }
+    });  
+    if(!exams){
+      
+    }
   }
 }
 

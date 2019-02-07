@@ -103,12 +103,14 @@ class ENTRYFORM(View):
                         sampleExa[sE.exam_id]={
                             'exam_id': sE.exam_id,
                             'exam_name': sE.exam.name,
+                            'exam_type': sE.exam.exam_type,
                             'sample_id': sE.sample_id,
                             'organ_id': [{
                             'name':sE.organ.name,
                             'id':sE.organ.id}]
                         }
-                    organs.append(model_to_dict(sE.organ))
+                    if sE.exam.exam_type == 1:
+                        organs.append(model_to_dict(sE.organ))
                 cassettes = Cassette.objects.filter(sample=s).values()
                 s_dict['organs_set'] = organs
                 # s_dict['exams_set'] = list(exams)
@@ -196,7 +198,7 @@ class CASSETTE(View):
             # s_dict['identification'] = model_to_dict(s.identification, exclude=["organs",])
             sample['identification'] = model_to_dict(Identification.objects.get(pk=sample['identification']), exclude=["organs"])
             # sample_exams = [model_to_dict(exam) for exam in Sample.objects.get(pk=sample['id']).exams.all() ]
-            sample_exams = [ model_to_dict(sampleexam.exam) for sampleexam in Sample.objects.get(pk=sample['id']).sampleexams_set.all() ]
+            sample_exams = [ model_to_dict(sampleexam.exam) for sampleexam in Sample.objects.get(pk=sample['id']).sampleexams_set.all() if sampleexam.exam.exam_type == 1 ]
             sample['exams_set'] = sample_exams
 
             # sample['exams_set'] = list(sample.exams.all().values())
@@ -226,7 +228,7 @@ class CASSETTE(View):
         for s in samples:
             s_dict = model_to_dict(s, exclude=['organs', 'exams', 'identification'])
             organs_set = s.organs.all().values()
-            exams_set = s.exams.all().values()
+            exams_set = s.exams.filter(exam_type= 1).values()
             cassettes_set = Cassette.objects.filter(sample=s).values()
             sampleexams = s.sampleexams_set.all()
             sampleExa = {}
@@ -1423,7 +1425,7 @@ def step_4_entryform(request):
 
     for values in zip_block:
         
-        exams = [ sampleexam.exam for sampleexam in Sample.objects.get(pk=values[0]).sampleexams_set.all() ]
+        exams = [ sampleexam.exam for sampleexam in Sample.objects.get(pk=values[0]).sampleexams_set.all() if sampleexam.exam.exam_type == 1]
         slice_index = 0
         cassette = Cassette.objects.get(pk=values[1])
         
