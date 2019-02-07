@@ -276,5 +276,18 @@ function deleteAnalisis(sampleId, sampleIndex){
   $('#sampleNro-'+sampleId)[0].rowSpan = $('#sampleNro-'+sampleId)[0].rowSpan - 1; 
   $('#sampleIden-'+sampleId)[0].rowSpan = $('#sampleIden-'+sampleId)[0].rowSpan - 1; 
   if($('#sampleIden-'+sampleId)[0].rowSpan == 1)
-        $('.delete-'+sampleId).show();
+    $('.delete-'+sampleId).show();
+  var exist = 0;
+  $('#samples_table .analis-row').each( function(i){
+    if($(this).data('sampleid') == sampleIndex){
+      exist +=1;
+    }
+  }); 
+  if(!exist){
+    var old_values = $('#exam_select').val();
+    old_values.splice(old_values.indexOf(sampleIndex), 1);
+    $('#exam_select').val(old_values);
+    $('#exam_select').trigger('change');
+  }
+
 }
