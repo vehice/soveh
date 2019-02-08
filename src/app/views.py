@@ -136,9 +136,10 @@ def download_report(request, id):
     return response
 
 def template_report(request, id):
+    analisis = AnalysisForm.objects.get(id=int(id))
     report = Report.objects.filter(analysis_id=int(id))
     report_final = ReportFinal.objects.filter(analysis_id=int(id)).last()
-    return render(request, 'app/template_report.html',{'report': report, 'report_final':report_final })
+    return render(request, 'app/template_report.html',{'analisis': analisis, 'report': report, 'report_final':report_final })
 
 @login_required
 def preview_report(request, id):

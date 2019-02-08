@@ -38,6 +38,7 @@ function populateAnalysisData(data) {
     row.percentage_step = item.percentage_step;
     row.current_step_tag = item.current_step_tag;
     row.form_closed = item.form_closed;
+    row.histologico = item.exam_type == 1;
 
     addAnalysisElement(row)
   });

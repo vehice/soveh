@@ -31,56 +31,56 @@
         <tbody>
           <tr>
             <td class="danger col-xs-3">N° Caso</td>
-            <td colspan="2">{{ report.0.analysis.entryform.no_caso}}</td>
+            <td colspan="2">{{ analisis.entryform.no_caso}}</td>
           </tr>
           <tr>
             <td class="danger">Empresa</td>
-            <td colspan="2">{{ report.0.analysis.entryform.customer.name}}</td>
+            <td colspan="2">{{ analisis.entryform.customer.name}}</td>
           </tr>
           <tr>
             <td class="danger">Centro</td>
-            <td colspan="2">{{ report.0.analysis.entryform.center|default:""}}</td>
+            <td colspan="2">{{ analisis.entryform.center|default:""}}</td>
           </tr>
           <tr>
             <td class="danger">Especie - E° Desarrollo</td>
             <td>
-              {{ report.0.analysis.entryform.specie.name }}
+              {{ analisis.entryform.specie.name }}
             </td>
             <td>
-              {{ report.0.analysis.entryform.larvalstage.name }}
+              {{ analisis.entryform.larvalstage.name }}
             </td>
           </tr>
           <tr>
             <td class="danger">Estanque/Jaula</td>
             <td>
-              {% for ident in report.0.analysis.entryform.identification_set.all %}
+              {% for ident in analisis.entryform.identification_set.all %}
                 ({{ ident.cage }}/{{ ident.group }}) -
               {% endfor %}
             </td>
             <td>
-              Nº Solicitud: {{report.0.analysis.entryform.no_request}}
+              Nº Solicitud: {{analisis.entryform.no_request}}
             </td>
           </tr>
           <tr>
             <td class="danger">Fuente de agua</td>
-            <td colspan="2">{{ report.0.analysis.entryform.watersource.name }}</td>
+            <td colspan="2">{{ analisis.entryform.watersource.name }}</td>
           </tr>
           <tr>
             <td class="danger">Análisis</td>
-            <td colspan="2">{{ report.0.analysis.exam.name }} {{ report.0.analysis.entryform.larvalstage.name }}</td>
+            <td colspan="2">{{ analisis.exam.name }} {{ analisis.entryform.larvalstage.name }}</td>
           </tr>
           <tr>
             <td class="danger">Fecha muestreo</td>
-            <td colspan="2">{{ report.0.analysis.entryform.sampled_at }}</td>
+            <td colspan="2">{{ analisis.entryform.sampled_at }}</td>
           </tr>
           <tr>
             <td class="danger">Fecha de recepción</td>
-            <td colspan="2">{{ report.0.analysis.entryform.created_at }}</td>
+            <td colspan="2">{{ analisis.entryform.created_at }}</td>
           </tr>
-          <tr>
+          <!-- <tr>
             <td class="danger">Fecha informe</td>
             <td colspan="2"></td>
-          </tr>
+          </tr> -->
         </tbody>
       </table>
     </div>
@@ -88,7 +88,7 @@
 
   <div class="row" style="page-break-inside: avoid !important;">
     <div class="col-xs-12" style="padding-top:5% !important; padding-bottom:3% !important;">
-      <center><h3 class="text-danger"><strong>HALLAZGOS HISTOLÓGICOS</strong></h3></center>
+      <center><h3 class="text-danger"><strong>HALLAZGOS</strong></h3></center>
     </div>
     <div class="col-xs-12">
       {{report_final.box_findings | safe}}

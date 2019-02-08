@@ -304,6 +304,7 @@ class ANALYSIS(View):
                 'form_id': form_id,
                 'exam_name': exam.name,
                 'exam_stain': exam.stain,
+                'exam_type': exam.exam_type,
                 'slices': slices,
                 'current_step_tag': current_step_tag,
                 'current_step': current_step,
@@ -453,6 +454,7 @@ class WORKFLOW(View):
             }
         elif (form.content_type.name == 'analysis form'):
             route = 'app/workflow_analysis.html'
+            analisis = AnalysisForm.objects.get(id=int(object_form_id))
             reports = Report.objects.filter(analysis_id=int(object_form_id))
             from collections import defaultdict
 
@@ -501,6 +503,7 @@ class WORKFLOW(View):
 
             data = {
                 'form': form,
+                'analisis': analisis,
                 'form_id': form_id,
                 'analysis_id': object_form_id,
                 'set_step_tag': step_tag,
@@ -659,8 +662,8 @@ class REPORT(View):
 
             entryform["identifications"] = list(
                 entryform_object.identification_set.all().values())
-            entryform["answer_questions"] = list(
-                entryform_object.answerreceptioncondition_set.all().values())
+            # entryform["answer_questions"] = list(
+            #     entryform_object.answerreceptioncondition_set.all().values())
             entryform["analyses"] = list(
                 entryform_object.analysisform_set.all().values())
             entryform["cassettes"] = list(

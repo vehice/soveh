@@ -14,19 +14,35 @@
 
 <script id="analysis_element" type="text/x-lodash-template">
 <% if (!form_closed)  { %> 
-  <div href="/workflow/<%= form_id %>/<%= current_step_tag %>" class="list-group-item list-group-item-action">
-    <div class="media-body">
-      <div class="row">
-        <div class="col-sm-4 font-medium-4 text-left"><%= exam_name %></div>
-        <div class="col-sm-4 font-medium-4 text-center"><a class="btn btn-outline-secondary square" href="/workflow/<%= form_id %>/<%= current_step_tag %>"><i class="fa fa-arrow-right"></i> Ir al análisis </a></div>
-        <div class="col-sm-4 font-medium-4 text-right">Tinción: <%= exam_name %></div>
-      </div>
-      <p class="list-group-item-text"><%= no_slice %> cortes</p>
-      <div class="progress" style="height: 18px;">
-        <div class="progress-bar" role="progressbar" style="width:<%= percentage_step %>%" aria-describedby="example-caption-2"> <%= current_step %> de <%= total_step  %> pasos</div>
+  <% if (histologico)  { %> 
+    <div href="/workflow/<%= form_id %>/<%= current_step_tag %>" class="list-group-item list-group-item-action">
+      <div class="media-body">
+        <div class="row">
+          <div class="col-sm-4 font-medium-4 text-left"><%= exam_name %></div>
+          <div class="col-sm-4 font-medium-4 text-center"><a class="btn btn-outline-secondary square" href="/workflow/<%= form_id %>/<%= current_step_tag %>"><i class="fa fa-arrow-right"></i> Ir al análisis </a></div>
+          <div class="col-sm-4 font-medium-4 text-right">Tinción: <%= exam_name %></div>
+        </div>
+        <p class="list-group-item-text"><%= no_slice %> cortes</p>
+        <div class="progress" style="height: 18px;">
+          <div class="progress-bar" role="progressbar" style="width:<%= percentage_step %>%" aria-describedby="example-caption-2"> <%= current_step %> de <%= total_step  %> pasos</div>
+        </div>
       </div>
     </div>
-  </div>
+  <% } else { %>
+    <div href="/workflow/<%= form_id %>/step_5" class="list-group-item list-group-item-action">
+      <div class="media-body">
+        <div class="row">
+          <div class="col-sm-4 font-medium-4 text-left"><%= exam_name %></div>
+          <div class="col-sm-4 font-medium-4 text-center"><a class="btn btn-outline-secondary square" href="/workflow/<%= form_id %>/step_5"><i class="fa fa-arrow-right"></i> Ir al análisis </a></div>
+          <!-- <div class="col-sm-4 font-medium-4 text-right">Tinción: <%= exam_name %></div> -->
+        </div>
+        <!-- <p class="list-group-item-text"><%= no_slice %> cortes</p> -->
+        <div class="progress" style="height: 18px;">
+          <div class="progress-bar" role="progressbar" style="width:<%= percentage_step %>%" aria-describedby="example-caption-2"> <%= current_step/5 %> de 1 pasos</div>
+        </div>
+      </div>
+    </div>
+  <% } %>
 <% } else { %>
   <div href="/workflow/<%= form_id %>/<%= current_step_tag %>" class="list-group-item list-group-item-action">
     <div class="media-body">
