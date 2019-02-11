@@ -33,7 +33,7 @@ function populateAnalysisData(data) {
     row.exam_name = item.exam_name;
     row.exam_stain = item.exam_stain;
     row.no_slice = item.slices.length;
-    row.current_step = item.current_step;
+    row.current_step = item.exam_type == 1 ? item.current_step : Math.floor(item.current_step/5);
     row.total_step = item.total_step;
     row.percentage_step = item.percentage_step;
     row.current_step_tag = item.current_step_tag;

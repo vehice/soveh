@@ -31,6 +31,7 @@
         <center>
           <h3> <strong>CASO N° {{form.content_object.no_caso}}</strong></h3>
           <button class="btn btn-secondary square showSummaryBtn hidden"><i class="fa fa-list fa-fx"></i> Resúmen del caso</button>
+          <button class="btn btn-secondary square newAnalysisBtn hidden"><i class="fa fa-list fa-plus-circle"></i> Nuevo Análisis</button>
         </center>
       </div>
       <div class="card-content">
@@ -295,6 +296,10 @@ $(window).on('load', function (e) {
 
 $(document).on('click', '.showSummaryBtn', function(e){
   $("#show_summary").modal("show");
+});
+
+$(document).on('click', '.newAnalysisBtn', function(e){
+  $("#new_analysis").modal("show");
 });
 
 function fillSummary(data){

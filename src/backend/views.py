@@ -110,7 +110,10 @@ class ENTRYFORM(View):
                             'id':sE.organ.id}]
                         }
                     if sE.exam.exam_type == 1:
-                        organs.append(model_to_dict(sE.organ))
+                        try:
+                            organs.index(model_to_dict(sE.organ))
+                        except:
+                            organs.append(model_to_dict(sE.organ))
                 cassettes = Cassette.objects.filter(sample=s).values()
                 s_dict['organs_set'] = organs
                 # s_dict['exams_set'] = list(exams)
@@ -241,6 +244,7 @@ class CASSETTE(View):
                     sampleExa[sE.exam_id]={
                         'exam_id': sE.exam_id,
                         'exam_name': sE.exam.name,
+                        'exam_type': sE.exam.exam_type,
                         'sample_id': sE.sample_id,
                         'organ_id': [{
                             'name':sE.organ.name,
@@ -273,7 +277,10 @@ class CASSETTE(View):
         entryform["watersource"] = model_to_dict(entryform_object.watersource) if entryform_object.watersource else None
         entryform["specie"] = model_to_dict(entryform_object.specie) if entryform_object.specie else None
         
-        data = {'cassettes': cassettes, 'exams': exams, 'analyses': analyses, 'entryform':entryform, 'samples': samples_as_dict}
+        organs_set = list(Organ.objects.all().values())
+        exams_set = list(Exam.objects.all().values())
+        
+        data = {'cassettes': cassettes, 'exams_set': exams_set, 'exams': exams, 'analyses': analyses, 'entryform':entryform, 'samples': samples_as_dict, 'organs': organs_set}
 
         return JsonResponse(data)
 
@@ -342,6 +349,7 @@ class ANALYSIS(View):
                     sampleExa[sE.exam_id]={
                         'exam_id': sE.exam_id,
                         'exam_name': sE.exam.name,
+                        'exam_type': sE.exam.exam_type,
                         'sample_id': sE.sample_id,
                         'organ_id': [{
                             'name':sE.organ.name,
@@ -780,7 +788,8 @@ def process_entryform(request):
         'step_1': step_1_entryform,
         'step_2': step_2_entryform,
         'step_3': step_3_entryform,
-        'step_4': step_4_entryform
+        'step_4': step_4_entryform,
+        'step_3_new': step_new_analysis,
     }
 
     method = switcher.get(step_tag)
@@ -788,11 +797,8 @@ def process_entryform(request):
     if not method:
         raise NotImplementedError(
             "Method %s_entryform not implemented" % step_tag)
-
-    method(request)
-
-    return True
-
+    
+    return method(request)
 
 def process_analysisform(request):
     step_tag = request.POST.get('step_tag')
@@ -1289,6 +1295,7 @@ def step_1_entryform(request):
         #         flow=flow,
         #         state=flow.step_set.all()[0].state,
         #         parent_id=entryform.forms.first().id)
+    return True
 
 def step_2_entryform(request):
     var_post = request.POST.copy()
@@ -1321,17 +1328,10 @@ def step_2_entryform(request):
     sample_id = [
         v for k, v in var_post.items() if k.startswith("sample[id]")
     ]
-    # sample_exams = [
-    #     list(v) for k, v in dict(var_post).items() if k.startswith("sample[exams]")
-    # ]
-    # sample_organs = [
-    #     list(v) for k, v in dict(var_post).items() if k.startswith("sample[organs]")
-    # ]
-
-    # zip_samples = zip(sample_id, sample_exams, sample_organs)
 
     for values in sample_id:
         sample = Sample.objects.get(pk=int(values))
+        sample.cassette_set.all().delete()
         sample.sampleexams_set.all().delete()
         sample.save()
         sample_exams = [
@@ -1348,7 +1348,7 @@ def step_2_entryform(request):
                     exam_id= exam,
                     organ_id= organ
                 )
-    return
+    return True
         # for exam in values[1]:
         #     sample.exams.add(exam)
 
@@ -1392,6 +1392,7 @@ def step_3_entryform(request):
         cassette.organs.set(values[2])
         cassette.save()
         count += 1
+    return True
 
 def step_4_entryform(request):
     var_post = request.POST.copy()
@@ -1454,10 +1455,41 @@ def step_4_entryform(request):
 
             )
             slice_new.save()
+    return True
 
 def step_5_entryform(request):
     print("step_4")
+    return True
 
+def step_new_analysis(request):
+    step_2_entryform(request)
+    var_post = request.POST.copy()
+    entryform = EntryForm.objects.get(pk=var_post.get('entryform_id'))
+    sample_id = [
+        v for k, v in var_post.items() if k.startswith("sample[id]")
+    ]
+    for values in sample_id:
+        sample = Sample.objects.get(pk=int(values))
+        organs = []
+        for s in sample.sampleexams_set.all():
+            if s.exam.exam_type == 1:
+                organs.append(s.organ_id)
+        if organs:
+            cassette_preffix = ""
+            if entryform.get_subflow != "N/A":
+                cassette_preffix =entryform.no_caso + '-' +entryform.get_subflow + '_C'
+            else:
+                cassette_preffix =entryform.no_caso + '_C'
+            cassette = Cassette.objects.create(
+                entryform_id=entryform.id,
+                processor_loaded_at=datetime.now(),
+                cassette_name=cassette_preffix + '' +str(sample.index),
+                index=sample.index,
+                sample=sample
+            )
+            cassette.organs.set(organs)
+            cassette.save()
+    return False
 
 def step_1_analysisform(request):
     var_post = request.POST.copy()

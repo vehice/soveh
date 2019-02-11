@@ -12,6 +12,7 @@ function init_step_3() {
   .done(function (data) {
     data_step_3 = data
     $('.showSummaryBtn').removeClass("hidden");
+    $('.newAnalysisBtn').addClass("hidden");
     fillSummary(data);
 
     if ($.fn.DataTable.isDataTable('#cassettes_table')) {
