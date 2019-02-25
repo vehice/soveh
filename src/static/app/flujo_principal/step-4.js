@@ -103,8 +103,10 @@ function populateBlockTable(data) {
     row.cassette_pk = item.id;
     row.cassette_index = item.index;
     row.organs = item.organs_set.join(", ")
-    row.no_slice = item.sample.exams_set.length;
     row.block_index = i;
+
+    var exams_grouped = _.mapValues(_.groupBy(item.sample.exams_set, 'id'), clist => clist.map(exam => _.omit(exam, 'id')));
+    row.no_slice = Object.keys(exams_grouped).length;
 
     if (item.slices_set.length > 0) {
       row.start_block = item.slices_set[0].start_block;
@@ -119,9 +121,11 @@ function populateBlockTable(data) {
     }
 
     row.slice_info = "<ol>";
-    $.each(item.sample.exams_set, function (i, elem) {
-      row.slice_info += "<li><p><strong>Cassette:</strong> " + row.cassette_name + " <strong> </br>Muestra: </strong>" + row.sample_index + " <strong> </br>Corte: </strong>" +row.cassette_name+"-S"+(i+1).toString()+" <strong> </br>An&aacute;lisis: </strong>" + elem.name + "</p></li>"
-    })
+    var slice_num = 1;
+    $.each(exams_grouped, function (k, v) {
+      row.slice_info += "<li><p><strong>Cassette:</strong> " + row.cassette_name + " <strong> </br>Muestra: </strong>" + row.sample_index + " <strong> </br>Corte: </strong>" +row.cassette_name+"-S"+(slice_num).toString()+" <strong> </br>An&aacute;lisis: </strong>" + v[0].name + "</p></li>"
+      slice_num += 1;
+    });
     row.slice_info += "</ol>";
 
     addBlockRow(row)

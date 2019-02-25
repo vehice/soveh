@@ -197,7 +197,6 @@ class CASSETTE(View):
                 slices.append(model_to_dict(slice))
 
             sample = model_to_dict(cassette.sample, exclude=["exams", "organs"])
-            # print(sample)
             # s_dict['identification'] = model_to_dict(s.identification, exclude=["organs",])
             sample['identification'] = model_to_dict(Identification.objects.get(pk=sample['identification']), exclude=["organs"])
             # sample_exams = [model_to_dict(exam) for exam in Sample.objects.get(pk=sample['id']).exams.all() ]
@@ -206,7 +205,6 @@ class CASSETTE(View):
 
             # sample['exams_set'] = list(sample.exams.all().values())
             
-            # print (sample)
             cassette_as_dict = model_to_dict(cassette, exclude=['organs'])
             cassette_as_dict['slices_set'] = slices
             cassette_as_dict['organs_set'] = organs
@@ -214,7 +212,6 @@ class CASSETTE(View):
 
             cassettes.append(cassette_as_dict)
             # cassette_as_dict['sample'] = 
-        # print(cassettes)
         
         entryform = EntryForm.objects.values().get(pk=entry_form)
         entryform_object = EntryForm.objects.get(pk=entry_form)
@@ -303,7 +300,6 @@ class ANALYSIS(View):
 
             slices_qs = analysis.slice_set.all()
             slices = []
-
             for slice_new in slices_qs:
                 slices.append({'name': slice_new.slice_name})
 
@@ -441,7 +437,6 @@ class SLICE(View):
         entryform["specie"] = entryform_object.specie.name
 
         data = {'slices': slices, 'entryform': entryform, 'samples': samples_as_dict}
-        # print (data)
 
         return JsonResponse(data)
 
@@ -681,7 +676,6 @@ class REPORT(View):
             entryform["fixative"] = entryform_object.fixative.name
             entryform["watersource"] = entryform_object.watersource.name
             entryform["specie"] = entryform_object.specie.name
-            # print(reports)
 
             data = {'reports': reports, "entryform": entryform}
         return JsonResponse(data)
@@ -826,7 +820,6 @@ def process_analysisform(request):
 # Steps Function for entry forms
 def step_1_entryform(request):
     var_post = request.POST.copy()
-    # print (var_post)
 
     entryform = EntryForm.objects.get(pk=var_post.get('entryform_id'))
 
@@ -1312,7 +1305,6 @@ def step_2_entryform(request):
 
     flow = Flow.objects.get(pk=2)
 
-    # print(exams_to_do)
     for exam in exams_to_do:
         analysis_form = AnalysisForm.objects.create(
             entryform_id=entryform.id,
@@ -1349,12 +1341,6 @@ def step_2_entryform(request):
                     organ_id= organ
                 )
     return True
-        # for exam in values[1]:
-        #     sample.exams.add(exam)
-
-        # sample.organs.clear()
-        # for organ in values[2]:
-        #     sample.organs.add(organ)
         
 
 def step_3_entryform(request):
@@ -1414,7 +1400,7 @@ def step_4_entryform(request):
     block_end_block = [
         v for k, v in var_post.items() if k.startswith("block_end_block")
     ]
-
+    
     block_start_slice = [
         v for k, v in var_post.items() if k.startswith("block_start_slice")
     ]
@@ -1428,12 +1414,20 @@ def step_4_entryform(request):
     entryform.slice_set.all().delete()
 
     for values in zip_block:
-        
         exams = [ sampleexam.exam for sampleexam in Sample.objects.get(pk=values[0]).sampleexams_set.all() if sampleexam.exam.exam_type == 1]
+        
+        exams_uniques = []
+        _exams = []
+        
+        for item in exams:
+            if item.pk not in exams_uniques:
+                exams_uniques.append(item.pk)
+                _exams.append(item)
+
         slice_index = 0
         cassette = Cassette.objects.get(pk=values[1])
         
-        for index, val in enumerate(exams):
+        for index, val in enumerate(_exams):
             slice_index = index + 1
             slice_name = cassette.cassette_name + "-S" + str(slice_index)
             
