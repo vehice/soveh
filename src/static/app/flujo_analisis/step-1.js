@@ -61,7 +61,6 @@ function loadStainTable(data) {
 }
 
 function populateStainTable(data) {
-  // console.log(data);
   $.each(data.slices, function (i, item) {
     var row = {};
 

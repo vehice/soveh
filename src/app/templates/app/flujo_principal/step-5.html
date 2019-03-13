@@ -12,7 +12,59 @@
   </div>
 </fieldset>
 
-<script id="analysis_element" type="text/x-lodash-template">
+<div class="modal fade text-left" id="new_analysis5" role="dialog">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title" id="title">Nuevo Análisis <span class="NoCasoSummary"></span></h3>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <fieldset>
+          <div id="modal_{{ step_tab }}">
+            <input type="hidden" name="step_id" value="{{step_id}}">
+            <input type="hidden" name="step_tag" value="step_4_new">
+            <input type="hidden" name="form_id" value="{{form_id}}" >
+            <input type="hidden" name="entryform_id" value="{{entryform_id}}" >
+            <h4 class="form-section">
+              <i class="ft-search"></i> Servicios
+            </h4>
+            <div class="row">
+              <div class="col-sm-12">
+                <p><label for="exam">Seleccione los análisis:</label></p>
+                <div class="input-group">
+                  <select class="select2" id="exam_new_select5" name="analysis" multiple="multiple" style="width:100%;">
+                  </select>
+                </div>
+              </div>
+              <div class="col-sm-12 mt-3">
+                <table class="table table-bordered table-condensed" id="samples_new_table5" style="font-size:13px;">
+                  <thead>
+                    <tr>
+                      <th style="width:5%">Nº Muestra</th>
+                      <th style="width:15%">Identificación</th>
+                      <th style="width:37%">Análisis</th>
+                      <th style="width:37%">Órganos</th>
+                      <th style="width:6%">Acciones</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+            
+          </div>
+        </fieldset>
+        <a class="btn btn-primary" href="javascript:void(0);" onclick="submitNewAnalysis5();"> Guardar </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script id="analysis_element5" type="text/x-lodash-template">
 <% if (!form_closed)  { %> 
   <% if (histologico)  { %> 
     <div href="/workflow/<%= form_id %>/<%= current_step_tag %>" class="list-group-item list-group-item-action">
@@ -36,7 +88,6 @@
           <div class="col-sm-4 font-medium-4 text-center"><a class="btn btn-outline-secondary square" href="/workflow/<%= form_id %>/step_5"><i class="fa fa-arrow-right"></i> Ir al análisis </a></div>
           <!-- <div class="col-sm-4 font-medium-4 text-right">Tinción: <%= exam_name %></div> -->
         </div>
-        <!-- <p class="list-group-item-text"><%= no_slice %> cortes</p> -->
         <div class="progress" style="height: 18px;">
           <div class="progress-bar" role="progressbar" style="width:<%= percentage_step %>%" aria-describedby="example-caption-2"> <%= current_step %> de 1 pasos</div>
         </div>
@@ -55,4 +106,66 @@
     </div>
   </div>
 <% } %>
+</script>
+
+<script id="sample_new_row5" type="text/x-lodash-template">
+  <tr id="sample_new-<%= sample.id %>">
+    <td id="sampleNro_new-<%= sample.id %>" rowspan="1">
+        <input type="hidden" value="<%= sample.id %>" name="sample[id][<%= sample.index %>]">
+        <%= sample.index %>
+    </td>
+
+    <td id="sampleIden_new-<%= sample.id %>" rowspan="1">
+        <%= sample.identification.cage %>-<%= sample.identification.group %>
+    </td>
+  
+    <!-- Analisis -->
+    <td class="samples_new_exams_list samples_new_exams delete_new-<%= sample.id %>" data-index="<%= sample.id %>">
+    </td>
+
+    <!-- Organs -->
+    <td class="delete_new-<%= sample.id %>">
+    </td>
+
+    <!-- Actions -->
+    <td class="delete_new-<%= sample.id %>">
+    </td>
+  </tr> 
+</script>
+
+<script id="add_old_analisis5" type="text/x-lodash-template">
+  <tr id="analisis_new-<%= sampleId %>-<%= sampleIndex %>" class="old_row analis_new_row analis_new_row-<%= sampleId %>" data-sampleid="<%= sampleIndex %>" data-sampleindex="<%= sampleId %>">
+    <td class="samples_new_exams_list" data-index="<%= sampleId %>">
+      <input class="form-control" style="width:100% !important;" readonly value="<%= analisis %>"/>
+    </td>
+    <td>
+      <select id="select<%= optionId %>" class="select2 form-control organs_new_select organs_new_select-<%= sampleIndex %>" style="width:100% !important;" multiple="multiple" disabled>
+        <% _.each(organs, function (organ) { %>
+          <option value=<%= organ.id %>> <%= _.toUpper(organ.name) %> </option>
+        <% }); %>
+      </select>
+    </td>
+    <td>
+      <a href="javascript:void(0);" class="btn btn-danger" disabled><i class="fa fa-trash "></i></a>
+    </td>
+  </tr>
+</script>
+
+<script id="add_new_analisis5" type="text/x-lodash-template">
+  <tr id="analisis_new-<%= sampleId %>-<%= sampleIndex %>" class="analis_new_row analis_new_row-<%= sampleId %>" data-sampleid="<%= sampleIndex %>" data-sampleindex="<%= sampleId %>">
+    <td class="samples_new_exams_list" data-index="<%= sampleId %>">
+      <input class="form-control" style="width:100% !important;" readonly value="<%= analisis %>"/>
+      <input class="form-control" style="width:100% !important;" name="sample[exams][<%= sampleId %>][<%= sampleIndex %>]" hidden value="<%= sampleIndex %>"/>
+    </td>
+    <td>
+      <select id="select<%= optionId %>" class="select2 form-control organs_new_select organs_new_select-<%= sampleIndex %>" style="width:100% !important;" name="sample[organs][<%= sampleId %>][<%= sampleIndex %>]" multiple="multiple">
+        <% _.each(organs, function (organ) { %>
+          <option value=<%= organ.id %>> <%= _.toUpper(organ.name) %> </option>
+        <% }); %>
+      </select>
+    </td>
+    <td>
+      <a href="javascript:void(0);" class="btn btn-danger" onclick="deleteNewAnalisis(<%= sampleId %>, <%= sampleIndex %>);"><i class="fa fa-trash "></i></a>
+    </td>
+  </tr>
 </script>

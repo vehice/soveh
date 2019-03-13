@@ -165,7 +165,6 @@ function init_step_4() {
       autoProcessQueue: false,
       acceptedFiles: ".png, .jpeg, .jpg",
       init: function() {
-        console.log("goladfkasjdkasd")
         var submitButton = document.querySelector(".submit-file")
         myDropzone = this;
         submitButton.addEventListener("click", function() {

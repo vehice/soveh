@@ -257,8 +257,6 @@ var steps = $("#workflow_form").steps({
       var form_data = ($("form").serialize());
       disform.prop('disabled', true);
 
-      // console.log(form_data);
-
       $.ajax({
         type: "POST",
         url: url,
@@ -299,11 +297,14 @@ $(document).on('click', '.showSummaryBtn', function(e){
 });
 
 $(document).on('click', '.newAnalysisBtn', function(e){
-  $("#new_analysis").modal("show");
+  {% if set_step_tag and set_step_tag == "step_4" %}
+    $("#new_analysis").modal("show");
+  {% else %}
+    $("#new_analysis5").modal("show");
+  {% endif %}
 });
 
 function fillSummary(data){
-  console.log(data);
   $('.NoCasoSummary').html(data.entryform.no_caso);
   $('.summaryClient').html('<b>Cliente</b>: '+ data.entryform.customer.name);
   $('.summaryCompany').html('<b>Empresa</b>: '+ data.entryform.company);

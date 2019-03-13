@@ -12,7 +12,7 @@ function init_step_4() {
       $('.newAnalysisBtn').removeClass("hidden");
       fillSummary(data);
       fillNewAnalysis(data);
-      loadBlockTable(data);
+      loadBlockTable(data); 
     })
     .fail(function () {
       console.log("Fail")
@@ -93,7 +93,7 @@ function loadBlockTable(data) {
 }
 
 function populateBlockTable(data) {
-
+  // console.log(data);
   $.each(data.cassettes, function (i, item) {
     var row = {};
 
@@ -148,14 +148,14 @@ function addBlockRow(data) {
 function fillNewAnalysis(data) {
   organs_list = data.organs;
   loadNewSamples(data.samples, data.organs);
-  loadNewExams(data.exams_set);
+  loadNewExams4(data.exams_set);
   $.each(data.entryform.analyses, function(i, item){
     $('#exam_new_select option[value="'+item.exam_id+'"]').prop('selected', true);
   });
   $('#exam_new_select').trigger('change');
 }
 
-function loadNewExams(exams) {
+function loadNewExams4(exams) {
   $("#exam_new_select").html("");
   $.each(exams, function (i, item) {
     var html = '<option data-examtype="'+item.exam_type+'" value="'+item.id+'">'+item.name+'</option>';
@@ -207,7 +207,7 @@ function loadNewSamples(samples, organs){
       $('.delete_new-'+v.id).hide();
       var html = addOldOrgansOptions(item.exam_name, item.exam_type, v.id, item.exam_id, v.id+"-"+($('#sampleNro_new-'+v.id)[0].rowSpan + 1));
       $('#sampleNro_new-'+v.id)[0].rowSpan = $('#sampleNro_new-'+v.id)[0].rowSpan + 1; 
-      $('#sampleIden_new-'+v.id)[0].rowSpan = $('#sampleIden_new-'+v.id)[0].rowSpan + 1; 
+      $('#sampleIden_new-'+v.id)[0].rowSpan = $('#sampleIden_new-'+v.id)[0].rowSpan + 1;
       $("#sample_new-"+v.id).after(html);
      
       $('.organs_new_select-'+ item.exam_id).select2();
@@ -280,7 +280,11 @@ function deleteNewAnalisis(sampleId, sampleIndex){
 
 function submitNewAnalysis(){
   var url = Urls.workflow();
-  form_data = $("#modal_3 :input").serialize();
+  
+  var disform = $("#modal_3").find(':disabled').prop('disabled', false);
+  var form_data = $("#modal_3").find("select, input").serialize();
+  disform.prop('disabled', true);
+
   var response;
   $.ajax({
     type: "POST",

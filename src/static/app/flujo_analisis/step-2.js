@@ -34,7 +34,6 @@ $(document).on('click', '.end_scan_all', function (e) {
 });
 
 $(document).on('click', '.showSummary', function (e) {
-  // console.log("ASDASDAS");
   swal({
     title: 'Resúmen del caso',
     type: 'info',
