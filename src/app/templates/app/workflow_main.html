@@ -1,6 +1,13 @@
 {% extends 'layout.html' %}
 {% load static %}
 {% block stylesheets %}
+
+<style>
+  .steps {
+    pointer-events: none;
+  }
+</style>
+
 {% endblock stylesheets %}
 {% block content_header %}
 <div class="content-header row">
@@ -143,7 +150,11 @@ var steps = $("#workflow_form").steps({
           if (!resp) {
             return false
           }
-          saltar = resp == 5;
+        } else if (currentIndex == 2) {
+          var resp = validate_step_3();
+          if (!resp) {
+            return false
+          }
         }
         
         if (currentIndex > newIndex)
@@ -271,7 +282,6 @@ var steps = $("#workflow_form").steps({
       })
     }
 });
-
 
 $(window).on('load', function (e) {
     // If para cargar un paso en especifico

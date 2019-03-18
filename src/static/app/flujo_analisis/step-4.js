@@ -108,7 +108,7 @@ function init_step_4() {
       .done(function (data) {
         // $('.showSummaryBtn').removeClass("hidden");
         // fillSummary(data);
-        loadPathologyTable(data)
+        loadPathologyTable(data);
 
         $("#show_pathologies").modal("show");
       })
@@ -300,13 +300,19 @@ function loadDiagnosticTable(data) {
 
 function populateDiagnosticTable(data) {
   $.each(data.slices, function (i, item) {
-
     var row = {};
 
     row.slice_id = item.id;
     row.slice_name = item.slice_name;
     row.sample_index = item.sample.index;
-    row.organs = item.organs;
+    
+    $.each(data.samples, function (j, item2){
+      if ( item2.id == item.sample.id ) {
+        row.organs = item2.exams_set[item.analysis_exam].organ_id;
+        return false;
+      }
+    });
+    // row.organs = item.organs;
     row.store_index = i;
     row.sample_identification = item.sample.identification.cage + '-' + item.sample.identification.group;
     row.paths = item.paths_count;

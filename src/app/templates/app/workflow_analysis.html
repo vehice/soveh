@@ -391,7 +391,6 @@ $("#workflow_form").steps({
 $(window).on('load', function (e) {
   // If para cargar un paso en especifico
   {% if set_step_tag and set_step_tag != "step_1" %}
-    // console.log("SET STEP TAG DESPUES DEL CAMBIO")
     set_state = true;
     var step_wizard = parseInt("{{ set_step_tag }}".split("_")[1]) - 1; // Se resta 1 para igualar a los indices del plugin
     var step_tag_function = "init_{{ set_step_tag }}";
@@ -412,7 +411,6 @@ $(document).on('click', '.showSummaryBtn', function(e){
 });
 
 function fillSummary(data){
-  // console.log(data);
   $('.NoCasoSummary').html(data.entryform.no_caso);
   $('.summaryClient').html('<b>Cliente</b>: '+ data.entryform.customer);
   $('.summaryCompany').html('<b>Empresa</b>: '+ data.entryform.company);

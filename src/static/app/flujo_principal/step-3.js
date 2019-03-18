@@ -61,13 +61,13 @@ function init_step_3() {
 
 function validate_step_3(){  
   // Validates date
-  if ( $('input[name="processor_loaded_at"').val() == "") {
+  if ( $('#processor_loaded_at').val() == "") {
     toastr.error(
       'Para continuar debes ingresar la fecha y hora del procesado de tejido.', 
       'Ups!', 
       {positionClass: 'toast-top-full-width', containerId: 'toast-bottom-full-width'}
     );
-    $('input[name="processor_loaded_at"').focus();
+    $('#processor_loaded_at').focus();
     return false;
   }
   return true;
@@ -186,7 +186,6 @@ $(document).on('click', '.add_cassette_to_sample', function (e) {
 });
 
 function loadCassetteData(data) {
-  console.log(data);
   if (data.entryform.cassettes.length > 0){
     $('[name="processor_loaded_at"]').val(moment(data.entryform.cassettes[0].processor_loaded_at).format("DD/MM/YYYY HH:MM") || "");
     $('#processor_loaded_at_submit').val(data.entryform.cassettes[0].processor_loaded_at);

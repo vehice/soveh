@@ -13,7 +13,6 @@ function init_step_1() {
     organs = data.organs;
     initialConf();
     loadData();
-    console.log(data);
   })
   .fail(function () {
     console.log("Fail")
@@ -25,8 +24,6 @@ function init_step_1() {
       temp_id : temp_id,
       organs : organs
     });
-    // console.log(organs);
-    // loadQuestions(data.questionReceptionCondition)
   });
 
   $('#identification_group').on("click", "#delete_identification", function (e) {
@@ -169,8 +166,6 @@ function init_step_1() {
     })
     .done(function (data) {
       var entryform = data.entryform;
-      console.log(entryform)
-
       // $('#customer_select').val(entryform.customer_id).trigger('change');
       $('#fixtative_select').val(entryform.fixative_id).trigger('change');
       $('#specie_select').val(entryform.specie_id).trigger('change');
@@ -242,7 +237,6 @@ function init_step_1() {
   }
 
   function initialConf() {
-    // console.log("initialconf")
     var temp_id = Math.random().toString(36).replace('0.', '');
     addIdentificationTemplate({
       temp_id : temp_id,
@@ -429,7 +423,6 @@ function addIdentificationTemplate(data) {
 }
 
 function addQuestionReceptionTemplate(data) {
-  console.log(data);
   var questionTemplate = document.getElementById("questionReception_template").innerHTML;
   var templateFn = _.template(questionTemplate);
   var templateHTML = templateFn(data);

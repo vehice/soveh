@@ -397,6 +397,7 @@ class SLICE(View):
             slice_as_dict['sample'] = model_to_dict(sample, exclude=['exams', 'organs', 'cassettes'])
             slice_as_dict['sample']['identification'] = model_to_dict(sample.identification, exclude=["organs"])
             slice_as_dict['paths_count'] = Report.objects.filter(slice_id=slice_new.pk).count()
+            slice_as_dict['analysis_exam'] = slice_new.analysis.exam.id
             slices.append(slice_as_dict)
 
         analysis_form = AnalysisForm.objects.get(pk=analysis_form)
@@ -759,27 +760,69 @@ class IMAGES(View):
 
 def organs_by_slice(request, slice_id=None):
     if slice_id:
-        organs_qs = Slice.objects.get(
-            pk=slice_id).cassette.organs.all()
+        slice_obj = Slice.objects.get(
+            pk=slice_id)
+
+        sampleexams = slice_obj.cassette.sample.sampleexams_set.all()
+        sampleExa = {}
+        for sE in sampleexams:
+            try:
+                sampleExa[sE.exam_id]['organ_id'].append({
+                        'name':sE.organ.name,
+                        'id':sE.organ.id})
+            except:
+                sampleExa[sE.exam_id]={
+                    'exam_id': sE.exam_id,
+                    'exam_name': sE.exam.name,
+                    'exam_type': sE.exam.exam_type,
+                    'sample_id': sE.sample_id,
+                    'organ_id': [{
+                        'name':sE.organ.name,
+                        'id':sE.organ.id}]
+                }
 
         organs = []
-        for organ in organs_qs:
-            organs.append({
-                "id":
-                organ.id,
-                "name":
-                organ.name,
-                "organ_locations":
-                list(organ.organlocation_set.all().values()),
-                "pathologys":
-                list(organ.pathology_set.all().values()),
-                "diagnostics":
-                list(organ.diagnostic_set.all().values()),
-                "diagnostic_distributions":
-                list(organ.diagnosticdistribution_set.all().values()),
-                "diagnostic_intensity":
-                list(organ.diagnosticintensity_set.all().values())
-            })
+        for key, value in sampleExa.items():
+            if key == slice_obj.analysis.exam.id:
+                for organ in value['organ_id']:
+                    # print (organ)
+                    if organ['name'].upper() != "ALEVÍN":
+                        organ = Organ.objects.get(pk=organ['id'])
+                        organs.append({
+                            "id":
+                            organ.id,
+                            "name":
+                            organ.name,
+                            "organ_locations":
+                            list(organ.organlocation_set.all().values()),
+                            "pathologys":
+                            list(organ.pathology_set.all().values()),
+                            "diagnostics":
+                            list(organ.diagnostic_set.all().values()),
+                            "diagnostic_distributions":
+                            list(organ.diagnosticdistribution_set.all().values()),
+                            "diagnostic_intensity":
+                            list(organ.diagnosticintensity_set.all().values())
+                        })
+                    else:
+                        all_organs = Organ.objects.all()
+                        for organ in all_organs:
+                            organs.append({
+                                "id":
+                                organ.id,
+                                "name":
+                                organ.name.upper(),
+                                "organ_locations":
+                                list(organ.organlocation_set.all().values()),
+                                "pathologys":
+                                list(organ.pathology_set.all().values()),
+                                "diagnostics":
+                                list(organ.diagnostic_set.all().values()),
+                                "diagnostic_distributions":
+                                list(organ.diagnosticdistribution_set.all().values()),
+                                "diagnostic_intensity":
+                                list(organ.diagnosticintensity_set.all().values())
+                            })
 
         data = {'organs': organs}
 
