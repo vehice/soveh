@@ -131,7 +131,7 @@ class ENTRYFORM(View):
                 entryform["identifications"].append(ident_json)              
 
             entryform["analyses"] = list(
-                entryform_object.analysisform_set.all().values())
+                entryform_object.analysisform_set.all().values('id', 'created_at', 'comments', 'entryform_id', 'exam_id', 'exam__name'))
             entryform["cassettes"] = list(
                 entryform_object.cassette_set.all().values())
             entryform["customer"] = model_to_dict(entryform_object.customer) if entryform_object.customer else None
@@ -194,16 +194,14 @@ class CASSETTE(View):
             slices = []
 
             for slice in Slice.objects.filter(cassette=cassette):
-                slices.append(model_to_dict(slice))
+                _slice_mtd = model_to_dict(slice)
+                _slice_mtd['exam'] = slice.analysis.exam.name
+                slices.append(_slice_mtd)
 
             sample = model_to_dict(cassette.sample, exclude=["exams", "organs"])
-            # s_dict['identification'] = model_to_dict(s.identification, exclude=["organs",])
             sample['identification'] = model_to_dict(Identification.objects.get(pk=sample['identification']), exclude=["organs"])
-            # sample_exams = [model_to_dict(exam) for exam in Sample.objects.get(pk=sample['id']).exams.all() ]
             sample_exams = [ model_to_dict(sampleexam.exam) for sampleexam in Sample.objects.get(pk=sample['id']).sampleexams_set.all() if sampleexam.exam.exam_type == 1 ]
             sample['exams_set'] = sample_exams
-
-            # sample['exams_set'] = list(sample.exams.all().values())
             
             cassette_as_dict = model_to_dict(cassette, exclude=['organs'])
             cassette_as_dict['slices_set'] = slices
@@ -211,7 +209,6 @@ class CASSETTE(View):
             cassette_as_dict['sample'] = sample
 
             cassettes.append(cassette_as_dict)
-            # cassette_as_dict['sample'] = 
         
         entryform = EntryForm.objects.values().get(pk=entry_form)
         entryform_object = EntryForm.objects.get(pk=entry_form)
@@ -265,7 +262,7 @@ class CASSETTE(View):
         # entryform["answer_questions"] = list(
         #     entryform_object.answerreceptioncondition_set.all().values())
         entryform["analyses"] = list(
-            entryform_object.analysisform_set.all().values())
+            entryform_object.analysisform_set.all().values('id', 'created_at', 'comments', 'entryform_id', 'exam_id', 'exam__name'))
         entryform["cassettes"] = list(
             entryform_object.cassette_set.all().values())
         entryform["customer"] = model_to_dict(entryform_object.customer) if entryform_object.customer else None
@@ -367,7 +364,7 @@ class ANALYSIS(View):
             entryform["identifications"].append(ident_json)           
 
         entryform["analyses"] = list(
-            entryform_object.analysisform_set.all().values())
+            entryform_object.analysisform_set.all().values('id', 'created_at', 'comments', 'entryform_id', 'exam_id', 'exam__name'))
         entryform["cassettes"] = list(
             entryform_object.cassette_set.all().values())
         entryform["customer"] = model_to_dict(entryform_object.customer) if entryform_object.customer else None
@@ -414,7 +411,7 @@ class SLICE(View):
         
         samples_as_dict = []
         for s in samples:
-            s_dict = model_to_dict(s, exclude=['organs', 'exams', 'cassettes', 'identification'])
+            s_dict = model_to_dict(s, exclude=['organs', 'exams', 'identification'])
             organs_set = s.organs.all().values()
             # exams_set = s.exams.all().values()
             sampleexams = s.sampleexams_set.all()
@@ -435,7 +432,7 @@ class SLICE(View):
                             'id':sE.organ.id}]
                     }
                 # organs.append(model_to_dict(sE.organ))
-            s_dict['exams_set'] = sampleExa
+            s_dict['sample_exams_set'] = sampleExa
             cassettes_set = Cassette.objects.filter(sample=s).values()
             s_dict['organs_set'] = list(organs_set)
             # s_dict['exams_set'] = list(exams_set)
@@ -450,7 +447,7 @@ class SLICE(View):
             entryform["identifications"].append(ident_json)   
 
         entryform["analyses"] = list(
-            entryform_object.analysisform_set.all().values())
+            entryform_object.analysisform_set.all().values('id', 'created_at', 'comments', 'entryform_id', 'exam_id', 'exam__name'))
         entryform["cassettes"] = list(
             entryform_object.cassette_set.all().values())
         entryform["customer"] = entryform_object.customer.name
@@ -458,8 +455,10 @@ class SLICE(View):
         entryform["fixative"] = entryform_object.fixative.name
         entryform["watersource"] = entryform_object.watersource.name
         entryform["specie"] = entryform_object.specie.name
+        organs_set = list(Organ.objects.all().values())
+        exams_set = list(Exam.objects.all().values())
 
-        data = {'slices': slices, 'entryform': entryform, 'samples': samples_as_dict}
+        data = {'slices': slices, 'entryform': entryform, 'samples': samples_as_dict, 'organs': organs_set, 'exams_set': exams_set}
 
         return JsonResponse(data)
 
@@ -836,6 +835,110 @@ def set_analysis_comments(request, analysisform_id):
         analysis.save()
         return JsonResponse({'ok': True})
     except:
+        return JsonResponse({'ok': False})
+
+def save_block_timing(request):
+    try:
+        var_post = request.POST.copy()
+
+        block_cassette_pk = [
+            v for k, v in var_post.items() if k.startswith("block_cassette_pk")
+        ]
+
+        block_start_block = [
+            v for k, v in var_post.items() if k.startswith("block_start_block")
+        ]
+
+        block_end_block = [
+            v for k, v in var_post.items() if k.startswith("block_end_block")
+        ]
+        
+        block_start_slice = [
+            v for k, v in var_post.items() if k.startswith("block_start_slice")
+        ]
+
+        block_end_slice = [
+            v for k, v in var_post.items() if k.startswith("block_end_slice")
+        ]
+
+        zip_block = zip(block_cassette_pk, block_start_block, block_end_block, block_start_slice, block_end_slice)
+
+        for values in zip_block:
+            _slices = Slice.objects.filter(cassette=Cassette.objects.get(pk=values[0]))
+            for _slice in _slices:
+                if values[1] != '':
+                    _slice.start_block = values[1]
+                if values[2] != '':
+                    _slice.end_block = values[2]
+                if values[3] != '':
+                    _slice.start_slice = values[3]
+                if values[4] != '':
+                    _slice.end_slice = values[4]
+                _slice.save()
+        return JsonResponse({'ok': True})
+    except:
+        return JsonResponse({'ok': False})
+
+def save_stain_timing(request):
+    try:
+        var_post = request.POST.copy()
+
+        stain_slice_id = [
+            v for k, v in var_post.items() if k.startswith("stain_slice_id")
+        ]
+        stain_start_stain = [
+            v for k, v in var_post.items() if k.startswith("stain_start_stain")
+        ]
+        stain_end_stain = [
+            v for k, v in var_post.items() if k.startswith("stain_end_stain")
+        ]
+
+        zip_stain = zip(stain_slice_id, stain_start_stain, stain_end_stain)
+
+        for values in zip_stain:
+            slice_new = Slice.objects.get(pk=values[0])
+            if values[1] != '':
+                slice_new.start_stain = values[1]
+            if values[2] != '':
+                slice_new.end_stain = values[2]
+            slice_new.save()
+        return JsonResponse({'ok': True})
+    except Exception as e:
+        print (e)
+        return JsonResponse({'ok': False})
+
+def save_scan_timing(request):
+    try:
+        var_post = request.POST.copy()
+
+        scan_slice_id = [
+            v for k, v in var_post.items() if k.startswith("scan_slice_id")
+        ]
+        scan_start_scan = [
+            v for k, v in var_post.items() if k.startswith("scan_start_scan")
+        ]
+        scan_end_scan = [
+            v for k, v in var_post.items() if k.startswith("scan_end_scan")
+        ]
+        scan_store = [
+            v for k, v in var_post.items() if k.startswith("scan_store")
+        ]
+
+        zip_scan = zip(scan_slice_id, scan_start_scan, scan_end_scan, scan_store)
+
+        for values in zip_scan:
+            slice_new = Slice.objects.get(pk=values[0])
+            if values[1] != '':
+                slice_new.start_scan = values[1]
+            if values[2] != '':
+                slice_new.end_scan = values[2]
+            if values[3] != '':
+                slice_new.slice_store = values[3]
+
+            slice_new.save()
+        return JsonResponse({'ok': True})
+    except Exception as e:
+        print (e)
         return JsonResponse({'ok': False})
 
 # Any process function must to have a switcher for choice which method will be call
@@ -1361,6 +1464,7 @@ def step_3_entryform(request):
     zip_cassettes = zip(cassette_sample_id, cassette_name, cassette_organs)
 
     entryform.cassette_set.all().delete()
+    entryform.slice_set.all().delete()
     count = 1
     for values in zip_cassettes:
         sample = Sample.objects.get(pk=values[0])
@@ -1374,16 +1478,42 @@ def step_3_entryform(request):
         cassette.organs.set(values[2])
         cassette.save()
         count += 1
+
+        exams = [ sampleexam.exam for sampleexam in sample.sampleexams_set.all() if sampleexam.exam.exam_type == 1]
+        exams_uniques = []
+        _exams = []
+
+        for item in exams:
+            if item.pk not in exams_uniques:
+                exams_uniques.append(item.pk)
+                _exams.append(item)
+        
+        slice_index = 0
+        
+        for index, val in enumerate(_exams):
+            slice_index = index + 1
+            slice_name = cassette.cassette_name + "-S" + str(slice_index)
+            
+            analysis_form = AnalysisForm.objects.filter(
+                entryform_id=entryform.id,
+                exam_id=val.id,
+            ).first()
+
+            slice_new = Slice.objects.create(
+                entryform_id = entryform.id,
+                slice_name = slice_name,
+                index=slice_index,
+                cassette=cassette,
+                analysis=analysis_form
+            )
+            slice_new.save()
+        
     return True
 
 def step_4_entryform(request):
     var_post = request.POST.copy()
 
     entryform = EntryForm.objects.get(pk=var_post.get('entryform_id'))
-
-    block_sample_id = [
-        v for k, v in var_post.items() if k.startswith("cassette_sample_id")
-    ]
 
     block_cassette_pk = [
         v for k, v in var_post.items() if k.startswith("block_cassette_pk")
@@ -1405,46 +1535,17 @@ def step_4_entryform(request):
         v for k, v in var_post.items() if k.startswith("block_end_slice")
     ]
 
-    zip_block = zip(block_sample_id, block_cassette_pk, block_start_block, block_end_block, block_start_slice, block_end_slice)
-
-    entryform.slice_set.all().delete()
+    zip_block = zip(block_cassette_pk, block_start_block, block_end_block, block_start_slice, block_end_slice)
 
     for values in zip_block:
-        exams = [ sampleexam.exam for sampleexam in Sample.objects.get(pk=values[0]).sampleexams_set.all() if sampleexam.exam.exam_type == 1]
-        
-        exams_uniques = []
-        _exams = []
-        
-        for item in exams:
-            if item.pk not in exams_uniques:
-                exams_uniques.append(item.pk)
-                _exams.append(item)
+        _slices = Slice.objects.filter(cassette=Cassette.objects.get(pk=values[0]))
+        for _slice in _slices:
+            _slice.start_block = values[1]
+            _slice.end_block = values[2]
+            _slice.start_slice = values[3]
+            _slice.end_slice = values[4]
+            _slice.save()
 
-        slice_index = 0
-        cassette = Cassette.objects.get(pk=values[1])
-        
-        for index, val in enumerate(_exams):
-            slice_index = index + 1
-            slice_name = cassette.cassette_name + "-S" + str(slice_index)
-            
-            analysis_form = AnalysisForm.objects.filter(
-                entryform_id=entryform.id,
-                exam_id=val.id,
-            ).first()
-
-            slice_new = Slice.objects.create(
-                entryform_id=entryform.id,
-                slice_name=slice_name,
-                start_block=values[2],
-                end_block=values[3],
-                start_slice=values[4],
-                end_slice=values[5],
-                index=slice_index,
-                cassette=cassette,
-                analysis=analysis_form
-
-            )
-            slice_new.save()
     return True
 
 def step_5_entryform(request):
@@ -1572,13 +1673,13 @@ def step_1_analysisform(request):
     var_post = request.POST.copy()
 
     stain_slice_id = [
-        v for k, v in var_post.items() if k.startswith("stain[slice_id]")
+        v for k, v in var_post.items() if k.startswith("stain_slice_id")
     ]
     stain_start_stain = [
-        v for k, v in var_post.items() if k.startswith("stain[start_stain]")
+        v for k, v in var_post.items() if k.startswith("stain_start_stain")
     ]
     stain_end_stain = [
-        v for k, v in var_post.items() if k.startswith("stain[end_stain]")
+        v for k, v in var_post.items() if k.startswith("stain_end_stain")
     ]
 
     zip_stain = zip(stain_slice_id, stain_start_stain, stain_end_stain)
@@ -1595,16 +1696,16 @@ def step_2_analysisform(request):
     var_post = request.POST.copy()
 
     scan_slice_id = [
-        v for k, v in var_post.items() if k.startswith("scan[slice_id]")
+        v for k, v in var_post.items() if k.startswith("scan_slice_id")
     ]
     scan_start_scan = [
-        v for k, v in var_post.items() if k.startswith("scan[start_scan]")
+        v for k, v in var_post.items() if k.startswith("scan_start_scan")
     ]
     scan_end_scan = [
-        v for k, v in var_post.items() if k.startswith("scan[end_scan]")
+        v for k, v in var_post.items() if k.startswith("scan_end_scan")
     ]
     scan_store = [
-        v for k, v in var_post.items() if k.startswith("scan[store]")
+        v for k, v in var_post.items() if k.startswith("scan_store")
     ]
 
     zip_scan = zip(scan_slice_id, scan_start_scan, scan_end_scan, scan_store)
@@ -1622,10 +1723,10 @@ def step_3_analysisform(request):
     var_post = request.POST.copy()
 
     store_slice_id = [
-        v for k, v in var_post.items() if k.startswith("store[slice_id]")
+        v for k, v in var_post.items() if k.startswith("store_slice_id")
     ]
     store_box_id = [
-        v for k, v in var_post.items() if k.startswith("store[box_id]")
+        v for k, v in var_post.items() if k.startswith("store_box_id")
     ]
 
     zip_store = zip(store_slice_id, store_box_id)

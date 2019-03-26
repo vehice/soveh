@@ -26,11 +26,36 @@ function init_step_2() {
 }
 
 $(document).on('click', '.start_scan_all', function (e) {
-  $("input[type=checkbox][id^='scan[start_scan]']" ).trigger('click');
+  $("input[type=checkbox][id^='scan_start_scan']" ).trigger('click');
 });
 
 $(document).on('click', '.end_scan_all', function (e) {
-  $("input[type=checkbox][id^='scan[end_scan]']" ).trigger('click');
+  $("input[type=checkbox][id^='scan_end_scan']" ).trigger('click');
+});
+
+$(document).on('click', '#saveTimingStep2', function (e) {
+  lockScreen(1);
+  var form_data = $('#scan_table_wrapper :input').serialize();
+  var url = Urls.save_scan_timing();
+  $.ajax({
+    type: "POST",
+    url: url,
+    data: form_data,
+    async: false,
+  })
+  .done(function (data) {
+    lockScreen(0);
+    if (data.ok) {
+      toastr.success('', 'Guardado.');
+    } else {
+      toastr.error('', 'No ha sido posible guardar. Contacte un administrador.');
+    }    
+    response = data;
+  })
+  .fail(function (data) {
+    lockScreen(0);
+    toastr.error('', 'No ha sido posible guardar. Contacte un administrador.');
+  })
 });
 
 $(document).on('click', '.showSummary', function (e) {
@@ -63,9 +88,6 @@ function loadScanTable(data) {
   $('#scan_table').DataTable({
     ordering: false,
     paginate: false,
-    columnDefs: [
-      { className: "dt-head-center", targets: [0] },
-    ],
     language: {
       url: "https://cdn.datatables.net/plug-ins/1.10.16/i18n/Spanish.json"
     },
@@ -84,11 +106,15 @@ function populateScanTable(data) {
     row.end_scan = item.end_scan;
     row.slice_store = item.slice_store;
 
-    addScanRow(row)
+    addScanRow(row);
 
-    if (item.start_scan != null && item.end_scan != null) {
-      $("[data-index='" + i + "']").find(".switchery").trigger("click");
+    if (item.start_scan != null) {
+      $("#scan_start_scan_" + i).trigger("click");
     }
+    if (item.end_scan != null) {
+      $("#scan_end_scan_" + i).trigger("click");
+    }
+
   });
 }
 

@@ -308,7 +308,7 @@ function populateDiagnosticTable(data) {
     
     $.each(data.samples, function (j, item2){
       if ( item2.id == item.sample.id ) {
-        row.organs = item2.exams_set[item.analysis_exam].organ_id;
+        row.organs = item2.sample_exams_set[item.analysis_exam].organ_id;
         return false;
       }
     });

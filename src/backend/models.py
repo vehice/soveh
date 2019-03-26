@@ -233,6 +233,7 @@ class AnalysisForm(models.Model):
     # no_fish = models.IntegerField(null=True, blank=True)
     forms = GenericRelation(Form)
     comments = models.TextField(blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
 
 class Sample(models.Model):
     entryform = models.ForeignKey(

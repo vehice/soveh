@@ -14,6 +14,9 @@
       </div>
     </div>
     <div id="scan_group">
+      <div class="col-md-12 text-right m-1">
+        <button type="button" id="saveTimingStep2" class="btn btn-warning square"><i class="fa fa-save"></i> Guardar Cambios</button>
+      </div>
       <table id="scan_table" class="table table-condensed table-bordered" width="100%" cellpadding="0" cellspacing="0" border="0">
         <thead>
           <tr>
@@ -43,18 +46,18 @@
     </td>
     <td>
       <%= slice_name %>
-      <input type="hidden" name="scan[slice_id][<%= scan_index %>]" value="<%= slice_id %>" >
+      <input type="hidden" name="scan_slice_id_<%= scan_index %>" value="<%= slice_id %>" >
     </td>
     <td>
-      <input type="checkbox" id="scan[start_scan][<%= scan_index %>]" class="switchery" />
-      <input type="hidden" name="scan[start_scan][<%= scan_index %>]" value="<%= start_scan %>" />
+      <input type="checkbox" id="scan_start_scan_<%= scan_index %>" class="switchery" />
+      <input type="hidden" name="scan_start_scan_<%= scan_index %>" value="<%= start_scan %>" />
     </td>
     <td>
-      <input type="checkbox" id="scan[end_scan][<%= scan_index %>]" class="switchery" />
-      <input type="hidden" name="scan[end_scan][<%= scan_index %>]" value="<%= end_scan %>" />
+      <input type="checkbox" id="scan_end_scan_<%= scan_index %>" class="switchery" />
+      <input type="hidden" name="scan_end_scan_<%= scan_index %>" value="<%= end_scan %>" />
     </td>
     <td>
-      <input name="scan[store][<%= scan_index %>]" value="<%= slice_store %>" class="form-control">
+      <input name="scan_store_<%= scan_index %>" value="<%= slice_store %>" class="form-control">
     </td>
   </tr>
 </script>

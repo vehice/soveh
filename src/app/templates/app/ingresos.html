@@ -138,13 +138,14 @@
           <div class="col-sm-4 summaryWaterSource">
           </div>
         </div>
-        <hr>
-        <h6 class="form-section mt-2"> Identificación</h6>
-        <div class="row summaryIdentification">
-        </div>
-        <hr>
-        <h6 class="form-section mt-2"> Muestras</h6>
-        <div class="row summarySamples">
+        <hr>        
+        <div class="row">
+          <div class="col-sm-3 summaryIdentification">
+          </div>
+          <div class="col-sm-3 summaryExams">
+          </div>
+          <div class="col-sm-6 summarySamples">
+          </div>
         </div>
       </div>
     </div>
@@ -243,32 +244,37 @@
       $('.summaryDevStatus').html('<b>Estado de desarrollo</b>: '+ data.entryform.larvalstage.name);  
       $('.summaryWaterSource').html('<b>Fuente de agua</b>: '+ data.entryform.watersource.name);
 
-      var tpl_identification = '<div class="col-sm-12"><table class="table table-bordered table-xs">';
-      tpl_identification += '<thead><tr><th>Estanque/Jaula</th><th>Grupo</th><th>Peces</th><th>Contenedores</th><th>Peso</th><th>C. Extras</th><th>Óptimo</th><th>Obs</th><th>Órganos</th></tr></thead><tbody>';
+      var tpl_identification = '<div class="col-sm-12"><h6 class="form-section mt-2"> Identificación</h6></br>';
 
       $.each(data.entryform.identifications, function(i, item){
         var optimum = "No"
         if (item.is_optimum){
           optimum = "Sí"
         }
-        tpl_identification += '<tr>';
-        tpl_identification += '<td>'+ item.cage +'</td>';
-        tpl_identification += '<td>'+ item.group +'</td>';
-        tpl_identification += '<td>'+ item.no_fish +'</td>';
-        tpl_identification += '<td>'+ item.no_container +'</td>';
-        tpl_identification += '<td>'+ item.weight +'</td>';
-        tpl_identification += '<td>'+ item.extra_features_detail +'</td>';
-        tpl_identification += '<td>'+ optimum +'</td>';
-        tpl_identification += '<td>'+ item.observation +'</td>';
-        tpl_identification += '<td>'+ Object.keys(item.organs_set).map(function(k){return item.organs_set[k].name}).join(", ") +'</td>';
-        tpl_identification += '</tr>';
+        tpl_identification += '<div class="alert alert-light"><b>Estanque/Jaula:</b> '+ item.cage;
+        tpl_identification += '</br><b>Grupo:</b> '+ item.group;
+        tpl_identification += '</br><b>Peces:</b> '+ item.no_fish;
+        tpl_identification += '</br><b>Contenedores:</b> '+ item.no_container;
+        tpl_identification += '</br><b>Peso:</b> '+ item.weight;
+        tpl_identification += '</br><b>Comentarios Extras:</b> '+ item.extra_features_detail;
+        tpl_identification += '</br><b>Óptimo?:</b> '+ optimum;
+        tpl_identification += '</br><b>Observaciones:</b> '+ item.observation;
+        tpl_identification += '</br><b>Órganos:</b> '+ Object.keys(item.organs_set).map(function(k){return item.organs_set[k].name}).join(", ") +'</div>';
       });
 
-      tpl_identification += '</tbody></table></div>';
+      tpl_identification += '</div>';
       $('.summaryIdentification').html(tpl_identification);
 
-      var tpl_samples = '<div class="col-sm-12"><table class="table table-bordered table-xs">';
-      tpl_samples += '<thead><tr><th>No. Muestra</th><th>Identificación</th><th>Análisis</th><th>Órganos</th></tr></thead><tbody>';
+      var tpl_exams = '<div class="col-sm-12"><h6 class="form-section mt-2"> Servicios</h6></br>';
+      $.each(data.entryform.analyses, function(i, item){
+        tpl_exams += '<div class="alert alert-light"><b>'+ item.exam__name +':</b> '+ moment(item.created_at).format("DD/MM/YYYY HH:MM") +'</div>';
+      });
+
+      tpl_exams += '</div>';
+      $('.summaryExams').html(tpl_exams);
+
+      var tpl_samples = '<div class="col-sm-12"><h6 class="form-section mt-2"> Muestras</h6></br><table class="table table-bordered table-xs">';
+      tpl_samples += '<thead><tr><th width="8% !important;">Muestra</th><th>Identificación</th><th>Análisis</th><th>Órganos</th></tr></thead><tbody>';
 
       $.each(data.samples, function(i, item){
         var len = 1;
@@ -281,8 +287,6 @@
         tpl_samples += '<tr>';
         tpl_samples += '<td rowspan="'+len+'">'+ item.index +'</td>';
         tpl_samples += '<td rowspan="'+len+'">'+ item.identification.cage +'-'+item.identification.group+'</td>';
-        // tpl_samples += '<td></td>';
-        // tpl_samples += '<td></td>';
         tpl_samples += '</tr>';
         tpl_samples += tpl_exams;
         

@@ -52,19 +52,52 @@ $(document).on('change', '#block_table :checkbox', function (e) {
 })
 
 $(document).on('click', '.block_start_all', function (e) {
+  lockScreen(1);
   $("input[type=checkbox][id^='block_start_block']" ).trigger('click');
+  lockScreen(0);
 });
 
 $(document).on('click', '.block_end_all', function (e) {
+  lockScreen(1);
   $("input[type=checkbox][id^='block_end_block']" ).trigger('click');
+  lockScreen(0);
 });
 
 $(document).on('click', '.slice_start_all', function (e) {
+  lockScreen(1);
   $("input[type=checkbox][id^='block_start_slice']" ).trigger('click');
+  lockScreen(0);
 });
 
 $(document).on('click', '.slice_end_all', function (e) {
+  lockScreen(1);
   $("input[type=checkbox][id^='block_end_slice']" ).trigger('click');
+  lockScreen(0);
+});
+
+$(document).on('click', '#saveTimingStep4', function (e) {
+  lockScreen(1);
+  var form_data = $('#block_table_wrapper :input').serialize();
+  var url = Urls.save_block_timing();
+  $.ajax({
+    type: "POST",
+    url: url,
+    data: form_data,
+    async: false,
+  })
+  .done(function (data) {
+    lockScreen(0);
+    if (data.ok) {
+      toastr.success('', 'Guardado.');
+    } else {
+      toastr.error('', 'No ha sido posible guardar. Contacte un administrador.');
+    }    
+    response = data;
+  })
+  .fail(function (data) {
+    lockScreen(0);
+    toastr.error('', 'No ha sido posible guardar. Contacte un administrador.');
+  })
 });
 
 function loadBlockTable(data) {
@@ -85,6 +118,7 @@ function loadBlockTable(data) {
   $('#block_table').DataTable({
     ordering: false,
     paginate: false,
+    bFilter: false,
     // scrollX: true,
     language: {
       url: "https://cdn.datatables.net/plug-ins/1.10.16/i18n/Spanish.json"
@@ -93,7 +127,6 @@ function loadBlockTable(data) {
 }
 
 function populateBlockTable(data) {
-  // console.log(data);
   $.each(data.cassettes, function (i, item) {
     var row = {};
 
@@ -105,8 +138,7 @@ function populateBlockTable(data) {
     row.organs = item.organs_set.join(", ")
     row.block_index = i;
 
-    var exams_grouped = _.mapValues(_.groupBy(item.sample.exams_set, 'id'), clist => clist.map(exam => _.omit(exam, 'id')));
-    row.no_slice = Object.keys(exams_grouped).length;
+    row.no_slice = item.slices_set.length;
 
     if (item.slices_set.length > 0) {
       row.start_block = item.slices_set[0].start_block;
@@ -121,17 +153,26 @@ function populateBlockTable(data) {
     }
 
     row.slice_info = "<ol>";
-    var slice_num = 1;
-    $.each(exams_grouped, function (k, v) {
-      row.slice_info += "<li><p><strong>Cassette:</strong> " + row.cassette_name + " <strong> </br>Muestra: </strong>" + row.sample_index + " <strong> </br>Corte: </strong>" +row.cassette_name+"-S"+(slice_num).toString()+" <strong> </br>An&aacute;lisis: </strong>" + v[0].name + "</p></li>"
-      slice_num += 1;
+    $.each(item.slices_set, function (k, v) {
+      row.slice_info += "<li><p><strong>Cassette:</strong> " + row.cassette_name + " <strong> </br>Muestra: </strong>\
+      " + row.sample_index + " <strong> </br>Corte: </strong>" +v.slice_name+" <strong>\
+      </br>An&aacute;lisis: </strong>" + v.exam + "</p></li>"
     });
     row.slice_info += "</ol>";
 
     addBlockRow(row)
 
-    if (item.slices_set.length > 0) {
-      $("[data-index='" + i + "']").find(".switchery").trigger("click");
+    if (row.start_block) {
+      $("#block_start_block_" + i).trigger("click");
+    }
+    if (row.end_block) {
+      $("#block_end_block_" + i).trigger("click");
+    }
+    if (row.start_slice) {
+      $("#block_start_slice_" + i).trigger("click");
+    }
+    if (row.end_slice) {
+      $("#block_end_slice_" + i).trigger("click");
     }
   });
 }

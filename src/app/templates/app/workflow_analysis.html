@@ -193,7 +193,6 @@
         </button>
       </div>
       <div class="modal-body" style="font-size:12px !important; max-height: calc(100vh - 150px); overflow-y:scroll;">
-        
         <h6 class="form-section"> Información general</h6>
         <div class="row generalInfo">
           <div class="col-sm-4 summaryClient">
@@ -226,12 +225,13 @@
           </div>
         </div>
         <hr>
-        <h6 class="form-section mt-2"> Identificación</h6>
-        <div class="row summaryIdentification">
-        </div>
-        <hr>
-        <h6 class="form-section mt-2"> Muestras</h6>
-        <div class="row summarySamples">
+        <div class="row">
+          <div class="col-sm-3 summaryIdentification">
+          </div>
+          <div class="col-sm-3 summaryExams">
+          </div>
+          <div class="col-sm-6 summarySamples">
+          </div>
         </div>
       </div>
     </div>
@@ -264,6 +264,7 @@ $("#workflow_form").steps({
     startIndex: 0,
     onStepChanging: function (event, currentIndex, newIndex)
     {
+      lockScreen(1);
       if(!set_state) {
         var previous_step = false;
         var form_data;
@@ -279,7 +280,6 @@ $("#workflow_form").steps({
 
         var url = Urls.workflow();
         var id_next_step = $("#step_" + newIndex).children("#step_id").val();
-
         var response;
         $.ajax({
           type: "POST",
@@ -322,9 +322,10 @@ $("#workflow_form").steps({
             toastr.success('', 'Paso guardado exitosamente!');
           }
         }
-
+        lockScreen(0);
         return response.next_step_permission;
       } else {
+        lockScreen(0);
         set_state = false;
         return true
       }
@@ -411,6 +412,7 @@ $(document).on('click', '.showSummaryBtn', function(e){
 });
 
 function fillSummary(data){
+  console.log(data);
   $('.NoCasoSummary').html(data.entryform.no_caso);
   $('.summaryClient').html('<b>Cliente</b>: '+ data.entryform.customer);
   $('.summaryCompany').html('<b>Empresa</b>: '+ data.entryform.company);
@@ -426,33 +428,52 @@ function fillSummary(data){
   $('.summaryDevStatus').html('<b>Estado de desarrollo</b>: '+ data.entryform.larvalstage);  
   $('.summaryWaterSource').html('<b>Fuente de agua</b>: '+ data.entryform.watersource);
 
-  var tpl_identification = '<div class="col-sm-12"><table class="table table-bordered table-xs">';
-  tpl_identification += '<thead><tr><th>Estanque/Jaula</th><th>Grupo</th><th>No. Peces</th><th>No. Contenedores</th></tr></thead><tbody>';
+  var tpl_identification = '<div class="col-sm-12"><h6 class="form-section mt-2"> Identificación</h6></br>';
 
   $.each(data.entryform.identifications, function(i, item){
-    tpl_identification += '<tr>';
-    tpl_identification += '<td>'+ item.cage +'</td>';
-    tpl_identification += '<td>'+ item.group +'</td>';
-    tpl_identification += '<td>'+ item.no_fish +'</td>';
-    tpl_identification += '<td>'+ item.no_container +'</td>';
-    tpl_identification += '</tr>';
+    var optimum = "No"
+    if (item.is_optimum){
+      optimum = "Sí"
+    }
+    tpl_identification += '<div class="alert alert-light"><b>Estanque/Jaula:</b> '+ item.cage;
+    tpl_identification += '</br><b>Grupo:</b> '+ item.group;
+    tpl_identification += '</br><b>Peces:</b> '+ item.no_fish;
+    tpl_identification += '</br><b>Contenedores:</b> '+ item.no_container;
+    tpl_identification += '</br><b>Peso:</b> '+ item.weight;
+    tpl_identification += '</br><b>Comentarios Extras:</b> '+ item.extra_features_detail;
+    tpl_identification += '</br><b>Óptimo?:</b> '+ optimum;
+    tpl_identification += '</br><b>Observaciones:</b> '+ item.observation;
+    tpl_identification += '</br><b>Órganos:</b> '+ Object.keys(item.organs_set).map(function(k){return item.organs_set[k].name}).join(", ") +'</div>';
   });
 
-  tpl_identification += '</tbody></table></div>';
+  tpl_identification += '</div>';
   $('.summaryIdentification').html(tpl_identification);
 
-  var tpl_samples = '<div class="col-sm-12"><table class="table table-bordered table-xs">';
-  tpl_samples += '<thead><tr><th>No. Muestra</th><th>Identificación</th><th>Análisis</th><th>Órganos</th></tr></thead><tbody>';
+  var tpl_exams = '<div class="col-sm-12"><h6 class="form-section mt-2"> Servicios</h6></br>';
+  $.each(data.entryform.analyses, function(i, item){
+    tpl_exams += '<div class="alert alert-light"><b>'+ item.exam__name +':</b> '+ moment(item.created_at).format("DD/MM/YYYY HH:MM") +'</div>';
+  });
+
+  tpl_exams += '</div>';
+  $('.summaryExams').html(tpl_exams);
+
+  var tpl_samples = '<div class="col-sm-12"><h6 class="form-section mt-2"> Muestras</h6></br><table class="table table-bordered table-xs">';
+  tpl_samples += '<thead><tr><th width="8% !important;">Muestra</th><th>Identificación</th><th>Análisis</th><th>Órganos</th></tr></thead><tbody>';
 
   $.each(data.samples, function(i, item){
-    var exams = item.exams_set;
-    var organs = item.organs_set;
+    var len = 1;
+    var tpl_exams = ""
+    $.each(item.sample_exams_set, function(j, v){
+      len+=1;
+      tpl_exams += '<tr><td>'+v.exam_name+'</td>';
+      tpl_exams += '<td>'+ Object.keys(v.organ_id).map(function(k){return v.organ_id[k].name}).join(", ") +'</td></tr>';
+    });
     tpl_samples += '<tr>';
-    tpl_samples += '<td>'+ item.index +'</td>';
-    tpl_samples += '<td>'+ item.identification.cage +'-'+item.identification.group+'</td>';
-    tpl_samples += '<td>'+ Object.keys(exams).map(function(k){return exams[k].name}).join(", ") +'</td>';
-    tpl_samples += '<td>'+ Object.keys(organs).map(function(k){return organs[k].name}).join(", ") +'</td>';
+    tpl_samples += '<td rowspan="'+len+'">'+ item.index +'</td>';
+    tpl_samples += '<td rowspan="'+len+'">'+ item.identification.cage +'-'+item.identification.group+'</td>';
     tpl_samples += '</tr>';
+    tpl_samples += tpl_exams;
+    
   });
 
   tpl_samples += '</tbody></table></div>';

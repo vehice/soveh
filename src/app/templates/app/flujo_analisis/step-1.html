@@ -14,6 +14,9 @@
         </div>
       </div>
       <div>
+        <div class="col-md-12 text-right m-1">
+          <button type="button" id="saveTimingStep1" class="btn btn-warning square"><i class="fa fa-save"></i> Guardar Cambios</button>
+        </div>
         <div class="table-responsive">
           <table id="stain_table" class="table table-condensed table-bordered" width="100%" cellpadding="0" cellspacing="0" border="0">
             <thead>
@@ -44,15 +47,15 @@
       </td>
       <td>
         <%= slice_name %>
-        <input type="hidden" name="stain[slice_id][<%= stain_index %>]" value="<%= slice_id %>" >
+        <input type="hidden" name="stain_slice_id_<%= stain_index %>" value="<%= slice_id %>" >
       </td>
       <td>
-        <input type="checkbox" id="stain[start_stain][<%= stain_index %>]" class="switchery" />
-        <input type="hidden" name="stain[start_stain][<%= stain_index %>]" value="<%= start_stain %>" />
+        <input type="checkbox" id="stain_start_stain_<%= stain_index %>" class="switchery" />
+        <input type="hidden" name="stain_start_stain_<%= stain_index %>" value="<%= start_stain %>" />
       </td>
       <td>
-        <input type="checkbox" id="stain[end_stain][<%= stain_index %>]" class="switchery" />
-        <input type="hidden" name="stain[end_stain][<%= stain_index %>]" value="<%= end_stain %>" />
+        <input type="checkbox" id="stain_end_stain_<%= stain_index %>" class="switchery" />
+        <input type="hidden" name="stain_end_stain_<%= stain_index %>" value="<%= end_stain %>" />
       </td>
     </tr>
   </script>

@@ -56,6 +56,21 @@ urlpatterns = [
         csrf_exempt(views.IMAGES.as_view()),
         name='images',
     ),
+    path(
+        'block-timing',
+        csrf_exempt(views.save_block_timing),
+        name="save_block_timing"
+    ),
+    path(
+        'stain-timing',
+        csrf_exempt(views.save_stain_timing),
+        name="save_stain_timing"
+    ),
+    path(
+        'scan-timing',
+        csrf_exempt(views.save_scan_timing),
+        name="save_scan_timing"
+    ),
     # path(
     #     'images/<int:image_id>',
     #     csrf_exempt(views.IMAGES.as_view()),

@@ -30,13 +30,37 @@ function init_step_1() {
 }
 
 $(document).on('click', '.start_stain_all', function (e) {
-  $("input[type=checkbox][id^='stain[start_stain]']" ).trigger('click');
+  $("input[type=checkbox][id^='stain_start_stain']" ).trigger('click');
 });
 
 $(document).on('click', '.end_stain_all', function (e) {
-  $("input[type=checkbox][id^='stain[end_stain]']" ).trigger('click');
+  $("input[type=checkbox][id^='stain_end_stain']" ).trigger('click');
 });
 
+$(document).on('click', '#saveTimingStep1', function (e) {
+  lockScreen(1);
+  var form_data = $('#stain_table_wrapper :input').serialize();
+  var url = Urls.save_stain_timing();
+  $.ajax({
+    type: "POST",
+    url: url,
+    data: form_data,
+    async: false,
+  })
+  .done(function (data) {
+    lockScreen(0);
+    if (data.ok) {
+      toastr.success('', 'Guardado.');
+    } else {
+      toastr.error('', 'No ha sido posible guardar. Contacte un administrador.');
+    }    
+    response = data;
+  })
+  .fail(function (data) {
+    lockScreen(0);
+    toastr.error('', 'No ha sido posible guardar. Contacte un administrador.');
+  })
+});
 
 function loadStainTable(data) {
   if ($.fn.DataTable.isDataTable('#stain_table')) {
@@ -69,15 +93,18 @@ function populateStainTable(data) {
     row.slice_name = item.slice_name;
     row.stain_index = i;
     row.sample_identification = item.sample.identification.cage + '-' + item.sample.identification.group;
-    // row.identification_cage = 'E-' + item.identification_cage;
     row.start_stain = item.start_stain;
     row.end_stain = item.end_stain;
 
     addStainRow(row)
 
-    if (item.start_stain != null && item.end_stain != null) {
-      $("[data-index='" + i + "']").find(".switchery").trigger("click");
+    if (item.start_stain != null) {
+      $("#stain_start_stain_" + i).trigger("click");
     }
+    if (item.end_stain != null) {
+      $("#stain_end_stain_" + i).trigger("click");
+    }
+    
   });
 }
 
