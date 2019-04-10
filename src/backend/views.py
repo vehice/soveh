@@ -143,12 +143,23 @@ class ENTRYFORM(View):
             exams_set = list(Exam.objects.all().values())
             organs_set = list(Organ.objects.all().values())
 
+            species_list = list(Specie.objects.all().values())
+            larvalStages_list = list(LarvalStage.objects.all().values())
+            fixtatives_list = list(Fixative.objects.all().values())
+            waterSources_list = list(WaterSource.objects.all().values())
+            customers_list = list(Customer.objects.all().values())
+
             data = {
                 'entryform': entryform,
                 'identifications': identifications,
                 'samples': samples_as_dict,
                 'exams': exams_set,
-                'organs': organs_set
+                'organs': organs_set,
+                'species_list': species_list,
+                'larvalStages_list': larvalStages_list,
+                'fixtatives_list': fixtatives_list,
+                'waterSources_list': waterSources_list,
+                'customers_list': customers_list,
             }
         else:
             species = list(Specie.objects.all().values())
@@ -273,8 +284,26 @@ class CASSETTE(View):
         
         organs_set = list(Organ.objects.all().values())
         exams_set = list(Exam.objects.all().values())
-        
-        data = {'cassettes': cassettes, 'exams_set': exams_set, 'exams': exams, 'analyses': analyses, 'entryform':entryform, 'samples': samples_as_dict, 'organs': organs_set}
+        species_list = list(Specie.objects.all().values())
+        larvalStages_list = list(LarvalStage.objects.all().values())
+        fixtatives_list = list(Fixative.objects.all().values())
+        waterSources_list = list(WaterSource.objects.all().values())
+        customers_list = list(Customer.objects.all().values())
+
+        data = {
+            'cassettes': cassettes,
+            'exams_set': exams_set,
+            'exams': exams,
+            'analyses': analyses,
+            'entryform':entryform,
+            'samples': samples_as_dict,
+            'organs': organs_set,
+            'species_list': species_list,
+            'larvalStages_list': larvalStages_list,
+            'fixtatives_list': fixtatives_list,
+            'waterSources_list': waterSources_list,
+            'customers_list': customers_list,
+         }
 
         return JsonResponse(data)
 
@@ -376,7 +405,24 @@ class ANALYSIS(View):
         organs_set = list(Organ.objects.all().values())
         exams_set = list(Exam.objects.all().values())
 
-        data = {'analyses': analyses, 'entryform':entryform, 'samples': samples_as_dict, 'organs': organs_set, 'exams_set': exams_set }
+        species_list = list(Specie.objects.all().values())
+        larvalStages_list = list(LarvalStage.objects.all().values())
+        fixtatives_list = list(Fixative.objects.all().values())
+        waterSources_list = list(WaterSource.objects.all().values())
+        customers_list = list(Customer.objects.all().values())
+
+        data = {
+            'analyses': analyses,
+            'entryform':entryform,
+            'samples': samples_as_dict,
+            'exams_set': exams_set,
+            'organs': organs_set,
+            'species_list': species_list,
+            'larvalStages_list': larvalStages_list,
+            'fixtatives_list': fixtatives_list,
+            'waterSources_list': waterSources_list,
+            'customers_list': customers_list,
+        }
         
         return JsonResponse(data)
 
@@ -1332,7 +1378,7 @@ def step_1_entryform(request):
                 temp_id=values[4],
                 weight=values[5],
                 extra_features_detail=values[6],
-                is_optimum = True if values[7] == "si" else False,
+                is_optimum = True if "si" in values[7] else False,
                 observation = values[8]
             )
             
@@ -1767,3 +1813,48 @@ def call_process_method(model_name, request):
     if not method:
         raise NotImplementedError("Method %s not implemented" % method_name)
     return method(request)
+
+def save_identification(request, id):
+    var_post = request.POST.copy()
+    ident = Identification.objects.get(pk=id)
+    ident.cage = var_post['jaula']
+    ident.group = var_post['grupo']
+    ident.no_container = var_post['contenedores']
+    ident.weight = var_post['peso']
+    ident.extra_features_detail = var_post['extras']
+    ident.observation = var_post['observation']
+    ident.is_optimum = var_post['optimo']
+    organs = var_post.getlist('organs')
+   
+    ident.organs.set([])
+    for org in organs:
+        ident.organs.add(int(org))
+    
+    ident.save()
+    return JsonResponse({})
+
+def save_generalData(request, id):
+    var_post = request.POST.copy()
+    entry = EntryForm.objects.get(pk=id)
+    entry.specie_id = int(var_post['specie'])
+    entry.watersource_id = int(var_post['watersource'])
+    entry.larvalstage_id = int(var_post['larvalstage'])
+    entry.fixative_id = int(var_post['fixative'])
+    entry.customer_id = int(var_post['client'])
+
+    entry.company = var_post['company']
+    entry.center = var_post['center']
+    entry.responsible = var_post['responsable']
+    entry.no_order = var_post['no_order']
+    entry.no_request = var_post['no_solic']
+    try:
+        entry.created_at = datetime.strptime(var_post.get('recive'), '%d/%m/%Y %H:%M')
+    except: 
+        pass
+    try:
+        entry.sampled_at = datetime.strptime(var_post.get('muestreo'), '%d/%m/%Y %H:%M')
+    except:
+        pass
+
+    entry.save()
+    return JsonResponse({})

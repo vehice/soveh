@@ -6,6 +6,12 @@
   .steps {
     pointer-events: none;
   }
+  .form-section {
+    color: #404E67;
+    line-height: 3rem;
+    margin-bottom: 20px;
+    border-bottom: 1px solid #404E67;
+  }
 </style>
 
 {% endblock stylesheets %}
@@ -55,54 +61,58 @@
   </div>
 </div>
 
-<div class="modal fade text-left" id="show_summary" role="dialog">
+<div class="modal fade text-left" id="show_summary" role="dialog" data-backdrop="static" data-keyboard="false">
   <div class="modal-dialog" role="document" style="min-width:80% !important;">
     <div class="modal-content">
       <div class="modal-header">
         <h3 class="modal-title" id="title">Resumen Caso <span class="NoCasoSummary"></span></h3>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
       </div>
       <div class="modal-body" style="font-size:12px !important; max-height: calc(100vh - 150px); overflow-y:scroll;">
-        <h6 class="form-section"> Información general</h6>
-        <div class="row generalInfo">
-          <div class="col-sm-4 summaryClient">
-          </div>
-          <div class="col-sm-4 summaryCompany">
-          </div>
-          <div class="col-sm-4 summaryCenter">
-          </div>
-          <div class="col-sm-4 summaryResponsible">
-          </div>
-          <div class="col-sm-4 summaryReception">
-          </div>
-          <div class="col-sm-4 sumarrySampling">
-          </div>
-          <div class="col-sm-4 summaryNoOrder">
-          </div>
-          <div class="col-sm-4 summaryNoRequest">
-          </div>
-          <div class="col-sm-4 summaryFixative">
-          </div>
+        <div style="padding: 10px;background-color: #f2efed;">
+            <div class="col-md-12">
+              <a href="javascript:void(0);" onclick="submitGeneralData({{form.content_object.id}})" class="btn btn-primary pull-right"> <i class="fa fa-save fa-2x"></i> </a>
+            </div>
+          <form action="#" id="generalData">
+            <h6 class="form-section mt-2">  Información general</h6>
+            <div class="row generalInfo">
+              <div class="col-sm-4 form-group summaryClient">
+              </div>
+              <div class="col-sm-4 form-group summaryCompany">
+              </div>
+              <div class="col-sm-4 form-group summaryCenter">
+              </div>
+              <div class="col-sm-4 form-group summaryResponsible">
+              </div>
+              <div class="col-sm-4 form-group summaryReception">
+              </div>
+              <div class="col-sm-4 form-group sumarrySampling">
+              </div>
+              <div class="col-sm-4 form-group summaryNoOrder">
+              </div>
+              <div class="col-sm-4 form-group summaryNoRequest">
+              </div>
+              <div class="col-sm-4 form-group summaryFixative">
+              </div>
+            </div>
+            <hr>
+            <h6 class="form-section mt-2"> Detalle</h6>
+            <div class="row ">
+              <div class="col-sm-4 summarySpecie">
+              </div>
+              <div class="col-sm-4 summaryDevStatus">
+              </div>
+              <div class="col-sm-4 summaryWaterSource">
+              </div>
+            </div>
+          </form>   
         </div>
         <hr>
-        <h6 class="form-section mt-2"> Detalle</h6>
-        <div class="row ">
-          <div class="col-sm-4 summarySpecie">
-          </div>
-          <div class="col-sm-4 summaryDevStatus">
-          </div>
-          <div class="col-sm-4 summaryWaterSource">
-          </div>
-        </div>
-        <hr>        
         <div class="row">
-          <div class="col-sm-3 summaryIdentification">
+          <div class="col-sm-4 summaryExams">
           </div>
-          <div class="col-sm-3 summaryExams">
+          <div class="col-sm-8 summarySamples">
           </div>
-          <div class="col-sm-6 summarySamples">
+          <div class="row col-sm-12 summaryIdentification" style="margin:0">
           </div>
         </div>
       </div>
@@ -318,40 +328,88 @@ $(document).on('click', '.newAnalysisBtn', function(e){
 });
 
 function fillSummary(data){
-  $('.NoCasoSummary').html(data.entryform.no_caso);
-  $('.summaryClient').html('<b>Cliente</b>: '+ data.entryform.customer.name);
-  $('.summaryCompany').html('<b>Empresa</b>: '+ data.entryform.company);
-  $('.summaryCenter').html('<b>Centro</b>: '+ data.entryform.center);
-  $('.summaryResponsible').html('<b>Responsable</b>: '+ data.entryform.responsible);
-  $('.summaryReception').html('<b>Fecha recepción</b>: '+ moment(data.entryform.created_at).format("DD/MM/YYYY HH:MM") );
-  $('.sumarrySampling').html('<b>Fecha muestreo</b>: '+ moment(data.entryform.sampled_at).format("DD/MM/YYYY HH:MM") );
-  $('.summaryNoOrder').html('<b>No. orden</b>: '+ data.entryform.no_order);
-  $('.summaryNoRequest').html('<b>No. solicitud</b>: '+ data.entryform.no_request);
-  $('.summaryFixative').html('<b>Fijador</b>: '+ data.entryform.fixative.name);
-  
-  $('.summarySpecie').html('<b>Especie</b>: '+ data.entryform.specie.name);  
-  $('.summaryDevStatus').html('<b>Estado de desarrollo</b>: '+ data.entryform.larvalstage.name);  
-  $('.summaryWaterSource').html('<b>Fuente de agua</b>: '+ data.entryform.watersource.name);
+  var selectClient = '<select class="select2 form-control selectOpt" id="client" name="client">';
+  $.each(data.customers_list, function(j, o){
+      selectClient += '<option value="'+o.id+'">'+o.name+'</option>';
+  });
+  selectClient +='</select>';
 
-  var tpl_identification = '<div class="col-sm-12"><h6 class="form-section mt-2"> Identificación</h6></br>';
+  var selectFix = '<select class="select2 form-control selectOpt" id="fixative" name="fixative">';
+  $.each(data.fixtatives_list, function(j, o){
+      selectFix += '<option value="'+o.id+'">'+o.name+'</option>';
+  });
+  selectFix +='</select>';
+
+  var selectSpecie = '<select class="select2 form-control selectOpt" id="specie" name="specie">';
+  $.each(data.species_list, function(j, o){
+      selectSpecie += '<option value="'+o.id+'">'+o.name+'</option>';
+  });
+  selectSpecie +='</select>';
+
+  var selectlarvalstage = '<select class="select2 form-control selectOpt" id="larvalstage" name="larvalstage">';
+  $.each(data.larvalStages_list, function(j, o){
+      selectlarvalstage += '<option value="'+o.id+'">'+o.name+'</option>';
+  });
+  selectlarvalstage +='</select>';
+
+  var selectwatersource = '<select class="select2 form-control selectOpt" id="watersource" name="watersource">';
+  $.each(data.waterSources_list, function(j, o){
+      selectwatersource += '<option value="'+o.id+'">'+o.name+'</option>';
+  });
+  selectwatersource +='</select>';
+
+  $('.NoCasoSummary').html(data.entryform.no_caso);
+  $('.summaryClient').html('<label>Cliente:</label>' + selectClient);
+  $('.summaryCompany').html('<label>Empresa:</label> <input class="form-control" value="'+ data.entryform.company+'" name="company" />');
+  $('.summaryCenter').html('<label>Centro:</label> <input class="form-control" value="'+ data.entryform.center+'" name="center" />');
+  $('.summaryResponsible').html('<label>Responsable:</label> <input class="form-control" value="'+ data.entryform.responsible+'" name="responsable" />');
+  $('.summaryReception').html('<label>Fecha recepción:</label> <div class="input-group date" id=""><input type="text" class="form-control" name="recive" value="'+ moment(data.entryform.created_at).format("DD/MM/YYYY HH:MM")+'" /><div class="input-group-append"><span class="input-group-text"><span class="fa fa-calendar"></span></span></div></div> ' );
+  $('.sumarrySampling').html('<label>Fecha muestreo:</label> <div class="input-group date" id=""><input type="text" class="form-control" name="muestreo" value="'+ moment(data.entryform.sampled_at).format("DD/MM/YYYY HH:MM")+'" /><div class="input-group-append"><span class="input-group-text"><span class="fa fa-calendar"></span></span></div></div> ' );
+  $('.summaryNoOrder').html('<label>No. orden:</label> <input class="form-control" value="'+ data.entryform.no_order+'" name="no_order" />');
+  $('.summaryNoRequest').html('<label>No. solicitud:</label> <input class="form-control" value="'+ data.entryform.no_request+'" name="no_solic" />');
+  $('.summaryFixative').html('<label>Fijador:</label>'+ selectFix);
+  
+  $('.summarySpecie').html('<label>Especie:</label>'+selectSpecie  );
+  $('.summaryDevStatus').html('<label>Estado de desarrollo:</label>'+selectlarvalstage ); 
+  $('.summaryWaterSource').html('<label>Fuente de agua:</label>'+selectwatersource);
+
+  // var tpl_identification = '';
+  var tpl_identification ='<div class="col-sm-12"> <hr><h6 class="form-section mt-2"> Identificación</h6></br> </div>';
 
   $.each(data.entryform.identifications, function(i, item){
-    var optimum = "No"
-    if (item.is_optimum){
-      optimum = "Sí"
+    var optimum = ""
+    if (!item.is_optimum){
+      optimum = "selected"
     }
-    tpl_identification += '<div class="alert alert-light"><b>Estanque/Jaula:</b> '+ item.cage;
-    tpl_identification += '</br><b>Grupo:</b> '+ item.group;
-    tpl_identification += '</br><b>Peces:</b> '+ item.no_fish;
-    tpl_identification += '</br><b>Contenedores:</b> '+ item.no_container;
-    tpl_identification += '</br><b>Peso:</b> '+ item.weight;
-    tpl_identification += '</br><b>Comentarios Extras:</b> '+ item.extra_features_detail;
-    tpl_identification += '</br><b>Óptimo?:</b> '+ optimum;
-    tpl_identification += '</br><b>Observaciones:</b> '+ item.observation;
-    tpl_identification += '</br><b>Órganos:</b> '+ Object.keys(item.organs_set).map(function(k){return item.organs_set[k].name}).join(", ") +'</div>';
+    var selectOptimum = '<select class="select2 form-control selectOpt" name="optimo" ><option value="1">Si</option><option value="0" '+optimum+'>No</option></select>'
+    
+    var selectOrgans = '<select class="select2 form-control selectOrgs" name="organs" multiple>';
+    $.each(data.organs, function(j, o){
+      if(item.organs_set.findIndex(x => x.id === o.id) != -1){
+        selectOrgans += '<option value="'+o.id+'" selected>'+o.name+'</option>';
+      }
+      else
+        selectOrgans += '<option value="'+o.id+'">'+o.name+'</option>';
+    });
+    selectOrgans +='</select>';
+    
+    tpl_identification += '<div class="col-md-4"><form id="identification-'+item.id+'" action="#" method="POST">';
+    tpl_identification += '<div class="alert alert-light"><div class="row">';
+    tpl_identification += '<div class="form-group col-md-6"><label>Estanque/Jaula:</label> <input class="form-control" value="'+ item.cage+'"  name="jaula" /></div>';
+    tpl_identification += '<div class="form-group col-md-6"><label>Grupo:</label> <input class="form-control" value="'+ item.group+'"  name="grupo" /></div>';
+    tpl_identification += '<div class="form-group col-md-6"><label>Peces:</label> <input class="form-control" value="'+ item.no_fish+'" disabled /></div>';
+    tpl_identification += '<div class="form-group col-md-6"><label>Contenedores:</label> <input class="form-control" type="number" value="'+ item.no_container+'"  name="contenedores" /></div>';
+    tpl_identification += '<div class="form-group col-md-6"><label>Peso:</label> <input class="form-control" type="number" value="'+ item.weight+'"  name="peso" /></div>';
+    tpl_identification += '<div class="form-group col-md-6"><label>Óptimo?:</label>'+ selectOptimum+'</div>';
+    tpl_identification += '<div class="form-group col-md-6"><label>Comentarios Extras:</label> <textarea class="form-control" rows="2" name="extras">'+ item.extra_features_detail+' </textarea></div>';
+    tpl_identification += '<div class="form-group col-md-6"><label>Observaciones:</label> <textarea class="form-control" rows="2" name="observation">'+ item.observation+' </textarea></div>';
+    tpl_identification += '<div class="form-group col-md-10"><label>Órganos:</label>'+selectOrgans+'</div>';
+    tpl_identification += '<div style="padding-top:25px;"><a href="javascript:void(0);" onclick="submitIdentification('+item.id+')" class="btn btn-primary"> <i class="fa fa-save"></i> </a></div>'
+    tpl_identification += '</div></div>';
+    tpl_identification += '</form></div>';
   });
 
-  tpl_identification += '</div>';
+  // tpl_identification += '</div>';
   $('.summaryIdentification').html(tpl_identification);
 
   var tpl_exams = '<div class="col-sm-12"><h6 class="form-section mt-2"> Servicios</h6></br>';
@@ -383,6 +441,60 @@ function fillSummary(data){
 
   tpl_samples += '</tbody></table></div>';
   $('.summarySamples').html(tpl_samples);
+
+  $('#client').val(data.entryform.customer.id);
+  $('#fixative').val(data.entryform.fixative.id);
+  $('#specie').val(data.entryform.specie.id);
+  $('#watersource').val(data.entryform.watersource.id);
+  $('#larvalstage').val(data.entryform.larvalstage.id);
+
+  $('.selectOpt').select2({'width':'100%'});
+  $('.selectOrgs').select2({'width':'100%'});
+  
+  $('.date').datetimepicker({
+      locale: 'es',
+      keepOpen: false,
+      format:'DD/MM/YYYY HH:mm'
+    });
+
+  // $('#datetime_sampled_at').datetimepicker({
+  //     locale: 'es',
+  //     keepOpen: false,
+  //     format:'DD/MM/YYYY HH:mm'
+  //   });
+}
+
+function submitIdentification(id){
+  var data = $('#identification-'+id).serialize();
+  $.ajax({
+    type: "POST",
+    url: '/identification/'+id,
+    data: data,
+    async: false,
+  })
+  .done(function (data) {
+    response = data;
+  })
+  .fail(function (data) {
+    console.log("Fail");
+  })
+
+}
+
+function submitGeneralData(id){
+  var data = $('#generalData').serialize();
+  $.ajax({
+    type: "POST",
+    url: '/generalData/'+id,
+    data: data,
+    async: false,
+  })
+  .done(function (data) {
+    $('#show_summary').modal('hide');
+  })
+  .fail(function (data) {
+    console.log("Fail");
+  })
 
 }
 

@@ -76,5 +76,14 @@ urlpatterns = [
     #     csrf_exempt(views.IMAGES.as_view()),
     #     'images_w_id'
     # ),
-
+    path(
+        'identification/<int:id>',
+        csrf_exempt(views.save_identification),
+        name="identification"
+    ),
+    path(
+        'generalData/<int:id>',
+        csrf_exempt(views.save_generalData),
+        name="generalData"
+    ),
 ]

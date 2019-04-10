@@ -197,7 +197,7 @@ class Identification(models.Model):
     observation = models.TextField(null=True, blank=True)
     group = models.CharField(max_length=250, null=True, blank=True)
     temp_id = models.CharField(max_length=250, null=True, blank=True)
-    organs = organs = models.ManyToManyField(Organ)
+    organs = models.ManyToManyField(Organ)
 
     def __str__(self):
         return str(self.pk)
