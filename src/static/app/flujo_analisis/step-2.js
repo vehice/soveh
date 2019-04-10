@@ -60,7 +60,7 @@ $(document).on('click', '#saveTimingStep2', function (e) {
 
 $(document).on('click', '.showSummary', function (e) {
   swal({
-    title: 'Resúmen del caso',
+    title: 'Resumen del caso',
     type: 'info',
     html:
       'You can use <b>bold text</b>, ' +
