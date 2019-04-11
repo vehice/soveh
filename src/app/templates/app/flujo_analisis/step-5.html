@@ -88,84 +88,94 @@
               </div>
               <input type="hidden" name="box-findings" id="box-findings">
               <div class="col-md-12" id="summernote-hallazgos">
-                <table class="table table-bordered">
-                  <thead class="bg-danger text-white">
-                    <tr>
-                      <th>IDENTIFICACIÓN</th>
-                      <th>TINCIÓN</th>
-                      <th>HALLAZGO</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {% regroup report by identification as new_group %}
-                      {% for gr in new_group %}
-                        <tr>
-                          <td>
-                              {{ gr.grouper.cage }} - {{ gr.grouper.group }}
-                          </td>
-                          <td>
-                              {{ gr.list.0.analysis.exam.name }}
-                          </td>
-                          <td>
-                            <ul>
-                              {% regroup gr.list|dictsort:"organ.name" by organ.name as by_organ %}
-                                  {% for organ in by_organ %}
-                                    <li><strong><u>{{ organ.grouper }}:</u></strong>
-                                      <ul>
-                                        {% for item in organ.list %}
-                                          <li>
-                                            Se observa {{ item.pathology.name }} en {{ item.organ_location.name }} {{ item.diagnostic_intensity.name }} (Muestra {{item.slice.cassette.sample.index}}),
-                                          </li>
-                                        {% endfor %}
-                                      </ul>
-                                  </li>
-                                  {% endfor %}                                                  
-                            </ul>
-                          </td>
-                        </tr>
-                      {% endfor %}                
-                  </tbody>
+                {% if reopen %}
+                  {{report_finalExtra.box_findings | safe}}
+                {% else %}
+                  <table class="table table-bordered">
+                    <thead class="bg-danger text-white">
+                      <tr>
+                        <th>IDENTIFICACIÓN</th>
+                        <th>TINCIÓN</th>
+                        <th>HALLAZGO</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {% regroup report by identification as new_group %}
+                        {% for gr in new_group %}
+                          <tr>
+                            <td>
+                                {{ gr.grouper.cage }} - {{ gr.grouper.group }}
+                            </td>
+                            <td>
+                                {{ gr.list.0.analysis.exam.name }}
+                            </td>
+                            <td>
+                              <ul>
+                                {% regroup gr.list|dictsort:"organ.name" by organ.name as by_organ %}
+                                    {% for organ in by_organ %}
+                                      <li><strong><u>{{ organ.grouper }}:</u></strong>
+                                        <ul>
+                                          {% for item in organ.list %}
+                                            <li>
+                                              Se observa {{ item.pathology.name }} en {{ item.organ_location.name }} {{ item.diagnostic_intensity.name }} (Muestra {{item.slice.cassette.sample.index}}),
+                                            </li>
+                                          {% endfor %}
+                                        </ul>
+                                    </li>
+                                    {% endfor %}                                                  
+                              </ul>
+                            </td>
+                          </tr>
+                        {% endfor %}                
+                    </tbody>
 
-                  <tfood>
-                    
-                  </tfood>
-                </table>
+                    <tfood>
+                      
+                    </tfood>
+                  </table>
+                {% endif %}
               </div>
               <div class="col-md-12" style="padding-top:5% !important; padding-bottom:3% !important;">
                 <center><h3 class="text-danger"><strong>DIAGNÓSTICO</strong></h3></center>
               </div>
               <input type="hidden" name="box-diagnostics" id="box-diagnostics">
               <div class="col-md-12" id="summernote-diagnosticos">
-                <div class="">
-                  <ul>
-                  {% regroup report|dictsort:"organ.name" by organ.name as new_group %}
-                    {% for organ in new_group %}
-                      <li><strong><u>{{ organ.grouper }}</u>:</strong>
-                      {% regroup organ.list|dictsort:"diagnostic.name" by diagnostic.name as by_diag %}
-                        <ul>
-                        {% for diag in by_diag %}
-                            <li>{{ diag.list.0.pathology.name }} en {{ diag.list.0.organ_location.name }} {{ diag.list.0.diagnostic_intensity.name }}. 
-                            Muestras (
-                            {% for fin in diag.list %}
-                              
-                                {{fin.slice.cassette.sample.index}},
-                              
-                            {% endfor %}
-                            ) </li>
-                        
-                        {% endfor %}
-                        </ul>
-                      </li>
-                    {% endfor %}       
-                  </ul>
-                </div>
+                {% if reopen %}
+                  {{report_finalExtra.box_diagnostics | safe}}
+                {% else %}
+                  <div class="">
+                    <ul>
+                    {% regroup report|dictsort:"organ.name" by organ.name as new_group %}
+                      {% for organ in new_group %}
+                        <li><strong><u>{{ organ.grouper }}</u>:</strong>
+                        {% regroup organ.list|dictsort:"diagnostic.name" by diagnostic.name as by_diag %}
+                          <ul>
+                          {% for diag in by_diag %}
+                              <li>{{ diag.list.0.pathology.name }} en {{ diag.list.0.organ_location.name }} {{ diag.list.0.diagnostic_intensity.name }}. 
+                              Muestras (
+                              {% for fin in diag.list %}
+                                
+                                  {{fin.slice.cassette.sample.index}},
+                                
+                              {% endfor %}
+                              ) </li>
+                          
+                          {% endfor %}
+                          </ul>
+                        </li>
+                      {% endfor %}       
+                    </ul>
+                  </div>
+                {% endif %}
               </div>
               <div class="col-md-12" style="padding-top:5% !important; padding-bottom:3% !important;">
                 <center><h3 class="text-danger"><strong>COMENTARIOS</strong></h3></center>
               </div>
               <input type="hidden" name="box-comments" id="box-comments">
               <div class="col-md-12" id="summernote-comentarios">
-                
+                  {% if reopen %}
+                    {{report_finalExtra.box_comments | safe}}
+                  {% endif %}
               </div>
               <div class="col-md-12" style="padding-top:5% !important; padding-bottom:3% !important;">
                 <center><h3 class="text-danger"><strong>IMÁGENES</strong></h3></center>
@@ -189,50 +199,54 @@
 
               <input type="hidden" name="box-tables" id="box-tables">
               <div id="summernote-tablas">
-                <div class="col-md-12" style="padding-top:5% !important; padding-bottom:3% !important;">
-                  <center><h3 class="text-danger"><strong>Principales hallazgos</strong></h3></center>
-                </div>
-                <div class="col-md-12">
-                  <div class="row">
-                    {% for key, values in reports2.items %}
-                      <div class="col-md-12" style="margin-bottom: 3% !important;">
-                        <table class="table table-bordered table-hallazgos">
-                          <thead>
-                            <tr>
-                              {% for head in values.0 %}
-                                <th> <center>{{head}} </center></th>
-                              {% endfor %}
-                            </tr>
-                            
-                          </thead>
-                          <tbody>
-                            {% for val in values %}
-                              {% if forloop.counter0 != 0 %}
-                                <tr>
-                                  {% for row in val %}
-                                    <td><center>
-                                      {% if row == "leve" %}
-                                        +
-                                      {% elif row == "moderada" %}
-                                        ++
-                                      {% elif row == "severa" %}
-                                        +++
-                                      {% else %}
-                                        {{ row.upper }}
-                                      {% endif %}
-                                    </center></td>
-                                  {% endfor %}
-                                </tr>
-                              {% endif %}
-                            {% endfor %}
-      
-                          </tbody>
-                        </table>
-                        <center><span class="text-danger">Intensidad: Leve +; Moderada ++; Severa +++ </span></center>
-                      </div>
-                    {% endfor %}
+                {% if reopen %}
+                  {{report_finalExtra.box_tables| safe}}
+                {% else %}
+                  <div class="col-md-12" style="padding-top:5% !important; padding-bottom:3% !important;">
+                    <center><h3 class="text-danger"><strong>Principales hallazgos</strong></h3></center>
                   </div>
-                </div>
+                  <div class="col-md-12">
+                    <div class="row">
+                      {% for key, values in reports2.items %}
+                        <div class="col-md-12" style="margin-bottom: 3% !important;">
+                          <table class="table table-bordered table-hallazgos">
+                            <thead>
+                              <tr>
+                                {% for head in values.0 %}
+                                  <th> <center>{{head}} </center></th>
+                                {% endfor %}
+                              </tr>
+                              
+                            </thead>
+                            <tbody>
+                              {% for val in values %}
+                                {% if forloop.counter0 != 0 %}
+                                  <tr>
+                                    {% for row in val %}
+                                      <td><center>
+                                        {% if row == "leve" %}
+                                          +
+                                        {% elif row == "moderada" %}
+                                          ++
+                                        {% elif row == "severa" %}
+                                          +++
+                                        {% else %}
+                                          {{ row.upper }}
+                                        {% endif %}
+                                      </center></td>
+                                    {% endfor %}
+                                  </tr>
+                                {% endif %}
+                              {% endfor %}
+        
+                            </tbody>
+                          </table>
+                          <center><span class="text-danger">Intensidad: Leve +; Moderada ++; Severa +++ </span></center>
+                        </div>
+                      {% endfor %}
+                    </div>
+                  </div>
+                {% endif %}
               </div>
             </div>
           </div>

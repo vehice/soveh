@@ -340,6 +340,7 @@ class ANALYSIS(View):
                 'total_step': total_step,
                 'percentage_step': percentage_step,
                 'form_closed': form.form_closed,
+                'form_reopened': form.form_reopened,
                 # 'no_caso': analisys.entry_form.no_caso
             })
         
@@ -571,6 +572,16 @@ class WORKFLOW(View):
                     matrix.append(column)
 
                 data[key] = list(zip(*matrix))
+            
+            reopen = False
+            if step_tag == 'step_6':
+                reopen = True
+                step_tag = 'step_5'
+                form.form_closed = False
+                form.form_reopened = True
+                form.save()
+
+            report_finalExtra = ReportFinal.objects.filter(analysis_id=int(object_form_id)).last()
 
             data = {
                 'form': form,
@@ -581,7 +592,9 @@ class WORKFLOW(View):
                 'exam_name': form.content_object.exam.name,
                 'form_parent_id': form.parent.id,
                 'report': reports,
-                'reports2': data
+                'reports2': data,
+                'reopen': reopen,
+                'report_finalExtra': report_finalExtra
             }
 
         return render(request, route, data)
@@ -638,6 +651,7 @@ class WORKFLOW(View):
             process_answer = call_process_method(form.content_type.model,
                                                      request)
             form.form_closed = True
+            form.form_reopened = False
             form.save()
 
             return JsonResponse({'redirect_flow': True})

@@ -306,7 +306,10 @@ $("#workflow_form").steps({
             function_name = "init_step_" + step;
           }
           if (step == 5) {
-            window.location.href = document.URL.replace('step_'+(currentIndex+1), 'step_5');
+            if(document.URL.indexOf('step_6') == -1)
+              window.location.href = document.URL.replace('step_'+(currentIndex+1), 'step_5');
+            else  
+              window.location.href = document.URL.replace('step_6', 'step_5');
           } else {
             window[function_name]();
           }
