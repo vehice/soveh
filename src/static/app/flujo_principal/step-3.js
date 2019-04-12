@@ -13,7 +13,7 @@ function init_step_3() {
     data_step_3 = data
     $('.showSummaryBtn').removeClass("hidden");
     $('.newAnalysisBtn').addClass("hidden");
-    fillSummary(data);
+    // fillSummary(data);
 
     if ($.fn.DataTable.isDataTable('#cassettes_table')) {
       // TODO: Fix efecto al destruir la tabla

@@ -10,7 +10,7 @@ function init_step_4() {
     .done(function (data) {
       $('.showSummaryBtn').removeClass("hidden");
       $('.newAnalysisBtn').removeClass("hidden");
-      fillSummary(data);
+      // fillSummary(data);
       fillNewAnalysis(data);
       loadBlockTable(data); 
     })
