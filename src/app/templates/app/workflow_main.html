@@ -378,8 +378,8 @@ function fillSummary(data){
   $('.summaryCompany').html('<label>Empresa:</label> <input class="form-control" value="'+ data.entryform.company+'" name="company" />');
   $('.summaryCenter').html('<label>Centro:</label> <input class="form-control" value="'+ data.entryform.center+'" name="center" />');
   $('.summaryResponsible').html('<label>Responsable:</label> <input class="form-control" value="'+ data.entryform.responsible+'" name="responsable" />');
-  $('.summaryReception').html('<label>Fecha recepción:</label> <div class="input-group date" id=""><input type="text" class="form-control" name="recive" value="'+ moment(data.entryform.created_at).format("DD/MM/YYYY HH:MM")+'" /><div class="input-group-append"><span class="input-group-text"><span class="fa fa-calendar"></span></span></div></div> ' );
-  $('.sumarrySampling').html('<label>Fecha muestreo:</label> <div class="input-group date" id=""><input type="text" class="form-control" name="muestreo" value="'+ moment(data.entryform.sampled_at).format("DD/MM/YYYY HH:MM")+'" /><div class="input-group-append"><span class="input-group-text"><span class="fa fa-calendar"></span></span></div></div> ' );
+  $('.summaryReception').html('<label>Fecha recepción:</label> <div class="input-group date" id=""><input type="text" class="form-control" name="recive" value="'+ moment(data.entryform.created_at).format("DD/MM/YYYY HH:mm")+'" /><div class="input-group-append"><span class="input-group-text"><span class="fa fa-calendar"></span></span></div></div> ' );
+  $('.sumarrySampling').html('<label>Fecha muestreo:</label> <div class="input-group date" id=""><input type="text" class="form-control" name="muestreo" value="'+ moment(data.entryform.sampled_at).format("DD/MM/YYYY HH:mm")+'" /><div class="input-group-append"><span class="input-group-text"><span class="fa fa-calendar"></span></span></div></div> ' );
   $('.summaryNoOrder').html('<label>No. orden:</label> <input class="form-control" value="'+ data.entryform.no_order+'" name="no_order" />');
   $('.summaryNoRequest').html('<label>No. solicitud:</label> <input class="form-control" value="'+ data.entryform.no_request+'" name="no_solic" />');
   $('.summaryFixative').html('<label>Fijador:</label>'+ selectFix);
@@ -429,7 +429,7 @@ function fillSummary(data){
 
   var tpl_exams = '<div class="col-sm-12"><h6 class="form-section mt-2"> Servicios</h6></br>';
   $.each(data.entryform.analyses, function(i, item){
-    tpl_exams += '<div class="alert alert-light"><b>'+ item.exam__name +':</b> '+ moment(item.created_at).format("DD/MM/YYYY HH:MM") +'</div>';
+    tpl_exams += '<div class="alert alert-light"><b>'+ item.exam__name +':</b> '+ moment(item.created_at).format("DD/MM/YYYY HH:mm") +'</div>';
   });
 
   tpl_exams += '</div>';
