@@ -50,13 +50,15 @@ function init_step_3() {
 
   $('#datetime_processor_loaded_at').datetimepicker({
     locale: 'es',
+    keepOpen: false,
+    format:'DD/MM/YYYY HH:mm'
   });
 
-  $('#datetime_processor_loaded_at').on("dp.change", function (e) {
-    if (e.date) {
-      $("#processor_loaded_at_submit").val(e.date.format());
-    }
-  });
+  // $('#datetime_processor_loaded_at').on("dp.change", function (e) {
+  //   if (e.date) {
+  //     $("#processor_loaded_at_submit").val(e.date.format());
+  //   }
+  // });
 }
 
 function validate_step_3(){  
