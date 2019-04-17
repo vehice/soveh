@@ -1506,7 +1506,12 @@ def step_3_entryform(request):
     var_post = request.POST.copy()
 
     entryform = EntryForm.objects.get(pk=var_post.get('entryform_id'))
-    processor_loaded_at = var_post.get('processor_loaded_at_submit')
+
+    processor_loaded_at = None
+    try:
+        processor_loaded_at = datetime.strptime(var_post.get('processor_loaded_at'), '%d/%m/%Y %H:%M')
+    except Exce: 
+        pass
 
     cassette_sample_id = [
         v for k, v in var_post.items() if k.startswith("cassette[sample_id]")
