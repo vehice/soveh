@@ -22,7 +22,7 @@ function init_step_1() {
 
   $(document).on('change', '#stain_table :checkbox', function (e) {
     if (e.target.checked) {
-      $("[name='" + e.target.id + "']").val(moment().format());
+      $("[name='" + e.target.id + "']").val(moment().format("DD/MM/YYYY HH:mm:ss"));
     } else {
       $("[name='" + e.target.id + "']").val("");
     }
