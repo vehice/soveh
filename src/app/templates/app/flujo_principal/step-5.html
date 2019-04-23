@@ -114,37 +114,37 @@
 </script>
 
 <script id="sample_new_row5" type="text/x-lodash-template">
-  <tr id="sample_new-<%= sample.id %>">
-    <td id="sampleNro_new-<%= sample.id %>" rowspan="1">
+  <tr id="sample_new5-<%= sample.id %>">
+    <td id="sampleNro_new5-<%= sample.id %>" rowspan="1">
         <input type="hidden" value="<%= sample.id %>" name="sample[id][<%= sample.index %>]">
         <%= sample.index %>
     </td>
 
-    <td id="sampleIden_new-<%= sample.id %>" rowspan="1">
+    <td id="sampleIden_new5-<%= sample.id %>" rowspan="1">
         <%= sample.identification.cage %>-<%= sample.identification.group %>
     </td>
   
     <!-- Analisis -->
-    <td class="samples_new_exams_list samples_new_exams delete_new-<%= sample.id %>" data-index="<%= sample.id %>">
+    <td class="samples_new_exams_list samples_new_exams delete_new5-<%= sample.id %>" data-index="<%= sample.id %>">
     </td>
 
     <!-- Organs -->
-    <td class="delete_new-<%= sample.id %>">
+    <td class="delete_new5-<%= sample.id %>">
     </td>
 
     <!-- Actions -->
-    <td class="delete_new-<%= sample.id %>">
+    <td class="delete_new5-<%= sample.id %>">
     </td>
   </tr> 
 </script>
 
 <script id="add_old_analisis5" type="text/x-lodash-template">
-  <tr id="analisis_new-<%= sampleId %>-<%= sampleIndex %>" class="old_row analis_new_row analis_new_row-<%= sampleId %>" data-sampleid="<%= sampleIndex %>" data-sampleindex="<%= sampleId %>">
+  <tr id="analisis_new5-<%= sampleId %>-<%= sampleIndex %>" class="old_row analis_new_row analis_new_row-<%= sampleId %>" data-sampleid="<%= sampleIndex %>" data-sampleindex="<%= sampleId %>">
     <td class="samples_new_exams_list" data-index="<%= sampleId %>">
       <input class="form-control" style="width:100% !important;" readonly value="<%= analisis %>"/>
     </td>
     <td>
-      <select id="select<%= optionId %>" class="select2 form-control organs_new_select organs_new_select-<%= sampleIndex %>" style="width:100% !important;" multiple="multiple" disabled>
+      <select id="select5-<%= optionId %>" class="select2 form-control organs_new_select organs_new_select5-<%= sampleIndex %>" style="width:100% !important;" multiple="multiple" disabled>
         <% _.each(organs, function (organ) { %>
           <option value=<%= organ.id %>> <%= _.toUpper(organ.name) %> </option>
         <% }); %>
@@ -157,20 +157,20 @@
 </script>
 
 <script id="add_new_analisis5" type="text/x-lodash-template">
-  <tr id="analisis_new-<%= sampleId %>-<%= sampleIndex %>" class="analis_new_row analis_new_row-<%= sampleId %>" data-sampleid="<%= sampleIndex %>" data-sampleindex="<%= sampleId %>">
+  <tr id="analisis_new5-<%= sampleId %>-<%= sampleIndex %>" class="analis_new_row analis_new_row-<%= sampleId %>" data-sampleid="<%= sampleIndex %>" data-sampleindex="<%= sampleId %>">
     <td class="samples_new_exams_list" data-index="<%= sampleId %>">
       <input class="form-control" style="width:100% !important;" readonly value="<%= analisis %>"/>
       <input class="form-control" style="width:100% !important;" name="sample[exams][<%= sampleId %>][<%= sampleIndex %>]" hidden value="<%= sampleIndex %>"/>
     </td>
     <td>
-      <select id="select<%= optionId %>" class="select2 form-control organs_new_select organs_new_select-<%= sampleIndex %>" style="width:100% !important;" name="sample[organs][<%= sampleId %>][<%= sampleIndex %>]" multiple="multiple">
+      <select id="select5-<%= optionId %>" class="select2 form-control organs_new_select organs_new_select5-<%= sampleIndex %>" style="width:100% !important;" name="sample[organs][<%= sampleId %>][<%= sampleIndex %>]" multiple="multiple">
         <% _.each(organs, function (organ) { %>
           <option value=<%= organ.id %>> <%= _.toUpper(organ.name) %> </option>
         <% }); %>
       </select>
     </td>
     <td>
-      <a href="javascript:void(0);" class="btn btn-danger" onclick="deleteNewAnalisis(<%= sampleId %>, <%= sampleIndex %>);"><i class="fa fa-trash "></i></a>
+      <a href="javascript:void(0);" class="btn btn-danger" onclick="deleteNewAnalisis5(<%= sampleId %>, <%= sampleIndex %>);"><i class="fa fa-trash "></i></a>
     </td>
   </tr>
 </script>

@@ -114,11 +114,20 @@ class ENTRYFORM(View):
                             organs.index(model_to_dict(sE.organ))
                         except:
                             organs.append(model_to_dict(sE.organ))
-                cassettes = Cassette.objects.filter(sample=s).values()
+                cassettes = Cassette.objects.filter(sample=s)
                 s_dict['organs_set'] = organs
-                # s_dict['exams_set'] = list(exams)
                 s_dict['sample_exams_set'] = sampleExa
-                s_dict['cassettes_set'] = list(cassettes)
+                cassettes_set = []
+                for c in cassettes:
+                    cassettes_set.append({
+                        'cassette_name': c.cassette_name,
+                        'entryform_id': c.entryform_id,
+                        'id': c.id,
+                        'index': c.index,
+                        'sample_id': c.sample_id,
+                        'organs_set': list(c.organs.values())
+                    })
+                s_dict['cassettes_set'] = cassettes_set
                 s_dict['identification'] = model_to_dict(s.identification, exclude=["organs",])
                 samples_as_dict.append(s_dict)
 
@@ -204,9 +213,9 @@ class CASSETTE(View):
             organs = [organ.name for organ in cassette.organs.all()]
             slices = []
 
-            for slice in Slice.objects.filter(cassette=cassette):
-                _slice_mtd = model_to_dict(slice)
-                _slice_mtd['exam'] = slice.analysis.exam.name
+            for slic in Slice.objects.filter(cassette=cassette):
+                _slice_mtd = model_to_dict(slic)
+                _slice_mtd['exam'] = slic.analysis.exam.name
                 slices.append(_slice_mtd)
 
             sample = model_to_dict(cassette.sample, exclude=["exams", "organs"])
@@ -235,8 +244,12 @@ class CASSETTE(View):
         samples_as_dict = []
         for s in samples:
             s_dict = model_to_dict(s, exclude=['organs', 'exams', 'identification'])
-            organs_set = s.organs.all().values()
-            exams_set = s.exams.filter(exam_type= 1).values()
+            organs_set = []
+            exams_set = []
+            for sampleExam in s.sampleexams_set.all():
+                organs_set.append(model_to_dict(sampleExam.organ))
+                if sampleExam.exam.exam_type == 1:
+                    exams_set.append(model_to_dict(sampleExam.exam))
             cassettes_set = Cassette.objects.filter(sample=s).values()
             sampleexams = s.sampleexams_set.all()
             sampleExa = {}
@@ -359,7 +372,16 @@ class ANALYSIS(View):
         samples_as_dict = []
         for s in samples:
             s_dict = model_to_dict(s, exclude=['organs', 'exams', 'identification'])
-            organs_set = s.organs.all().values()
+            organs = []
+            sampleexams = s.sampleexams_set.all()
+            sampleExa = {}
+            for sE in sampleexams:
+                if sE.exam.exam_type == 1:
+                    try:
+                        organs.index(model_to_dict(sE.organ))
+                    except:
+                        organs.append(model_to_dict(sE.organ))
+            organs_set = organs
             # exams_set = s.exams.all().values()
             sampleexams = s.sampleexams_set.all()
             sampleExa = {}
@@ -459,7 +481,16 @@ class SLICE(View):
         samples_as_dict = []
         for s in samples:
             s_dict = model_to_dict(s, exclude=['organs', 'exams', 'identification'])
-            organs_set = s.organs.all().values()
+            organs = []
+            sampleexams = s.sampleexams_set.all()
+            sampleExa = {}
+            for sE in sampleexams:
+                if sE.exam.exam_type == 1:
+                    try:
+                        organs.index(model_to_dict(sE.organ))
+                    except:
+                        organs.append(model_to_dict(sE.organ))
+            organs_set = organs
             # exams_set = s.exams.all().values()
             sampleexams = s.sampleexams_set.all()
             sampleExa = {}
@@ -1051,6 +1082,9 @@ def step_1_entryform(request):
     var_post = request.POST.copy()
 
     entryform = EntryForm.objects.get(pk=var_post.get('entryform_id'))
+   
+    entryform.analysisform_set.all().delete()
+    Sample.objects.filter(entryform=entryform).delete()
 
     entryform.specie_id = var_post.get('specie')
     entryform.watersource_id = var_post.get('watersource')
@@ -1452,7 +1486,7 @@ def step_2_entryform(request):
     var_post = request.POST.copy()
 
     entryform = EntryForm.objects.get(pk=var_post.get('entryform_id'))
-    
+    Cassette.objects.filter(sample__entryform=entryform).delete()
     exams_to_do = var_post.getlist("analysis")
     analyses_qs = entryform.analysisform_set.all()
 
@@ -1661,8 +1695,40 @@ def step_new_analysis(request):
                         organ_id= organ
                     )
                     for cassette in Cassette.objects.filter(sample=sample):
-                        cassette.organs.add(organ)
-                        cassette.save() 
+                        if not len(cassette.organs.filter(id=organ)):
+                            cassette.organs.add(organ)
+                            cassette.save()
+                            
+        for cassette in Cassette.objects.filter(sample=sample):
+            cassette.slice_set.all().delete()
+            exams = [ sampleexam.exam for sampleexam in sample.sampleexams_set.all() if sampleexam.exam.exam_type == 1]
+            exams_uniques = []
+            _exams = []
+
+            for item in exams:
+                if item.pk not in exams_uniques:
+                    exams_uniques.append(item.pk)
+                    _exams.append(item)
+            
+            slice_index = 0
+            
+            for index, val in enumerate(_exams):
+                slice_index = index + 1
+                slice_name = cassette.cassette_name + "-S" + str(slice_index)
+                
+                analysis_form = AnalysisForm.objects.filter(
+                    entryform_id=entryform.id,
+                    exam_id=val.id,
+                ).first()
+
+                slice_new = Slice.objects.create(
+                    entryform_id = entryform.id,
+                    slice_name = slice_name,
+                    index=slice_index,
+                    cassette=cassette,
+                    analysis=analysis_form
+                )
+                slice_new.save()
 
     return False
 
@@ -1713,8 +1779,9 @@ def step_new_analysis2(request):
                         organ_id= organ
                     )
                     for cassette in Cassette.objects.filter(sample=sample):
-                        cassette.organs.add(organ)
-                        cassette.save()
+                        if not len(cassette.organs.filter(id=organ)):
+                            cassette.organs.add(organ)
+                            cassette.save()
 
             if new_analysisform.get(exam, None):
                 for cassette in Cassette.objects.filter(sample=sample):

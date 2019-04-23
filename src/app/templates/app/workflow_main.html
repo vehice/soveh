@@ -45,6 +45,7 @@
           <h3> <strong>CASO N° {{form.content_object.no_caso}}</strong></h3>
           <button class="btn btn-secondary square showSummaryBtn hidden"><i class="fa fa-list fa-fx"></i> Resumen del caso</button>
           <button class="btn btn-secondary square newAnalysisBtn hidden"><i class="fa fa-list fa-plus-circle"></i> Nuevo Análisis</button>
+          <button class="btn btn-secondary square newAnalysisBtn5 hidden"><i class="fa fa-list fa-plus-circle"></i> Nuevo Análisis</button>
         </center>
       </div>
       <div class="card-content">
@@ -153,21 +154,25 @@ var steps = $("#workflow_form").steps({
       if(!set_state) {
         var previous_step = false;
         var form_data;
-
-        if (currentIndex == 0){
-          var resp = validate_step_1();
-          if (!resp) {
-            return false
-          }
-        } else if (currentIndex == 1) {
-          var resp = validate_step_2();
-          if (!resp) {
-            return false
-          }
-        } else if (currentIndex == 2) {
-          var resp = validate_step_3();
-          if (!resp) {
-            return false
+        if(currentIndex < newIndex){
+          if (currentIndex == 0){
+            var resp = validate_step_1();
+            if (!resp) {
+              lockScreen(0);
+              return false
+            }
+          } else if (currentIndex == 1) {
+            var resp = validate_step_2();
+            if (!resp) {
+              lockScreen(0);
+              return false
+            }
+          } else if (currentIndex == 2) {
+            var resp = validate_step_3();
+            if (!resp) {
+              lockScreen(0);
+              return false
+            }
           }
         }
         
@@ -200,7 +205,10 @@ var steps = $("#workflow_form").steps({
         .fail(function (data) {
           console.log("Fail");
         })
-
+        if (response == undefined) {
+          lockScreen(0);
+          return false
+        }
         if (response.next_step_permission) {
           var step;
           var function_name;
@@ -212,7 +220,9 @@ var steps = $("#workflow_form").steps({
             step = newIndex + 1
             function_name = "init_step_" + step;
           }
-          window[function_name]();
+          setTimeout(function() {
+            window[function_name](previous_step && step==1);
+          }, 500);
         } else {
           toastr.error('No puedes continuar ya que no tienes permisos para los siguientes pasos.', 'No tienes permisos');
           setTimeout(function() {
@@ -335,11 +345,11 @@ $(document).on('click', '.showSummaryBtn', function(e){
 });
 
 $(document).on('click', '.newAnalysisBtn', function(e){
-  {% if set_step_tag and set_step_tag == "step_4" %}
     $("#new_analysis").modal("show");
-  {% else %}
+});
+
+$(document).on('click', '.newAnalysisBtn5', function(e){
     $("#new_analysis5").modal("show");
-  {% endif %}
 });
 
 function fillSummary(data){

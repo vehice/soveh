@@ -71,7 +71,7 @@
     </td>
     <td style="width:40%">
       <select class="select2 form-control form-control-sm" style="width:100%"
-        name="cassette[organ][<%= cassette_index %>]" multiple="multiple">
+        id="cassette-organ-<%= cassette_index %>" name="cassette[organ][<%= cassette_index %>]" multiple="multiple">
         <% _.each( organs, function( organ ){ %>
           <option value=<%= organ.id %>> <%= organ.name %> </option>
         <% }); %>

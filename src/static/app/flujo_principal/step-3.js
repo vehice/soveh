@@ -13,6 +13,7 @@ function init_step_3() {
     data_step_3 = data
     $('.showSummaryBtn').removeClass("hidden");
     $('.newAnalysisBtn').addClass("hidden");
+    $('.newAnalysisBtn5').addClass("hidden");
     // fillSummary(data);
 
     if ($.fn.DataTable.isDataTable('#cassettes_table')) {
@@ -36,7 +37,7 @@ function init_step_3() {
     });
   
     $('[name*="cassette[organ]"]').select2();
-    $('[name*="cassette[organ]"] > option').prop('selected', 'selected');
+    // $('[name*="cassette[organ]"] > option').prop('selected', 'selected');
     $('[name*="cassette[organ]"]').trigger('change');
     
     $('[name*="cassette[organ]"]').on("select2:unselecting", function (e) {
@@ -201,6 +202,9 @@ function loadCassetteData(data) {
           'organs': sample.organs_set
         };
         addCasseteRow(row);
+        $.each(cassette.organs_set, function(i, item){
+          $('#cassette-organ-'+cassette.index+' option[value="'+item.id+'"]').prop('selected', true);
+        });
       });
     });   
   } else {
@@ -226,6 +230,9 @@ function loadCassetteData(data) {
           'organs': sample.organs_set
         };
         addCasseteRow(row);
+        $.each( $('#cassette-organ-'+sample.index+' > option'), function(i, item){
+          $(item).prop('selected', true);
+        });
         exams+=1;
       }
     });  

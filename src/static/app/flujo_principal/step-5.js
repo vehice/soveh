@@ -9,7 +9,8 @@ function init_step_5() {
   })
     .done(function (data) {
       $('.showSummaryBtn').removeClass("hidden");
-      $('.newAnalysisBtn').removeClass("hidden");
+      $('.newAnalysisBtn').addClass("hidden");
+      $('.newAnalysisBtn5').removeClass("hidden");
       // fillSummary(data);
       fillNewAnalysis2(data);
       loadAnalysisData(data);
@@ -108,18 +109,18 @@ function loadNewExams(exams) {
 function addNewExamToSamples5(exam){
   $('#samples_new_table5 .samples_new_exams').each( function(i){
       var sampleId = $(this).data('index');
-      $('.delete_new-'+sampleId).hide();
-      $('#sampleNro_new-'+sampleId)[0].rowSpan = $('#sampleNro_new-'+sampleId)[0].rowSpan + 1; 
-      $('#sampleIden_new-'+sampleId)[0].rowSpan = $('#sampleIden_new-'+sampleId)[0].rowSpan + 1; 
+      $('.delete_new5-'+sampleId).hide();
+      $('#sampleNro_new5-'+sampleId)[0].rowSpan = $('#sampleNro_new5-'+sampleId)[0].rowSpan + 1; 
+      $('#sampleIden_new5-'+sampleId)[0].rowSpan = $('#sampleIden_new5-'+sampleId)[0].rowSpan + 1; 
       //show organs options
-      var html = addNewOrgansOptions(exam.text, $(exam.element).data('examtype'), sampleId, exam.id);
-      $("#sample_new-"+sampleId).after(html);
+      var html = addNewOrgansOptions5(exam.text, $(exam.element).data('examtype'), sampleId, exam.id);
+      $("#sample_new5-"+sampleId).after(html);
     // }
   }); 
-  $('.organs_new_select-'+ exam.id).select2();
-  $('.organs_new_select-'+ exam.id).on('select2:select', function(e){
+  $('.organs_new_select5-'+ exam.id).select2();
+  $('.organs_new_select5-'+ exam.id).on('select2:select', function(e){
     var values = e.params.data.id;
-    $.each($('.organs_new_select-'+ exam.id), function(i,v){
+    $.each($('.organs_new_select5-'+ exam.id), function(i,v){
       var old_values = $(v).val();
       old_values.push(values);
       $(v).val(old_values);
@@ -132,11 +133,11 @@ function removeNewExamFromSamples5(exam){
   $('#samples_new_table5 .analis_new_row').each( function(i){
     if($(this).data('sampleid') == exam.id && !$(this).hasClass('old_row')){
       var sampleIndex = $(this).data('sampleindex');
-      $('#sampleNro_new-'+sampleIndex)[0].rowSpan = $('#sampleNro_new-'+sampleIndex)[0].rowSpan - 1; 
-      $('#sampleIden_new-'+sampleIndex)[0].rowSpan = $('#sampleIden_new-'+sampleIndex)[0].rowSpan - 1; 
+      $('#sampleNro_new5-'+sampleIndex)[0].rowSpan = $('#sampleNro_new5-'+sampleIndex)[0].rowSpan - 1; 
+      $('#sampleIden_new5-'+sampleIndex)[0].rowSpan = $('#sampleIden_new5-'+sampleIndex)[0].rowSpan - 1; 
       $(this).remove();
-      if($('#sampleIden_new-'+sampleIndex)[0].rowSpan == 1)
-        $('.delete_new-'+sampleIndex).show();
+      if($('#sampleIden_new5-'+sampleIndex)[0].rowSpan == 1)
+        $('.delete_new5-'+sampleIndex).show();
     }
   }); 
 }
@@ -147,16 +148,16 @@ function loadNewSamples5(samples, organs){
   $.each(samples, function (i, v){
     addNewSampleRow5(v, organs);
     $.each(v.sample_exams_set, function(j,item){
-      $('.delete_new-'+v.id).hide();
-      var html = addOldOrgansOptions5(item.exam_name, item.exam_type, v.id, item.exam_id, v.id+"-"+($('#sampleNro_new-'+v.id)[0].rowSpan + 1));
-      $('#sampleNro_new-'+v.id)[0].rowSpan = $('#sampleNro_new-'+v.id)[0].rowSpan + 1; 
-      $('#sampleIden_new-'+v.id)[0].rowSpan = $('#sampleIden_new-'+v.id)[0].rowSpan + 1; 
-      $("#sample_new-"+v.id).after(html);
+      $('.delete_new5-'+v.id).hide();
+      var html = addOldOrgansOptions5(item.exam_name, item.exam_type, v.id, item.exam_id, v.id+"-"+($('#sampleNro_new5-'+v.id)[0].rowSpan + 1));
+      $('#sampleNro_new5-'+v.id)[0].rowSpan = $('#sampleNro_new5-'+v.id)[0].rowSpan + 1; 
+      $('#sampleIden_new5-'+v.id)[0].rowSpan = $('#sampleIden_new5-'+v.id)[0].rowSpan + 1; 
+      $("#sample_new5-"+v.id).after(html);
      
-      $('.organs_new_select-'+ item.exam_id).select2();
-      $('.organs_new_select-'+ item.exam_id).on('select2:select', function(e){
+      $('.organs_new_select5-'+ item.exam_id).select2();
+      $('.organs_new_select5-'+ item.exam_id).on('select2:select', function(e){
         var values = e.params.data.id;
-        $.each($('.organs_new_select-'+ item.exam_id), function(i,v){
+        $.each($('.organs_new_select5-'+ item.exam_id), function(i,v){
           var old_values = $(v).val();
           old_values.push(values);
           $(v).val(old_values);
@@ -167,8 +168,8 @@ function loadNewSamples5(samples, organs){
       $.each(item.organ_id, function(j,w){
         values.push(w.id);
       });
-      $('#select'+v.id+"-"+$('#sampleNro_new-'+v.id)[0].rowSpan).val(values);
-      $('#select'+v.id+"-"+$('#sampleNro_new-'+v.id)[0].rowSpan).trigger('change');
+      $('#select5-'+v.id+"-"+$('#sampleNro_new5-'+v.id)[0].rowSpan).val(values);
+      $('#select5-'+v.id+"-"+$('#sampleNro_new5-'+v.id)[0].rowSpan).trigger('change');
     });
   });
  
@@ -201,12 +202,12 @@ function addOldOrgansOptions5(analisis, analisis_type, sampleId, sampleIndex, op
   return templateHTML;
 }
 
-function deleteNewAnalisis(sampleId, sampleIndex){
-  $('#analisis_new-'+sampleId+'-'+sampleIndex).remove();
-  $('#sampleNro_new-'+sampleId)[0].rowSpan = $('#sampleNro_new-'+sampleId)[0].rowSpan - 1; 
-  $('#sampleIden_new-'+sampleId)[0].rowSpan = $('#sampleIden_new-'+sampleId)[0].rowSpan - 1; 
-  if($('#sampleIden_new-'+sampleId)[0].rowSpan == 1)
-    $('.delete_new-'+sampleId).show();
+function deleteNewAnalisis5(sampleId, sampleIndex){
+  $('#analisis_new5-'+sampleId+'-'+sampleIndex).remove();
+  $('#sampleNro_new5-'+sampleId)[0].rowSpan = $('#sampleNro_new5-'+sampleId)[0].rowSpan - 1; 
+  $('#sampleIden_new5-'+sampleId)[0].rowSpan = $('#sampleIden_new5-'+sampleId)[0].rowSpan - 1; 
+  if($('#sampleIden_new5-'+sampleId)[0].rowSpan == 1)
+    $('.delete_new5-'+sampleId).show();
   var exist = 0;
   $('#samples_new_table5 .analis_new_row').each( function(i){
     if($(this).data('sampleid') == sampleIndex){

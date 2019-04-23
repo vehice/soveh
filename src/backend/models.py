@@ -239,8 +239,8 @@ class Sample(models.Model):
     entryform = models.ForeignKey(
         EntryForm, null=True, on_delete=models.SET_NULL)
     index = models.IntegerField(null=True, blank=True)
-    exams = models.ManyToManyField(Exam)
-    organs = models.ManyToManyField(Organ)
+    # exams = models.ManyToManyField(Exam)
+    # organs = models.ManyToManyField(Organ)
     # cassette = models.ForeignKey(Cassette, null=True, on_delete=models.SET_NULL)
     identification = models.ForeignKey(Identification, null=True, on_delete=models.SET_NULL)
 

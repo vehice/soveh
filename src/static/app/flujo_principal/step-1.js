@@ -1,6 +1,14 @@
 // Data Template
 var organs;
 var questionReceptionCondition;
+var last_temp_id;
+function addIdentificador() {
+  last_temp_id = Math.random().toString(36).replace('0.', '');
+  addIdentificationTemplate({
+    temp_id : last_temp_id,
+    organs : organs
+  });
+}
 
 function init_step_1() {
   var url = Urls.entryform();
@@ -18,13 +26,6 @@ function init_step_1() {
     console.log("Fail")
   });
 
-  $('#identification_group').on("click", "#add_identification", function (e) {
-    var temp_id = Math.random().toString(36).replace('0.', '');
-    addIdentificationTemplate({
-      temp_id : temp_id,
-      organs : organs
-    });
-  });
 
   $('#identification_group').on("click", "#delete_identification", function (e) {
     $(this).closest(".identification").remove();
@@ -165,6 +166,7 @@ function init_step_1() {
       url: url,
     })
     .done(function (data) {
+      $('#identification_group_list').html('');
       var entryform = data.entryform;
       // $('#customer_select').val(entryform.customer_id).trigger('change');
       $('#fixtative_select').val(entryform.fixative_id).trigger('change');
@@ -176,6 +178,8 @@ function init_step_1() {
       $('#company_input').val(entryform.company);
       $('#center_input').val(entryform.center);
       $('#responsible_input').val(entryform.responsible);
+      $('#larvalstage_select').val(entryform.larvalstage_id);
+      $('#watersource_select').val(entryform.watersource_id);
 
       if (entryform.created_at) {
         $('[name="created_at"]').val(moment(entryform.created_at).format("DD/MM/YYYY HH:MM") || "");
@@ -201,24 +205,47 @@ function init_step_1() {
 
       var identification_size = entryform.identifications.length;
 
-      if (identification_size > 1) {
-        for (var i = 1; i < identification_size; i++) {
-          $("#add_identification").trigger("click");
-        }
+      if(identification_size == 0){
+        var temp_id = Math.random().toString(36).replace('0.', '');
+        addIdentificationTemplate({
+          temp_id : temp_id,
+          organs : organs
+        });
       }
-
-      var identifications_cage = $('[name="identification[cage]"]');
-      var identifications_group = $('[name="identification[group]"]');
-      var identifications_no_fish = $('[name="identification[no_fish]"]');
-      var identifications_no_container = $('[name="identification[no_container]"]')
-
-      $.each(entryform.identifications, function (i, item) {
-        $(identifications_cage[i]).val(item.cage);
-        $(identifications_group[i]).val(item.group);
-        $(identifications_no_fish[i]).val(item.no_fish);
-        $(identifications_no_container[i]).val(item.no_container);
-      });
-
+      
+      if (identification_size >= 1) {
+        $.each(entryform.identifications, function (i, item) {
+          $("#add_identification").trigger("click");
+          var identifications_cage = $('[name="identification[cage]"]');
+          var identifications_group = $('[name="identification[group]"]');
+          var identifications_no_fish = $('[name="identification[no_fish]"]');
+          var identifications_no_container = $('[name="identification[no_container]"]')
+          var identifications_weight = $('[name="identification[weight]"]')
+          var identifications_extra_features_detail = $('[name="identification[extra_features_detail]"]')
+          var identifications_observations = $('[name="identification[observations]"]')
+          var identifications_organs = $('[name="identification[organs]['+last_temp_id+']"]')
+          
+          $(identifications_cage[i]).val(item.cage);
+          $(identifications_group[i]).val(item.group);
+          $(identifications_no_fish[i]).val(item.no_fish);
+          $(identifications_no_container[i]).val(item.no_container);
+          $(identifications_weight[i]).val(item.weight);
+          $(identifications_extra_features_detail[i]).val(item.extra_features_detail);
+          $(identifications_observations[i]).val(item.observation);
+          var orgs = [];
+          $.each(item.organs_set, function(j,v){
+            orgs.push(v.id);
+          });
+          $(identifications_organs[0]).val(orgs);
+          $(identifications_organs[0]).trigger('change');
+          if(item.is_optimum){
+            $('[name="identification[is_optimal]['+last_temp_id+']"]')[0].checked = true;
+          }
+          else{
+            $('[name="identification[is_optimal]['+last_temp_id+']"]')[1].checked = true;
+          }
+        });
+      }
     })
     .fail(function () {
       console.log("Fail")
@@ -237,12 +264,6 @@ function init_step_1() {
   }
 
   function initialConf() {
-    var temp_id = Math.random().toString(36).replace('0.', '');
-    addIdentificationTemplate({
-      temp_id : temp_id,
-      organs : organs
-    });
-  
     $('#datetime_created_at').datetimepicker({
       locale: 'es',
       keepOpen: false,
@@ -417,7 +438,7 @@ function addIdentificationTemplate(data) {
   var templateFn = _.template(identificationTemplate);
   var templateHTML = templateFn(data);
 
-  $("#identification_group").append(templateHTML);
+  $("#identification_group_list").append(templateHTML);
 
   $('.identification_organs').select2();
 }
