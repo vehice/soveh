@@ -1815,6 +1815,9 @@ def step_1_analysisform(request):
         slice_new = Slice.objects.get(pk=values[0])
         slice_new.start_stain = values[1]
         slice_new.end_stain = values[2]
+        slice_new.start_scan = None
+        slice_new.end_scan = None
+        slice_new.slice_store = None
 
         slice_new.save()
 
@@ -1842,7 +1845,7 @@ def step_2_analysisform(request):
         slice_new.start_scan = values[1]
         slice_new.end_scan = values[2]
         slice_new.slice_store = values[3]
-
+        slice_new.box_id = None
         slice_new.save()
 
 
@@ -1850,10 +1853,10 @@ def step_3_analysisform(request):
     var_post = request.POST.copy()
 
     store_slice_id = [
-        v for k, v in var_post.items() if k.startswith("store_slice_id")
+        v for k, v in var_post.items() if k.startswith("store[slice_id]")
     ]
     store_box_id = [
-        v for k, v in var_post.items() if k.startswith("store_box_id")
+        v for k, v in var_post.items() if k.startswith("store[box_id]")
     ]
 
     zip_store = zip(store_slice_id, store_box_id)
@@ -1861,7 +1864,7 @@ def step_3_analysisform(request):
     for values in zip_store:
         slice_new = Slice.objects.get(pk=values[0])
         slice_new.box_id = values[1]
-
+        slice_new.report_set.all().delete()
         slice_new.save()
 
 

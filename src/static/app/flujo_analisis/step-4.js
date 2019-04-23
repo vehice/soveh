@@ -64,39 +64,6 @@ function init_step_4() {
     loadSelectNewPathologyModal(organ_index);
   });
 
-  $(document).on('click', '#new_pathology_save', function (e) {
-    var url = Urls.report();
-    var form_id = $(this).data('form');
-    var form_data = $("#new_pathology :input").serialize();
-    var pathology = $('#pathology_select').find(':selected').text();
-    lockScreen(1);
-    $.ajax({
-      type: "POST",
-      url: url,
-      data: form_data,
-    })
-    .done(function (data) {
-      if (data.ok) {
-        var pathology_cell = $("#pathology_table .select #pathology");
-        $(pathology_cell).append(pathology + " ");
-
-        $('#new_pathology').modal('hide');
-        toastr.success('', 'Hallazgo ingresado exitosamente.');
-        setTimeout(function() {
-          window.location.href = "/workflow/"+form_id+"/step_4";
-        }, 1500);
-      } else {
-        toastr.error('', 'Error al ingresar hallazgo. Favor intentar nuevamente!');
-        setTimeout(function() {
-          window.location.href = "/workflow/"+form_id+"/step_4";
-        }, 1500);
-      }
-    })
-    .fail(function () {
-      toastr.error('', 'Error al ingresar hallazgo. Favor intentar nuevamente!');
-    })
-  });
-
   $(document).on('click', '#show_pathology_link', function (e) {
     var slice_id = $(this).data("slice-id");
     var url = Urls.report_by_slice(slice_id);
@@ -205,6 +172,39 @@ function init_step_4() {
     $('#load_images_modal').modal('show');
   });
 
+}
+
+function saveReport(id) {
+  var url = Urls.report();
+  var form_id = id;
+  var form_data = $("#new_pathology :input").serialize();
+  var pathology = $('#pathology_select').find(':selected').text();
+  lockScreen(1);
+  $.ajax({
+    type: "POST",
+    url: url,
+    data: form_data,
+  })
+  .done(function (data) {
+    if (data.ok) {
+      var pathology_cell = $("#pathology_table .select #pathology");
+      $(pathology_cell).append(pathology + " ");
+
+      $('#new_pathology').modal('hide');
+      toastr.success('', 'Hallazgo ingresado exitosamente.');
+      setTimeout(function() {
+        window.location.href = "/workflow/"+form_id+"/step_4";
+      }, 1500);
+    } else {
+      toastr.error('', 'Error al ingresar hallazgo. Favor intentar nuevamente!');
+      setTimeout(function() {
+        window.location.href = "/workflow/"+form_id+"/step_4";
+      }, 1500);
+    }
+  })
+  .fail(function () {
+    toastr.error('', 'Error al ingresar hallazgo. Favor intentar nuevamente!');
+  })
 }
 
 function initializeSelect2NewPathologyModal() {
