@@ -36,6 +36,28 @@
   <!-- BEGIN Custom CSS-->
   <link rel="stylesheet" type="text/css" href="{% static 'assets/css/style.css' %}">
   <!-- END Custom CSS-->
+  <style>
+      .dropdown-content-avatar {
+        display: none;
+        position: absolute;
+        background-color: #f1f1f1;
+        min-width: 160px;
+        overflow: auto;
+        box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+        z-index: 1;
+      }
+      
+      .dropdown-content-avatar a {
+        color: black;
+        padding: 12px 16px;
+        text-decoration: none;
+        display: block;
+      }
+      
+      .dropdown a:hover {background-color: #ddd;}
+      
+      .show {display: block;}
+      </style>
   {% block stylesheets %}{% endblock stylesheets %}
 </head>
 
@@ -96,7 +118,25 @@
         $.unblockUI();
       }
     }
-  </script> {% block scripts %}{% endblock scripts %}
+  </script> 
+  <script>
+      function myFunction() {
+        document.getElementById("myDropdown").classList.toggle("show");
+      }
+      window.onclick = function(event) {
+        if (!event.target.matches('.dropbtn')) {
+          var dropdowns = document.getElementsByClassName("dropdown-content-avatar");
+          var i;
+          for (i = 0; i < dropdowns.length; i++) {
+            var openDropdown = dropdowns[i];
+            if (openDropdown.classList.contains('show')) {
+              openDropdown.classList.remove('show');
+            }
+          }
+        }
+      }
+      </script>
+  {% block scripts %}{% endblock scripts %}
 </body>
 
 </html>

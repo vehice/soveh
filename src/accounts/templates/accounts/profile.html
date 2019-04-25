@@ -47,11 +47,10 @@
               <div class="panel-body">
                 <!-- <div class="picture-container"> -->
                     <div class="picture-sm">
-                        <img src="{% if request.user|has_avatar %}{% avatar_url user 80 %}{% else %}{% static 'assets/img/default-avatar.png' %}{% endif %}" class="picture-src" id="wizardPicturePreview" style="width:80px" title=""/>
+                        <img src="{% if request.user|has_avatar %}{% avatar_url user 80 %}{% else %}{% static 'assets/images/portrait/small/avatar-s-1.png' %}{% endif %}" class="picture-src" id="wizardPicturePreview" style="width:80px" title=""/>
                     </div>
                 <!-- </div> -->
                 <div class="name" id="global_name">{{name}}</div>
-                <div class="info">{{group}}</div>
               </div>
             </div><!-- panel -->
             <div class="list-group list-group-alternate mb-n nav nav-tabs">
@@ -89,7 +88,7 @@
                         <div class="panel-footer">
                             <div class="row">
                                 <div class="col-sm-3 col-sm-offset-9">
-                                    <input type="submit" class="btn-midnightblue btn" id="change_pass" value="Guardar">
+                                    <input type="submit" class="btn-primary btn" id="change_pass" value="Guardar">
                                 </div>
                             </div>
                         </div>
@@ -102,7 +101,7 @@
                             <h2>Información Personal</h2>
                         </div>
                         <div class="panel-body">
-                            <form id="change_data">
+                            <form id="change_data" action="{% url 'change_info' %}" method="POST">
                                 <div class="col-sm-10 col-sm-offset-1">
                                     <div class="form-group">
                                         <label for="first_name">Nombre</label>
@@ -129,7 +128,7 @@
                                         <div class="fileinput fileinput-new" style="width: 100%;" data-provides="fileinput">
                                             {% if hayFoto == 1 %}
                                             <div class="fileinput-new thumbnail" style="width: 100%; height: 150px;">
-                                                <img src="{% static signature %}" alt="...">
+                                                <img src="{{signature}}" alt="..." height="250px">
                                             </div>
                                             <div class="fileinput-preview fileinput-exists thumbnail" style="width: 100%; height: 150px;"></div>
                                             {% else %}
@@ -147,7 +146,7 @@
                         <div class="panel-footer">
                             <div class="row">
                                 <div class="col-sm-3 col-sm-offset-9">
-                                    <button class="btn-midnightblue btn" id="change_personal_data">Guardar</button>
+                                    <button class="btn-primary btn" id="change_personal_data">Guardar</button>
                                 </div>
                             </div>
                         </div>
@@ -166,8 +165,8 @@
                                     <div class="col-sm-4 col-sm-offset-4">
                                         <div class="picture-container">
                                             <div class="picture">
-                                                <img src="{% if request.user|has_avatar %}{% avatar_url user 200 %}{% else %}{% static 'assets/img/default-avatar.png' %}{% endif %}" class="picture-src" id="wizardPicturePreview" title=""/>
-                                                <input type="file" name="avatar" id="wizard-picture">
+                                                <img src="{% if request.user|has_avatar %}{% avatar_url user 200 %}{% else %}{% static 'assets/images/portrait/small/avatar-s-1.png' %}{% endif %}" class="picture-src" id="wizardPicturePreview" title=""/>
+                                                <input type="file" name="avatar" id="wizard-picture" required>
                                             </div>
                                             <h4>Selecciona tu imagen</h4>
                                         </div>
@@ -175,7 +174,7 @@
                                 </div>
                                 <div class="row">
                                     <div class="col-sm-3 col-sm-offset-9 clearfix">
-                                        <input type="submit" class="btn-midnightblue btn" id="change_avatar" value="Guardar">
+                                        <input type="submit" class="btn-primary btn" id="change_avatar" value="Guardar">
                                     </div>
                                 </div>
                             </form>
@@ -193,27 +192,37 @@
 
 
 {% block scripts %}
+<script src="{% static 'assets/js/jquery.form.js' %}"></script>
 <script>
+$('#change_password')[0].reset();
 $('#change_pass').on('click', function(){
     var url  = "{% url 'change-password' %}"
-    console.log(url)
-    $.when($.submitAdmin({url: url,formId: 'change_password', resetForm: true})).done(function(data){
-        layout = $.layoutNotifications({error: data.error,message: data.message});
-        $('#change_password')[0].reset();
-        $('#notifications').html('')
-        $('#notifications').css('display','block')
-        $('#notifications').append(layout).delay(4000).fadeOut();
-    });
+    data = $('#change_password').serialize();
+    $.ajax(url, {
+        data: data,
+        type: 'post',
+        success: function(data) {
+            if(data.error){
+                toastr.error(data.message, '');
+            }
+            else{
+                toastr.success(data.message, '');
+                $('#change_password')[0].reset();
+            }
+        },
+        error: function() {
+        }
+    })
 });
 
 $('#change_personal_data').on('click', function(){
-    var url  = "{% url 'change_info' %}"
-    console.log(url)
-    $.when($.submitFile({url: url,formId: 'change_data', resetForm: true})).done(function(data){
-        if (data.error == 0){
+    $('#change_data').ajaxSubmit({
+        success: function(data) {
             window.location.href = "/accounts/profile"
+            },
+        error: function() {
         }
-    });
+    })
 });
 </script>
 {% endblock scripts %}

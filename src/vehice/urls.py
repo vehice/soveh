@@ -30,6 +30,7 @@ urlpatterns = [
     url(r'^accounts/', include('accounts.urls')),
     url(r'^', include('app.urls')),
     url(r'^', include('backend.urls')),
+    url('avatar/', include('avatar.urls')),
     url(r'^jsreverse/$', urls_js, name='js_reverse'),
 ] + static(
     settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

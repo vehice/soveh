@@ -327,7 +327,7 @@ def user_profile(request):
         signature = userProfile.signature.url
     return render(
         request, 'accounts/profile.html', {
-            'group': grupo.name,
+            'group': grupo.name if grupo else None,
             'name': nombre,
             'first_name': user.first_name.capitalize(),
             'last_name': user.last_name.capitalize(),
@@ -343,14 +343,14 @@ def user_profile(request):
 def change_password(request):
     var_post = request.POST.copy()
     user = authenticate(
-        username=request.user.email, password=request.POST['old_password'])
+        username=request.user.username, password=request.POST['old_password'])
     pass1 = var_post['new_password1']
     pass2 = var_post['new_password2']
     if user:
         if pass1 == pass2:
             user.set_password(pass1)
             user.save()
-            user = authenticate(username=request.user.email, password=pass1)
+            user = authenticate(username=request.user.username, password=pass1)
             login(request, user)
             return render2({
                 'error': 0,
