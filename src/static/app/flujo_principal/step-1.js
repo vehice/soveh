@@ -182,12 +182,12 @@ function init_step_1() {
       $('#watersource_select').val(entryform.watersource_id);
 
       if (entryform.created_at) {
-        $('[name="created_at"]').val(moment(entryform.created_at).format("DD/MM/YYYY HH:MM") || "");
+        $('[name="created_at"]').val(moment(entryform.created_at).format("DD/MM/YYYY HH:mm") || "");
       } else {
         $('[name="created_at"]').val("");
       }
       if (entryform.sampled_at) {
-        $('[name="sampled_at"]').val(moment(entryform.sampled_at).format("DD/MM/YYYY HH:MM") || "");
+        $('[name="sampled_at"]').val(moment(entryform.sampled_at).format("DD/MM/YYYY HH:mm") || "");
       } else {
         $('[name="sampled_at"]').val("");
       }

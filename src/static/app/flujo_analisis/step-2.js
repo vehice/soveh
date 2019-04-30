@@ -18,7 +18,7 @@ function init_step_2() {
 
   $(document).on('change', '#scan_table :checkbox', function (e) {
     if (e.target.checked) {
-      $("[name='" + e.target.id + "']").val(moment().format());
+      $("[name='" + e.target.id + "']").val(moment().format("DD/MM/YYYY HH:mm:ss"));
     } else {
       $("[name='" + e.target.id + "']").val("");
     }

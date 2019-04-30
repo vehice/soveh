@@ -958,13 +958,13 @@ def save_block_timing(request):
             _slices = Slice.objects.filter(cassette=Cassette.objects.get(pk=values[0]))
             for _slice in _slices:
                 if values[1] != '':
-                    _slice.start_block = values[1]
+                    _slice.start_block = datetime.strptime(values[1], '%d/%m/%Y %H:%M:%S') or None
                 if values[2] != '':
-                    _slice.end_block = values[2]
+                    _slice.end_block = datetime.strptime(values[2], '%d/%m/%Y %H:%M:%S') or None
                 if values[3] != '':
-                    _slice.start_slice = values[3]
+                    _slice.start_slice = datetime.strptime(values[3], '%d/%m/%Y %H:%M:%S') or None
                 if values[4] != '':
-                    _slice.end_slice = values[4]
+                    _slice.end_slice = datetime.strptime(values[4], '%d/%m/%Y %H:%M:%S') or None
                 _slice.save()
         return JsonResponse({'ok': True})
     except:
@@ -989,9 +989,9 @@ def save_stain_timing(request):
         for values in zip_stain:
             slice_new = Slice.objects.get(pk=values[0])
             if values[1] != '':
-                slice_new.start_stain = values[1]
+                slice_new.start_stain = datetime.strptime(values[1], '%d/%m/%Y %H:%M:%S') or None
             if values[2] != '':
-                slice_new.end_stain = values[2]
+                slice_new.end_stain = datetime.strptime(values[2], '%d/%m/%Y %H:%M:%S') or None
             slice_new.save()
         return JsonResponse({'ok': True})
     except Exception as e:
@@ -1020,9 +1020,9 @@ def save_scan_timing(request):
         for values in zip_scan:
             slice_new = Slice.objects.get(pk=values[0])
             if values[1] != '':
-                slice_new.start_scan = values[1]
+                slice_new.start_scan = datetime.strptime(values[1], '%d/%m/%Y %H:%M:%S') or None
             if values[2] != '':
-                slice_new.end_scan = values[2]
+                slice_new.end_scan = datetime.strptime(values[2], '%d/%m/%Y %H:%M:%S') or None
             if values[3] != '':
                 slice_new.slice_store = values[3]
 
@@ -1540,7 +1540,12 @@ def step_3_entryform(request):
     var_post = request.POST.copy()
 
     entryform = EntryForm.objects.get(pk=var_post.get('entryform_id'))
-    processor_loaded_at = var_post.get('processor_loaded_at_submit')
+
+    processor_loaded_at = None
+    try:
+        processor_loaded_at = datetime.strptime(var_post.get('processor_loaded_at'), '%d/%m/%Y %H:%M')
+    except Exce: 
+        pass
 
     cassette_sample_id = [
         v for k, v in var_post.items() if k.startswith("cassette[sample_id]")
@@ -1634,10 +1639,10 @@ def step_4_entryform(request):
     for values in zip_block:
         _slices = Slice.objects.filter(cassette=Cassette.objects.get(pk=values[0]))
         for _slice in _slices:
-            _slice.start_block = values[1]
-            _slice.end_block = values[2]
-            _slice.start_slice = values[3]
-            _slice.end_slice = values[4]
+            _slice.start_block = datetime.strptime(values[1], '%d/%m/%Y %H:%M:%S') or None
+            _slice.end_block = datetime.strptime(values[2], '%d/%m/%Y %H:%M:%S') or None
+            _slice.start_slice = datetime.strptime(values[3], '%d/%m/%Y %H:%M:%S') or None
+            _slice.end_slice = datetime.strptime(values[4], '%d/%m/%Y %H:%M:%S') or None
             _slice.save()
 
     return True
@@ -1813,8 +1818,8 @@ def step_1_analysisform(request):
 
     for values in zip_stain:
         slice_new = Slice.objects.get(pk=values[0])
-        slice_new.start_stain = values[1]
-        slice_new.end_stain = values[2]
+        slice_new.start_stain = datetime.strptime(values[1], '%d/%m/%Y %H:%M:%S') or None
+        slice_new.end_stain = datetime.strptime(values[2], '%d/%m/%Y %H:%M:%S') or None
         slice_new.start_scan = None
         slice_new.end_scan = None
         slice_new.slice_store = None
@@ -1842,8 +1847,8 @@ def step_2_analysisform(request):
 
     for values in zip_scan:
         slice_new = Slice.objects.get(pk=values[0])
-        slice_new.start_scan = values[1]
-        slice_new.end_scan = values[2]
+        slice_new.start_scan = datetime.strptime(values[1], '%d/%m/%Y %H:%M:%S') or None
+        slice_new.end_scan = datetime.strptime(values[2], '%d/%m/%Y %H:%M:%S') or None
         slice_new.slice_store = values[3]
         slice_new.box_id = None
         slice_new.save()

@@ -46,7 +46,7 @@ function init_step_4() {
 
 $(document).on('change', '#block_table :checkbox', function (e) {
   if (e.target.checked) {
-    $("[name='" + e.target.id + "']").val(moment().format());
+    $("[name='" + e.target.id + "']").val(moment().format("DD/MM/YYYY HH:mm:ss"));
   } else {
     $("[name='" + e.target.id + "']").val("");
   }

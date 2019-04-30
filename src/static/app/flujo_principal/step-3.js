@@ -51,13 +51,15 @@ function init_step_3() {
 
   $('#datetime_processor_loaded_at').datetimepicker({
     locale: 'es',
+    keepOpen: false,
+    format:'DD/MM/YYYY HH:mm'
   });
 
-  $('#datetime_processor_loaded_at').on("dp.change", function (e) {
-    if (e.date) {
-      $("#processor_loaded_at_submit").val(e.date.format());
-    }
-  });
+  // $('#datetime_processor_loaded_at').on("dp.change", function (e) {
+  //   if (e.date) {
+  //     $("#processor_loaded_at_submit").val(e.date.format());
+  //   }
+  // });
 }
 
 function validate_step_3(){  
@@ -188,7 +190,7 @@ $(document).on('click', '.add_cassette_to_sample', function (e) {
 
 function loadCassetteData(data) {
   if (data.entryform.cassettes.length > 0){
-    $('[name="processor_loaded_at"]').val(moment(data.entryform.cassettes[0].processor_loaded_at).format("DD/MM/YYYY HH:MM") || "");
+    $('[name="processor_loaded_at"]').val(moment(data.entryform.cassettes[0].processor_loaded_at).format("DD/MM/YYYY HH:mm") || "");
     $('#processor_loaded_at_submit').val(data.entryform.cassettes[0].processor_loaded_at);
 
     $.each(data.samples, function (i, sample) {

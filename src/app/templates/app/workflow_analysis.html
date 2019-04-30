@@ -418,8 +418,8 @@ function fillSummary(data){
   $('.summaryCompany').html('<b>Empresa</b>: '+ data.entryform.company);
   $('.summaryCenter').html('<b>Centro</b>: '+ data.entryform.center);
   $('.summaryResponsible').html('<b>Responsable</b>: '+ data.entryform.responsible);
-  $('.summaryReception').html('<b>Fecha recepción</b>: '+ moment(data.entryform.created_at).format("DD/MM/YYYY HH:MM") );
-  $('.sumarrySampling').html('<b>Fecha muestreo</b>: '+ moment(data.entryform.sampled_at).format("DD/MM/YYYY HH:MM") );
+  $('.summaryReception').html('<b>Fecha recepción</b>: '+ moment(data.entryform.created_at).format("DD/MM/YYYY HH:mm") );
+  $('.sumarrySampling').html('<b>Fecha muestreo</b>: '+ moment(data.entryform.sampled_at).format("DD/MM/YYYY HH:mm") );
   $('.summaryNoOrder').html('<b>No. orden</b>: '+ data.entryform.no_order);
   $('.summaryNoRequest').html('<b>No. solicitud</b>: '+ data.entryform.no_request);
   $('.summaryFixative').html('<b>Fijador</b>: '+ data.entryform.fixative);
@@ -451,7 +451,7 @@ function fillSummary(data){
 
   var tpl_exams = '<div class="col-sm-12"><h6 class="form-section mt-2"> Servicios</h6></br>';
   $.each(data.entryform.analyses, function(i, item){
-    tpl_exams += '<div class="alert alert-light"><b>'+ item.exam__name +':</b> '+ moment(item.created_at).format("DD/MM/YYYY HH:MM") +'</div>';
+    tpl_exams += '<div class="alert alert-light"><b>'+ item.exam__name +':</b> '+ moment(item.created_at).format("DD/MM/YYYY HH:mm") +'</div>';
   });
 
   tpl_exams += '</div>';
