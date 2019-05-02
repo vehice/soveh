@@ -548,12 +548,15 @@ class WORKFLOW(View):
         object_form_id = form.content_object.id
 
         if (form.content_type.name == 'entry form'):
+            actor = Actor.objects.filter(profile_id=request.user.userprofile.profile_id).first()
+            edit = 1 if actor.permission.filter(from_state_id=step_tag.split('_')[1], type_permission='w').first() else 0
             route = 'app/workflow_main.html'
             data = {
                 'form': form,
                 'form_id': form_id,
                 'entryform_id': object_form_id,
-                'set_step_tag': step_tag
+                'set_step_tag': step_tag,
+                'edit': edit
             }
         elif (form.content_type.name == 'analysis form'):
             route = 'app/workflow_analysis.html'
@@ -662,14 +665,14 @@ class WORKFLOW(View):
             if not previous_step:
                 process_answer = call_process_method(form.content_type.model,
                                                      request)
+            
+            for actor in form.state.step.actors.all():
+                if actor.profile == up.profile:
+                    next_step_permission = True
 
             if process_answer:
                 form.state = next_state
                 form.save()
-
-                for actor in form.state.step.actors.all():
-                    if actor.profile == up.profile:
-                        next_step_permission = True
                 process_response = True
             else:
                 print("FALLO EL PROCESAMIENTO")

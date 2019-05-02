@@ -1,4 +1,4 @@
-function init_step_4() {
+function init_step_4(active = true) {
   var entryform_id = $('#entryform_id').val();
   var url = Urls.cassette_entryform_id(entryform_id);
 
@@ -13,7 +13,7 @@ function init_step_4() {
       $('.newAnalysisBtn5').addClass("hidden");
       // fillSummary(data);
       fillNewAnalysis(data);
-      loadBlockTable(data); 
+      loadBlockTable(data, active); 
     })
     .fail(function () {
       console.log("Fail")
@@ -101,12 +101,12 @@ $(document).on('click', '#saveTimingStep4', function (e) {
   })
 });
 
-function loadBlockTable(data) {
+function loadBlockTable(data, active = true) {
   if ($.fn.DataTable.isDataTable('#block_table')) {
     $('#block_table').DataTable().clear().destroy();
   }
 
-  populateBlockTable(data);
+  populateBlockTable(data, active);
 
   var elems = Array.prototype.slice.call(document.querySelectorAll('.switchery'));
 
@@ -127,7 +127,7 @@ function loadBlockTable(data) {
   });
 }
 
-function populateBlockTable(data) {
+function populateBlockTable(data, active = true) {
   $.each(data.cassettes, function (i, item) {
     var row = {};
 
@@ -165,15 +165,23 @@ function populateBlockTable(data) {
 
     if (row.start_block) {
       $("#block_start_block_" + i).trigger("click");
+      if(!active)
+        $("#block_start_block_" + i).attr("disabled", true);
     }
     if (row.end_block) {
       $("#block_end_block_" + i).trigger("click");
+      if(!active)
+      $("#block_end_block_" + i).attr("disabled", true);
     }
     if (row.start_slice) {
       $("#block_start_slice_" + i).trigger("click");
+      if(!active)
+      $("#block_start_slice_" + i).attr("disabled", true);
     }
     if (row.end_slice) {
       $("#block_end_slice_" + i).trigger("click");
+      if(!active)
+      $("#block_end_slice_" + i).attr("disabled", true);
     }
   });
 }

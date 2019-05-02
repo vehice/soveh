@@ -142,6 +142,7 @@ var steps = $("#workflow_form").steps({
     bodyTag: "fieldset",
     transitionEffect: "fade",
     titleTemplate: '<span class="step">#index#</span> #title#',
+    enablePagination: {{edit}} == 1,
     labels: {
         previous: 'Deshacer y Volver',
         next: 'Continuar',
@@ -221,7 +222,7 @@ var steps = $("#workflow_form").steps({
             function_name = "init_step_" + step;
           }
           setTimeout(function() {
-            window[function_name](previous_step && step==1);
+            window[function_name](previous_step && step==1, {{edit}} == 1);
           }, 500);
         } else {
           toastr.error('No puedes continuar ya que no tienes permisos para los siguientes pasos.', 'No tienes permisos');
@@ -318,7 +319,7 @@ $(window).on('load', function (e) {
 
     form.steps("setStep", step_wizard);
 
-    window[step_tag_function]();
+    window[step_tag_function]({{edit}} == 1);
 
   {% else %}
     set_state = false;

@@ -14,9 +14,11 @@
       </div>
     </div>
     <div id="block_group">
-      <div class="col-md-12 text-right m-1">
-        <button type="button" id="saveTimingStep4" class="btn btn-warning square"><i class="fa fa-save"></i> Guardar Cambios</button>
-      </div>
+        {% if edit %}
+        <div class="col-md-12 text-right m-1">
+          <button type="button" id="saveTimingStep4" class="btn btn-warning square"><i class="fa fa-save"></i> Guardar Cambios</button>
+        </div>
+        {% endif %}
       <div class="table-responsive">
         <table id="block_table" class="table table-bordered table-condensed" width="100%" cellpadding="0" cellspacing="0" border="0">
           <thead>

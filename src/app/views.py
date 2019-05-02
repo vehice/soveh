@@ -49,18 +49,21 @@ def show_analisis(request):
 @login_required
 def show_ingresos(request):
     up = UserProfile.objects.filter(user=request.user).first()
+    editar = up.profile_id in (1,3)
     check_forms = Form.objects.filter(content_type__model='entryform', state__id=1)
     for f in check_forms:
         if Identification.objects.filter(entryform=f.content_object).count() == 0:
             f.delete()
-    if up.user.is_staff:
-        form = Form.objects.filter(content_type__model='entryform').order_by('-object_id')
-    else:
-        form = Form.objects.filter(
-            content_type__model='entryform',
-            state__step__actors__profile=up.profile).order_by('-object_id')
 
-    return render(request, 'app/ingresos.html', {'entryForm_list': form})
+    form = Form.objects.filter(content_type__model='entryform').order_by('-object_id')
+    # if up.user.is_staff:
+    #     form = Form.objects.filter(content_type__model='entryform').order_by('-object_id')
+    # else:
+    #     form = Form.objects.filter(
+    #         content_type__model='entryform',
+    #         state__step__actors__profile=up.profile).order_by('-object_id')
+
+    return render(request, 'app/ingresos.html', {'entryForm_list': form, 'edit': editar})
 
 
 @login_required
@@ -94,11 +97,16 @@ def new_ingreso(request):
 def show_workflow_main_form(request, form_id):
     form = Form.objects.get(pk=form_id)
     entryform_id = form.content_object.id
+    actor = Actor.objects.filter(profile_id=request.user.userprofile.profile_id).first()
+    edit = 1 if actor.permission.filter(from_state_id=1, type_permission='w').first() else 0
+    if not edit:
+        return show_ingresos(request)
 
     return render(request, 'app/workflow_main.html', {
         'form': form,
         'form_id': form_id,
-        'entryform_id': entryform_id
+        'entryform_id': entryform_id,
+        'edit': edit
     })
 
 def make_pdf_file(id):
