@@ -1,8 +1,5 @@
-$(function () {
-  init_step_1();
-});
 
-function init_step_1() {
+function init_step_1(active = true) {
   var analysis_id = $('#analysis_id').val();
   var url = Urls.slice_analysis_id(analysis_id);
   $.ajax({
@@ -12,7 +9,7 @@ function init_step_1() {
   .done(function (data) {
     $('.showSummaryBtn').removeClass("hidden");
     fillSummary(data);
-    loadStainTable(data)
+    loadStainTable(data, active)
   })
   .fail(function () {
     console.log("Fail")
@@ -62,12 +59,12 @@ $(document).on('click', '#saveTimingStep1', function (e) {
   })
 });
 
-function loadStainTable(data) {
+function loadStainTable(data, active = true) {
   if ($.fn.DataTable.isDataTable('#stain_table')) {
     $('#stain_table').DataTable().clear().destroy();
   }
 
-  populateStainTable(data);
+  populateStainTable(data, active);
 
   var elems = Array.prototype.slice.call(document.querySelectorAll('.switchery'));
 
@@ -84,7 +81,7 @@ function loadStainTable(data) {
   });
 }
 
-function populateStainTable(data) {
+function populateStainTable(data, active = true) {
   $.each(data.slices, function (i, item) {
     var row = {};
 
@@ -97,13 +94,17 @@ function populateStainTable(data) {
     row.end_stain = item.end_stain;
 
     addStainRow(row)
-
+    console.log(active)
     if (item.start_stain != null) {
       $("#stain_start_stain_" + i).trigger("click");
     }
+    if(!active)
+      $("#stain_start_stain_" + i).attr("disabled", true);
     if (item.end_stain != null) {
       $("#stain_end_stain_" + i).trigger("click");
     }
+    if(!active)
+      $("#stain_end_stain_" + i).attr("disabled", true);
     
   });
 }

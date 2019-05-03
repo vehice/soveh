@@ -87,7 +87,7 @@
                 <center><h3 class="text-danger"><strong>HALLAZGOS</strong></h3></center>
               </div>
               <input type="hidden" name="box-findings" id="box-findings">
-              <div class="col-md-12" id="summernote-hallazgos">
+              <div class="col-md-12 summernote" id="summernote-hallazgos">
                 {% if reopen %}
                   {{report_finalExtra.box_findings | safe}}
                 {% else %}
@@ -139,7 +139,7 @@
                 <center><h3 class="text-danger"><strong>DIAGNÓSTICO</strong></h3></center>
               </div>
               <input type="hidden" name="box-diagnostics" id="box-diagnostics">
-              <div class="col-md-12" id="summernote-diagnosticos">
+              <div class="col-md-12 summernote" id="summernote-diagnosticos">
                 {% if reopen %}
                   {{report_finalExtra.box_diagnostics | safe}}
                 {% else %}
@@ -172,7 +172,7 @@
                 <center><h3 class="text-danger"><strong>COMENTARIOS</strong></h3></center>
               </div>
               <input type="hidden" name="box-comments" id="box-comments">
-              <div class="col-md-12" id="summernote-comentarios">
+              <div class="col-md-12 summernote" id="summernote-comentarios">
                   {% if reopen %}
                     {{report_finalExtra.box_comments | safe}}
                   {% endif %}
@@ -198,7 +198,7 @@
               </div>
 
               <input type="hidden" name="box-tables" id="box-tables">
-              <div id="summernote-tablas">
+              <div id="summernote-tablas" class="summernote">
                 {% if reopen %}
                   {{report_finalExtra.box_tables| safe}}
                 {% else %}

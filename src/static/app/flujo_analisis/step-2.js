@@ -1,4 +1,4 @@
-function init_step_2() {
+function init_step_2(active = true) {
   var analysis_id = $('#analysis_id').val();
   var url = Urls.slice_analysis_id(analysis_id);
   $.ajax({
@@ -6,7 +6,7 @@ function init_step_2() {
     url: url,
   })
   .done(function (data) {
-    loadScanTable(data);
+    loadScanTable(data, active);
     $('.showSummaryBtn').removeClass("hidden");
     fillSummary(data);
   })
@@ -72,12 +72,12 @@ $(document).on('click', '.showSummary', function (e) {
   });
 });
 
-function loadScanTable(data) {
+function loadScanTable(data, active = true) {
   if ($.fn.DataTable.isDataTable('#scan_table')) {
     $('#scan_table').DataTable().clear().destroy();
   }
 
-  populateScanTable(data);
+  populateScanTable(data, active);
 
   var elems = Array.prototype.slice.call(document.querySelectorAll('.switchery'));
 
@@ -94,7 +94,7 @@ function loadScanTable(data) {
   });
 }
 
-function populateScanTable(data) {
+function populateScanTable(data, active = true) {
   $.each(data.slices, function (i, item) {
     var row = {};
     row.slice_id = item.id;
@@ -111,9 +111,13 @@ function populateScanTable(data) {
     if (item.start_scan != null) {
       $("#scan_start_scan_" + i).trigger("click");
     }
+    if(!active)
+      $("#scan_start_scan_" + i).attr("disabled", true);
     if (item.end_scan != null) {
       $("#scan_end_scan_" + i).trigger("click");
     }
+    if(!active)
+      $("#scan_end_scan_" + i).attr("disabled", true);
 
   });
 }

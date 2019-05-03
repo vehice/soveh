@@ -38,7 +38,7 @@
       <input type="hidden" name="store[slice_id][<%= store_index %>]" value="<%= slice_id %>" >
     </td>
     <td>
-      <input name="store[box_id][<%= store_index %>]" class="form-control" value="<%= box_id %>">
+      <input name="store[box_id][<%= store_index %>]" class="form-control" value="<%= box_id %>" {% if not edit %}disabled{% endif %}>
     </td>
   </tr>
 </script>

@@ -165,24 +165,24 @@ function populateBlockTable(data, active = true) {
 
     if (row.start_block) {
       $("#block_start_block_" + i).trigger("click");
-      if(!active)
-        $("#block_start_block_" + i).attr("disabled", true);
     }
+    if(!active)
+      $("#block_start_block_" + i).attr("disabled", true);
     if (row.end_block) {
       $("#block_end_block_" + i).trigger("click");
-      if(!active)
-      $("#block_end_block_" + i).attr("disabled", true);
     }
+    if(!active)
+      $("#block_end_block_" + i).attr("disabled", true);
     if (row.start_slice) {
       $("#block_start_slice_" + i).trigger("click");
-      if(!active)
-      $("#block_start_slice_" + i).attr("disabled", true);
     }
+    if(!active)
+      $("#block_start_slice_" + i).attr("disabled", true);
     if (row.end_slice) {
       $("#block_end_slice_" + i).trigger("click");
-      if(!active)
-      $("#block_end_slice_" + i).attr("disabled", true);
     }
+    if(!active)
+      $("#block_end_slice_" + i).attr("disabled", true);
   });
 }
 

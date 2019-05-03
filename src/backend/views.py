@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.views.generic import View
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.auth.decorators import login_required
@@ -6,7 +6,7 @@ from django.http import JsonResponse
 from distutils.util import strtobool
 from django.db.models import F
 from django.db.models import Prefetch
-
+from app import views as app_view
 from datetime import datetime
 from .models import *
 from workflows.models import *
@@ -547,9 +547,10 @@ class WORKFLOW(View):
         form = Form.objects.get(pk=form_id)
         object_form_id = form.content_object.id
 
+        actor = Actor.objects.filter(profile_id=request.user.userprofile.profile_id).first()
         if (form.content_type.name == 'entry form'):
-            actor = Actor.objects.filter(profile_id=request.user.userprofile.profile_id).first()
-            edit = 1 if actor.permission.filter(from_state_id=step_tag.split('_')[1], type_permission='w').first() else 0
+            permisos =  actor.permission.filter(from_state_id=step_tag.split('_')[1])
+            edit = 1 if permisos.filter(type_permission='w').first() else 0
             route = 'app/workflow_main.html'
             data = {
                 'form': form,
@@ -559,6 +560,20 @@ class WORKFLOW(View):
                 'edit': edit
             }
         elif (form.content_type.name == 'analysis form'):
+            reopen = False
+            if step_tag == 'step_6':
+                reopen = True
+                step_tag = 'step_5'
+                form.form_closed = False
+                form.form_reopened = True
+                form.save()
+                
+            permisos =  actor.permission.filter(from_state_id=int(step_tag.split('_')[1]) + 6)
+            if permisos:
+                edit = 1 if permisos.filter(type_permission='w').first() else 0
+            else:
+                return redirect(app_view.show_ingresos)
+
             route = 'app/workflow_analysis.html'
             analisis = AnalysisForm.objects.get(id=int(object_form_id))
             reports = Report.objects.filter(analysis_id=int(object_form_id))
@@ -607,14 +622,6 @@ class WORKFLOW(View):
 
                 data[key] = list(zip(*matrix))
             
-            reopen = False
-            if step_tag == 'step_6':
-                reopen = True
-                step_tag = 'step_5'
-                form.form_closed = False
-                form.form_reopened = True
-                form.save()
-
             report_finalExtra = ReportFinal.objects.filter(analysis_id=int(object_form_id)).last()
 
             data = {
@@ -628,7 +635,8 @@ class WORKFLOW(View):
                 'report': reports,
                 'reports2': data,
                 'reopen': reopen,
-                'report_finalExtra': report_finalExtra
+                'report_finalExtra': report_finalExtra,
+                'edit': edit
             }
 
         return render(request, route, data)
@@ -657,10 +665,10 @@ class WORKFLOW(View):
                 if actor.profile == up.profile:
                     if previous_step:
                         next_state = actor.permission.get(
-                            to_state=form.state).from_state
+                            to_state=form.state, type_permission='w').from_state
                     else:
                         next_state = actor.permission.get(
-                            from_state=form.state).to_state
+                            from_state=form.state, type_permission='w').to_state
 
             if not previous_step:
                 process_answer = call_process_method(form.content_type.model,

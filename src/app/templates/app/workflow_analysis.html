@@ -256,6 +256,7 @@ $("#workflow_form").steps({
     bodyTag: "fieldset",
     transitionEffect: "fade",
     titleTemplate: '<span class="step">#index#</span> #title#',
+    enablePagination: {{edit}} == 1,
     labels: {
         previous: 'Deshacer y Volver',
         next: 'Continuar',
@@ -398,12 +399,12 @@ $(window).on('load', function (e) {
 
     form.steps("setStep", step_wizard);
 
-    window[step_tag_function]();
+    window[step_tag_function]({{edit}} == 1);
   {% else %}
     set_state = false;
 
     // Si se abre un nuevo caso es necesario ejecutar el metodo del paso 1
-    init_step_1();
+    init_step_1({{edit}} == 1);
   {% endif %}
 });
 

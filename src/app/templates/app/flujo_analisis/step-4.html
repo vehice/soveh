@@ -26,7 +26,9 @@
                 <th>Corte</th>
                 <th>Organos</th>
                 <th><center>No. hallazgos</center></th>
-                <th><center>Opciónes hallazgos</center></th>
+                {% if edit %}
+                  <th><center>Opciónes hallazgos</center></th>
+                {% endif %}
               </tr>
             </thead>
             <tbody>
@@ -66,10 +68,12 @@
         </div>
       </center>
     </td>
-    <td class="text-center">
+    {% if edit %}
+      <td class="text-center">
         <a title="Agregar nuevo hallazgo" id="new_pathology_link" data-slice-id="<%= slice_id %>" <i class="fa fa-plus fa-fw fa-2x"></i></a>
         <a title="Editar hallazgos" id="show_pathology_link" data-slice-id="<%= slice_id %>" <i class="fa fa-edit fa-fw fa-2x"></i></a>
-    </td>
+      </td>
+    {% endif %}
   </tr>
 </script>
 

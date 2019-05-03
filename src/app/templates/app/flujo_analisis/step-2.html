@@ -15,7 +15,9 @@
     </div>
     <div id="scan_group">
       <div class="col-md-12 text-right m-1">
-        <button type="button" id="saveTimingStep2" class="btn btn-warning square"><i class="fa fa-save"></i> Guardar Cambios</button>
+        {% if edit %}
+          <button type="button" id="saveTimingStep2" class="btn btn-warning square"><i class="fa fa-save"></i> Guardar Cambios</button>
+        {% endif %}
       </div>
       <table id="scan_table" class="table table-condensed table-bordered" width="100%" cellpadding="0" cellspacing="0" border="0">
         <thead>
@@ -57,7 +59,7 @@
       <input type="hidden" name="scan_end_scan_<%= scan_index %>" value="<%= end_scan %>" />
     </td>
     <td>
-      <input name="scan_store_<%= scan_index %>" value="<%= slice_store %>" class="form-control">
+      <input name="scan_store_<%= scan_index %>" value="<%= slice_store %>" class="form-control" {% if not edit %}disabled{% endif %}>
     </td>
   </tr>
 </script>
