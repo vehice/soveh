@@ -13,7 +13,7 @@
           <label for="customer">
             Cliente :
           </label>
-          <select class="select2 form-control" name="customer" id="customer_select">
+          <select class="select2 form-control" name="customer" id="customer_select" {% if not edit %}disabled{% endif %}>
             <!-- <option></option> -->
           </select>
         </div>
@@ -22,26 +22,26 @@
             Empresa :
             <!-- <span class="danger">*</span> -->
           </label>
-          <input class="form-control" name="company" id="company_input">
+          <input class="form-control" name="company" id="company_input" {% if not edit %}disabled{% endif %} />
         </div>
         <div class="form-group" id="center">
           <label for="center">
             Centro :
             <!-- <span class="danger">*</span> -->
           </label>
-          <input class="form-control" name="center" id="center_input">
+          <input class="form-control" name="center" id="center_input" {% if not edit %}disabled{% endif %} />
         </div>
         <div class="form-group" id="order_number">
           <label for="order_number">
             Nro Orden :
           </label>
-          <input type='text' class="form-control" id="order_number_input" name="no_order" />
+          <input type='text' class="form-control" id="order_number_input" name="no_order" {% if not edit %}disabled{% endif %} />
         </div>
         <div class="form-group" id="request_number">
           <label for="request_number">
             Nro Solicitud Interna :
           </label>
-          <input type='text' class="form-control" id="request_number_input" name="no_request" />
+          <input type='text' class="form-control" id="request_number_input" name="no_request" {% if not edit %}disabled{% endif %} />
         </div>
 
       </div>
@@ -49,36 +49,36 @@
         <div class="form-group">
           <label>Fecha / Hora Recepción : </label>
           <div class='input-group date' id='datetime_created_at'>
-            <input type="text" class="form-control" name="created_at" />
+            <input type="text" class="form-control" name="created_at" {% if not edit %}disabled{% endif %}  />
             <div class="input-group-append">
               <span class="input-group-text">
                 <span class="fa fa-calendar"></span>
               </span>
             </div>
           </div>
-          <input type="hidden" name="created_at_submit" id="created_at_submit" />
+          <input type="hidden" name="created_at_submit" id="created_at_submit" {% if not edit %}disabled{% endif %}  />
         </div>
         <div class="form-group">
           <label>Fecha / Hora Muestreo : </label>
           <div class='input-group date' id='datetime_sampled_at'>
-            <input type='text' class="form-control" name='sampled_at' />
+            <input type='text' class="form-control" name='sampled_at' {% if not edit %}disabled{% endif %}  />
             <div class="input-group-append">
               <span class="input-group-text">
                 <span class="fa fa-calendar"></span>
               </span>
             </div>
           </div>
-          <input type="hidden" name="sampled_at_submit" id="sampled_at_submit" />
+          <input type="hidden" name="sampled_at_submit" id="sampled_at_submit"  {% if not edit %}disabled{% endif %} />
         </div>
         <div class="form-group" id="responsible">
           <label for="responsible">
             Responsable :
           </label>
-          <input type='text' class="form-control" id="responsible_input" name="responsible" />
+          <input type='text' class="form-control" id="responsible_input" name="responsible"  {% if not edit %}disabled{% endif %}  />
         </div>
         <div class="form-group">
           <label for="phoneNumber3">Fijador :</label>
-          <select class="select2 form-control" id="fixtative_select" name="fixative">
+          <select class="select2 form-control" id="fixtative_select" name="fixative" {% if not edit %}disabled{% endif %} >
             <option value="">S/I</option>
           </select>
         </div>
@@ -91,7 +91,7 @@
       <div class="col-sm-6">
         <div class="form-group">
           <label for="date3">Especie :</label>
-          <select class="select2 form-control" id="specie_select" name="specie">
+          <select class="select2 form-control" id="specie_select" name="specie" {% if not edit %}disabled{% endif %} >
             <option value="">S/I</option>
           </select>
         </div>
@@ -99,7 +99,7 @@
       <div class="col-sm-6">
         <div class="form-group">
           <label for="phoneNumber3">Estado Desarrollo :</label>
-          <select class="select2 form-control" id="larvalstage_select" name="larvalstage">
+          <select class="select2 form-control" id="larvalstage_select" name="larvalstage" {% if not edit %}disabled{% endif %} >
             <option value="">S/I</option>
           </select>
         </div>
@@ -107,7 +107,7 @@
       <div class="col-sm-6">
         <div class="form-group">
           <label for="date3">Fuente Agua :</label>
-          <select class="select2 form-control" id="watersource_select" name="watersource">
+          <select class="select2 form-control" id="watersource_select" name="watersource" {% if not edit %}disabled{% endif %} >
             <option value="">S/I</option>
             {% for waterSource in waterSource_list %}
             <option value="{{waterSource.id}}">{{waterSource}}</option>
@@ -138,7 +138,7 @@
       <div class="row">
         <div class="col-sm-3">
           <div class="form-group">
-            <button class="btn_white_letter btn btn-success form-control" id="add_identification" type="button" onclick="addIdentificador()">Añadir Indetificación</button>
+            <button class="btn_white_letter btn btn-success form-control" id="add_identification" type="button" onclick="addIdentificador()"  {% if not edit %}disabled{% endif %} >Añadir Indetificación</button>
           </div>
         </div>
       </div>
@@ -160,12 +160,12 @@
       </div>
       <div class="col-sm-6">
         <label for="flow_divider">¿Desea dividir en trabajo en partes o trabajar con grupos de peces por separado?. </label>
-        <select class="form-control" id="select_if_divide_flow" name="select_if_divide_flow">
+        <select class="form-control" id="select_if_divide_flow" name="select_if_divide_flow" {% if not edit %}disabled{% endif %} >
             <option selected value="0">No</option>
             <option value="1">Sí</option>
         </select>
       </div>
-      <input type="hidden" value="0" name="flow_divide_option" id="flow_divide_option"/>
+      <input type="hidden" value="0" name="flow_divide_option" id="flow_divide_option" {% if not edit %}disabled{% endif %} />
       <div class="col-sm-12" id="flow_divider_options"></div>
     </div>
   </div>
@@ -178,37 +178,37 @@
     <div class="col-sm-3">
       <div class="form-group">
         <label for="cage">Estanque/Jaula</label>
-        <input type="text" value="" name="identification[cage]" class="form-control">
+        <input type="text" value="" name="identification[cage]" class="form-control"  {% if not edit %}disabled{% endif %} >
       </div>
     </div>
     <div class="col-sm-3">
       <div class="form-group">
         <label for="group">Grupo</label>
-        <input name="identification[group]" class="form-control">
+        <input name="identification[group]" class="form-control" {% if not edit %}disabled{% endif %} >
       </div>
     </div>
     <div class="col-sm-2">
       <div class="form-group">
         <label for="no_fish">No. Peces</label>
-        <input name="identification[no_fish]" type="number" value="0" min="1" class="form-control">
+        <input name="identification[no_fish]" type="number" value="0" min="1" class="form-control" {% if not edit %}disabled{% endif %} >
       </div>
     </div>
     <div class="col-sm-2">
       <div class="form-group">
         <label for="no_container">No. Contenedores</label>
-        <input name="identification[no_container]" type="number" value="1" min="1" class="form-control">
+        <input name="identification[no_container]" type="number" value="1" min="1" class="form-control" {% if not edit %}disabled{% endif %} >
       </div>
     </div>
     <div class="col-sm-2">
       <div class="form-group">
         <label for="wheight">Peso</label>
-        <input name="identification[weight]" value="0.0" class="form-control">
+        <input name="identification[weight]" value="0.0" class="form-control" {% if not edit %}disabled{% endif %} >
       </div>
     </div>
     <div class="col-sm-3">
       <div class="form-group">
         <label for="wheight">Carácteristicas Extras</label>
-        <textarea name="identification[extra_features_detail]" row="2" class="form-control"></textarea>
+        <textarea name="identification[extra_features_detail]" row="2" class="form-control" {% if not edit %}disabled{% endif %} ></textarea>
       </div>
     </div>
     <div class="col-sm-3">
@@ -216,11 +216,11 @@
         <label> ¿Condiciones óptimas? </label>
         <div class="input-group">
           <div class="d-inline-block custom-control custom-radio">
-            <input type="radio" checked name="identification[is_optimal][<%= temp_id %>]" class="custom-control-input" value="si" id="identification[is_optimal][<%= temp_id %>]_si">
+            <input type="radio" checked name="identification[is_optimal][<%= temp_id %>]" class="custom-control-input" value="si" id="identification[is_optimal][<%= temp_id %>]_si" {% if not edit %}disabled{% endif %} >
             <label class="custom-control-label" for="identification[is_optimal][<%= temp_id %>]_si">Si</label>
           </div> &nbsp;&nbsp;&nbsp;
           <div class="d-inline-block custom-control custom-radio">
-            <input type="radio" name="identification[is_optimal][<%= temp_id %>]" class="custom-control-input" value="no" id="identification[is_optimal][<%= temp_id %>]_no">
+            <input type="radio" name="identification[is_optimal][<%= temp_id %>]" class="custom-control-input" value="no" id="identification[is_optimal][<%= temp_id %>]_no" {% if not edit %}disabled{% endif %} >
             <label class="custom-control-label" for="identification[is_optimal][<%= temp_id %>]_no">No</label>
           </div>
         </div>
@@ -229,13 +229,13 @@
     <div class="col-sm-3">
       <div class="form-group">
         <label>Observaciones</label>
-        <textarea name="identification[observations]" class="form-control" row="2"></textarea>
+        <textarea name="identification[observations]" class="form-control" row="2" {% if not edit %}disabled{% endif %} ></textarea>
       </div>
     </div>
     <div class="col-sm-3">
       <div class="form-group">
         <label>Órganos</label>
-        <select class="select2 form-control identification_organs" name="identification[organs][<%= temp_id %>]" multiple="multiple">
+        <select class="select2 form-control identification_organs" name="identification[organs][<%= temp_id %>]" multiple="multiple" {% if not edit %}disabled{% endif %} >
           <% _.each(organs, function (organ) { %>
             <option value="<%= organ.id %>"><%= organ.name %></option>
           <% }); %>
@@ -244,10 +244,12 @@
     </div>
   </div>
   <div class="col-sm-1 text-right">
+    {% if edit %}
     <div class="form-group">
       <label for="delete">&nbsp;</label>
       <button class="btn btn-danger" id="delete_identification" type="button"><i class="fa fa-close fa-fx fa-1x"></i></button>
     </div>
+    {% endif %} 
   </div>
 </div>
 </script>
@@ -259,7 +261,7 @@
 <script id="group_content_manual_template" type="text/x-lodash-template">
   <div class="col-sm-12 pt-1 pb-1">
     <label>Peces grupo <%= group_nro %></label>
-    <select class="select2 form-control fishSelection" name="subflow_select[group][<%= group_nro %>]" multiple="multiple">
+    <select class="select2 form-control fishSelection" name="subflow_select[group][<%= group_nro %>]" multiple="multiple" {% if not edit %}disabled{% endif %} >
       <% _.each(group_fishes, function (fish) { %>
         <option value="<%= fish.identification_id %>_<%= fish.fish_num %>"><%= fish.cage %>_<%= fish.group %>_P<%= fish.fish_num %> </option>
       <% }); %>
@@ -289,7 +291,7 @@
           <label for="flowdivider_manual_group_quantity" class="control-label"><h5>¿Cuántos grupos desea realizar?</h5></label>
         </div>
         <div class="col-sm-2">
-          <input id="flowdivider_manual_group_quantity" name="flowdivider_manual_group_quantity" class="form-control" type="number" min="2" value="2" />
+          <input id="flowdivider_manual_group_quantity" name="flowdivider_manual_group_quantity" class="form-control" type="number" min="2" value="2"  {% if not edit %}disabled{% endif %} />
         </div>
       </div>
       <div class="col-sm-12" id="flowdivider_manual_groups">

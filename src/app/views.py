@@ -50,6 +50,7 @@ def show_analisis(request):
 def show_ingresos(request):
     up = UserProfile.objects.filter(user=request.user).first()
     editar = up.profile_id in (1,3)
+    eliminar = editar and request.user.is_superuser
     check_forms = Form.objects.filter(content_type__model='entryform', state__id=1)
     for f in check_forms:
         if Identification.objects.filter(entryform=f.content_object).count() == 0:
@@ -63,7 +64,7 @@ def show_ingresos(request):
     #         content_type__model='entryform',
     #         state__step__actors__profile=up.profile).order_by('-object_id')
 
-    return render(request, 'app/ingresos.html', {'entryForm_list': form, 'edit': editar})
+    return render(request, 'app/ingresos.html', {'entryForm_list': form, 'edit': editar, 'eliminar': eliminar})
 
 
 @login_required

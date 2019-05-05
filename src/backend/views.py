@@ -562,11 +562,9 @@ class WORKFLOW(View):
         elif (form.content_type.name == 'analysis form'):
             reopen = False
             if step_tag == 'step_6':
-                reopen = True
                 step_tag = 'step_5'
-                form.form_closed = False
-                form.form_reopened = True
-                form.save()
+                reopen = True
+               
                 
             permisos =  actor.permission.filter(from_state_id=int(step_tag.split('_')[1]) + 6)
             if permisos:
@@ -574,6 +572,13 @@ class WORKFLOW(View):
             else:
                 return redirect(app_view.show_ingresos)
 
+            if reopen:
+                if not edit and not form.form_reopened:
+                    return redirect(app_view.show_ingresos)
+                form.form_closed = False
+                form.form_reopened = True
+                form.save()
+                
             route = 'app/workflow_analysis.html'
             analisis = AnalysisForm.objects.get(id=int(object_form_id))
             reports = Report.objects.filter(analysis_id=int(object_form_id))
@@ -660,30 +665,38 @@ class WORKFLOW(View):
             next_step_permission = False
             process_response = False
             process_answer = True
-
+            
+            actor_user = None
+            next_state = None
             for actor in next_step.actors.all():
                 if actor.profile == up.profile:
+                    actor_user = actor
                     if previous_step:
-                        next_state = actor.permission.get(
-                            to_state=form.state, type_permission='w').from_state
+                        next_state = Permission.objects.get(to_state=form.state, type_permission='w').from_state
                     else:
                         next_state = actor.permission.get(
                             from_state=form.state, type_permission='w').to_state
-
+                    break
+            
             if not previous_step:
                 process_answer = call_process_method(form.content_type.model,
                                                      request)
-            
-            for actor in form.state.step.actors.all():
-                if actor.profile == up.profile:
-                    next_step_permission = True
+            else:
+                form.form_reopened = False
+            # for actor in next_state.step.actors.all():
+            #     if actor.profile == up.profile:
+            #         next_step_permission = True
 
-            if process_answer:
+            if process_answer and next_state:
                 form.state = next_state
                 form.save()
+                if next_state.id != 1 and not len(actor_user.permission.filter(to_state=next_state, type_permission='w')):
+                    return redirect(app_view.show_ingresos)
+                next_step_permission = True
                 process_response = True
             else:
                 print("FALLO EL PROCESAMIENTO")
+                return redirect(app_view.show_ingresos)
 
             return JsonResponse({
                 'process_response': process_response,

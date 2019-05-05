@@ -9,7 +9,9 @@ function init_step_4(active = true) {
   })
     .done(function (data) {
       $('.showSummaryBtn').removeClass("hidden");
-      $('.newAnalysisBtn').removeClass("hidden");
+      if(active){
+        $('.newAnalysisBtn').removeClass("hidden");
+      }
       $('.newAnalysisBtn5').addClass("hidden");
       // fillSummary(data);
       fillNewAnalysis(data);

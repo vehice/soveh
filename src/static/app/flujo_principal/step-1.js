@@ -178,8 +178,8 @@ function init_step_1() {
       $('#company_input').val(entryform.company);
       $('#center_input').val(entryform.center);
       $('#responsible_input').val(entryform.responsible);
-      $('#larvalstage_select').val(entryform.larvalstage_id);
-      $('#watersource_select').val(entryform.watersource_id);
+      $('#larvalstage_select').val(entryform.larvalstage_id).trigger('change');;
+      $('#watersource_select').val(entryform.watersource_id).trigger('change');;
 
       if (entryform.created_at) {
         $('[name="created_at"]').val(moment(entryform.created_at).format("DD/MM/YYYY HH:mm") || "");
