@@ -105,6 +105,7 @@ class ENTRYFORM(View):
                             'exam_name': sE.exam.name,
                             'exam_type': sE.exam.exam_type,
                             'sample_id': sE.sample_id,
+                            'patologo_id': sE.patologo_id,
                             'organ_id': [{
                             'name':sE.organ.name,
                             'id':sE.organ.id}]
@@ -157,7 +158,7 @@ class ENTRYFORM(View):
             fixtatives_list = list(Fixative.objects.all().values())
             waterSources_list = list(WaterSource.objects.all().values())
             customers_list = list(Customer.objects.all().values())
-
+            patologos = list(User.objects.filter(userprofile__profile_id=4).values())
             data = {
                 'entryform': entryform,
                 'identifications': identifications,
@@ -169,6 +170,7 @@ class ENTRYFORM(View):
                 'fixtatives_list': fixtatives_list,
                 'waterSources_list': waterSources_list,
                 'customers_list': customers_list,
+                'patologos': patologos
             }
         else:
             species = list(Specie.objects.all().values())
@@ -1511,6 +1513,7 @@ def step_2_entryform(request):
 
     entryform = EntryForm.objects.get(pk=var_post.get('entryform_id'))
     Cassette.objects.filter(sample__entryform=entryform).delete()
+    Cassette.objects.filter(entryform=entryform).delete()
     exams_to_do = var_post.getlist("analysis")
     analyses_qs = entryform.analysisform_set.all()
 
@@ -1555,7 +1558,8 @@ def step_2_entryform(request):
                 SampleExams.objects.create(
                     sample_id = sample.pk,
                     exam_id = exam,
-                    organ_id= organ
+                    organ_id= organ,
+                    patologo_id= int(var_post.get("sample[patologos]["+values+"]["+exam+"]"))
                 )
     return True
         

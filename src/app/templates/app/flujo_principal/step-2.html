@@ -21,8 +21,9 @@
             <tr>
               <th style="width:5%">Nº Muestra</th>
               <th style="width:15%">Identificación</th>
-              <th style="width:37%">Análisis</th>
-              <th style="width:37%">Órganos</th>
+              <th style="width:30%">Análisis</th>
+              <th style="width:30%">Órganos</th>
+              <th style="width:14%">Patólogo</th>
               <th style="width:6%">Acciones</th>
             </tr>
           </thead>
@@ -56,6 +57,10 @@
     <td class="delete-<%= sample.id %>">
     </td>
 
+    <!-- Patólogo -->
+    <td class="delete-<%= sample.id %>">
+    </td>
+
     <!-- Actions -->
     <td class="delete-<%= sample.id %>">
     </td>
@@ -73,6 +78,13 @@
     <select id="<%= optionId %>" class="select2 form-control organs-select organs-select-<%= sampleIndex %>" style="width:100% !important;" name="sample[organs][<%= sampleId %>][<%= sampleIndex %>]" multiple="multiple" {% if not edit %}disabled{% endif %}>
       <% _.each(organs, function (organ) { %>
         <option value=<%= organ.id %>> <%= _.toUpper(organ.name) %> </option>
+      <% }); %>
+    </select>
+  </td>
+  <td>
+    <select id="<%= optionPatId %>" class="select2 form-control patologos-select patologos-select-<%= sampleIndex %>" style="width:100% !important;" name="sample[patologos][<%= sampleId %>][<%= sampleIndex %>]" {% if not edit %}disabled{% endif %}>
+      <% _.each(patologos, function (patologo) { %>
+        <option value=<%= patologo.id %>> <%= _.toUpper(patologo.first_name) %> </option>
       <% }); %>
     </select>
   </td>

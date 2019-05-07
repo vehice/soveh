@@ -1,5 +1,6 @@
 var data_step_2;
 var organs_list;
+var patologos_list;
 
 function init_step_2() {
   var entryform_id = $('#entryform_id').val();
@@ -82,6 +83,10 @@ function loadSamples(samples, organs){
       });
       $('#'+v.id+"-"+$('#sampleNro-'+v.id)[0].rowSpan).val(values);
       $('#'+v.id+"-"+$('#sampleNro-'+v.id)[0].rowSpan).trigger('change');
+
+      $('#'+v.id+"-"+$('#sampleNro-'+v.id)[0].rowSpan+'-pat').select2();
+      $('#'+v.id+"-"+$('#sampleNro-'+v.id)[0].rowSpan+'-pat').val(item.patologo_id);
+      $('#'+v.id+"-"+$('#sampleNro-'+v.id)[0].rowSpan+'-pat').trigger('change');
     });
   });
  
@@ -99,6 +104,7 @@ function loadSamples(samples, organs){
 
 function initialData(data) {
   organs_list = data.organs;
+  patologos_list = data.patologos;
   loadSamples(data.samples, data.organs);
   loadExams(data.exams);
 }
@@ -151,6 +157,8 @@ function addExamToSamples(exam){
       $(v).trigger('change');
     });
   });
+  
+  $('.patologos-select-'+ exam.id).select2();
 }
 
 function removeExamFromSamples(exam){
@@ -269,7 +277,7 @@ function addOrgansOptions(analisis, analisis_type, sampleId, sampleIndex, option
   var sampleRowTemplate = document.getElementById("add_analisis").innerHTML;
 
   var templateFn = _.template(sampleRowTemplate);
-  var templateHTML = templateFn({'organs': organs_list, 'type': analisis_type, 'analisis': analisis, 'sampleId': sampleId, 'sampleIndex': sampleIndex, 'optionId': optionId});
+  var templateHTML = templateFn({'organs': organs_list, 'patologos': patologos_list, 'type': analisis_type, 'analisis': analisis, 'sampleId': sampleId, 'sampleIndex': sampleIndex, 'optionId': optionId, 'optionPatId': optionId+'-pat'});
   return templateHTML;
 }
 
