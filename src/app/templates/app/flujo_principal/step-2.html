@@ -16,14 +16,25 @@
         </div>
       </div>
       <div class="col-sm-12 mt-3">
+        <table class="table table-bordered table-condensed" id="patologo_table" style="font-size:13px;">
+          <thead>
+            <tr>
+              <th style="width:40%">Análisis</th>
+              <th style="width:60%">Patólogo</th>
+            </tr>
+          </thead>
+          <tbody>
+          </tbody>
+        </table>
+      </div>
+      <div class="col-sm-12 mt-3">
         <table class="table table-bordered table-condensed" id="samples_table" style="font-size:13px;">
           <thead>
             <tr>
               <th style="width:5%">Nº Muestra</th>
               <th style="width:15%">Identificación</th>
-              <th style="width:30%">Análisis</th>
-              <th style="width:30%">Órganos</th>
-              <th style="width:14%">Patólogo</th>
+              <th style="width:37%">Análisis</th>
+              <th style="width:37%">Órganos</th>
               <th style="width:6%">Acciones</th>
             </tr>
           </thead>
@@ -57,10 +68,6 @@
     <td class="delete-<%= sample.id %>">
     </td>
 
-    <!-- Patólogo -->
-    <td class="delete-<%= sample.id %>">
-    </td>
-
     <!-- Actions -->
     <td class="delete-<%= sample.id %>">
     </td>
@@ -82,14 +89,22 @@
     </select>
   </td>
   <td>
-    <select id="<%= optionPatId %>" class="select2 form-control patologos-select patologos-select-<%= sampleIndex %>" style="width:100% !important;" name="sample[patologos][<%= sampleId %>][<%= sampleIndex %>]" {% if not edit %}disabled{% endif %}>
-      <% _.each(patologos, function (patologo) { %>
-        <option value=<%= patologo.id %>> <%= _.toUpper(patologo.first_name +' '+ patologo.last_name) %> </option>
-      <% }); %>
-    </select>
-  </td>
-  <td>
     <a  href="javascript:void(0);" class="btn btn-danger" onclick="deleteAnalisis(<%= sampleId %>, <%= sampleIndex %>, {{ edit }});"><i class="fa fa-trash "></i></a>
   </td>
 </tr>
+</script>
+
+<script id="patologo_row" type="text/x-lodash-template">
+  <tr id="exam-<%= exam.id %>">
+    <td>
+      <%= exam.text %>
+    </td>
+    <td>
+      <select class="select2 form-control patologos-select patologos-select-<%= exam.id %>" style="width:100% !important;" name="sample[patologos][<%= exam.id %>]" {% if not edit %}disabled{% endif %}>
+        <% _.each(patologos, function (patologo) { %>
+          <option value=<%= patologo.id %>> <%= _.toUpper(patologo.first_name +' '+ patologo.last_name) %> </option>
+        <% }); %>
+      </select>
+    </td>
+  </tr> 
 </script>

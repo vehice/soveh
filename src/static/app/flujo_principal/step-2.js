@@ -34,11 +34,13 @@ function init_step_2() {
   $('#exam_select').on("select2:select", function (e) {
     var data = e.params.data;
     addExamToSamples(data);
+    addPatologoRow(data);
   });
 
   $('#exam_select').on("select2:unselect", function (e) {
     var data = e.params.data;
     removeExamFromSamples(data);
+    removePatologoRow(data.id);
   });
 
   $('#exam_select').on("select2:unselecting", function (e) {
@@ -60,6 +62,7 @@ function loadSamples(samples, organs){
   $("#samples_table tbody").html("");
   $.each(samples, function (i, v){
     addSampleRow(v, organs);
+    // addPatologoRow
     $.each(v.sample_exams_set, function(j,item){
       $('.delete-'+v.id).hide();
       var html = addOrgansOptions(item.exam_name, item.exam_type, v.id, item.exam_id, v.id+"-"+($('#sampleNro-'+v.id)[0].rowSpan + 1));
@@ -83,10 +86,6 @@ function loadSamples(samples, organs){
       });
       $('#'+v.id+"-"+$('#sampleNro-'+v.id)[0].rowSpan).val(values);
       $('#'+v.id+"-"+$('#sampleNro-'+v.id)[0].rowSpan).trigger('change');
-
-      $('#'+v.id+"-"+$('#sampleNro-'+v.id)[0].rowSpan+'-pat').select2();
-      $('#'+v.id+"-"+$('#sampleNro-'+v.id)[0].rowSpan+'-pat').val(item.patologo_id);
-      $('#'+v.id+"-"+$('#sampleNro-'+v.id)[0].rowSpan+'-pat').trigger('change');
     });
   });
  
@@ -157,8 +156,6 @@ function addExamToSamples(exam){
       $(v).trigger('change');
     });
   });
-  
-  $('.patologos-select-'+ exam.id).select2();
 }
 
 function removeExamFromSamples(exam){
@@ -277,7 +274,7 @@ function addOrgansOptions(analisis, analisis_type, sampleId, sampleIndex, option
   var sampleRowTemplate = document.getElementById("add_analisis").innerHTML;
 
   var templateFn = _.template(sampleRowTemplate);
-  var templateHTML = templateFn({'organs': organs_list, 'patologos': patologos_list, 'type': analisis_type, 'analisis': analisis, 'sampleId': sampleId, 'sampleIndex': sampleIndex, 'optionId': optionId, 'optionPatId': optionId+'-pat'});
+  var templateHTML = templateFn({'organs': organs_list, 'type': analisis_type, 'analisis': analisis, 'sampleId': sampleId, 'sampleIndex': sampleIndex, 'optionId': optionId});
   return templateHTML;
 }
 
@@ -300,6 +297,21 @@ function deleteAnalisis(sampleId, sampleIndex, active){
       old_values.splice(old_values.indexOf(sampleIndex), 1);
       $('#exam_select').val(old_values);
       $('#exam_select').trigger('change');
+      $('#exam-'+sampleIndex).remove();
     }
   }
+}
+
+function addPatologoRow(exam) {
+  var sampleRowTemplate = document.getElementById("patologo_row").innerHTML;
+
+  var templateFn = _.template(sampleRowTemplate);
+  var templateHTML = templateFn({'exam': exam, 'patologos': patologos_list});
+
+  $("#patologo_table tbody").append(templateHTML)
+  $('.patologos-select-'+exam.id).select2();
+}
+
+function removePatologoRow(exam_id){
+  $('#exam-'+exam_id).remove();
 }
