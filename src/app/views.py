@@ -57,8 +57,12 @@ def show_ingresos(request):
             f.delete()
 
     form = Form.objects.filter(content_type__model='entryform').order_by('-object_id')
-    # if up.user.is_staff:
-    #     form = Form.objects.filter(content_type__model='entryform').order_by('-object_id')
+    if up.profile_id == 5:
+        ids = EntryForm.objects.filter(sample__sampleexams__patologo_id=up.user_id).values_list('id')
+        form_ids = form.filter(object_id__in=ids).values_list('id')
+        state_ids = Form.objects.filter(content_type__model='analysisform', parent_id__in=form_ids, state_id__in=[10,11]).values_list('parent_id')
+        form = form.filter(id__in=state_ids)
+
     # else:
     #     form = Form.objects.filter(
     #         content_type__model='entryform',

@@ -158,7 +158,7 @@ class ENTRYFORM(View):
             fixtatives_list = list(Fixative.objects.all().values())
             waterSources_list = list(WaterSource.objects.all().values())
             customers_list = list(Customer.objects.all().values())
-            patologos = list(User.objects.filter(userprofile__profile_id=4).values())
+            patologos = list(User.objects.filter(userprofile__profile_id__in=[4, 5]).values())
             data = {
                 'entryform': entryform,
                 'identifications': identifications,
@@ -330,6 +330,13 @@ class ANALYSIS(View):
 
         for analysis in analyses_qs:
             exam = analysis.exam
+            if request.user.userprofile.profile_id == 5:
+                posee = False
+                for e in exam.sampleexams_set.all():
+                    if e.patologo_id == request.user.id:
+                        posee = True
+                if not posee:
+                    continue
             form = analysis.forms.get()
 
             form_id = form.id

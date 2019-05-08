@@ -8,6 +8,7 @@ function init_step_4() {
     url: url,
   })
     .done(function (data) {
+      $('.showSummaryBtn').removeClass("hidden");
       loadDiagnosticTable(data);
     })
     .fail(function () {
