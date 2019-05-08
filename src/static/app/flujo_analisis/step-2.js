@@ -8,7 +8,6 @@ function init_step_2(active = true) {
   .done(function (data) {
     loadScanTable(data, active);
     $('.showSummaryBtn').removeClass("hidden");
-    fillSummary(data);
   })
   .fail(function () {
     console.log("Fail")

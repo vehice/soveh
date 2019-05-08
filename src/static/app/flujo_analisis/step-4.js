@@ -73,7 +73,7 @@ function init_step_4() {
       url: url,
     })
       .done(function (data) {
-        // $('.showSummaryBtn').removeClass("hidden");
+        $('.showSummaryBtn').removeClass("hidden");
         // fillSummary(data);
         loadPathologyTable(data);
 

@@ -6,6 +6,7 @@ function init_step_5(active = true) {
     url: url,
   })
   .done(function (data) {
+    $('.showSummaryBtn').removeClass("hidden");
   })
   .fail(function () {
     console.log("Fail")

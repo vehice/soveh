@@ -8,7 +8,6 @@ function init_step_1(active = true) {
   })
   .done(function (data) {
     $('.showSummaryBtn').removeClass("hidden");
-    fillSummary(data);
     loadStainTable(data, active)
   })
   .fail(function () {

@@ -84,7 +84,7 @@
   <td>
     <select id="<%= optionPatId %>" class="select2 form-control patologos-select patologos-select-<%= sampleIndex %>" style="width:100% !important;" name="sample[patologos][<%= sampleId %>][<%= sampleIndex %>]" {% if not edit %}disabled{% endif %}>
       <% _.each(patologos, function (patologo) { %>
-        <option value=<%= patologo.id %>> <%= _.toUpper(patologo.first_name) %> </option>
+        <option value=<%= patologo.id %>> <%= _.toUpper(patologo.first_name +' '+ patologo.last_name) %> </option>
       <% }); %>
     </select>
   </td>

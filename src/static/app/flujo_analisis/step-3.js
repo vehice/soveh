@@ -7,7 +7,6 @@ function init_step_3() {
   })
     .done(function (data) {
       $('.showSummaryBtn').removeClass("hidden");
-      fillSummary(data);
       loadStoreTable(data);
       
     })
