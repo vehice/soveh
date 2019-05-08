@@ -164,18 +164,26 @@ var steps = $("#workflow_form").steps({
               lockScreen(0);
               return false
             }
-          } else if (currentIndex == 1) {
+          } 
+          else if (currentIndex == 1) {
             var resp = validate_step_2();
             if (!resp) {
               lockScreen(0);
               return false
             }
-          } else if (currentIndex == 2) {
-            var resp = validate_step_3();
-            if (!resp) {
-              lockScreen(0);
-              return false
+            saltar = resp == 5;
+          } 
+          else if (currentIndex == 2) {
+            if(!saltar){
+              var resp = validate_step_3();
+              if (!resp) {
+                lockScreen(0);
+                return false
+              }
             }
+          }
+          else if (currentIndex == 3) {
+            saltar = false;
           }
         }
         
@@ -185,7 +193,8 @@ var steps = $("#workflow_form").steps({
           var disform = $("#step_" + newIndex + " :input").find(':disabled').prop('disabled', false);
           form_data = $("#step_" + newIndex + " :input").serialize();
           disform.prop('disabled', true);
-        } else {
+        } 
+        else {
           previous_step = false;
           var disform = $("#step_" + currentIndex + " :input").find(':disabled').prop('disabled', false);
           form_data = $("#step_" + currentIndex + " :input").serialize();
@@ -194,52 +203,55 @@ var steps = $("#workflow_form").steps({
         
         var url = Urls.workflow();
         var id_next_step = $("#step_" + newIndex).children("#step_id").val();
-
-        var response;
-        $.ajax({
-          type: "POST",
-          url: url,
-          data: form_data + "&id_next_step=" + id_next_step +"&previous_step=" + previous_step,
-          async: false,
-        })
-        .done(function (data) {
-          response = data;
-        })
-        .fail(function (data) {
-          console.log("Fail");
-        })
-        if (response == undefined) {
-          lockScreen(0);
-          return false
-        }
-        if (response.next_step_permission) {
-          var step;
-          var function_name;
-          if(previous_step) {
-            step = currentIndex
-            function_name = "init_step_" + step;
-
-          } else {
-            step = newIndex + 1
-            function_name = "init_step_" + step;
+        if(!saltar){
+          var response;
+          $.ajax({
+            type: "POST",
+            url: url,
+            data: form_data + "&id_next_step=" + id_next_step +"&previous_step=" + previous_step,
+            async: false,
+          })
+          .done(function (data) {
+            response = data;
+          })
+          .fail(function (data) {
+            console.log("Fail");
+          })
+          if (response == undefined) {
+            lockScreen(0);
+            return false
           }
-          setTimeout(function() {
-            window[function_name]({{edit}} == 1);
-          }, 500);
-        } else {
-          toastr.error('No puedes continuar ya que no tienes permisos para los siguientes pasos.', 'No tienes permisos');
-          setTimeout(function() {
-            window.location.href = '/ingresos'
-          }, 1000);
-        }
+          if (response.next_step_permission) {
+            var step;
+            var function_name;
+            if(previous_step) {
+              step = currentIndex
+              function_name = "init_step_" + step;
 
-        if(!previous_step) {
-          if(response.process_response) {
-            toastr.success('', 'Paso guardado exitosamente!');
+            } else {
+              step = newIndex + 1
+              function_name = "init_step_" + step;
+            }
+            setTimeout(function() {
+              window[function_name]({{edit}} == 1);
+            }, 500);
+          } 
+          else {
+            toastr.error('No puedes continuar ya que no tienes permisos para los siguientes pasos.', 'No tienes permisos');
+            setTimeout(function() {
+              window.location.href = '/ingresos'
+            }, 1000);
           }
+          if(!previous_step) {
+            if(response.process_response) {
+              toastr.success('', 'Paso guardado exitosamente!');
+            }
+          }
+          return response.next_step_permission;
         }
-        return response.next_step_permission;
-      } else {
+        return true;
+      } 
+      else {
         set_state = false;
         return true
       }
@@ -259,7 +271,8 @@ var steps = $("#workflow_form").steps({
           }
           else if (prevIndex == 3){
               if(saltar){
-                  steps.steps("previous");
+                saltar = false;
+                steps.steps("previous");
               }
           }
           return true; 

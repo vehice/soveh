@@ -266,6 +266,7 @@ $("#workflow_form").steps({
     transitionEffect: "fade",
     titleTemplate: '<span class="step">#index#</span> #title#',
     enablePagination: {{edit}} == 1,
+    forceMoveForward: {{histologico}} == 2,//Comprobar que sea no histologico
     labels: {
         previous: 'Deshacer y Volver',
         next: 'Continuar',

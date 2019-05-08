@@ -14,6 +14,7 @@ function init_step_5(active = true) {
         $('.newAnalysisBtn5').removeClass("hidden");
       }
       // fillSummary(data);
+      saltar=true;
       fillNewAnalysis2(data);
       loadAnalysisData(data);
     })
@@ -68,7 +69,7 @@ function populateAnalysisData(data) {
     row.form_closed = item.form_closed;
     row.form_reopened = item.form_reopened;
     row.histologico = item.exam_type == 1;
-
+    saltar=saltar && item.exam_type == 2;
     addAnalysisElement(row)
   });
 }

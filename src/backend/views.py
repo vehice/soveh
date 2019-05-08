@@ -638,6 +638,7 @@ class WORKFLOW(View):
                 'analysis_id': object_form_id,
                 'set_step_tag': step_tag,
                 'exam_name': form.content_object.exam.name,
+                'histologico': form.content_object.exam.exam_type,
                 'form_parent_id': form.parent.id,
                 'entryform_id': analisis.entryform_id,
                 'report': reports,
