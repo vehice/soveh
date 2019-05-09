@@ -329,14 +329,19 @@
 
       var tpl_exams = '<div class="col-sm-12"><h6 class="form-section mt-2"> Servicios</h6></br>';
       $.each(data.entryform.analyses, function(i, item){
-        tpl_exams += '<div class="alert alert-light"><b>'+ item.exam__name +':</b> '+ moment(item.created_at).format("DD/MM/YYYY HH:mm") +'</div>';
+        tpl_exams += '<div class="alert alert-light"><b>'+ item.exam__name +'</b> <b class="pull-right">'
+        if(item.patologo__first_name != null)
+          tpl_exams += item.patologo__first_name+' ';
+        if(item.patologo__last_name != null)
+          tpl_exams += item.patologo__last_name;
+        tpl_exams += '</b> <br>'+ moment(item.created_at).format("DD/MM/YYYY HH:mm") +'</div>';
       });
 
       tpl_exams += '</div>';
       $('.summaryExams').html(tpl_exams);
 
       var tpl_samples = '<div class="col-sm-12"><h6 class="form-section mt-2"> Muestras</h6></br><table class="table table-bordered table-xs">';
-      tpl_samples += '<thead><tr><th width="8% !important;">Muestra</th><th>Identificación</th><th>Análisis</th><th>Órganos</th><th>Patólogos</th></tr></thead><tbody>';
+      tpl_samples += '<thead><tr><th width="8% !important;">Muestra</th><th>Identificación</th><th>Análisis</th><th>Órganos</th></tr></thead><tbody>';
       var patologos = {};
       $.each(data.patologos, function(i, v){
         patologos[v.id]=v.first_name+' '+v.last_name;
@@ -349,7 +354,6 @@
           len+=1;
           tpl_exams += '<tr><td>'+v.exam_name+'</td>';
           tpl_exams += '<td>'+ Object.keys(v.organ_id).map(function(k){return v.organ_id[k].name}).join(", ") +'</td>';
-          tpl_exams += '<td>'+ patologos[v.patologo_id] +'</td></tr>';
         });
         tpl_samples += '<tr>';
         tpl_samples += '<td rowspan="'+len+'">'+ item.index +'</td>';

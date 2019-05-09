@@ -100,7 +100,7 @@
       <%= exam.text %>
     </td>
     <td>
-      <select class="select2 form-control patologos-select patologos-select-<%= exam.id %>" style="width:100% !important;" name="sample[patologos][<%= exam.id %>]" {% if not edit %}disabled{% endif %}>
+      <select id="patologos-select-<%= exam.id %>" class="select2 form-control patologos-select" style="width:100% !important;" name="sample[patologos][<%= exam.id %>]" {% if not edit %}disabled{% endif %}>
         <% _.each(patologos, function (patologo) { %>
           <option value=<%= patologo.id %>> <%= _.toUpper(patologo.first_name +' '+ patologo.last_name) %> </option>
         <% }); %>

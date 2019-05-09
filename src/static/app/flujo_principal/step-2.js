@@ -62,7 +62,6 @@ function loadSamples(samples, organs){
   $("#samples_table tbody").html("");
   $.each(samples, function (i, v){
     addSampleRow(v, organs);
-    // addPatologoRow
     $.each(v.sample_exams_set, function(j,item){
       $('.delete-'+v.id).hide();
       var html = addOrgansOptions(item.exam_name, item.exam_type, v.id, item.exam_id, v.id+"-"+($('#sampleNro-'+v.id)[0].rowSpan + 1));
@@ -109,10 +108,13 @@ function initialData(data) {
 }
 
 function loadData(data){
-
+  $('#patologo_table tbody').html('');
   // Fill analyses
   $.each(data.entryform.analyses, function(i, item){
     $('#exam_select option[value="'+item.exam_id+'"]').prop('selected', true);
+    addPatologoRow({text: item.exam__name, id: item.exam_id});
+    $('#patologos-select-'+item.exam_id).val(item.patologo_id);
+    $('#patologos-select-'+item.exam_id).trigger('change');
   });
 
   // Fill exams and organs per samples
@@ -309,7 +311,7 @@ function addPatologoRow(exam) {
   var templateHTML = templateFn({'exam': exam, 'patologos': patologos_list});
 
   $("#patologo_table tbody").append(templateHTML)
-  $('.patologos-select-'+exam.id).select2();
+  $('#patologos-select-'+exam.id).select2();
 }
 
 function removePatologoRow(exam_id){

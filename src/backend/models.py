@@ -235,6 +235,7 @@ class AnalysisForm(models.Model):
     forms = GenericRelation(Form)
     comments = models.TextField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    patologo = models.ForeignKey(User, null=True, on_delete=models.SET_NULL)
 
 class Sample(models.Model):
     entryform = models.ForeignKey(
@@ -252,7 +253,6 @@ class SampleExams(models.Model):
     sample = models.ForeignKey(Sample, null=True, on_delete=models.CASCADE)
     exam = models.ForeignKey(Exam, null=True, on_delete=models.CASCADE)
     organ = models.ForeignKey(Organ, null=True, on_delete=models.CASCADE)
-    patologo = models.ForeignKey(User, null=True, on_delete=models.SET_NULL)
 
     def __str__(self):
         return str(self.sample)

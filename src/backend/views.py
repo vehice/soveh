@@ -12,6 +12,8 @@ from .models import *
 from workflows.models import *
 from accounts.models import *
 from django.forms.models import model_to_dict
+from django.core.mail import EmailMultiAlternatives
+from django.template.loader import get_template
 
 # from utils import functions as fn
 
@@ -105,7 +107,6 @@ class ENTRYFORM(View):
                             'exam_name': sE.exam.name,
                             'exam_type': sE.exam.exam_type,
                             'sample_id': sE.sample_id,
-                            'patologo_id': sE.patologo_id,
                             'organ_id': [{
                             'name':sE.organ.name,
                             'id':sE.organ.id}]
@@ -141,7 +142,7 @@ class ENTRYFORM(View):
                 entryform["identifications"].append(ident_json)              
 
             entryform["analyses"] = list(
-                entryform_object.analysisform_set.all().values('id', 'created_at', 'comments', 'entryform_id', 'exam_id', 'exam__name'))
+                entryform_object.analysisform_set.all().values('id', 'created_at', 'comments', 'entryform_id', 'exam_id', 'exam__name', 'patologo_id', 'patologo__first_name', 'patologo__last_name'))
             entryform["cassettes"] = list(
                 entryform_object.cassette_set.all().values())
             entryform["customer"] = model_to_dict(entryform_object.customer) if entryform_object.customer else None
@@ -288,7 +289,7 @@ class CASSETTE(View):
         # entryform["answer_questions"] = list(
         #     entryform_object.answerreceptioncondition_set.all().values())
         entryform["analyses"] = list(
-            entryform_object.analysisform_set.all().values('id', 'created_at', 'comments', 'entryform_id', 'exam_id', 'exam__name'))
+            entryform_object.analysisform_set.all().values('id', 'created_at', 'comments', 'entryform_id', 'exam_id', 'exam__name', 'patologo_id', 'patologo__first_name', 'patologo__last_name'))
         entryform["cassettes"] = list(
             entryform_object.cassette_set.all().values())
         entryform["customer"] = model_to_dict(entryform_object.customer) if entryform_object.customer else None
@@ -331,11 +332,7 @@ class ANALYSIS(View):
         for analysis in analyses_qs:
             exam = analysis.exam
             if request.user.userprofile.profile_id == 5:
-                posee = False
-                for e in exam.sampleexams_set.all():
-                    if e.patologo_id == request.user.id:
-                        posee = True
-                if not posee:
+                if e.exam.patologo_id != request.user.id:
                     continue
             form = analysis.forms.get()
 
@@ -425,7 +422,7 @@ class ANALYSIS(View):
             entryform["identifications"].append(ident_json)           
 
         entryform["analyses"] = list(
-            entryform_object.analysisform_set.all().values('id', 'created_at', 'comments', 'entryform_id', 'exam_id', 'exam__name'))
+            entryform_object.analysisform_set.all().values('id', 'created_at', 'comments', 'entryform_id', 'exam_id', 'exam__name', 'patologo_id', 'patologo__first_name', 'patologo__last_name'))
         entryform["cassettes"] = list(
             entryform_object.cassette_set.all().values())
         entryform["customer"] = model_to_dict(entryform_object.customer) if entryform_object.customer else None
@@ -534,7 +531,7 @@ class SLICE(View):
             entryform["identifications"].append(ident_json)   
 
         entryform["analyses"] = list(
-            entryform_object.analysisform_set.all().values('id', 'created_at', 'comments', 'entryform_id', 'exam_id', 'exam__name'))
+            entryform_object.analysisform_set.all().values('id', 'created_at', 'comments', 'entryform_id', 'exam_id', 'exam__name', 'patologo_id', 'patologo__first_name', 'patologo__last_name'))
         entryform["cassettes"] = list(
             entryform_object.cassette_set.all().values())
         entryform["customer"] = entryform_object.customer.name
@@ -699,12 +696,14 @@ class WORKFLOW(View):
             #         next_step_permission = True
 
             if process_answer and next_state:
+                current_state = form.state
                 form.state = next_state
                 form.save()
                 if next_state.id != 1 and not len(actor_user.permission.filter(to_state=next_state, type_permission='w')):
                     return redirect(app_view.show_ingresos)
                 next_step_permission = True
                 process_response = True
+                sendEmailNotification(request, form, current_state, next_state)
             else:
                 print("FALLO EL PROCESAMIENTO")
                 return redirect(app_view.show_ingresos)
@@ -1575,6 +1574,7 @@ def step_2_entryform(request):
         analysis_form = AnalysisForm.objects.create(
             entryform_id=entryform.id,
             exam_id=exam,
+            patologo_id= int(var_post.get("sample[patologos]["+exam+"]"))
         )
 
         Form.objects.create(
@@ -1605,8 +1605,7 @@ def step_2_entryform(request):
                 SampleExams.objects.create(
                     sample_id = sample.pk,
                     exam_id = exam,
-                    organ_id= organ,
-                    patologo_id= int(var_post.get("sample[patologos]["+values+"]["+exam+"]"))
+                    organ_id= organ
                 )
     return True
         
@@ -2022,3 +2021,51 @@ def save_generalData(request, id):
 
     entry.save()
     return JsonResponse({})
+
+def sendEmailNotification(request, form, current_state, next_state):
+    step_tag = request.POST.get('step_tag')
+    step = int(step_tag.split('_')[1])
+    content_type = form.content_type.model
+    caso = ''
+    if content_type == 'analysisform':
+        caso = form.parent.content_object.no_caso
+        step += 6
+    else:
+        caso = form.content_object.no_caso
+    # else:
+    # # analysisform
+    #     pass
+    users=[]
+    if step < 9:
+        users = User.objects.filter(userprofile__profile_id__in=[1,3]).values_list('email', flat=True)
+    else:
+        users=User.objects.filter(userprofile__profile_id__in=[1]).values_list('email', flat=True)
+    
+    
+    subject = "Acción Requerida"
+    # Form.
+    to = users
+    # to = ['wcartaya@dataqu.cl']
+    from_email = 'no-reply@solmat.cl'
+
+    ctx = {
+        'name': 'UserName',
+        'nro_caso': caso,
+        'etapa_last': current_state.name,
+        'etapa_current': next_state.name,
+        'url':'settings.SITE_URL'
+    }
+
+    # # message = get_template('accounts/email_confirmation.html').render(Context(ctx))
+    # message = '<p> Estimados, </p><br>'
+    # message = message + '<p> El usuario )'
+
+    # message = message + ', ha generado la PMV de folio <b></b>, a través de la plataforma Sisvet Camanchaca.'
+    # message = message + ' Para poder visualizarla, favor acceder a:</p><br>'
+    # # message = message + ' <p><a href="'+str(settings.SITE_URL)+'/get_pdf/'+str(int(pmv.id))+u'">Ver PMV acá</a>'
+    # message = message + '</p> <br><p> Saludos,</p>'
+    message = get_template(
+                    'app/notification.html').render(context=ctx)
+    msg = EmailMultiAlternatives(subject,message,from_email,to)
+    msg.content_subtype="html"
+    # msg.send()
