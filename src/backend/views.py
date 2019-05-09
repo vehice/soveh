@@ -330,10 +330,10 @@ class ANALYSIS(View):
         analyses = []
 
         for analysis in analyses_qs:
-            exam = analysis.exam
             if request.user.userprofile.profile_id == 5:
-                if e.exam.patologo_id != request.user.id:
+                if analysis.patologo_id != request.user.id:
                     continue
+            exam = analysis.exam
             form = analysis.forms.get()
 
             form_id = form.id
@@ -821,7 +821,6 @@ class REPORT(View):
                             'exam_name': sE.exam.name,
                             'exam_type': sE.exam.exam_type,
                             'sample_id': sE.sample_id,
-                            'patologo_id': sE.patologo_id,
                             'organ_id': [{
                             'name':sE.organ.name,
                             'id':sE.organ.id}]
