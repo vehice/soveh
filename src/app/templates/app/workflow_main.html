@@ -144,12 +144,13 @@
 
 var form = $("#workflow_form");
 var saltar=false;
+var caso_cerrado = {{closed}};
 var steps = $("#workflow_form").steps({
     headerTag: "h6",
     bodyTag: "fieldset",
     transitionEffect: "fade",
     titleTemplate: '<span class="step">#index#</span> #title#',
-    enablePagination: {{edit}} == 1,
+    enablePagination: {{closed}} == 0 && {{edit}} == 1,
     labels: {
         previous: 'Deshacer y Volver',
         next: 'Continuar',
@@ -244,7 +245,6 @@ var steps = $("#workflow_form").steps({
               $.get(
                 Urls.sendNotification()+'?'+form_data + "&id_next_step=" + id_next_step +"&previous_step=" + previous_step,
                 function (data) {
-                toastr.success('', '2');
                 }
               )
             }, 500);
@@ -309,9 +309,51 @@ var steps = $("#workflow_form").steps({
     }, 
     onFinishing: function (event, currentIndex)
     {
-      alert(1);
-        // form.validate().settings.ignore = ":disabled";
-        // return form.valid();
+      swal({
+        title: "Confirmación",
+        text: "¿Está seguro que completó todo el proceso?",
+        icon: "warning",
+        showCancelButton: true,
+        buttons: {
+          cancel: {
+              text: "No, cancelar!",
+              value: null,
+              visible: true,
+              className: "btn-warning",
+              closeModal: true,
+          },
+          confirm: {
+              text: "Sí!",
+              value: true,
+              visible: true,
+              className: "",
+              closeModal: true,
+          }
+        }
+      }).then(isConfirm => {
+        if (isConfirm) {
+          var url = Urls.complete_form({{form_id}});
+          $.ajax({
+            type: "GET",
+            url: url,
+            async: false,
+          })
+          .done(function (data) {
+            response = data;
+            if (response.ok) {
+              toastr.success('', 'Se ha completado el caso exitosamente.');
+              var timer = setTimeout(function() {
+                window.location='/ingresos'
+              }, 2000);
+            } else {
+              toastr.error('', 'No ha sido posible completar el caso.');
+            }
+          })
+          .fail(function (data) {
+            toastr.error('', 'No ha sido posible completar el caso.');
+          });
+        }
+      });
     },
     onFinished: function (event, currentIndex)
     {

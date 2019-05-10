@@ -569,7 +569,8 @@ class WORKFLOW(View):
                 'form_id': form_id,
                 'entryform_id': object_form_id,
                 'set_step_tag': step_tag,
-                'edit': edit
+                'edit': edit,
+                'closed': 1 if form.form_closed else 0
             }
         elif (form.content_type.name == 'analysis form'):
             reopen = False
@@ -2091,3 +2092,9 @@ def sendEmailNotification(request):
         msg.content_subtype="html"
         # msg.send()
     return JsonResponse({})
+
+def completeForm(request, form_id):
+    form = Form.objects.get(pk=form_id)
+    form.form_closed = True
+    form.save()
+    return JsonResponse({'ok':True})

@@ -104,7 +104,7 @@
     <div class="media-body">
       <div class="row">
         <div class="col-sm-4 font-medium-4 text-left"><%= exam_name %></div>
-        <div class="col-sm-4 font-medium-4 text-center"><a class="btn btn-outline-secondary square" target="_blank" href="/download-report/<%= form_id %>"><i class="fa fa-download"></i> Descargar Informe</a><a class="btn btn-outline-primary square" href="/workflow/<%= form_id %>/step_6"><i class="fa fa-open"></i> Reabrir</a></div>
+        <div class="col-sm-4 font-medium-4 text-center"><a class="btn btn-outline-secondary square" target="_blank" href="/download-report/<%= form_id %>"><i class="fa fa-download"></i> Descargar Informe</a>{% if not closed %}<a class="btn btn-outline-primary square" href="/workflow/<%= form_id %>/step_6"><i class="fa fa-open"></i> Reabrir</a>{% endif %}</div>
         <div class="col-sm-4 font-medium-4 text-right">Tinción: <%= exam_name %></div>
       </div>
       <p class="list-group-item-text">Análisis Finalizado</p>
