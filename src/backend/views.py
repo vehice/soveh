@@ -707,7 +707,7 @@ class WORKFLOW(View):
                     return redirect(app_view.show_ingresos)
                 next_step_permission = not next_step_permission
                 process_response = True
-                sendEmailNotification(form, current_state, next_state)
+                # sendEmailNotification(form, current_state, next_state)
             else:
                 print("FALLO EL PROCESAMIENTO")
                 return redirect(app_view.show_ingresos)
@@ -753,7 +753,7 @@ class REPORT(View):
 
                 reports.append({
                     "report_id": report.id,
-                    "organ": organ,
+                    "organ": model_to_dict(organ),
                     "organ_location": organ_location,
                     "pathology": pathology,
                     "diagnostic": diagnostic,
@@ -785,7 +785,7 @@ class REPORT(View):
                     "diagnostic_distribution": model_to_dict(report.diagnostic_distribution, exclude=["organs"]),
                     "diagnostic_intensity": model_to_dict(report.diagnostic_intensity, exclude=["organs"]),
                     "images": image_list,
-                    "identification": model_to_dict(report.identification),
+                    "identification": model_to_dict(report.identification, exclude=["organs"]),
                     "analysis": model_to_dict(report.analysis, exclude=["exam"]),
                     "exam": model_to_dict(report.analysis.exam)
                 })
@@ -2025,7 +2025,18 @@ def save_generalData(request, id):
     entry.save()
     return JsonResponse({})
 
-def sendEmailNotification(form, current_state, next_state):
+def sendEmailNotification(request):
+# form, current_state, next_state):
+    var_post = request.GET.copy()
+
+    form = Form.objects.get(pk=var_post.get('form_id'))
+    next_state = form.state
+    previous_step = strtobool(var_post.get('previous_step'))
+    if not previous_step:
+        current_state = Permission.objects.get(to_state=form.state, type_permission='w').from_state
+    else:
+        current_state = Permission.objects.get(from_state=form.state, type_permission='w').to_state
+
     content_type = form.content_type.model
     caso = ''
     exam = ''
@@ -2044,10 +2055,9 @@ def sendEmailNotification(form, current_state, next_state):
         users=list(User.objects.filter(userprofile__profile_id__in=[1]).values_list('first_name', 'last_name', 'email'))
         if form.content_object.patologo:
             users.append((form.content_object.patologo.first_name, form.content_object.patologo.last_name, form.content_object.patologo.email))
-    
+    print(users)
     for f, l, e in users:
         subject = "Notificación: Acción Requerida Caso " + caso
-        # Form.
         to = [e]
         # to = ['wcartaya@dataqu.cl']
         from_email = 'no-reply@solmat.cl'
@@ -2064,3 +2074,4 @@ def sendEmailNotification(form, current_state, next_state):
         msg = EmailMultiAlternatives(subject,message,from_email,to)
         msg.content_subtype="html"
         # msg.send()
+    return JsonResponse({})

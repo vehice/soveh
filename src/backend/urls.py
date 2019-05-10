@@ -86,4 +86,9 @@ urlpatterns = [
         csrf_exempt(views.save_generalData),
         name="generalData"
     ),
+    path(
+        'sendNotification',
+        csrf_exempt(views.sendEmailNotification),
+        name="sendNotification"
+    ),
 ]
