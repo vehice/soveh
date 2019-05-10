@@ -1,3 +1,4 @@
+var patologos_list;
 function init_step_5(active = true) {
   var entryform_id = $('#entryform_id').val();
   var url = Urls.analysis_entryform_id(entryform_id);
@@ -15,6 +16,7 @@ function init_step_5(active = true) {
       }
       // fillSummary(data);
       saltar=true;
+      patologos_list = data.patologos;
       fillNewAnalysis2(data);
       loadAnalysisData(data);
     })
@@ -33,11 +35,13 @@ function init_step_5(active = true) {
     $('#exam_new_select5').on("select2:select", function (e) {
       var data = e.params.data;
       addNewExamToSamples5(data);
+      addPatologoRow_5(data);
     });
   
     $('#exam_new_select5').on("select2:unselect", function (e) {
       var data = e.params.data;
       removeNewExamFromSamples5(data);
+      removePatologoRow_5(data.id);
     });
   
     $('#exam_new_select5').on("select2:unselecting", function (e) {
@@ -87,8 +91,13 @@ function fillNewAnalysis2(data) {
   organs_list = data.organs;
   loadNewSamples5(data.samples, data.organs);
   loadNewExams5(data.exams_set);
+  $('#patologo_table_5 tbody').html('');
   $.each(data.entryform.analyses, function(i, item){
     $('#exam_new_select5 option[value="'+item.exam_id+'"]').prop('selected', true);
+    addPatologoRow_5({text: item.exam__name, id: item.exam_id});
+    $('#patologos-select_5-'+item.exam_id).val(item.patologo_id);
+    $('#patologos-select_5-'+item.exam_id).trigger('change');
+    $('#patologos-select_5-'+item.exam_id).attr('disabled', 'disabled');
   });
   $('#exam_new_select5').trigger('change');
 }
@@ -247,4 +256,18 @@ function submitNewAnalysis5(){
   .fail(function (data) {
     console.log("Fail");
   })
+}
+
+function addPatologoRow_5(exam) {
+  var sampleRowTemplate = document.getElementById("patologo_row_5").innerHTML;
+
+  var templateFn = _.template(sampleRowTemplate);
+  var templateHTML = templateFn({'exam': exam, 'patologos': patologos_list});
+
+  $("#patologo_table_5 tbody").append(templateHTML)
+  $('#patologos-select_5-'+exam.id).select2();
+}
+
+function removePatologoRow_5(exam_id){
+  $('#exam_5-'+exam_id).remove();
 }

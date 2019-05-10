@@ -307,6 +307,7 @@ class CASSETTE(View):
         fixtatives_list = list(Fixative.objects.all().values())
         waterSources_list = list(WaterSource.objects.all().values())
         customers_list = list(Customer.objects.all().values())
+        patologos = list(User.objects.filter(userprofile__profile_id__in=[4, 5]).values())
 
         data = {
             'cassettes': cassettes,
@@ -321,6 +322,7 @@ class CASSETTE(View):
             'fixtatives_list': fixtatives_list,
             'waterSources_list': waterSources_list,
             'customers_list': customers_list,
+            'patologos': patologos
          }
 
         return JsonResponse(data)
@@ -441,6 +443,7 @@ class ANALYSIS(View):
         fixtatives_list = list(Fixative.objects.all().values())
         waterSources_list = list(WaterSource.objects.all().values())
         customers_list = list(Customer.objects.all().values())
+        patologos = list(User.objects.filter(userprofile__profile_id__in=[4, 5]).values())
 
         data = {
             'analyses': analyses,
@@ -453,6 +456,7 @@ class ANALYSIS(View):
             'fixtatives_list': fixtatives_list,
             'waterSources_list': waterSources_list,
             'customers_list': customers_list,
+            'patologos': patologos
         }
         
         return JsonResponse(data)
@@ -1764,6 +1768,7 @@ def step_new_analysis(request):
             analysis_form = AnalysisForm.objects.create(
                 entryform_id=entryform.id,
                 exam_id=exam,
+                patologo_id=int(var_post.get("sample[patologos]["+exam+"]"))
             )
 
             Form.objects.create(
@@ -1831,7 +1836,6 @@ def step_new_analysis(request):
 
     return False
 
-
 def step_new_analysis2(request):
     var_post = request.POST.copy()
     entryform = EntryForm.objects.get(pk=var_post.get('entryform_id'))
@@ -1847,6 +1851,7 @@ def step_new_analysis2(request):
             analysis_form = AnalysisForm.objects.create(
                 entryform_id=entryform.id,
                 exam_id=exam,
+                patologo_id=int(var_post.get("sample[patologos]["+exam+"]"))
             )
             new_analysisform[exam] = analysis_form.pk
 
