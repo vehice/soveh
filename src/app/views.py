@@ -131,9 +131,11 @@ def make_pdf_file(id):
             'margin-top': "5mm",
             'margin-left': "5mm",
             'margin-right': "5mm",
-            'margin-bottom': "5mm",
+            'margin-bottom': "10mm",
             'load-error-handling': "ignore",
-            'disable-javascript': ''
+            'disable-javascript': '',
+            'footer-center': '[page]',
+            # 'footer-html': 'www.google.com'
         }
 
     urlsitio = settings.SITE_URL +'/template-report/' + str(id)
