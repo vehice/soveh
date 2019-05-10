@@ -84,6 +84,6 @@ class Form(models.Model):
     content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
     object_id = models.PositiveIntegerField(null=True)
     content_object = GenericForeignKey()
-
+    deleted = models.BooleanField(default=False)
     def __str__(self):
         return str(self.content_type)

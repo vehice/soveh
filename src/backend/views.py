@@ -740,7 +740,9 @@ class WORKFLOW(View):
             return JsonResponse({'redirect_flow': True})
 
     def delete(self, request, form_id):
-        Form.objects.get(pk=form_id).delete()
+        form =  Form.objects.get(pk=form_id)
+        form.deleted = True
+        form.save()
         # object_form_id = form.content_object.id
         return JsonResponse({'ok': True})
 

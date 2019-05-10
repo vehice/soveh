@@ -56,7 +56,7 @@ def show_ingresos(request):
         if Identification.objects.filter(entryform=f.content_object).count() == 0:
             f.delete()
 
-    form = Form.objects.filter(content_type__model='entryform').order_by('-object_id')
+    form = Form.objects.filter(content_type__model='entryform', deleted=False).order_by('-object_id')
     if up.profile_id == 5:
         ids = EntryForm.objects.filter(analysisform__patologo_id=up.user_id).values_list('id')
         form_ids = form.filter(object_id__in=ids).values_list('id')
@@ -89,7 +89,8 @@ def show_ingresos_by_id(request, form_id):
 def new_ingreso(request):
     flow = Flow.objects.get(pk=1)
     entryform = EntryForm.objects.create()
-    no_caso = "V0{0}".format(entryform.pk)
+    folio = ('000000'+str(Form.objects.filter().count()+1))[-4:]
+    no_caso = "V{0}".format(folio)
     entryform.no_caso = no_caso
     entryform.save()
     form = Form.objects.create(

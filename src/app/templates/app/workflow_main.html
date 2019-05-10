@@ -134,7 +134,12 @@
     <script src="{% static script_step %}" type="text/javascript"></script>
   {% endwith %}
 {% endfor %}
-
+<script language="JavaScript">
+  window.onbeforeunload = confirmExit;
+  function confirmExit() {
+    return "Ha intentado salir de esta pagina. Si ha realizado algun cambio en los campos sin hacer clic en el boton Guardar, los cambios se perderan. Seguro que desea salir de esta pagina? ";
+  }
+</script>
 <script type="text/javascript">
 
 var form = $("#workflow_form");
@@ -154,6 +159,7 @@ var steps = $("#workflow_form").steps({
     onStepChanging: function (events, currentIndex, newIndex)
     {
       lockScreen(1);
+      window.onbeforeunload = function(){};
       if(!set_state) {
         var previous_step = false;
         var form_data;
@@ -334,15 +340,17 @@ var steps = $("#workflow_form").steps({
 
 $(window).on('load', function (e) {
     // If para cargar un paso en especifico
-  {% if set_step_tag and set_step_tag != "step_1" %}
-    set_state = true;
-    var step_wizard = parseInt("{{ set_step_tag }}".split("_")[1]) - 1; // Se resta 1 para igualar a los indices del plugin
-    var step_tag_function = "init_{{ set_step_tag }}";
+  {% if set_step_tag %}
+    window.onbeforeunload = function(){};
+    {% if set_step_tag != "step_1" %}
+      set_state = true;
+      var step_wizard = parseInt("{{ set_step_tag }}".split("_")[1]) - 1; // Se resta 1 para igualar a los indices del plugin
+      var step_tag_function = "init_{{ set_step_tag }}";
 
-    form.steps("setStep", step_wizard);
+      form.steps("setStep", step_wizard);
 
-    window[step_tag_function]({{edit}} == 1);
-
+      window[step_tag_function]({{edit}} == 1);
+    {% endif %}
   {% else %}
     set_state = false;
 
