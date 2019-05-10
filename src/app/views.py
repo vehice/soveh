@@ -112,7 +112,8 @@ def show_workflow_main_form(request, form_id):
         'form': form,
         'form_id': form_id,
         'entryform_id': entryform_id,
-        'edit': edit
+        'edit': edit,
+        'closed': 0
     })
 
 def make_pdf_file(id):

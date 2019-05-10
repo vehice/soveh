@@ -385,20 +385,44 @@
   }
   
   function submitGeneralData(){
-  var data = $('#generalData').serialize();
-  $.ajax({
-    type: "POST",
-    url: '/generalData/'+resumenId,
-    data: data,
-    async: false,
-  })
-  .done(function (data) {
-    $('#show_summary').modal('hide');
-  })
-  .fail(function (data) {
-    console.log("Fail");
-  })
-
+    swal({
+        title: "Confirmación",
+        text: "¿Está seguro que desea guardar los cambios?",
+        icon: "warning",
+        showCancelButton: true,
+        buttons: {
+          cancel: {
+              text: "No, cancelar!",
+              value: null,
+              visible: true,
+              className: "btn-warning",
+              closeModal: true,
+          },
+          confirm: {
+              text: "Sí!",
+              value: true,
+              visible: true,
+              className: "",
+              closeModal: true,
+          }
+        }
+      }).then(isConfirm => {
+      if (isConfirm) {
+        var data = $('#generalData').serialize();
+        $.ajax({
+          type: "POST",
+          url: '/generalData/'+resumenId,
+          data: data,
+          async: false,
+        })
+        .done(function (data) {
+          $('#show_summary').modal('hide');
+        })
+        .fail(function (data) {
+          console.log("Fail");
+        })
+      }
+    });
 }
 
 </script> {% endblock scripts %}
