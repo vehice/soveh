@@ -213,7 +213,9 @@
                             <thead>
                               <tr>
                                 {% for head in values.0 %}
-                                  <th> <center>{{head}} </center></th>
+                                  {% if  head.0 != '' %}
+                                    <th colspan="{{head.1}}"> <center> {{head.0}} </center></th>
+                                  {% endif %}
                                 {% endfor %}
                               </tr>
                               

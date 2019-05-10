@@ -550,6 +550,10 @@ class SLICE(View):
 
 class WORKFLOW(View):
     http_method_names = ['get', 'post', 'delete']
+    
+    def sortReport(self, report):
+        return report.organ_id
+
     @method_decorator(login_required)
     def get(self, request, form_id, step_tag):
         form = Form.objects.get(pk=form_id)
@@ -600,16 +604,26 @@ class WORKFLOW(View):
             for key, value in res.items():
                 samples = Sample.objects.filter(identification_id=key).order_by('index')
                 matrix = []
-                first_column = ["MUESTRA / HALLAZGO", ""]
+                first_column = [["MUESTRA / HALLAZGO", 1], ""]
                 first_column = first_column + list(map(lambda x: x.identification.cage+"-"+x.identification.group+"-"+str(x.index), samples))
                 matrix.append(first_column + [""])
                 
                 res2 = defaultdict(list)
+                value.sort(key=self.sortReport)
                 for elem in value:
                     res2[elem.pathology.name + " en " + elem.organ_location.name].append(elem)
 
+                lastOrgan = ''
                 for key2, value2 in res2.items():
-                    column = [value2[0].organ.name, key2]
+                    if lastOrgan == value2[0].organ.name:
+                        column = [['', 1], key2]
+                        for col in matrix:
+                            if col[0][0] == lastOrgan:
+                                col[0][1] = col[0][1] + 1
+                                break
+                    else:
+                        lastOrgan = value2[0].organ.name
+                        column = [[value2[0].organ.name, 1], key2]
                     samples_by_index = {}
                     
                     for sam in samples:
@@ -753,7 +767,7 @@ class REPORT(View):
 
                 reports.append({
                     "report_id": report.id,
-                    "organ": model_to_dict(organ),
+                    "organ": organ,
                     "organ_location": organ_location,
                     "pathology": pathology,
                     "diagnostic": diagnostic,

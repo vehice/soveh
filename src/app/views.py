@@ -154,6 +154,9 @@ def template_report(request, id):
     report_final = ReportFinal.objects.filter(analysis_id=int(id)).last()
     return render(request, 'app/template_report.html',{'analisis': analisis, 'report': report, 'report_final':report_final })
 
+def sortReport(report):
+    return report.organ_id
+
 @login_required
 def preview_report(request, id):
     form = Form.objects.get(pk=int(id))
@@ -170,16 +173,26 @@ def preview_report(request, id):
     for key, value in res.items():
         samples = Sample.objects.filter(identification_id=key).order_by('index')
         matrix = []
-        first_column = ["MUESTRA / HALLAZGO", ""]
+        first_column = [["MUESTRA / HALLAZGO", 1], ""]
         first_column = first_column + list(map(lambda x: x.identification.cage+"-"+x.identification.group+"-"+str(x.index), samples))
         matrix.append(first_column + [""])
         
         res2 = defaultdict(list)
+        value.sort(key=sortReport)
         for elem in value:
             res2[elem.pathology.name + " en " + elem.organ_location.name].append(elem)
-
+        
+        lastOrgan = ''
         for key2, value2 in res2.items():
-            column = [value2[0].organ.name, key2]
+            if lastOrgan == value2[0].organ.name:
+                column = [['', 1], key2]
+                for col in matrix:
+                    if col[0][0] == lastOrgan:
+                        col[0][1] = col[0][1] + 1
+                        break
+            else:
+                lastOrgan = value2[0].organ.name
+                column = [[value2[0].organ.name, 1], key2]
             samples_by_index = {}
             
             for sam in samples:
@@ -206,3 +219,15 @@ def preview_report(request, id):
         data[key] = list(zip(*matrix))
         
     return render(request, 'app/preview_report.html', {'report': reports, 'form_id': form.pk, 'form_parent_id': form.parent.id, 'reports2': data})
+
+# @login_required
+def notification(request):
+    ctx = {
+        'name': "Name s",
+        'nro_caso': "caso",
+        'etapa_last': 'current_state',
+        'etapa_current': 'next_state',
+        'url': 'settings.SITE_URL++str(form.id)++next_state.step.tag'
+    }
+        
+    return render(request, 'app/notification.html', ctx)
