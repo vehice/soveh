@@ -54,6 +54,7 @@ def show_ingresos(request):
     check_forms = Form.objects.filter(content_type__model='entryform', state__id=1)
     for f in check_forms:
         if Identification.objects.filter(entryform=f.content_object).count() == 0:
+            f.content_object.delete()
             f.delete()
 
     form = Form.objects.filter(content_type__model='entryform', deleted=False).order_by('-object_id')
@@ -89,7 +90,7 @@ def show_ingresos_by_id(request, form_id):
 def new_ingreso(request):
     flow = Flow.objects.get(pk=1)
     entryform = EntryForm.objects.create()
-    folio = ('000000'+str(Form.objects.filter().count()+1))[-4:]
+    folio = ('000000'+str(Form.objects.filter(flow_id=1, parent_id=None).count()+1))[-4:]
     no_caso = "V{0}".format(folio)
     entryform.no_caso = no_caso
     entryform.save()
