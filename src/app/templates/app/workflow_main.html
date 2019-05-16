@@ -211,7 +211,7 @@ var steps = $("#workflow_form").steps({
         
         var url = Urls.workflow();
         var id_next_step = $("#step_" + newIndex).children("#step_id").val();
-        if(!saltar){
+        if(!saltar || currentIndex == 1){
           var response;
           $.ajax({
             type: "POST",
