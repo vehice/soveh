@@ -81,7 +81,13 @@
                     </td>
                     <td>{{ entryForm.content_object.customer|default:"" }}</td>
                     <td>{{ entryForm.content_object.created_at|date:"d/m/Y" }}</td>
-                    <td><a href="workflow/{{ entryForm.id }}/{{ entryForm.state.step.tag }}">{{ entryForm.state.step }}</a></td>
+                    <td><a href="workflow/{{ entryForm.id }}/{{ entryForm.state.step.tag }}">
+                      {% if entryForm.form_closed %}
+                        Caso Cerrado 
+                      {% else %}
+                        {{ entryForm.state.step }}
+                      {% endif %}
+                    </a></td>
                     <td>
                       <div class="btn-group" role="group" aria-label="Opciones">
                         <button class="btn btn-sm btn-primary showSummaryBtn" data-id="{{ entryForm.content_object.pk }}"><i class="fa fa-list fa-fx"></i> Resumen</button>

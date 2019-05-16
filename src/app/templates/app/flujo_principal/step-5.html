@@ -5,7 +5,7 @@
     <input type="hidden" id="form_id" name="form_id" value="{{form_id}}" >
     <input type="hidden" id="entryform_id" name="entryform_id" value="{{entryform_id}}" >
     <h4 class="form-section">
-      <i class="ft-user"></i> Analisis
+      <i class="ft-user"></i> Analisis  {{closed}}
     </h4>
     <div id="analysis_group" class="list-group list-group-flush media-list">
     </div>
@@ -80,11 +80,15 @@
       <div class="media-body">
         <div class="row">
           <div class="col-sm-4 font-medium-4 text-left"><%= exam_name %></div>
-          <% if (form_reopened)  { %> 
-            <div class="col-sm-4 font-medium-4 text-center"><a class="btn btn-outline-secondary square" href="/workflow/<%= form_id %>/step_6"><i class="fa fa-arrow-right"></i> Ir al análisis </a></div>
-          <% } else { %>
-            <div class="col-sm-4 font-medium-4 text-center"><a class="btn btn-outline-secondary square" href="/workflow/<%= form_id %>/<%= current_step_tag %>"><i class="fa fa-arrow-right"></i> Ir al análisis </a></div>
-            <% } %>
+          {% if not closed  %} 
+            <% if (form_reopened)  { %> 
+              <div class="col-sm-4 font-medium-4 text-center"><a class="btn btn-outline-secondary square" href="/workflow/<%= form_id %>/step_6"><i class="fa fa-arrow-right"></i> Ir al análisis </a></div>
+            <% } else { %>
+              <div class="col-sm-4 font-medium-4 text-center"><a class="btn btn-outline-secondary square" href="/workflow/<%= form_id %>/<%= current_step_tag %>"><i class="fa fa-arrow-right"></i> Ir al análisis </a></div>
+              <% } %>
+          {% else %}
+            <div class="col-sm-4 font-medium-4 text-center"><button class="btn btn-outline-secondary square" type="button" disabled><i class="fa fa-times"></i> Caso Incompleto </button></div>
+          {% endif %}
             <div class="col-sm-4 font-medium-4 text-right">Tinción: <%= exam_name %></div>
         </div>
         <p class="list-group-item-text"><%= no_slice %> cortes</p>
@@ -98,13 +102,18 @@
       <div class="media-body">
         <div class="row">
           <div class="col-sm-4 font-medium-4 text-left"><%= exam_name %></div>
-          <% if (form_reopened)  { %> 
-            <div class="col-sm-4 font-medium-4 text-center"><a class="btn btn-outline-secondary square" href="/workflow/<%= form_id %>/step_6"><i class="fa fa-arrow-right"></i> Ir al análisis </a></div>
-          <% } else { %>
-            <div class="col-sm-4 font-medium-4 text-center"><a class="btn btn-outline-secondary square" href="/workflow/<%= form_id %>/step_5"><i class="fa fa-arrow-right"></i> Ir al análisis </a></div>
-          <% } %>
+          {% if not closed  %} 
+            <% if (form_reopened)  { %> 
+              <div class="col-sm-4 font-medium-4 text-center"><a class="btn btn-outline-secondary square" href="/workflow/<%= form_id %>/step_6"><i class="fa fa-arrow-right"></i> Ir al análisis </a></div>
+            <% } else { %>
+              <div class="col-sm-4 font-medium-4 text-center"><a class="btn btn-outline-secondary square" href="/workflow/<%= form_id %>/<%= current_step_tag %>"><i class="fa fa-arrow-right"></i> Ir al análisis </a></div>
+              <% } %>
+          {% else %}
+            <div class="col-sm-4 font-medium-4 text-center"><button class="btn btn-outline-secondary square" type="button" disabled><i class="fa fa-times"></i> Caso Incompleto </button></div>
+          {% endif %}
           <!-- <div class="col-sm-4 font-medium-4 text-right">Tinción: <%= exam_name %></div> -->
         </div>
+        <br/>
         <div class="progress" style="height: 18px;">
           <div class="progress-bar" role="progressbar" style="width:<%= percentage_step %>%" aria-describedby="example-caption-2"> <%= current_step %> de 1 pasos</div>
         </div>
