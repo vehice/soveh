@@ -106,7 +106,7 @@
             <% if (form_reopened)  { %> 
               <div class="col-sm-4 font-medium-4 text-center"><a class="btn btn-outline-secondary square" href="/workflow/<%= form_id %>/step_6"><i class="fa fa-arrow-right"></i> Ir al análisis </a></div>
             <% } else { %>
-              <div class="col-sm-4 font-medium-4 text-center"><a class="btn btn-outline-secondary square" href="/workflow/<%= form_id %>/<%= current_step_tag %>"><i class="fa fa-arrow-right"></i> Ir al análisis </a></div>
+              <div class="col-sm-4 font-medium-4 text-center"><a class="btn btn-outline-secondary square" href="/workflow/<%= form_id %>/step_5"><i class="fa fa-arrow-right"></i> Ir al análisis </a></div>
               <% } %>
           {% else %}
             <div class="col-sm-4 font-medium-4 text-center"><button class="btn btn-outline-secondary square" type="button" disabled><i class="fa fa-times"></i> Caso Incompleto </button></div>

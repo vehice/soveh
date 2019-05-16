@@ -456,7 +456,7 @@ class ANALYSIS(View):
             'fixtatives_list': fixtatives_list,
             'waterSources_list': waterSources_list,
             'customers_list': customers_list,
-            'patologos': patologos
+            'patologos': patologos,
         }
         
         return JsonResponse(data)
