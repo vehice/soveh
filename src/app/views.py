@@ -52,10 +52,6 @@ def show_ingresos(request):
     editar = up.profile_id in (1,3)
     eliminar = editar and request.user.is_superuser
     check_forms = Form.objects.filter(content_type__model='entryform', state__id=1)
-    for f in check_forms:
-        if Identification.objects.filter(entryform=f.content_object).count() == 0:
-            f.content_object.delete()
-            f.delete()
 
     form = Form.objects.filter(content_type__model='entryform', deleted=False).order_by('-object_id')
     if up.profile_id == 5:
@@ -63,11 +59,6 @@ def show_ingresos(request):
         form_ids = form.filter(object_id__in=ids).values_list('id')
         state_ids = Form.objects.filter(content_type__model='analysisform', parent_id__in=form_ids, state_id__in=[10,11]).values_list('parent_id')
         form = form.filter(id__in=state_ids)
-
-    # else:
-    #     form = Form.objects.filter(
-    #         content_type__model='entryform',
-    #         state__step__actors__profile=up.profile).order_by('-object_id')
 
     return render(request, 'app/ingresos.html', {'entryForm_list': form, 'edit': editar, 'eliminar': eliminar})
 
@@ -96,8 +87,7 @@ def new_ingreso(request):
     entryform.save()
     form = Form.objects.create(
         content_object=entryform, flow=flow, state=flow.step_set.first().state)
-
-    return show_workflow_main_form(request, form_id=form.id)
+    return redirect('/workflow/'+str(form.id))
 
 
 @login_required

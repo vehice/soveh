@@ -21,6 +21,7 @@ function init_step_1() {
     organs = data.organs;
     initialConf();
     loadData();
+    
   })
   .fail(function () {
     console.log("Fail")
@@ -132,6 +133,36 @@ function init_step_1() {
         'placeholder': "Por favor selecciona los peces"
       });
     });
+  });
+  
+  $(document).on('change', '#step_0 input', function(){
+    formChanged = true;
+  });
+  
+  $(document).on('change', '#step_0 textarea', function(){
+    formChanged = true;
+  });
+
+  $(document).on('click', '#saveStep1', function(){
+    form_data = $("#step_0 :input").serialize();
+    $.ajax({
+      type: "POST",
+      url: '/workform/1/save_step1',
+      data: form_data,
+    })
+    .done(function (data) {
+      if( data.ok){
+        formChanged = false;
+        toastr.success('Se guardó satisfactoriamente', '');
+      }
+      else{
+        formChanged = true;
+        toastr.error('No se pudo guardar satisfactoriamente', 'Aviso');
+      }
+    })
+    .fail(function (data) {
+      console.log("Fail");
+    })
   });
 
   function getManualGroupsData() {
@@ -268,12 +299,17 @@ function init_step_1() {
       locale: 'es',
       keepOpen: false,
       format:'DD/MM/YYYY HH:mm'
+    })
+    $('#datetime_created_at').on('dp.change', function(ev){
+        formChanged = true;
     });
   
     $('#datetime_sampled_at').datetimepicker({
       locale: 'es',
       keepOpen: false,
       format:'DD/MM/YYYY HH:mm'
+    }).on('dp.change', function(ev){
+      formChanged = true;
     });
   
     // $('#datetime_created_at').on("dp.change", function (e) {
@@ -290,23 +326,33 @@ function init_step_1() {
   
     $('#customer_select').select2({
       placeholder: "Porfavor seleccione un cliente"
-    });
+    }).on("select2:select", function (e) { 
+        formChanged = true;
+     });;
   
     $('#fixtative_select').select2({
       placeholder: "Porfavor seleccione un fijador"
-    });
+    }).on("select2:select", function (e) { 
+        formChanged = true;
+     });;
   
     $('#specie_select').select2({
       placeholder: "Porfavor seleccione una especie"
-    });
+    }).on("select2:select", function (e) { 
+        formChanged = true;
+     });;
   
     $('#larvalstage_select').select2({
       placeholder: "Porfavor seleccione un estadio desarrollo"
-    });
+    }).on("select2:select", function (e) { 
+        formChanged = true;
+     });;
   
     $('#watersource_select').select2({
       placeholder: "Porfavor seleccione una fuente de agua"
-    });
+    }).on("select2:select", function (e) { 
+        formChanged = true;
+     });;
   }
   
 }
@@ -317,7 +363,7 @@ function validate_step_1(){
   // Validates Identifications
   if ( no_fish <= 0 ) {
     toastr.error(
-      'Para continuar debes tener las muestras identificadas.', 
+      'Para continuar debes determinar la cantidad de peces para las muestras.', 
       'Ups!', 
       {positionClass: 'toast-top-full-width', containerId: 'toast-bottom-full-width'}
     );
@@ -325,6 +371,38 @@ function validate_step_1(){
     return false;
   }
 
+  var orgas = $('.identification_organs ');
+  no_organ = true;
+  $.each(orgas, function(i,v){
+    if($(v).val().length == 0)
+      no_organ = false
+  })
+ 
+  if ( !no_organ ) {
+    toastr.error(
+      'Para continuar debes seleccionar organos para las muestras.', 
+      'Ups!', 
+      {positionClass: 'toast-top-full-width', containerId: 'toast-bottom-full-width'}
+    );
+    return false;
+  }
+
+  // var orgas = $('input[name=identification[cage]]');
+  // no_organ = true;
+  // $.each(orgas, function(i,v){
+  //   if($(v).val() == '')
+  //     no_organ = false
+  // })
+ 
+  // if ( !no_organ ) {
+  //   toastr.error(
+  //     'Para continuar debes definir las jualas para las muestras.', 
+  //     'Ups!', 
+  //     {positionClass: 'toast-top-full-width', containerId: 'toast-bottom-full-width'}
+  //   );
+  //   return false;
+  // }
+  return no_organ;
   // // Validates exam selection
   // if ( $('#exam_select :selected').length <= 0 ) {
   //   toastr.error(

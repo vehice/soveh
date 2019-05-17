@@ -4,6 +4,11 @@
     <input type="hidden" id="step_tag" name="step_tag" value="{{step_tag}}">
     <input type="hidden" id="form_id" name="form_id" value="{{form_id}}" >
     <input type="hidden" id="entryform_id" name="entryform_id" value="{{entryform_id}}" >
+    {% if edit %}
+    <div class="offset-8 text-right m-1">
+      <button type="button" id="saveStep1" class="btn btn-warning square"><i class="fa fa-save"></i> Guardar Cambios</button>
+    </div>
+    {% endif %}
     <h4 class="form-section">
       <i class="ft-user"></i> Informacion General
     </h4>

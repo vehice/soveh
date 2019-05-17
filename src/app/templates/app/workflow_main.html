@@ -137,12 +137,14 @@
   {% endwith %}
 {% endfor %}
 <script language="JavaScript">
-  window.onbeforeunload = confirmExit;
-  function confirmExit() {
-    return "Ha intentado salir de esta pagina. Si ha realizado algun cambio en los campos sin hacer clic en el boton Guardar, los cambios se perderan. Seguro que desea salir de esta pagina? ";
+window.onbeforeunload = confirmExit;
+
+formChanged = false;
+function confirmExit(event) {
+  if (formChanged) {
+    event.returnValue = 'You have unfinished changes!';
   }
-</script>
-<script type="text/javascript">
+}
 
 var form = $("#workflow_form");
 var saltar=false;
@@ -170,6 +172,7 @@ var steps = $("#workflow_form").steps({
             var resp = validate_step_1();
             if (!resp) {
               lockScreen(0);
+              window.onbeforeunload = confirmExit;
               return false
             }
           } 
@@ -383,23 +386,17 @@ var steps = $("#workflow_form").steps({
 
 $(window).on('load', function (e) {
     // If para cargar un paso en especifico
-  {% if set_step_tag %}
-    window.onbeforeunload = function(){};
-    {% if set_step_tag != "step_1" %}
-      set_state = true;
-      var step_wizard = parseInt("{{ set_step_tag }}".split("_")[1]) - 1; // Se resta 1 para igualar a los indices del plugin
-      var step_tag_function = "init_{{ set_step_tag }}";
-
-      form.steps("setStep", step_wizard);
-
-      window[step_tag_function]({{edit}} == 1);
-    {% endif %}
-  {% else %}
-    set_state = false;
-
-    // Si se abre un nuevo caso es necesario ejecutar el metodo del paso 1
-    init_step_1({{edit}} == 1);
+  set_state = true;
+  {% if set_step_tag != "step_1" %}
+  window.onbeforeunload = function(){};
   {% endif %}
+  var step_wizard = parseInt("{{ set_step_tag }}".split("_")[1]) - 1; // Se resta 1 para igualar a los indices del plugin
+  var step_tag_function = "init_{{ set_step_tag }}";
+  
+  form.steps("setStep", step_wizard);
+  set_state = false;
+
+  window[step_tag_function]({{edit}} == 1);
 });
 
 $(document).on('click', '.showSummaryBtn', function(e){

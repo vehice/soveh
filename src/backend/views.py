@@ -559,8 +559,10 @@ class WORKFLOW(View):
         return report.organ_id
 
     @method_decorator(login_required)
-    def get(self, request, form_id, step_tag):
+    def get(self, request, form_id, step_tag=None):
         form = Form.objects.get(pk=form_id)
+        if not step_tag:
+            step_tag = form.state.step.tag
         object_form_id = form.content_object.id
 
         actor = Actor.objects.filter(profile_id=request.user.userprofile.profile_id).first()
@@ -2103,3 +2105,7 @@ def completeForm(request, form_id):
     form.form_closed = True
     form.save()
     return JsonResponse({'ok':True})
+
+def save_step1(request, form_id):
+    valid = step_1_entryform(request)
+    return JsonResponse({'ok': valid})

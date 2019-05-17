@@ -76,7 +76,7 @@
 <script id="analysis_element5" type="text/x-lodash-template">
 <% if (!form_closed)  { %> 
   <% if (histologico)  { %> 
-    <div href="/workflow/<%= form_id %>/<%= current_step_tag %>" class="list-group-item list-group-item-action">
+    <div href="/workflow/<%= form_id %>" class="list-group-item list-group-item-action">
       <div class="media-body">
         <div class="row">
           <div class="col-sm-4 font-medium-4 text-left"><%= exam_name %></div>
@@ -84,7 +84,7 @@
             <% if (form_reopened)  { %> 
               <div class="col-sm-4 font-medium-4 text-center"><a class="btn btn-outline-secondary square" href="/workflow/<%= form_id %>/step_6"><i class="fa fa-arrow-right"></i> Ir al análisis </a></div>
             <% } else { %>
-              <div class="col-sm-4 font-medium-4 text-center"><a class="btn btn-outline-secondary square" href="/workflow/<%= form_id %>/<%= current_step_tag %>"><i class="fa fa-arrow-right"></i> Ir al análisis </a></div>
+              <div class="col-sm-4 font-medium-4 text-center"><a class="btn btn-outline-secondary square" href="/workflow/<%= form_id %>"><i class="fa fa-arrow-right"></i> Ir al análisis </a></div>
               <% } %>
           {% else %}
             <div class="col-sm-4 font-medium-4 text-center"><button class="btn btn-outline-secondary square" type="button" disabled><i class="fa fa-times"></i> Caso Incompleto </button></div>
@@ -121,7 +121,7 @@
     </div>
   <% } %>
 <% } else { %>
-  <div href="/workflow/<%= form_id %>/<%= current_step_tag %>" class="list-group-item list-group-item-action">
+  <div href="/workflow/<%= form_id %>" class="list-group-item list-group-item-action">
     <div class="media-body">
       <div class="row">
         <div class="col-sm-4 font-medium-4 text-left"><%= exam_name %></div>

@@ -92,4 +92,6 @@ urlpatterns = [
         name="sendNotification"
     ),
     path('workform/<int:form_id>/complete', csrf_exempt(views.completeForm), name='complete_form'),
+
+    path('workform/<int:form_id>/save_step1', csrf_exempt(views.save_step1), name='save_step1'),
 ]

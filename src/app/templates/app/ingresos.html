@@ -81,7 +81,7 @@
                     </td>
                     <td>{{ entryForm.content_object.customer|default:"" }}</td>
                     <td>{{ entryForm.content_object.created_at|date:"d/m/Y" }}</td>
-                    <td><a href="workflow/{{ entryForm.id }}/{{ entryForm.state.step.tag }}">
+                    <td><a href="workflow/{{ entryForm.id }}">
                       {% if entryForm.form_closed %}
                         Caso Cerrado 
                       {% else %}
