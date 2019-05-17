@@ -371,7 +371,7 @@ function validate_step_1(){
     return false;
   }
 
-  var orgas = $('.identification_organs ');
+  var orgas = $('.identification_organs');
   no_organ = true;
   $.each(orgas, function(i,v){
     if($(v).val().length == 0)
@@ -381,6 +381,22 @@ function validate_step_1(){
   if ( !no_organ ) {
     toastr.error(
       'Para continuar debes seleccionar organos para las muestras.', 
+      'Ups!', 
+      {positionClass: 'toast-top-full-width', containerId: 'toast-bottom-full-width'}
+    );
+    return false;
+  }
+
+  var identif = $('.estanque-cage');
+  no_identif = true;
+  $.each(identif, function(i,v){
+    if($(v).val() == '')
+      no_identif = false
+  })
+ 
+  if ( !no_identif ) {
+    toastr.error(
+      'Para continuar debes determinar las identificaciones de los estanques y los grupos para las muestras.', 
       'Ups!', 
       {positionClass: 'toast-top-full-width', containerId: 'toast-bottom-full-width'}
     );
