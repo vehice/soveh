@@ -1205,35 +1205,37 @@ def step_1_entryform(request):
     entryform.no_request = var_post.get('no_request')
     entryform.save()
 
+    optimals = [
+        v for k, v in dict(var_post).items() if k.startswith("identification[is_optimal]")
+    ]
+
+    organs = [
+        list(v) for k, v in dict(var_post).items() if k.startswith("identification[organs]")
+    ]
+    identification_cage = var_post.getlist("identification[cage]")
+    identification_group = var_post.getlist("identification[group]")
+    identification_no_container = var_post.getlist("identification[no_container]")
+    identification_no_fish = var_post.getlist("identification[no_fish]")
+    identification_id = var_post.getlist("identification[id]")
+    identification_weight = var_post.getlist("identification[weight]")
+    identification_extra_features_detail = var_post.getlist("identification[extra_features_detail]")
+    identification_is_optimal = optimals
+    identification_observations = var_post.getlist("identification[observations]")
+    identification_organs = organs
+
+    zip_identification = zip(identification_cage, 
+                        identification_group,
+                        identification_no_container,
+                        identification_no_fish, 
+                        identification_id, 
+                        identification_weight,
+                        identification_extra_features_detail, 
+                        identification_is_optimal, 
+                        identification_observations,
+                        identification_organs)
+                        
     if strtobool(var_post.get('select_if_divide_flow')):
         if var_post.get('flow_divide_option') == "1":
-            optimals = [
-                v for k, v in dict(var_post).items() if k.startswith("identification[is_optimal]")
-            ]
-
-            organs = [
-                list(v) for k, v in dict(var_post).items() if k.startswith("identification[organs]")
-            ]
-            identification_cage = var_post.getlist("identification[cage]")
-            identification_group = var_post.getlist("identification[group]")
-            identification_no_container = var_post.getlist("identification[no_container]")
-            identification_no_fish = var_post.getlist("identification[no_fish]")
-            identification_id = var_post.getlist("identification[id]")
-            identification_weight = var_post.getlist("identification[weight]")
-            identification_extra_features_detail = var_post.getlist("identification[extra_features_detail]")
-            identification_is_optimal = optimals
-            identification_observations = var_post.getlist("identification[observations]")
-            identification_organs = organs
-            zip_identification = zip(identification_cage, 
-                                identification_group,
-                                identification_no_container,
-                                identification_no_fish, 
-                                identification_id, 
-                                identification_weight,
-                                identification_extra_features_detail, 
-                                identification_is_optimal, 
-                                identification_observations,
-                                identification_organs)
             i = 0
             for values in zip_identification:
                 # First identification is first subflow and it had some data saved before.
@@ -1310,40 +1312,10 @@ def step_1_entryform(request):
                         sample_index += 1
                 i += 1 
         elif var_post.get('flow_divide_option') == "2":
-            optimals = [
-                v for k, v in dict(var_post).items() if k.startswith("identification[is_optimal]")
-            ]
-
-            organs = [
-                list(v) for k, v in dict(var_post).items() if k.startswith("identification[organs]")
-            ]
-            identification_cage = var_post.getlist("identification[cage]")
-            identification_group = var_post.getlist("identification[group]")
-            identification_no_container = var_post.getlist("identification[no_container]")
-            identification_no_fish = var_post.getlist("identification[no_fish]")
-            identification_id = var_post.getlist("identification[id]")
-            identification_weight = var_post.getlist("identification[weight]")
-            identification_extra_features_detail = var_post.getlist("identification[extra_features_detail]")
-            identification_is_optimal = optimals
-            identification_observations = var_post.getlist("identification[observations]")
-            identification_organs = organs
-
-            zip_identification = zip(identification_cage, 
-                                identification_group,
-                                identification_no_container,
-                                identification_no_fish, 
-                                identification_id, 
-                                identification_weight,
-                                identification_extra_features_detail, 
-                                identification_is_optimal, 
-                                identification_observations,
-                                identification_organs)
             subflow_groups = [
                 var_post.getlist(k) for k, v in var_post.items()
                 if k.startswith("subflow_select[group]")
             ]
-
-            # print (subflow_groups)
             zip_identification_list = list(zip_identification)
             for i in range(len(subflow_groups)):
                 if i == 0:
@@ -1360,7 +1332,7 @@ def step_1_entryform(request):
                                 cage=values[0],
                                 group=values[1],
                                 no_container=values[2],
-                                no_fish=values[3],
+                                no_fish=new_no_fish,
                                 temp_id=values[4],
                                 weight=values[5],
                                 extra_features_detail=values[6],
@@ -1370,7 +1342,7 @@ def step_1_entryform(request):
                             
                             for org in values[9]:
                                 identificacion.organs.add(org)
-                                
+
                             sample_index = 1
                             for k in range(int(new_no_fish)):
                                 sample = Sample.objects.create(
@@ -1410,7 +1382,7 @@ def step_1_entryform(request):
                                 cage=values[0],
                                 group=values[1],
                                 no_container=values[2],
-                                no_fish=values[3],
+                                no_fish=new_no_fish,
                                 temp_id=values[4],
                                 weight=values[5],
                                 extra_features_detail=values[6],
@@ -1431,43 +1403,10 @@ def step_1_entryform(request):
                                 sample_index += 1
 
     else:
-        # print ( var_post.getlist("identification[cage]"))
-        # print (var_post.getlist("identification[is_optimal]"))
-        optimals = [
-            v for k, v in dict(var_post).items() if k.startswith("identification[is_optimal]")
-        ]
-
-        organs = [
-            list(v) for k, v in dict(var_post).items() if k.startswith("identification[organs]")
-        ]
-        # print (organs)
-
-        identification_cage = var_post.getlist("identification[cage]")
-        identification_group = var_post.getlist("identification[group]")
-        identification_no_container = var_post.getlist(
-            "identification[no_container]")
-        identification_no_fish = var_post.getlist("identification[no_fish]")
-        identification_id = var_post.getlist("identification[id]")
-        identification_weight = var_post.getlist("identification[weight]")
-        identification_extra_features_detail = var_post.getlist("identification[extra_features_detail]")
-        identification_is_optimal = optimals
-        identification_observations = var_post.getlist("identification[observations]")
-        identification_organs = organs
-
-        zip_identification = zip(identification_cage, identification_group,
-                                identification_no_container,
-                                identification_no_fish, 
-                                identification_id, 
-                                identification_weight,
-                                identification_extra_features_detail, 
-                                identification_is_optimal, 
-                                identification_observations,
-                                identification_organs)
-
         entryform.identification_set.all().delete()
         entryform.sample_set.all().delete()
         sample_index = 1
-        # print (zip_identification)
+
         for values in zip_identification:
             print (values)
             identificacion = Identification.objects.create(
@@ -1493,46 +1432,7 @@ def step_1_entryform(request):
                     identification=identificacion
                 )
                 sample_index += 1
-        # print (caaca)
-        # entryform.sample_set.all().delete()
-        # for values in zip_samples:
-        #     # print (values)
-        #     sample = Sample.objects.create(
-        #         entryform_id=entryform.id,
-        #         index=int(values[0][0]),
-        #         identification=Identification.objects.filter(entryform__id=entryform.id, temp_id=values[1][0]).first(),
-        #     )
-        #     for organ in values[3]:
-        #         sample.organs.add(organ)
-
-        #     for exam in values[2]:
-        #         sample.exams.add(exam)
-            
-        #     sample.save()
-
-        # exams_to_do = var_post.getlist("analysis")
-
-        # analyses_qs = entryform.analysisform_set.all()
-
-        # for analysis in analyses_qs:
-        #     analysis.forms.get().delete()
-
-        # analyses_qs.delete()
-
-        # flow = Flow.objects.get(pk=2)
-
-        # # print(exams_to_do)
-        # for exam in exams_to_do:
-        #     analysis_form = AnalysisForm.objects.create(
-        #         entryform_id=entryform.id,
-        #         exam_id=exam,
-        #     )
-
-        #     Form.objects.create(
-        #         content_object=analysis_form,
-        #         flow=flow,
-        #         state=flow.step_set.all()[0].state,
-        #         parent_id=entryform.forms.first().id)
+       
     return True
 
 def step_2_entryform(request):

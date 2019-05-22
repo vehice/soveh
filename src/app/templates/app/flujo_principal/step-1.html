@@ -167,7 +167,7 @@
         <label for="flow_divider">¿Desea dividir en trabajo en partes o trabajar con grupos de peces por separado?. </label>
         <select class="form-control" id="select_if_divide_flow" name="select_if_divide_flow" {% if not edit %}disabled{% endif %} >
             <option selected value="0">No</option>
-            <!-- <option value="1">Sí</option> -->
+            <option value="1">Sí</option>
         </select>
       </div>
       <input type="hidden" value="0" name="flow_divide_option" id="flow_divide_option" {% if not edit %}disabled{% endif %} />
@@ -195,7 +195,7 @@
     <div class="col-sm-2">
       <div class="form-group">
         <label for="no_fish">No. Peces</label>
-        <input name="identification[no_fish]" type="number" value="0" min="1" class="form-control" {% if not edit %}disabled{% endif %} >
+        <input name="identification[no_fish]" type="number" value="0" min="1" class="form-control no_peces" {% if not edit %}disabled{% endif %} >
       </div>
     </div>
     <div class="col-sm-2">

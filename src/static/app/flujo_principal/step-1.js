@@ -3,6 +3,8 @@ var organs;
 var questionReceptionCondition;
 var last_temp_id;
 function addIdentificador() {
+  $("#select_if_divide_flow").val(0);
+  $("#select_if_divide_flow").trigger('change');
   last_temp_id = Math.random().toString(36).replace('0.', '');
   addIdentificationTemplate({
     temp_id : last_temp_id,
@@ -40,6 +42,7 @@ function init_step_1() {
   $(document).on('click', '#FlowDividerOptions a', function (e) {
     if (e.target.id === 'base_flowdivider_by_identification') {
       $('#flow_divide_option').val(1);
+      $("#flowdivider_by_identification").html('');
       $('[name="identification[no_fish]"]').each(function (i, element) {
         var no_fish = parseInt($(element).val()) || 0;
         var templateData = {
@@ -51,6 +54,7 @@ function init_step_1() {
     } else {
       $('#flow_divide_option').val(2);
       var group_data = getManualGroupsData();
+      $("#flowdivider_manual_groups").html('');
       $.each(group_data, function(i, item){
         var aux = {
           "group_fishes" : item,
@@ -102,6 +106,7 @@ function init_step_1() {
 
   $(document).on('change', '#flowdivider_manual_group_quantity', function(e){
     var group_data = getManualGroupsData();
+    $("#flowdivider_manual_groups").html('');
     $.each(group_data, function(i, item){
       var aux = {
         "group_fishes" : item,
@@ -135,34 +140,17 @@ function init_step_1() {
     });
   });
   
+  $(document).on('change', '.no_peces', function(){
+    $("#select_if_divide_flow").val(0);
+    $("#select_if_divide_flow").trigger('change');
+  });
+  
   $(document).on('change', '#step_0 input', function(){
     formChanged = true;
   });
   
   $(document).on('change', '#step_0 textarea', function(){
     formChanged = true;
-  });
-
-  $(document).on('click', '#saveStep1', function(){
-    form_data = $("#step_0 :input").serialize();
-    $.ajax({
-      type: "POST",
-      url: '/workform/1/save_step1',
-      data: form_data,
-    })
-    .done(function (data) {
-      if( data.ok){
-        formChanged = false;
-        toastr.success('Se guardó satisfactoriamente', '');
-      }
-      else{
-        formChanged = true;
-        toastr.error('No se pudo guardar satisfactoriamente', 'Aviso');
-      }
-    })
-    .fail(function (data) {
-      console.log("Fail");
-    })
   });
 
   function getManualGroupsData() {
@@ -356,6 +344,28 @@ function init_step_1() {
   }
   
 }
+
+$(document).on('click', '#saveStep1', function(){
+  form_data = $("#step_0 :input").serialize();
+  $.ajax({
+    type: "POST",
+    url: '/workform/1/save_step1',
+    data: form_data,
+  })
+  .done(function (data) {
+    if( data.ok){
+      formChanged = false;
+      toastr.success('Se guardó satisfactoriamente', '');
+    }
+    else{
+      formChanged = true;
+      toastr.error('No se pudo guardar satisfactoriamente', 'Aviso');
+    }
+  })
+  .fail(function (data) {
+    console.log("Fail");
+  })
+});
 
 function validate_step_1(){
   var no_fish = countNoFish();
