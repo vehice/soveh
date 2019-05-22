@@ -178,7 +178,7 @@ class EntryForm(models.Model):
 
     @property
     def get_subflow(self):
-        subflows = EntryForm.objects.filter(no_caso=self.no_caso).order_by('id')
+        subflows = EntryForm.objects.filter(no_caso=self.no_caso, forms__deleted=0).order_by('id')
         if subflows.count() > 1:
             for i in range(len(subflows)):
                 if subflows[i].pk == self.pk:
