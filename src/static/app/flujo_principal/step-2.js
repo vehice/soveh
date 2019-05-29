@@ -34,13 +34,13 @@ function init_step_2() {
   $('#exam_select').on("select2:select", function (e) {
     var data = e.params.data;
     addExamToSamples(data);
-    addPatologoRow(data);
+    // addPatologoRow(data);
   });
 
   $('#exam_select').on("select2:unselect", function (e) {
     var data = e.params.data;
     removeExamFromSamples(data);
-    removePatologoRow(data.id);
+    // removePatologoRow(data.id);
   });
 
   $('#exam_select').on("select2:unselecting", function (e) {
@@ -112,7 +112,7 @@ function loadData(data){
   // Fill analyses
   $.each(data.entryform.analyses, function(i, item){
     $('#exam_select option[value="'+item.exam_id+'"]').prop('selected', true);
-    addPatologoRow({text: item.exam__name, id: item.exam_id});
+    // addPatologoRow({text: item.exam__name, id: item.exam_id});
     $('#patologos-select-'+item.exam_id).val(item.patologo_id);
     $('#patologos-select-'+item.exam_id).trigger('change');
   });
@@ -304,16 +304,16 @@ function deleteAnalisis(sampleId, sampleIndex, active){
   }
 }
 
-function addPatologoRow(exam) {
-  var sampleRowTemplate = document.getElementById("patologo_row").innerHTML;
+// function addPatologoRow(exam) {
+//   var sampleRowTemplate = document.getElementById("patologo_row").innerHTML;
 
-  var templateFn = _.template(sampleRowTemplate);
-  var templateHTML = templateFn({'exam': exam, 'patologos': patologos_list});
+//   var templateFn = _.template(sampleRowTemplate);
+//   var templateHTML = templateFn({'exam': exam, 'patologos': patologos_list});
 
-  $("#patologo_table tbody").append(templateHTML)
-  $('#patologos-select-'+exam.id).select2();
-}
+//   $("#patologo_table tbody").append(templateHTML)
+//   $('#patologos-select-'+exam.id).select2();
+// }
 
-function removePatologoRow(exam_id){
-  $('#exam-'+exam_id).remove();
-}
+// function removePatologoRow(exam_id){
+//   $('#exam-'+exam_id).remove();
+// }

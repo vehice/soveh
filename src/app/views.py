@@ -226,3 +226,25 @@ def notification(request):
     }
         
     return render(request, 'app/notification.html', ctx)
+
+@login_required
+def show_patologos(request):
+    analysis = AnalysisForm.objects.all()
+    data = []
+    patologos = list(User.objects.filter(userprofile__profile_id__in=[4, 5]).values())
+
+    for a in analysis:
+        if not a.entryform.forms.first().deleted:
+            parte = a.entryform.get_subflow
+            
+            if parte == "N/A":
+                parte = ''
+            else:
+                parte = ' (Parte ' + parte + ')'
+            data.append({
+                'analisis': a.id,
+                'patologo': a.patologo_id,
+                'no_caso': a.entryform.no_caso + parte, 
+                'exam': a.exam.name
+            })
+    return render(request, 'app/patologos.html', {'casos': data, 'patologos': patologos})

@@ -94,4 +94,6 @@ urlpatterns = [
     path('workform/<int:form_id>/complete', csrf_exempt(views.completeForm), name='complete_form'),
 
     path('workform/<int:form_id>/save_step1', csrf_exempt(views.save_step1), name='save_step1'),
+    path('analysis/<int:analysis_id>/patologo/', csrf_exempt(views.save_patologo), name='save_patologo_empty'),
+    path('analysis/<int:analysis_id>/patologo/<int:patologo_id>', csrf_exempt(views.save_patologo), name='save_patologo'),
 ]

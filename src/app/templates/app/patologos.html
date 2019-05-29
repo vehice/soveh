@@ -1,0 +1,155 @@
+{% extends 'layout.html' %}
+{% load static %}
+{% block stylesheets %}
+
+<style>
+  .steps {
+    pointer-events: none;
+  }
+  .form-section {
+    color: #404E67;
+    line-height: 3rem;
+    margin-bottom: 20px;
+    border-bottom: 1px solid #404E67;
+  }
+  .incomplete{
+    color: red !important;
+    font-weight: bolder;
+  }
+</style>
+
+{% endblock stylesheets %}
+{% block content_header %}
+<div class="content-header row">
+  <div class="content-header-left col-md-6 col-12 mb-2">
+    <h3 class="content-header-title mb-0">Asignación de Patólogos</h3>
+    <div class="row breadcrumbs-top">
+      <div class="breadcrumb-wrapper col-12">
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item">
+            <a href="/">INICIO</a>
+          </li>
+          <li class="breadcrumb-item">
+            <a href="#">Patólogos</a>
+          </li>
+          <li class="breadcrumb-item active">
+          </li>
+        </ol>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock content_header %}
+{% block content %}
+<div class="row">
+  <div class="col-12">
+    <div class="card">
+      <div class="card-header">
+        <h4 class="card-title">Casos</h4>
+      </div>
+      <div class="card-content">
+        <div class="card-body card-dashboard">
+          <table id="table-casos" class="table table-bordered zero-configuration">
+            <thead>
+              <tr>
+                <!-- <th>Id</th> -->
+                <th>Nro Caso</th>
+                <th>Servicios</th>
+                <th>Patólogos</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for entryForm in casos %}
+                <tr>
+                  <td class="first-column"><strong>{{ entryForm.no_caso }}</strong></td>
+                  <td class="service-{{entryForm.analisis}} {% if not entryForm.patologo %} incomplete {% endif %}">{{ entryForm.exam|default:"" }}</td>
+                  <td>
+                    <select class="select2 form-control patologos-select" style="width:100% !important;" data-analisis="{{entryForm.analisis}}">
+                      <option value="">No Asignado</option>
+                      {% for p in patologos %}
+                        <option value="{{p.id}}" {% if p.id == entryForm.patologo %}selected{% endif %}>{{p.first_name}} {{p.last_name}}</option>
+                      {% endfor %}
+                    </select>
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock content %}
+{% block scripts %}
+<script type="text/javascript" src="https://cdn.rawgit.com/ashl1/datatables-rowsgroup/fbd569b8768155c7a9a62568e66a64115887d7d0/dataTables.rowsGroup.js"></script>
+<script src="{% url 'js_reverse' %}" type="text/javascript"></script>
+<script language="JavaScript">
+$('.patologos-select').select2()
+$('.patologos-select').on('select2:selecting', function(e){
+  e.preventDefault();
+  var selected = e.params.args.data.id
+  var name = e.params.args.data.text
+  swal({
+        title: "Confirmación",
+        text: "¿Está seguro que desea asignar el patólogo: " + name +"?",
+        icon: "warning",
+        showCancelButton: true,
+        buttons: {
+          cancel: {
+              text: "No, cancelar!",
+              value: null,
+              visible: true,
+              className: "btn-warning",
+              closeModal: true,
+          },
+          confirm: {
+              text: "Sí!",
+              value: true,
+              visible: true,
+              className: "",
+              closeModal: true,
+          }
+        }
+      }).then(isConfirm => {
+      if (isConfirm) {
+        $(this).val(selected);
+        $(this).trigger('change');
+      }
+    });
+  
+});
+$('.patologos-select').on('change', function(e){
+  var analisis = $(this).data("analisis");
+  var patologo = $(this).val();
+  var td = $('.service-'+analisis)[0];
+  var url = '/analysis/'+analisis+'/patologo/'+patologo; 
+  $.ajax({
+      type: "POST",
+      url: url,
+    })
+    .done(function (data) {
+      $(td).removeClass('incomplete');
+      if(!patologo)
+        $(td).addClass('incomplete');
+      toastr.success("Patólogo Asignado Correctamente","");
+    })
+    .fail(function (data) {
+      toastr.error("Por favor reportelo.","Ha ocurrido un error!!");
+    })
+});
+$(document).ready(function(){
+  $('#table-casos').DataTable({
+    "rowsGroup": [0],
+    "autoWidth": false,
+    "bPaginate" : false,
+    "columnDefs": [{
+        "targets": [ 1, 2 ],
+        "orderable": false
+    }],
+    // "searching": false
+  });
+})
+</script>
+ {% endblock scripts %}

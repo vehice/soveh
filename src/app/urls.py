@@ -11,6 +11,7 @@ urlpatterns = [
     url(r'^analisis$', views.show_analisis, name='analisis'),
     url(r'^ingresos$', views.show_ingresos, name='ingresos'),
     url(r'^ingresos/new$', views.new_ingreso, name='ingresos_new'),
+    url(r'^patologos$', views.show_patologos, name='patologos'),
     url(r'^template-report/(?P<id>\d+)$', views.template_report, name='template_report'),
     url(r'^download-report/(?P<id>\d+)$', views.download_report, name='download_report'),
     url(r'^preview-report/(?P<id>\d+)$', views.preview_report, name='preview_report'),

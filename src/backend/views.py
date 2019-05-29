@@ -1455,7 +1455,7 @@ def step_2_entryform(request):
         analysis_form = AnalysisForm.objects.create(
             entryform_id=entryform.id,
             exam_id=exam,
-            patologo_id= int(var_post.get("sample[patologos]["+exam+"]"))
+            # patologo_id= int(var_post.get("sample[patologos]["+exam+"]"))
         )
 
         Form.objects.create(
@@ -1625,7 +1625,7 @@ def step_new_analysis(request):
             analysis_form = AnalysisForm.objects.create(
                 entryform_id=entryform.id,
                 exam_id=exam,
-                patologo_id=int(var_post.get("sample[patologos]["+exam+"]"))
+                # patologo_id=int(var_post.get("sample[patologos]["+exam+"]"))
             )
 
             Form.objects.create(
@@ -1708,7 +1708,7 @@ def step_new_analysis2(request):
             analysis_form = AnalysisForm.objects.create(
                 entryform_id=entryform.id,
                 exam_id=exam,
-                patologo_id=int(var_post.get("sample[patologos]["+exam+"]"))
+                # patologo_id=int(var_post.get("sample[patologos]["+exam+"]"))
             )
             new_analysisform[exam] = analysis_form.pk
 
@@ -1964,3 +1964,9 @@ def completeForm(request, form_id):
 def save_step1(request, form_id):
     valid = step_1_entryform(request)
     return JsonResponse({'ok': valid})
+
+def save_patologo(request, analysis_id, patologo_id= None):
+    analysis = AnalysisForm.objects.get(pk=analysis_id)
+    analysis.patologo_id = patologo_id
+    analysis.save()
+    return JsonResponse({})
