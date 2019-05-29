@@ -90,7 +90,7 @@
                     </a></td>
                     <td>
                       <div class="btn-group" role="group" aria-label="Opciones">
-                        <button class="btn btn-sm btn-primary showSummaryBtn" data-id="{{ entryForm.content_object.pk }}"><i class="fa fa-list fa-fx"></i> Resumen</button>
+                        <button class="btn btn-sm btn-primary showSummaryBtn" data-id="{{ entryForm.content_object.pk }}" data-closed="{{ entryForm.form_closed }}"><i class="fa fa-list fa-fx"></i> Resumen</button>
                         {% if eliminar %}
                         <button type="button" data-id="{{ entryForm.id }}" class="btn btn-danger btn-sm deleteFlow"><i class="fa fa-trash fa-fx"></i> Anular</button>
                         {% endif %}
@@ -119,7 +119,7 @@
         <div style="padding: 10px;background-color: #f2efed;">
           {% if edit %}
           <div class="col-md-12">
-            <a href="javascript:void(0);" onclick="submitGeneralData()" class="btn btn-primary pull-right"> <i class="fa fa-save fa-2x"></i> </a>
+            <a href="javascript:void(0);" id="btn_save" onclick="submitGeneralData()" class="btn btn-primary pull-right"> <i class="fa fa-save fa-2x"></i> </a>
           </div>
           {% endif %}
           <form action="#" id="generalData">
@@ -233,8 +233,15 @@
   var resumenId;
   $(document).on('click', '.showSummaryBtn', function(e){
     var entryform_id = $(this).data('id');
+    var closed = $(this).data('closed');
     resumenId = entryform_id;
-    fillSummary(entryform_id);
+    fillSummary(entryform_id)
+    if(closed == "True"){
+      $('#btn_save').hide();
+    }
+    else{
+      $('#btn_save').show();
+    }
     $("#show_summary").modal("show");
   });
 
@@ -371,12 +378,16 @@
 
       tpl_samples += '</tbody></table></div>';
       $('.summarySamples').html(tpl_samples);
-
-      $('#client').val(data.entryform.customer.id);
-      $('#fixative').val(data.entryform.fixative.id);
-      $('#specie').val(data.entryform.specie.id);
-      $('#watersource').val(data.entryform.watersource.id);
-      $('#larvalstage').val(data.entryform.larvalstage.id);
+      if(data.entryform.customer != null)
+        $('#client').val(data.entryform.customer.id);
+      if(data.entryform.fixative != null)
+        $('#fixative').val(data.entryform.fixative.id);
+      if(data.entryform.specie != null)
+        $('#specie').val(data.entryform.specie.id);
+      if(data.entryform.watersource != null)
+        $('#watersource').val(data.entryform.watersource.id);
+      if(data.entryform.larvalstage != null)
+        $('#larvalstage').val(data.entryform.larvalstage.id);
 
       $('.selectOpt').select2({'width':'100%'});
       $('.selectOrgs').select2({'width':'100%'});
