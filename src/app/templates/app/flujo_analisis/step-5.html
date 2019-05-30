@@ -1,4 +1,5 @@
 {% load static %}
+{% load report_list %}
 <fieldset>
   <div id="step_{{ step_tab }}">
 
@@ -118,7 +119,7 @@
                                         <ul>
                                           {% for item in organ.list %}
                                             <li>
-                                              Se observa {{ item.pathology.name }} en {{ item.organ_location.name }} {{ item.diagnostic_intensity.name }} (Muestra {{item.slice.cassette.sample.index}}),
+                                              Se observa {{ item.pathology.name }} en {{ item.organ_location.name }} {{ item.diagnostic_intensity.name }} (Muestra {{item.slice.cassette.sample.index}})
                                             </li>
                                           {% endfor %}
                                         </ul>
@@ -154,11 +155,7 @@
                           {% for diag in by_diag %}
                               <li>{{ diag.list.0.pathology.name }} en {{ diag.list.0.organ_location.name }} {{ diag.list.0.diagnostic_intensity.name }}. 
                               Muestras (
-                              {% for fin in diag.list %}
-                                
-                                  {{fin.slice.cassette.sample.index}},
-                                
-                              {% endfor %}
+                              {{ diag.list|join_diagnostic }}
                               ) </li>
                           
                           {% endfor %}
