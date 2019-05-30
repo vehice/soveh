@@ -29,8 +29,9 @@
                 <table class="table table-bordered">
                   <tbody>
                     <tr>
-                      <td class="danger">N° Caso</td>
-                      <td colspan="2">{{ analisis.entryform.no_caso}}</td>
+                      <td class="danger"> N° Reporte / N° Caso </td>
+                      <td><input name="no_reporte" style="width: 100%" value='{{ report_finalExtra.no_reporte|default:"" }}' ></td>
+                      <td>{{ analisis.entryform.no_caso }}</td>
                     </tr>
                     <tr>
                       <td class="danger">Empresa</td>

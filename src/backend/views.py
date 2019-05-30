@@ -1836,6 +1836,7 @@ def step_5_analysisform(request):
     var_post = request.POST.copy()
 
     analysis_id = var_post.get('analysis_id')
+    no_reporte = var_post.get('no_reporte')
     box_findings = var_post.get('box-findings').replace("\\r\\n", "")
     box_diagnostic = var_post.get('box-diagnostics').replace("\\r\\n", "")
     box_comments = var_post.get('box-comments').replace("\\r\\n", "")
@@ -1843,6 +1844,7 @@ def step_5_analysisform(request):
     # print (var_post)
     ReportFinal.objects.create(
         analysis_id=analysis_id,
+        no_reporte=no_reporte,
         box_findings=box_findings,
         box_diagnostics=box_diagnostic,
         box_comments=box_comments,

@@ -317,6 +317,7 @@ class Report(models.Model):
 class ReportFinal(models.Model):
     analysis = models.ForeignKey(
         AnalysisForm, null=True, on_delete=models.SET_NULL)
+    no_reporte = models.CharField(max_length=250, null=True, blank=True)
     box_findings = models.TextField(null=True, blank=True)
     box_diagnostics = models.TextField(null=True, blank=True)
     box_comments = models.TextField(null=True, blank=True)
