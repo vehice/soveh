@@ -238,9 +238,11 @@
     fillSummary(entryform_id)
     if(closed == "True"){
       $('#btn_save').hide();
+      $('.btn-save-identification').hide();
     }
     else{
       $('#btn_save').show();
+      $('.btn-save-identification').show();
     }
     $("#show_summary").modal("show");
   });
@@ -331,7 +333,7 @@
         tpl_identification += '<div class="form-group col-md-6"><label>Observaciones:</label> <textarea class="form-control" rows="2" name="observation" {% if not edit %}disabled{% endif %} >'+ item.observation+' </textarea></div>';
         tpl_identification += '<div class="form-group col-md-10"><label>Órganos:</label>'+selectOrgans+'</div>';
         {% if edit %}
-        tpl_identification += '<div style="padding-top:25px;"><a href="javascript:void(0);" onclick="submitIdentification('+item.id+')" class="btn btn-primary"> <i class="fa fa-save"></i> </a></div>'
+        tpl_identification += '<div style="padding-top:25px;"><a href="javascript:void(0);" onclick="submitIdentification('+item.id+')" class="btn btn-primary btn-save-identification"> <i class="fa fa-save"></i> </a></div>'
         {% endif %}
         tpl_identification += '</div></div>';
         tpl_identification += '</form></div>';
@@ -442,4 +444,20 @@
     });
 }
 
+  function submitIdentification(id){
+    var data = $('#identification-'+id).serialize();
+    $.ajax({
+      type: "POST",
+      url: '/identification/'+id,
+      data: data,
+      async: false,
+    })
+    .done(function (data) {
+      response = data;
+    })
+    .fail(function (data) {
+      console.log("Fail");
+    })
+
+  }
 </script> {% endblock scripts %}
