@@ -360,6 +360,11 @@ $("#workflow_form").steps({
     },
     onFinishing: function (event, currentIndex)
     {
+      var no_reporte = $('input[name=no_reporte]').val()
+      if(no_reporte == ""){
+        toastr.error('Debe ingresar el N° de reporte', 'Datos Incompletos');
+        return false;
+      }
       fillInputsFromSummernotes();
       var url = Urls.workflow();
       var form_closed = true;
