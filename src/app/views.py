@@ -229,6 +229,7 @@ def notification(request):
 
 @login_required
 def show_patologos(request):
+    up = UserProfile.objects.filter(user=request.user).first()
     analysis = AnalysisForm.objects.all()
     data = []
     patologos = list(User.objects.filter(userprofile__profile_id__in=[4, 5]).values())
@@ -244,6 +245,8 @@ def show_patologos(request):
             data.append({
                 'analisis': a.id,
                 'patologo': a.patologo_id,
+                'closed': a.entryform.forms.first().form_closed,
+                'edit': not a.entryform.forms.first().form_closed and up.profile.id == 1,
                 'no_caso': a.entryform.no_caso + parte, 
                 'exam': a.exam.name
             })

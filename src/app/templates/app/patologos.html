@@ -55,6 +55,7 @@
                 <!-- <th>Id</th> -->
                 <th>Nro Caso</th>
                 <th>Servicios</th>
+                <th>Estado</th>
                 <th>Patólogos</th>
               </tr>
             </thead>
@@ -64,7 +65,14 @@
                   <td class="first-column"><strong>{{ entryForm.no_caso }}</strong></td>
                   <td class="service-{{entryForm.analisis}} {% if not entryForm.patologo %} incomplete {% endif %}">{{ entryForm.exam|default:"" }}</td>
                   <td>
-                    <select class="select2 form-control patologos-select" style="width:100% !important;" data-analisis="{{entryForm.analisis}}">
+                    {% if entryForm.closed %}
+                      Finalizado 
+                    {% else %}
+                      En proceso
+                    {% endif %}
+                  </td>
+                  <td>
+                    <select class="select2 form-control patologos-select" style="width:100% !important;" data-analisis="{{entryForm.analisis}}" {% if not entryForm.edit  %} disabled {% endif %}>
                       <option value="">No Asignado</option>
                       {% for p in patologos %}
                         <option value="{{p.id}}" {% if p.id == entryForm.patologo %}selected{% endif %}>{{p.first_name}} {{p.last_name}}</option>

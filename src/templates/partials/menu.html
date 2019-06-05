@@ -1,31 +1,32 @@
+{% load custom_tags %}
 <div data-scroll-to-active="true" class="main-menu menu-fixed menu-dark menu-accordion menu-shadow">
   <!-- main menu content-->
   <div class="main-menu-content">
     <ul id="main-menu-navigation" data-menu="menu-navigation" class="navigation navigation-main">
-      <li class=" nav-item">
-        <a href="/">
-          <i class="ft-home"></i>
-          <span data-i18n="" class="menu-title">Inicio</span>
-        </a>
+      {% for item in user|navigations %}
+      <li>
+          <a href="{{ item.path }}">
+              {% if item.icon %}
+                  <i class="{{ item.icon }}"></i>
+              {% endif %}
+              <span>{{ item.section_name }}</span>
+          </a>
+          {% if item.child_items %}
+              <ul class="acc-menu">
+                  {% for subitem in item.child_items %}
+                      <li>
+                          <a href="{{ subitem.path }}">
+                              {% if subitem.icon %}
+                                  <i class="{{ subitem.icon }}"></i>
+                              {% endif %}
+                              <span>{{ subitem.section_name }}</span>
+                          </a>
+                      </li>
+                  {% endfor %}
+              </ul>
+          {% endif %}
       </li>
-      <li class=" nav-item">
-        <a href="/ingresos">
-          <i class="ft-clipboard"></i>
-          <span data-i18n="" class="menu-title">Ingreso de casos</span>
-        </a>
-      </li>
-      <li class=" nav-item">
-        <a href="/patologos">
-          <i class="ft-users"></i>
-          <span data-i18n="" class="menu-title">Patólogos</span>
-        </a>
-      </li>
-      <li class="nav-item">
-        <a href="/admin">
-          <i class="ft-settings"></i>
-          <span data-i18n="" class="menu-title">Administración</span>
-        </a>
-      </li>
+      {% endfor %}
     </ul>
   </div>
   <!-- /main menu content-->
