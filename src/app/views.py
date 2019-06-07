@@ -8,13 +8,32 @@ from django.db.models import Count
 from accounts.models import *
 from backend.models import *
 from workflows.models import *
+from django.db import connection
 
 import datetime
-
+import json
 
 @login_required
 def home(request):
-    return render(request, "app/home.html", {})
+    services = Exam.objects.values('id', 'name')
+    dates = EntryForm.objects.all().values_list('created_at', flat = True).distinct()
+    years = []
+    for d in dates:
+        if d and not d.year in years: 
+            years.append(d.year)
+    
+    cursor1=connection.cursor()
+    data1 = cursor1.execute(
+        """
+        SELECT e.id, e.`name`, COUNT(*) as count
+        FROM backend_analysisform a
+        INNER JOIN backend_exam e ON a.exam_id = e.id
+        GROUP BY e.`name`
+        ORDER BY count DESC
+    """)
+    top_10 = cursor1.fetchmany(10)
+    top_10 = json.dumps(top_10)
+    return render(request, "app/home.html", {'services': services, 'years': years, "top_10":top_10})
 
 
 @login_required

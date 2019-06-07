@@ -16,6 +16,7 @@ from django.forms.models import model_to_dict
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import get_template
 from django.conf import settings
+from django.db import connection
 
 # from utils import functions as fn
 
@@ -1842,6 +1843,7 @@ def step_5_analysisform(request):
     box_comments = var_post.get('box-comments').replace("\\r\\n", "")
     box_tables = var_post.get('box-tables').replace("\\r\\n", "")
     # print (var_post)
+    ReportFinal.objects.filter(analysis_id=analysis_id).delete()
     ReportFinal.objects.create(
         analysis_id=analysis_id,
         no_reporte=no_reporte,
@@ -1972,3 +1974,92 @@ def save_patologo(request, analysis_id, patologo_id= None):
     analysis.patologo_id = patologo_id
     analysis.save()
     return JsonResponse({})
+
+def dashboard_analysis(request):
+    exam = request.GET.get('exam')
+    year = request.GET.get('year')
+    mes = request.GET.getlist('mes')
+    query = """
+                SELECT YEAR(e.created_at) AS `year`, MONTH(e.created_at) AS `month`, COUNT(a.id) AS count
+                FROM `backend_analysisform` a
+                INNER JOIN backend_entryform e ON a.entryform_id = e.id
+                WHERE YEAR(e.created_at) = %s
+                AND MONTH(e.created_at) IN %s
+            """ % (year, tuple(mes))
+    if exam != '0':
+       query += """
+                    AND a.exam_id = %s
+                """ % exam
+    query +="""
+                GROUP BY `year`, `month`
+                ORDER BY `month`
+            """
+    analysis = AnalysisForm.objects.filter(entryform__created_at__year=year, entryform__created_at__month__in=mes)
+    cursor1=connection.cursor()
+    data1 = cursor1.execute(query)
+    data = cursor1.fetchall()
+    for a in analysis:
+        data.append(a)
+
+    return JsonResponse({'data': data})
+       
+def dashboard_lefts(request):
+    exam = request.GET.get('exam')
+    year = request.GET.get('year')
+    mes = request.GET.getlist('mes')
+    query = """
+                SELECT YEAR(e.created_at) AS `year`, MONTH(e.created_at) AS `month`, CONCAT(u.first_name,' ',u.last_name) AS fullName, COUNT(e.id) AS count
+                FROM backend_analysisform e 
+                LEFT JOIN backend_reportfinal r ON r.analysis_id = e.id
+                LEFT JOIN auth_user u ON e.patologo_id = u.id
+                WHERE no_reporte IS NULL
+                AND YEAR(e.created_at) = %s
+                AND MONTH(e.created_at) IN %s
+            """ % (year, tuple(mes))
+    if exam != '0':
+       query += """
+                    AND e.exam_id = %s
+                """ % exam
+    query +="""
+                GROUP BY `year`, `month`, fullName
+                ORDER BY `month`
+            """
+    analysis = AnalysisForm.objects.filter(entryform__created_at__year=year, entryform__created_at__month__in=mes)
+    cursor1=connection.cursor()
+    data1 = cursor1.execute(query)
+    data = cursor1.fetchall()
+    for a in analysis:
+        data.append(a)
+
+    return JsonResponse({'data': data})   
+
+def dashboard_reports(request):
+    exam = request.GET.get('exam')
+    year = request.GET.get('year')
+    mes = request.GET.getlist('mes')
+    
+    query = """
+                SELECT YEAR(a.closed_at) AS `year`, MONTH(a.closed_at) AS `month`, COUNT(r.id) AS count
+                FROM `backend_reportfinal` r
+                INNER JOIN backend_analysisform a ON r.analysis_id = a.id
+                WHERE r.no_reporte IS NOT NULL
+                AND YEAR(a.closed_at) = %s
+                AND MONTH(a.closed_at) IN %s
+            """ % (year, tuple(mes))
+    if exam != '0':
+       query += """
+                    AND a.exam_id = %s
+                """ % exam
+    query +="""
+                GROUP BY `year`, `month`
+                ORDER BY `month`
+            """
+    analysis = AnalysisForm.objects.filter(entryform__created_at__year=year, entryform__created_at__month__in=mes)
+    cursor1=connection.cursor()
+    data1 = cursor1.execute(query)
+    data = cursor1.fetchall()
+    for a in analysis:
+        data.append(a)
+
+    return JsonResponse({'data': data})
+    

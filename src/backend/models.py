@@ -235,6 +235,7 @@ class AnalysisForm(models.Model):
     forms = GenericRelation(Form)
     comments = models.TextField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    closed_at = models.DateTimeField(null=True)
     patologo = models.ForeignKey(User, null=True, on_delete=models.SET_NULL)
 
 class Sample(models.Model):
