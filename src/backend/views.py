@@ -1983,13 +1983,13 @@ def dashboard_analysis(request):
                 SELECT YEAR(e.created_at) AS `year`, MONTH(e.created_at) AS `month`, COUNT(a.id) AS count
                 FROM `backend_analysisform` a
                 INNER JOIN backend_entryform e ON a.entryform_id = e.id
-                WHERE YEAR(e.created_at) = %s
-                AND MONTH(e.created_at) IN %s
-            """ % (year, tuple(mes))
+                WHERE YEAR(e.created_at) = {0}
+                AND MONTH(e.created_at) IN {1}
+            """.format(year, tuple(mes))
     if exam != '0':
        query += """
                     AND a.exam_id = %s
-                """ % exam
+                """.format(exam)
     query +="""
                 GROUP BY `year`, `month`
                 ORDER BY `month`
@@ -2013,13 +2013,13 @@ def dashboard_lefts(request):
                 LEFT JOIN backend_reportfinal r ON r.analysis_id = e.id
                 LEFT JOIN auth_user u ON e.patologo_id = u.id
                 WHERE no_reporte IS NULL
-                AND YEAR(e.created_at) = %s
-                AND MONTH(e.created_at) IN %s
-            """ % (year, tuple(mes))
+                AND YEAR(e.created_at) = {0}
+                AND MONTH(e.created_at) IN {1}
+            """.format(year, tuple(mes))
     if exam != '0':
        query += """
-                    AND e.exam_id = %s
-                """ % exam
+                    AND e.exam_id = {0}
+                """.format(exam)
     query +="""
                 GROUP BY `year`, `month`, fullName
                 ORDER BY `month`
@@ -2043,13 +2043,13 @@ def dashboard_reports(request):
                 FROM `backend_reportfinal` r
                 INNER JOIN backend_analysisform a ON r.analysis_id = a.id
                 WHERE r.no_reporte IS NOT NULL
-                AND YEAR(a.closed_at) = %s
-                AND MONTH(a.closed_at) IN %s
-            """ % (year, tuple(mes))
+                AND YEAR(a.closed_at) = {0}
+                AND MONTH(a.closed_at) IN {1}
+            """.format(year, tuple(mes))
     if exam != '0':
        query += """
-                    AND a.exam_id = %s
-                """ % exam
+                    AND a.exam_id = {0}
+                """.format(exam)
     query +="""
                 GROUP BY `year`, `month`
                 ORDER BY `month`
