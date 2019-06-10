@@ -28,7 +28,7 @@ def home(request):
         SELECT e.id, e.`name`, COUNT(*) as count
         FROM backend_analysisform a
         INNER JOIN backend_exam e ON a.exam_id = e.id
-        GROUP BY e.`name`
+        GROUP BY e.`name`, e.id
         ORDER BY count DESC
     """)
     top_10 = cursor1.fetchmany(10)
