@@ -1994,12 +1994,9 @@ def dashboard_analysis(request):
                 GROUP BY `year`, `month`
                 ORDER BY `month`
             """
-    analysis = AnalysisForm.objects.filter(entryform__created_at__year=year, entryform__created_at__month__in=mes)
     cursor1=connection.cursor()
     data1 = cursor1.execute(query)
     data = cursor1.fetchall()
-    for a in analysis:
-        data.append(a)
 
     return JsonResponse({'data': data})
        
@@ -2024,12 +2021,9 @@ def dashboard_lefts(request):
                 GROUP BY `year`, `month`, fullName
                 ORDER BY `month`
             """
-    analysis = AnalysisForm.objects.filter(entryform__created_at__year=year, entryform__created_at__month__in=mes)
     cursor1=connection.cursor()
     data1 = cursor1.execute(query)
     data = cursor1.fetchall()
-    for a in analysis:
-        data.append(a)
 
     return JsonResponse({'data': data})   
 
@@ -2054,12 +2048,9 @@ def dashboard_reports(request):
                 GROUP BY `year`, `month`
                 ORDER BY `month`
             """
-    analysis = AnalysisForm.objects.filter(entryform__created_at__year=year, entryform__created_at__month__in=mes)
     cursor1=connection.cursor()
     data1 = cursor1.execute(query)
     data = cursor1.fetchall()
-    for a in analysis:
-        data.append(a)
 
     return JsonResponse({'data': data})
     
