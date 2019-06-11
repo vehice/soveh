@@ -1,16 +1,16 @@
 function init_step_5(active = true) {
   var analysis_id = $('#analysis_id').val();
-  var url = Urls.report_by_analysis(analysis_id);
-  $.ajax({
-    type: "GET",
-    url: url,
-  })
-  .done(function (data) {
-    $('.showSummaryBtn').removeClass("hidden");
-  })
-  .fail(function () {
-    console.log("Fail")
-  })
+  // var url = Urls.report_by_analysis(analysis_id);
+  // $.ajax({
+  //   type: "GET",
+  //   url: url,
+  // })
+  // .done(function (data) {
+  //   $('.showSummaryBtn').removeClass("hidden");
+  // })
+  // .fail(function () {
+  //   console.log("Fail")
+  // })
 
   $('#summernote-hallazgos').summernote({
     toolbar: [
