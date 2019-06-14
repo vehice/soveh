@@ -45,13 +45,12 @@ def default_tree(user):
             'icon': 'ft-clipboard',
             'section_name': "Ingreso de Casos",
         },
-    ]
-    if user.userprofile.profile_id in [1,2,3]:
-        menu.append({
+        {
             'path': '/patologos',
             'icon': 'ft-users',
             'section_name': "Patólogos"
-        })
+        }
+    ]
     if user.userprofile.profile_id == 1:
         menu.append({
             'path': '/admin',

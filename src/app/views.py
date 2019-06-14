@@ -261,12 +261,13 @@ def show_patologos(request):
                 parte = ''
             else:
                 parte = ' (Parte ' + parte + ')'
-            data.append({
-                'analisis': a.id,
-                'patologo': a.patologo_id,
-                'closed': a.entryform.forms.first().form_closed,
-                'edit': not a.entryform.forms.first().form_closed and up.profile.id == 1,
-                'no_caso': a.entryform.no_caso + parte, 
-                'exam': a.exam.name
-            })
+            if up.profile.id != 5 or a.patologo_id == request.user.id:
+                data.append({
+                    'analisis': a.id,
+                    'patologo': a.patologo_id,
+                    'closed': a.entryform.forms.first().form_closed,
+                    'edit': not a.entryform.forms.first().form_closed and up.profile.id == 1,
+                    'no_caso': a.entryform.no_caso + parte, 
+                    'exam': a.exam.name
+                })
     return render(request, 'app/patologos.html', {'casos': data, 'patologos': patologos})
