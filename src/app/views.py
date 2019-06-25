@@ -24,12 +24,15 @@ def home(request):
     
     cursor1=connection.cursor()
     data1 = cursor1.execute(
-        """
+    """
         SELECT e.id, e.`name`, COUNT(*) as count
-        FROM backend_analysisform a
+        FROM backend_sample s
+        INNER JOIN backend_analysisform a ON s.entryform_id = a.entryform_id
         INNER JOIN backend_exam e ON a.exam_id = e.id
+        INNER JOIN workflows_form f ON a.entryform_id = f.object_id
+        WHERE f.flow_id = 1 AND f.deleted = 0
         GROUP BY e.`name`, e.id
-        ORDER BY count DESC
+        ORDER BY count DESC;
     """)
     top_10 = cursor1.fetchmany(10)
     top_10 = json.dumps(top_10)

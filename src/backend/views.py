@@ -2007,9 +2007,9 @@ def dashboard_lefts(request):
     query = """
                 SELECT YEAR(e.created_at) AS `year`, MONTH(e.created_at) AS `month`, CONCAT(u.first_name,' ',u.last_name) AS fullName, COUNT(e.id) AS count
                 FROM backend_analysisform e 
-                LEFT JOIN backend_reportfinal r ON r.analysis_id = e.id
                 LEFT JOIN auth_user u ON e.patologo_id = u.id
-                WHERE no_reporte IS NULL
+                INNER JOIN workflows_form f ON f.object_id = e.id
+                WHERE f.form_closed = 0 AND f.flow_id = 2
                 AND YEAR(e.created_at) = {0}
                 AND MONTH(e.created_at) IN {1}
             """.format(year, tuple(mes))
@@ -2033,16 +2033,16 @@ def dashboard_reports(request):
     mes = request.GET.getlist('mes')
     
     query = """
-                SELECT YEAR(a.closed_at) AS `year`, MONTH(a.closed_at) AS `month`, COUNT(r.id) AS count
-                FROM `backend_reportfinal` r
-                INNER JOIN backend_analysisform a ON r.analysis_id = a.id
-                WHERE r.no_reporte IS NOT NULL
-                AND YEAR(a.closed_at) = {0}
-                AND MONTH(a.closed_at) IN {1}
+                SELECT YEAR(e.closed_at) AS `year`, MONTH(e.closed_at) AS `month`, COUNT(e.id) AS count
+                FROM backend_analysisform e
+                INNER JOIN workflows_form f ON f.object_id = e.id
+                WHERE f.form_closed = 1 AND f.flow_id = 2
+                AND YEAR(e.closed_at) = {0}
+                AND MONTH(e.closed_at) IN {1}
             """.format(year, tuple(mes))
     if exam != '0':
        query += """
-                    AND a.exam_id = {0}
+                    AND e.exam_id = {0}
                 """.format(exam)
     query +="""
                 GROUP BY `year`, `month`
