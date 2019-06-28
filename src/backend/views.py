@@ -1980,11 +1980,12 @@ def dashboard_analysis(request):
     year = request.GET.get('year')
     mes = request.GET.getlist('mes')
     query = """
-                SELECT YEAR(e.created_at) AS `year`, MONTH(e.created_at) AS `month`, COUNT(a.id) AS count
-                FROM `backend_analysisform` a
+                SELECT YEAR(a.created_at) AS `year`, MONTH(a.created_at) AS `month`, COUNT(a.id) AS count
+                FROM backend_sample s
+                INNER JOIN backend_analysisform a ON s.entryform_id = a.entryform_id
                 INNER JOIN backend_entryform e ON a.entryform_id = e.id
-                WHERE YEAR(e.created_at) = {0}
-                AND MONTH(e.created_at) IN {1}
+                WHERE YEAR(a.created_at) = {0}
+                AND MONTH(a.created_at) IN {1}
             """.format(year, tuple(mes))
     if exam != '0':
        query += """
