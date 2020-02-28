@@ -9,6 +9,7 @@ function init_step_5(active = true) {
     async: false,
   })
     .done(function (data) {
+      $('.showShareBtn').removeClass("hidden");
       $('.showSummaryBtn').removeClass("hidden");
       $('.newAnalysisBtn').addClass("hidden");
       if(active){

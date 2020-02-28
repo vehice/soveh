@@ -14,6 +14,8 @@ urlpatterns = [
     url(r'^patologos$', views.show_patologos, name='patologos'),
     url(r'^template-report/(?P<id>\d+)$', views.template_report, name='template_report'),
     url(r'^download-report/(?P<id>\d+)$', views.download_report, name='download_report'),
+    url(r'^download-resumen-report/(?P<id>\d+)$', views.download_resumen_report, name='download_report'),
+    url(r'^template-resumen-report/(?P<id>\d+)$', views.template_resumen_report, name='template_resumen_report'),
     url(r'^preview-report/(?P<id>\d+)$', views.preview_report, name='preview_report'),
     url(r'^notification$', views.notification, name='notification'),
 ]

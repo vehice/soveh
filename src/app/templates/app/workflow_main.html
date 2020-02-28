@@ -12,6 +12,10 @@
     margin-bottom: 20px;
     border-bottom: 1px solid #404E67;
   }
+  .multiple-action > .swal-footer{
+    display: grid;
+    text-align: center;
+  }
 </style>
 
 {% endblock stylesheets %}
@@ -44,6 +48,7 @@
         <center>
           <h3> <strong>CASO N° {{form.content_object.no_caso}}</strong></h3>
           <button class="btn btn-secondary square showSummaryBtn hidden"><i class="fa fa-list fa-fx"></i> Resumen del caso</button>
+          <button class="btn btn-secondary square showShareBtn hidden" onclick="shareChoice()"><i class="fa fa-paper-plane fa-fx"></i> Enviar caso</button>
           {% if not closed %}
             <button class="btn btn-secondary square newAnalysisBtn hidden"><i class="fa fa-list fa-plus-circle"></i> Nuevo Análisis</button>
             <button class="btn btn-secondary square newAnalysisBtn5 hidden"><i class="fa fa-list fa-plus-circle"></i> Nuevo Análisis</button>
@@ -183,6 +188,9 @@ var steps = $("#workflow_form").steps({
               return false
             }
             saltar = resp == 5;
+            shareChoice();
+             // lockScreen(0);
+            // return false
           } 
           else if (currentIndex == 2) {
             if(!saltar){
@@ -238,7 +246,6 @@ var steps = $("#workflow_form").steps({
             if(previous_step) {
               step = currentIndex
               function_name = "init_step_" + step;
-
             } 
             else {
               step = newIndex + 1
@@ -629,4 +636,72 @@ function submitGeneralData(id){
   });
 }
 
+function shareChoice(){
+  swal({
+    title: "Información",
+    text: "¿Que acción desea realizar?",
+    icon: "info",
+    className: "multiple-action",
+    closeOnClickOutside: false,
+    closeOnEsc: false,
+    showCancelButton: false,
+    buttons: {
+      download: {
+        text: "Descargar!",
+        value: "download",
+        visible: true,
+        className: "",
+        closeModal: true,
+      },
+      email: {
+        text: "Enviar por Correo!",
+        value: "email",
+        visible: true,
+        className: "",
+        closeModal: true,
+      },
+      downloadEmail: {
+        text: "Descargar y enviar!",
+        value: "downloadEmail",
+        visible: true,
+        className: "",
+        closeModal: true,
+      },
+      continue: {
+        text: "Continuar!",
+        visible: true,
+        className: "",
+        closeModal: true,
+      }
+    }
+  })
+  .then(value => {
+    emailOnly = true;
+    switch (value) {
+      case "downloadEmail":
+        emailOnly = false;
+      case "email":
+        alert("email")
+        if(emailOnly)
+          break
+      case "download":
+          alert("download")
+      default:
+    }
+
+    // var data = $('#generalData').serialize();
+    // $.ajax({
+    //   type: "POST",
+    //   url: '/generalData/'+id,
+    //   data: data,
+    //   async: false,
+    // })
+    // .done(function (data) {
+    //   $('#show_summary').modal('hide');
+    // })
+    // .fail(function (data) {
+    //   console.log("Fail");
+    // })
+  });
+}
 </script> {% endblock scripts %}
