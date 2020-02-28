@@ -951,6 +951,41 @@ class IMAGES(View):
         except:
              return JsonResponse({'ok': False})
 
+class RESPONSIBLE(View):
+    http_method_names = ['get', 'post', 'delete']
+    
+    def get(self, request):
+        responsibles = Responsible.objects.filter(active=True)
+        data = []
+        for r in responsibles:
+            data.append(model_to_dict(r))
+
+        return JsonResponse({'ok': True, 'responsibles': data})
+
+    def post(self, request):
+        try:
+            var_post = request.POST.copy()
+            responsible = Responsible()
+            id = var_post.get('id', None)
+            if id:
+                responsible.id = id
+            responsible.name = var_post.get('name', None)
+            responsible.email = var_post.get('email', None)
+            responsible.phone = var_post.get('phone', None)
+            responsible.job = var_post.get('job', None)
+            responsible.active = var_post.get('active', True)
+            responsible.save()
+            return JsonResponse({'ok': True})
+        except Exception as e:
+             return JsonResponse({'ok': False})
+    
+    def delete(self, request, id):
+        responsible = Responsible.objects.get(pk=id)
+        responsible.active = False
+        responsible.save()
+
+        return JsonResponse({'ok': True})
+
 def organs_by_slice(request, slice_id=None):
     if slice_id:
         slice_obj = Slice.objects.get(

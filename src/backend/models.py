@@ -323,3 +323,17 @@ class ReportFinal(models.Model):
     box_diagnostics = models.TextField(null=True, blank=True)
     box_comments = models.TextField(null=True, blank=True)
     box_tables = models.TextField(null=True, blank=True)
+
+class Responsible(models.Model):
+    name = models.CharField(max_length=250, null=True, blank=True)
+    email = models.CharField(max_length=250, null=True, blank=True)
+    phone = models.CharField(max_length=250, null=True, blank=True)
+    job = models.CharField(max_length=250, null=True, blank=True)
+    active = models.BooleanField(default=True)
+
+    def __str__(self):
+        return str(self.name)
+
+    class Meta:
+        verbose_name = "Responsable"
+        verbose_name_plural = "Responsables"

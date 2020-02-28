@@ -100,4 +100,6 @@ urlpatterns = [
     path('dashboard_analysis', csrf_exempt(views.dashboard_analysis), name='dashboard_analysis'),
     path('dashboard_reports', csrf_exempt(views.dashboard_reports), name='dashboard_reports'),
     path('dashboard_lefts', csrf_exempt(views.dashboard_lefts), name='dashboard_lefts'),
+    path('responsible', csrf_exempt(views.RESPONSIBLE.as_view()), name='responsible'),
+    path('responsible/<int:id>', csrf_exempt(views.RESPONSIBLE.as_view()), name='responsible_detail'),
 ]

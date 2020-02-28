@@ -1,6 +1,6 @@
 from django.contrib import admin
 from .models import Specie, WaterSource, Fixative, Exam, Customer, LarvalStage, EntryForm, Organ, Slice, \
-Diagnostic, DiagnosticDistribution, DiagnosticIntensity, Pathology, OrganLocation
+Diagnostic, DiagnosticDistribution, DiagnosticIntensity, Pathology, OrganLocation, Responsible
 
 # admin.site.register(Customer)
 
@@ -21,6 +21,8 @@ admin.site.register(OrganLocation)
 admin.site.register(Fixative)
 
 admin.site.register(Organ)
+
+admin.site.register(Responsible)
 
 class OrgansInline(admin.TabularInline):
     model = Pathology.organs.through
