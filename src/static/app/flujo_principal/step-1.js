@@ -1,13 +1,13 @@
 // Data Template
 var organs;
 var questionReceptionCondition;
-var last_temp_id;
-function addIdentificador() {
+function addIdentificador(temp_id = null) {
   $("#select_if_divide_flow").val(0);
   $("#select_if_divide_flow").trigger('change');
-  last_temp_id = Math.random().toString(36).replace('0.', '');
+  if (temp_id == null)
+    temp_id = Math.random().toString(36).replace('0.', '');
   addIdentificationTemplate({
-    temp_id: last_temp_id,
+    temp_id: temp_id,
     organs: organs
   });
 }
@@ -247,7 +247,8 @@ function init_step_1() {
         if (identification_size >= 1)
         {
           $.each(entryform.identifications, function (i, item) {
-            $("#add_identification").trigger("click");
+            // $("#add_identification").trigger("click");
+            addIdentificador(item.temp_id);
             var identifications_cage = $('[name="identification[cage]"]');
             var identifications_group = $('[name="identification[group]"]');
             var identifications_no_fish = $('[name="identification[no_fish]"]');
@@ -255,7 +256,7 @@ function init_step_1() {
             var identifications_weight = $('[name="identification[weight]"]')
             var identifications_extra_features_detail = $('[name="identification[extra_features_detail]"]')
             var identifications_observations = $('[name="identification[observations]"]')
-            var identifications_organs = $('[name="identification[organs][' + last_temp_id + ']"]')
+            var identifications_organs = $('[name="identification[organs][' + item.temp_id + ']"]')
 
             $(identifications_cage[i]).val(item.cage);
             $(identifications_group[i]).val(item.group);
@@ -272,11 +273,11 @@ function init_step_1() {
             $(identifications_organs[0]).trigger('change');
             if (item.is_optimum)
             {
-              $('[name="identification[is_optimal][' + last_temp_id + ']"]')[0].checked = true;
+              $('[name="identification[is_optimal][' + item.temp_id + ']"]')[0].checked = true;
             }
             else
             {
-              $('[name="identification[is_optimal][' + last_temp_id + ']"]')[1].checked = true;
+              $('[name="identification[is_optimal][' + item.temp_id + ']"]')[1].checked = true;
             }
           });
         }

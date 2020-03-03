@@ -4,6 +4,9 @@ from workflows.models import Form
 from accounts.models import User
 
 
+def entry_files_directory_path(instance, filename):
+    return 'uploads/template/{0}/{1}'.format(instance.template.name, filename)
+
 class Specie(models.Model):
     name = models.CharField(max_length=250, null=True, blank=True)
 
@@ -337,3 +340,30 @@ class Responsible(models.Model):
     class Meta:
         verbose_name = "Responsable"
         verbose_name_plural = "Responsables"
+
+class EmailTemplate(models.Model):
+    name = models.CharField(max_length=250, null=True, blank=True, verbose_name="Nombre")
+    body = models.TextField(max_length=1000, null=True, blank=True, verbose_name="Mensaje")
+    
+    class Meta:
+        verbose_name = "Email"
+        verbose_name_plural = "Emails"
+
+class EmailTemplateAttachment(models.Model):
+    template = models.ForeignKey(
+        EmailTemplate,
+        on_delete=models.CASCADE)
+    template_file = models.FileField(
+        upload_to=entry_files_directory_path, verbose_name="Archivo Adjunto")
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = "Email Adjunto"
+        verbose_name_plural = "Email Adjuntos"
+
+class DocumentResumeVersion(models.Model):
+    entryform = models.ForeignKey(
+        EntryForm, null=True, on_delete=models.SET_NULL)
+    version = models.IntegerField(null=True, blank=True)
+    created_by = models.ForeignKey(User, null=True, on_delete=models.SET_NULL)
+    created_at = models.DateTimeField(auto_now_add=True)

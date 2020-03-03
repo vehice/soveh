@@ -178,7 +178,7 @@ def download_resumen_report(request, id):
     entryform_id = form.content_object.id
     pdf = make_pdf_file(entryform_id, '/template-resumen-report/')
     response = HttpResponse(pdf, content_type='application/pdf')
-    response['Content-Disposition'] = 'attachment; filename="informe.pdf"'
+    # response['Content-Disposition'] = 'attachment; filename="informe.pdf"'
 
     return response
 

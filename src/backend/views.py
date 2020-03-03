@@ -986,6 +986,39 @@ class RESPONSIBLE(View):
 
         return JsonResponse({'ok': True})
 
+class EMAILTEMPLATE(View):
+    def get(self, request, id=None):
+        if id:
+            template = EmailTemplate.objects.get(pk=id)
+            data = model_to_dict(template)
+            return JsonResponse({'ok': True, 'template': data})
+        else:
+            templates = EmailTemplate.objects.all()
+            data = []
+            for r in templates:
+                data.append(model_to_dict(r))
+
+            return JsonResponse({'ok': True, 'templates': data})
+
+    def post(self, request):
+        try:
+            var_post = request.POST.copy()
+            print(var_post)
+            subject = "Envio de documento"
+            from_email = 'no-reply@solmat.cl'
+            to = var_post.get('to').split(',')
+            message = var_post.get('body')
+            plantilla = var_post.get('plantilla')
+
+            msg = EmailMultiAlternatives(subject, message, from_email, to)
+            files = EmailTemplateAttachment.objects.filter(template=plantilla)
+            for f in files:
+                msg.attach_file(f.template_file.path)
+            msg.send()
+            return JsonResponse({'ok': True})
+        except Exception as e:
+             return JsonResponse({'ok': False})
+   
 def organs_by_slice(request, slice_id=None):
     if slice_id:
         slice_obj = Slice.objects.get(
@@ -1224,25 +1257,66 @@ def step_1_entryform(request):
     entryform.analysisform_set.all().delete()
     Sample.objects.filter(entryform=entryform).delete()
 
+    change = False
+    if str(entryform.specie_id) != var_post.get('specie') and (entryform.specie_id == None and var_post.get('specie') != ''):
+        change = True
     entryform.specie_id = var_post.get('specie')
+    
+    if str(entryform.watersource_id) != var_post.get('watersource') and (entryform.watersource_id == None and var_post.get('watersource') != ''):
+        change = True
     entryform.watersource_id = var_post.get('watersource')
+    
+    if str(entryform.fixative_id) != var_post.get('fixative') and (entryform.fixative_id == None and var_post.get('fixative') != ''):
+        change = True
     entryform.fixative_id = var_post.get('fixative')
+    
+    if str(entryform.larvalstage_id) != var_post.get('larvalstage') and (entryform.larvalstage_id == None and var_post.get('larvalstage') != ''):
+        change = True
     entryform.larvalstage_id = var_post.get('larvalstage')
-    entryform.observation = var_post.get('observation')
+    
+    # if str(entryform.observation) != var_post.get('observation') and (entryform.observation == None and var_post.get('observation') != ''):
+    #     change = True
+    # entryform.observation = var_post.get('observation')
+    
+    if str(entryform.customer_id) != var_post.get('customer') and (entryform.customer_id == None and var_post.get('customer') != ''):
+        change = True
     entryform.customer_id = var_post.get('customer')
+    
+    if str(entryform.no_order) != var_post.get('no_order') and (entryform.no_order == None and var_post.get('no_order') != ''):
+        change = True
     entryform.no_order = var_post.get('no_order')
+    # TODO: COMPROBAR LOS CAMBIOS DE HORARIO SERVER - BD
     try:
+        if entryform.created_at != datetime.strptime(var_post.get('created_at'), '%d/%m/%Y %H:%M') and (entryform.created_at != datetime.strptime(var_post.get('created_at'), '%d/%m/%Y %H:%M') != ''):
+            # change = True
+            pass
         entryform.created_at = datetime.strptime(var_post.get('created_at'), '%d/%m/%Y %H:%M')
-    except: 
+    except Exception as e: 
         pass
     try:
+        if entryform.sampled_at != datetime.strptime(var_post.get('sampled_at'), '%d/%m/%Y %H:%M') and (entryform.sampled_at != datetime.strptime(var_post.get('sampled_at'), '%d/%m/%Y %H:%M') != ''):
+             # change = True
+            pass
         entryform.sampled_at = datetime.strptime(var_post.get('sampled_at'), '%d/%m/%Y %H:%M')
     except:
         pass
+
+    if str(entryform.center) != var_post.get('center') and (entryform.center == None and var_post.get('center') != ''):
+        change = True
     entryform.center = var_post.get('center')
+    
+    if str(entryform.responsible) != var_post.get('responsible') and (entryform.responsible == None and var_post.get('responsible') != ''):
+        change = True
     entryform.responsible = var_post.get('responsible')
+    
+    if str(entryform.company) != var_post.get('company') and (entryform.company == None and var_post.get('company') != ''):
+        change = True
     entryform.company = var_post.get('company')
+    
+    if str(entryform.no_request) != var_post.get('no_request') and (entryform.no_request == None and var_post.get('no_request') != ''):
+        change = True
     entryform.no_request = var_post.get('no_request')
+    
     entryform.save()
 
     optimals = [
@@ -1273,7 +1347,22 @@ def step_1_entryform(request):
                         identification_is_optimal, 
                         identification_observations,
                         identification_organs)
-                        
+    zip_identification1 = zip(identification_cage, 
+                        identification_group,
+                        identification_no_container,
+                        identification_no_fish, 
+                        identification_id, 
+                        identification_weight,
+                        identification_extra_features_detail, 
+                        identification_is_optimal, 
+                        identification_observations,
+                        identification_organs)
+
+    entryform_identification = entryform.identification_set.all()
+    
+    change = change or checkIdentification(entryform_identification, zip_identification1)
+    if change:
+        changeDocumentVersion(False, entryform.id, request.user.id)
     if strtobool(var_post.get('select_if_divide_flow')):
         if var_post.get('flow_divide_option') == "1":
             i = 0
@@ -1281,7 +1370,7 @@ def step_1_entryform(request):
                 # First identification is first subflow and it had some data saved before.
                 # Next iterations need to create an entire EntryForm based in the first one.
                 if i == 0:
-                    entryform.identification_set.all().delete()
+                    entryform_identification.delete()
                     identificacion = Identification.objects.create(
                         entryform_id=entryform.id,
                         cage=values[0],
@@ -1360,7 +1449,7 @@ def step_1_entryform(request):
             for i in range(len(subflow_groups)):
                 if i == 0:
                     total_no_fish = 0
-                    entryform.identification_set.all().delete()
+                    entryform_identification.delete()
                     for values in zip_identification_list:
                         new_no_fish = 0
                         for item in subflow_groups[i]:
@@ -1443,7 +1532,7 @@ def step_1_entryform(request):
                                 sample_index += 1
 
     else:
-        entryform.identification_set.all().delete()
+        entryform_identification.delete()
         entryform.sample_set.all().delete()
         sample_index = 1
 
@@ -1475,6 +1564,31 @@ def step_1_entryform(request):
        
     return True
 
+def checkIdentification(olds, news):
+    for v in news:
+        ident = olds.filter(temp_id=v[4]).first()
+        if not ident:
+            return True
+        if ident.cage != v[0] or \
+            ident.group != v[1] or \
+            str(ident.no_container) != v[2] or \
+            str(ident.no_fish)!= v[3] or \
+            ident.temp_id != v[4] or \
+            (ident.weight != v[5] and (v[5] != '0' and ident.weight == 0.0)) or \
+            ident.extra_features_detail != v[6] or \
+            ident.is_optimum != True if "si" in v[7] else False or \
+            ident.observation != v[8]:
+            return True
+        orgs = []
+        for org in ident.organs.all():
+            orgs.append(str(org.id))
+        if len(orgs) != len(v[9]):
+            return True
+        for o in v[9]:
+            if not o in orgs:
+                return True
+    return False
+
 def step_2_entryform(request):
     var_post = request.POST.copy()
 
@@ -1483,7 +1597,7 @@ def step_2_entryform(request):
     Cassette.objects.filter(entryform=entryform).delete()
     exams_to_do = var_post.getlist("analysis")
     analyses_qs = entryform.analysisform_set.all()
-
+    change = False
     for analysis in analyses_qs:
         analysis.forms.get().delete()
 
@@ -1511,25 +1625,38 @@ def step_2_entryform(request):
     for values in sample_id:
         sample = Sample.objects.get(pk=int(values))
         sample.cassette_set.all().delete()
-        sample.sampleexams_set.all().delete()
-        sample.save()
+        
         sample_exams = [
             v[0] for k, v in dict(var_post).items() if k.startswith("sample[exams]["+values)
         ]
         sample_organs = []
+        bulk_data = []
         for exam in sample_exams:
             sample_organs = [
                 v for k, v in dict(var_post).items() if k.startswith("sample[organs]["+values+"]["+exam)
             ]
 
             for organ in sample_organs[0]:
-                SampleExams.objects.create(
+                bulk_data.append(SampleExams(
                     sample_id = sample.pk,
                     exam_id = exam,
                     organ_id= organ
-                )
+                ))
+        change = change or checkSampleExams(sample.sampleexams_set.all(), bulk_data)
+        sample.sampleexams_set.all().delete()
+        SampleExams.objects.bulk_create(bulk_data)
+        sample.save()
+    if change:
+        changeDocumentVersion(True,entryform.id, request.user.id)
     return True
-        
+
+def checkSampleExams(olds, news):
+    if len(olds) != len(news):
+        return True
+    for s in news:
+        if not olds.filter(sample_id=s.sample_id, exam_id=s.exam_id, organ_id=s.organ_id).first():
+            return True
+    return False
 
 def step_3_entryform(request):
     var_post = request.POST.copy()
@@ -1645,6 +1772,16 @@ def step_4_entryform(request):
 def step_5_entryform(request):
     print("step_4")
     return True
+
+def changeDocumentVersion(allow_new, form_id, user_id):
+    versions = DocumentResumeVersion.objects.filter(entryform_id= form_id)
+    if len(versions) or allow_new:
+        DocumentResumeVersion.objects.create(
+            entryform_id= form_id,
+            version= len(versions) + 1,
+            created_by_id= user_id
+        )
+    
 
 def step_new_analysis(request):
     var_post = request.POST.copy()
@@ -1904,36 +2041,90 @@ def call_process_method(model_name, request):
 
 def save_identification(request, id):
     var_post = request.POST.copy()
+    change = False
     ident = Identification.objects.get(pk=id)
+    if ident.cage != var_post['jaula']:
+        change = True
     ident.cage = var_post['jaula']
+
+    if ident.group != var_post['grupo']:
+        change = True
     ident.group = var_post['grupo']
+
+    if str(ident.no_container) != var_post['contenedores']:
+        change = True
     ident.no_container = var_post['contenedores']
+
+    if ident.weight != var_post['peso'] and (var_post['peso'] != '0' and ident.weight == 0.0) :
+        change = True
     ident.weight = var_post['peso']
+
+    if ident.extra_features_detail != var_post['extras']:
+        change = True
     ident.extra_features_detail = var_post['extras']
+
+    if ident.observation != var_post['observation']:
+        change = True
     ident.observation = var_post['observation']
+
+    if ident.is_optimum != True if '1' == var_post['optimo'] else False:
+        change = True
     ident.is_optimum = var_post['optimo']
+
     organs = var_post.getlist('organs')
-   
+    orgs = []
+    for org in ident.organs.all():
+        orgs.append(str(org.id))
+    if len(orgs) != len(organs):
+        change = True
+    for o in organs:
+        if not o in orgs:
+            change = True
+
     ident.organs.set([])
     for org in organs:
         ident.organs.add(int(org))
     
     ident.save()
+    if change:
+        changeDocumentVersion(True, ident.entryform.id, request.user.id)
     return JsonResponse({})
 
 def save_generalData(request, id):
     var_post = request.POST.copy()
     entry = EntryForm.objects.get(pk=id)
+
+    change = False
+    if entry.specie_id != int(var_post['specie']):
+        change = True
     entry.specie_id = int(var_post['specie'])
+    if entry.watersource_id != int(var_post['watersource']):
+        change = True
     entry.watersource_id = int(var_post['watersource'])
+    if entry.larvalstage_id != int(var_post['larvalstage']):
+        change = True
     entry.larvalstage_id = int(var_post['larvalstage'])
+    if entry.fixative_id != int(var_post['fixative']):
+        change = True
     entry.fixative_id = int(var_post['fixative'])
+    if entry.customer_id != int(var_post['client']):
+        change = True
     entry.customer_id = int(var_post['client'])
 
+    if entry.company != var_post['company']:
+        change = True
     entry.company = var_post['company']
+    if entry.center != var_post['center']:
+        change = True
     entry.center = var_post['center']
+    if entry.responsible != var_post['responsable']:
+        change = True
     entry.responsible = var_post['responsable']
+    if entry.no_order != var_post['no_order']:
+        change = True
     entry.no_order = var_post['no_order']
+    if entry.no_request != var_post['no_solic']:
+        change = True
     entry.no_request = var_post['no_solic']
     try:
         entry.created_at = datetime.strptime(var_post.get('recive'), '%d/%m/%Y %H:%M')
@@ -1943,7 +2134,8 @@ def save_generalData(request, id):
         entry.sampled_at = datetime.strptime(var_post.get('muestreo'), '%d/%m/%Y %H:%M')
     except:
         pass
-
+    if change:
+        changeDocumentVersion(True, id, request.user.id)
     entry.save()
     return JsonResponse({})
 

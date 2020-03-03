@@ -177,6 +177,42 @@
     </div>
   </div>
 </div>
+
+<div class="modal fade text-left" id="email_modal" role="dialog" data-backdrop="static" data-keyboard="false">
+  <div class="modal-dialog" role="" style="min-width:80% !important;">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title" id="title"> Formulario de Email <span></span></h3>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <form action="#" id="email_form" onsubmit="sendEmail(); return false;">
+        <div class="modal-body" style="font-size:12px !important;">
+          <div class="form-group">
+            <label>Destinatarios:</label>
+            <input name="to" class="form-control basic-taginput" data-role="tagsinput" required>
+          </div>
+          <div class="form-group">
+            <label>Plantillas:</label>
+            <select class="form-control" id="plantilla" name="plantilla">
+              <option value="0">Sin plantilla</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Mensaje: </label>
+            <textarea id="body" name="body" class="form-control" rows="9"></textarea>
+          </div>
+        </div>
+        <div class="modal-footer" style="font-size:12px !important;">
+              <button type="submit" class="btn btn-primary">
+              <i class="fa fa-paper-plane fa-fx"></i>
+            </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
 {% endblock content %}
 {% block scripts %}
 
@@ -539,7 +575,7 @@ function fillSummary(data){
   $('.summaryClient').html('<label>Cliente:</label>' + selectClient);
   $('.summaryCompany').html('<label>Empresa:</label> <input class="form-control" value="'+ data.entryform.company+'" name="company" {% if not edit or closed  %}disabled{% endif %} />');
   $('.summaryCenter').html('<label>Centro:</label> <input class="form-control" value="'+ data.entryform.center+'" name="center" {% if not edit or closed  %}disabled{% endif %} />');
-  $('.summaryResponsible').html('<label>Responsable:</label> <input class="form-control responsible_place" value="'+ data.entryform.responsible+'" name="responsable" onclick="responsibleModal()" {% if not edit or closed  %}disabled{% endif %} />');
+  $('.summaryResponsible').html('<label>Responsable:</label> <input class="form-control responsible_place" readonly value="'+ data.entryform.responsible+'" name="responsable" onclick="responsibleModal()" {% if not edit or closed  %}disabled{% endif %} />');
   $('.summaryReception').html('<label>Fecha recepción:</label> <div class="input-group date" id=""><input type="text" class="form-control" name="recive" value="'+ moment(data.entryform.created_at).format("DD/MM/YYYY HH:mm")+'" {% if not edit or closed  %}disabled{% endif %} /><div class="input-group-append"><span class="input-group-text"><span class="fa fa-calendar"></span></span></div></div> ' );
   $('.sumarrySampling').html('<label>Fecha muestreo:</label> <div class="input-group date" id=""><input type="text" class="form-control" name="muestreo" value="'+ moment(data.entryform.sampled_at).format("DD/MM/YYYY HH:mm")+'" {% if not edit or closed  %}disabled{% endif %} /><div class="input-group-append"><span class="input-group-text"><span class="fa fa-calendar"></span></span></div></div> ' );
   $('.summaryNoOrder').html('<label>No. orden:</label> <input class="form-control" value="'+ data.entryform.no_order+'" name="no_order" {% if not edit or closed  %}disabled{% endif %} />');
@@ -630,10 +666,15 @@ function fillSummary(data){
   tpl_samples += '</tbody></table></div>';
   $('.summarySamples').html(tpl_samples);
 
+  if(data.entryform.customer != null)
   $('#client').val(data.entryform.customer.id);
+  if(data.entryform.fixative != null)
   $('#fixative').val(data.entryform.fixative.id);
+  if(data.entryform.specie != null)
   $('#specie').val(data.entryform.specie.id);
+  if(data.entryform.watersource != null)
   $('#watersource').val(data.entryform.watersource.id);
+  if(data.entryform.larvalstage != null)
   $('#larvalstage').val(data.entryform.larvalstage.id);
 
   $('.selectOpt').select2({'width':'100%'});
@@ -751,18 +792,59 @@ function shareChoice(){
   })
   .then(value => {
     emailOnly = true;
+    downloadOption = false;
+    emailOption = false;
     switch (value) {
       case "downloadEmail":
         emailOnly = false;
       case "email":
-        alert("email")
+        emailOption = true;
         if(emailOnly)
           break
       case "download":
-          alert("download")
+      downloadOption = true;
+        break
       default:
+        return;
     }
-
+    swal({
+      title: "Información",
+      text: "¿Que idioma desea utilizar?",
+      icon: "info",
+      className: "multiple-action",
+      closeOnClickOutside: false,
+      closeOnEsc: false,
+      showCancelButton: true,
+      buttons: {
+        
+        En: {
+          text: "Inglés!",
+          value: "en",
+          visible: true,
+          className: "",
+          closeModal: true,
+        },
+        Es: {
+          text: "Español!",
+          value: "es",
+          visible: true,
+          className: "",
+          closeModal: true,
+        },
+        cancel: {
+            text: "Cancelar!",
+            value: "",
+            visible: true,
+            className: "btn-warning",
+            closeModal: true,
+        },
+      }
+    })
+    .then(lang => {
+      if(lang == "") return;
+      shareAction(emailOption, downloadOption, lang)
+   
+    });
     // var data = $('#generalData').serialize();
     // $.ajax({
     //   type: "POST",
@@ -778,6 +860,72 @@ function shareChoice(){
     // })
   });
 }
+
+function shareAction(email, download, lang){
+  //Accion de generar un pdf
+  // Una vez terminada realizar el resto de las acciones con la referencia al documento
+  if(download){
+    // Modificar el request del download
+      window.open('/download-resumen-report/{{form.id}}?lang='+lang, '_blank');
+    }
+  if(email){
+    $.ajax({
+      type: "GET",
+      url: '/emailTemplate',
+    })
+    .done(function (data) {
+      if (data.ok)
+      {
+        $('#email_modal').modal('show');
+        $('.basic-taginput').tagsinput();
+        let template = '<option value="0">Sin Plantilla</option>';
+        $.each(data.templates, function(i, v){
+          template += '<option value="'+v.id+'">'+v.name+'</option>'
+        });
+        $('#plantilla').html(template);
+      }
+    });
+  }
+}
+
+function sendEmail(){
+  let form_data = $("#email_form").serialize();
+  $.ajax({
+    type: "POST",
+    url: '/emailTemplate',
+    data: form_data,
+  })
+    .done(function (data) {
+      if (data.ok)
+      {
+        // reloadResponsibleTable()
+        // $("#responsible_form")[0].reset();
+        toastr.success('Se envió satisfactoriamente', '');
+      }
+      else
+      {
+        toastr.error('No se pudo guardar satisfactoriamente', 'Aviso');
+      }
+    })
+    .fail(function (data) {
+      console.log("Fail");
+    })
+}
+
+$(document).on('change', '#plantilla', function(){
+  if($(this).val() == "0")
+    return;
+  $.ajax({
+    type: "GET",
+    url: '/emailTemplate/'+$(this).val(),
+  })
+  .done(function (data) {
+    if (data.ok)
+    {
+      $('#body').val(data.template.body);
+    }
+  });
+})
 
 function responsibleModal() {
   $('#responsible_modal').modal('show');

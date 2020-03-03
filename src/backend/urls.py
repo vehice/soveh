@@ -102,4 +102,6 @@ urlpatterns = [
     path('dashboard_lefts', csrf_exempt(views.dashboard_lefts), name='dashboard_lefts'),
     path('responsible', csrf_exempt(views.RESPONSIBLE.as_view()), name='responsible'),
     path('responsible/<int:id>', csrf_exempt(views.RESPONSIBLE.as_view()), name='responsible_detail'),
+    path('emailTemplate', csrf_exempt(views.EMAILTEMPLATE.as_view()), name='emailTemplate'),
+    path('emailTemplate/<int:id>', csrf_exempt(views.EMAILTEMPLATE.as_view()), name='emailTemplate_detail'),
 ]
