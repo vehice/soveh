@@ -19,3 +19,4 @@ sqlparse==0.2.4
 wkhtmltopdf==0.2
 wrapt==1.10.11
 yapf==0.21.0
+mysqlclient==1.4.4
