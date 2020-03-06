@@ -191,7 +191,7 @@
         <div class="modal-body" style="font-size:12px !important;">
           <div class="form-group">
             <label>Destinatarios:</label>
-            <input name="to" class="form-control basic-taginput" data-role="tagsinput" required>
+            <input id="email_to" name="to" class="form-control basic-taginput" data-role="tagsinput" required>
           </div>
           <div class="form-group">
             <label>Plantillas:</label>
@@ -871,13 +871,14 @@ function shareAction(email, download, lang){
   if(email){
     $.ajax({
       type: "GET",
-      url: '/emailTemplate',
+      url: '/emailTemplate?form={{form.object_id}}',
     })
     .done(function (data) {
       if (data.ok)
       {
         $('#email_modal').modal('show');
-        $('.basic-taginput').tagsinput();
+        $('#email_to').tagsinput();
+        $('#email_to').tagsinput('add', data.email);
         let template = '<option value="0">Sin Plantilla</option>';
         $.each(data.templates, function(i, v){
           template += '<option value="'+v.id+'">'+v.name+'</option>'

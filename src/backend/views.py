@@ -993,12 +993,18 @@ class EMAILTEMPLATE(View):
             data = model_to_dict(template)
             return JsonResponse({'ok': True, 'template': data})
         else:
+            var_get = request.GET.copy()
+            entryform = EntryForm.objects.get(pk=var_get['form'])
+            responsible = Responsible.objects.filter(name=entryform.responsible).first()
+            email = ''
+            if responsible:
+                email = responsible.email
             templates = EmailTemplate.objects.all()
             data = []
             for r in templates:
                 data.append(model_to_dict(r))
 
-            return JsonResponse({'ok': True, 'templates': data})
+            return JsonResponse({'ok': True, 'templates': data, 'email': email})
 
     def post(self, request):
         try:
