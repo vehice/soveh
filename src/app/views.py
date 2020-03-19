@@ -10,6 +10,8 @@ from accounts.models import *
 from backend.models import *
 from workflows.models import *
 from django.db import connection
+from django.conf import settings
+
 
 import datetime
 import json
@@ -153,9 +155,38 @@ def make_pdf_file(id, url):
         }
 
     urlsitio = settings.SITE_URL + url + str(id)
-    print(urlsitio)
     pdf = pdfkit.from_url(urlsitio, False, options=options)
     return pdf
+
+def make_pdf_file2(id, url, filename, userId):
+    import pdfkit
+    import os
+
+    d = datetime.datetime.today().strftime("%Y%m%d%H%M%S")
+
+    options = {
+            'quiet': '',
+            'page-size': "A4",
+            'encoding': "UTF-8",
+            'margin-top': "5mm",
+            'margin-left': "5mm",
+            'margin-right': "5mm",
+            'margin-bottom': "10mm",
+            'load-error-handling': "ignore",
+            'disable-javascript': '',
+            'footer-center': '[page]',
+            # 'footer-html': 'www.google.com'
+        }
+
+    if settings.DEBUG:
+        file_path = settings.BASE_DIR + settings.MEDIA_URL + "pdfs/" + filename
+    else:
+        file_path = settings.MEDIA_ROOT + "/pdfs/" + filename
+
+    # print (file_path)
+    urlsitio = settings.SITE_URL + url + str(id) + '/' + str(userId)
+    print (urlsitio)
+    pdfkit.from_url(urlsitio, file_path, options=options)
 
 @login_required
 def download_report(request, id):
@@ -173,18 +204,145 @@ def template_report(request, id):
     report_final = ReportFinal.objects.filter(analysis_id=int(id)).last()
     return render(request, 'app/template_report.html',{'analisis': analisis, 'report': report, 'report_final':report_final })
 
+def get_resume_file(user, formId, lang):
+    form = Form.objects.get(pk=formId)
+    entryForm = EntryForm.objects.get(id=form.content_object.id)
+    last_case_version = CaseVersion.objects.filter(
+        entryform=entryForm).order_by('-generated_at').first()
+
+    lang_option = 1
+    for n, l in RESUME_DOCUMENT_LANG:
+        if l == lang:
+            lang_option = n
+    
+    last_doc = DocumentCaseResume.objects.filter(
+        entryform=entryForm,
+    ).order_by('-created_at').first()
+
+    doc_final = None
+
+    # Primero valido si existe un documento que este al dia con la version del caso, si no existe entonce si o si creo un documento nuevo
+    if last_doc:
+        if last_doc.case_version.version < last_case_version.version:
+            # Caso desactualizado, se debe crear uno nuevo si o si porque aun nadie ha creado un documento con la ultima version del caso
+            new_version = last_doc.version + 1
+            file_base_name = "Resumen_"+str(entryForm.no_caso)+"_"+lang.upper()+"_v"+str(new_version)+"_"+str(int(datetime.datetime.now().timestamp()))+".pdf"
+            file_name = "Resumen_"+str(entryForm.no_caso)+"_"+lang.upper()+"_v"+str(new_version)+".pdf"
+
+            doc_final = DocumentCaseResume.objects.create(
+                entryform=entryForm,
+                filename=file_name,
+                file=file_base_name,
+                lang=lang_option,
+                case_version=last_case_version,
+                version=new_version,
+                generated_by=user
+            )
+            make_pdf_file2(entryForm.pk, "/template-resumen-report/", file_base_name, user.pk)
+
+        else:
+            # Caso actualizado, se debe verificar si existe un documento del usuario generado con la ultima version y con el lenguaje solicitado
+            temp_doc = DocumentCaseResume.objects.filter(
+                entryform=entryForm,
+                generated_by=user,
+                lang=lang_option,
+                case_version=last_case_version,
+                version=last_doc.version
+            ).first()
+            
+            if temp_doc:
+                doc_final = temp_doc
+            else:
+                file_base_name = "Resumen_"+str(entryForm.no_caso)+"_"+lang.upper()+"_v"+str(last_doc.version)+"_"+str(int(datetime.datetime.now().timestamp()))+".pdf"
+
+                file_name = "Resumen_"+str(entryForm.no_caso)+"_"+lang.upper()+"_v"+str(last_doc.version)+".pdf"
+                
+                doc_final = DocumentCaseResume.objects.create(
+                    entryform=entryForm,
+                    filename=file_name,
+                    file=file_base_name,
+                    lang=lang_option,
+                    case_version=last_case_version,
+                    version=last_doc.version,
+                    generated_by=user
+                )
+                make_pdf_file2(entryForm.pk, "/template-resumen-report/", file_base_name, user.pk)
+                
+    else:
+        # Creo el primer documento del caso
+        file_base_name = "Resumen_"+str(entryForm.no_caso)+"_"+lang.upper()+"_v1_"+str(int(datetime.datetime.now().timestamp()))+".pdf"
+
+        file_name = "Resumen_"+str(entryForm.no_caso)+"_"+lang.upper()+"_v1.pdf"
+
+        doc_final = DocumentCaseResume.objects.create(
+            entryform=entryForm,
+            filename=file_name,
+            file=file_base_name,
+            lang=lang_option,
+            case_version=last_case_version,
+            version=1,
+            generated_by=user
+        )
+
+        make_pdf_file2(entryForm.pk, "/template-resumen-report/", file_base_name, user.pk)
+
+
+    return doc_final
+    
 def download_resumen_report(request, id):
-    form = Form.objects.get(pk=id)
-    entryform_id = form.content_object.id
-    pdf = make_pdf_file(entryform_id, '/template-resumen-report/')
-    response = HttpResponse(pdf, content_type='application/pdf')
-    # response['Content-Disposition'] = 'attachment; filename="informe.pdf"'
 
-    return response
+    var_get = request.GET.copy()
+    lang = var_get.get('lang', 'es')
 
-def template_resumen_report(request, id):
+    doc_final = get_resume_file(request.user, id, lang)
+
+    DocumentResumeActionLog.objects.create(
+        document=doc_final,
+        download_action=True,
+        done_by=request.user
+    )
+
+    if settings.DEBUG:
+        file_path = settings.BASE_DIR + settings.MEDIA_URL + "pdfs/"
+    else:
+        file_path = settings.MEDIA_ROOT + "/pdfs/"
+
+    with open(file_path + "" + str(doc_final.file), 'rb') as pdf:
+        response = HttpResponse(pdf.read(), content_type='application/pdf')
+        response['Content-Disposition'] = 'inline;filename='+str(doc_final.filename)
+        return response
+
+def show_log_actions(request, id):
+    from django.http import JsonResponse
+    actions = DocumentResumeActionLog.objects.filter(document__entryform_id=id)
+    action_list = []
+
+    for action in actions:
+        action_dict = {}
+        action_dict['done_by'] = action.done_by.get_full_name().title()
+        type_v = ""
+        if action.mail_action:
+            type_v = "Envío por Mail"
+        else:
+            type_v = "Descarga Directa"
+        action_dict['type'] = type_v
+        action_dict['version'] = action.document.version
+        action_dict['action_date'] = action.action_date.strftime('%d/%m/%Y %H:%M')
+        action_list.append(action_dict)
+    return JsonResponse({'ok': True, 'data': action_list})
+
+def template_resumen_report(request, id, userId):
     entryform = EntryForm.objects.values().get(pk=id)
     entryform_object = EntryForm.objects.get(pk=id)
+    
+    doc = DocumentCaseResume.objects.filter(
+        entryform=entryform_object,
+        generated_by_id=userId
+    ).order_by('-created_at').first()
+
+    doc_data = model_to_dict(doc)
+    # print (doc_data)
+
     subflow = entryform_object.get_subflow
     entryform["subflow"] = subflow
     identifications = list(
@@ -253,30 +411,67 @@ def template_resumen_report(request, id):
     entryform["watersource"] = model_to_dict(entryform_object.watersource) if entryform_object.watersource else None
     entryform["specie"] = model_to_dict(entryform_object.specie) if entryform_object.specie else None
 
-    exams_set = list(Exam.objects.all().values())
-    organs_set = list(Organ.objects.all().values())
+    # exams_set = list(Exam.objects.all().values())
+    # organs_set = list(Organ.objects.all().values())
 
-    species_list = list(Specie.objects.all().values())
-    larvalStages_list = list(LarvalStage.objects.all().values())
-    fixtatives_list = list(Fixative.objects.all().values())
-    waterSources_list = list(WaterSource.objects.all().values())
-    customers_list = list(Customer.objects.all().values())
+    # species_list = list(Specie.objects.all().values())
+    # larvalStages_list = list(LarvalStage.objects.all().values())
+    # fixtatives_list = list(Fixative.objects.all().values())
+    # waterSources_list = list(WaterSource.objects.all().values())
+    # customers_list = list(Customer.objects.all().values())
     patologos = list(User.objects.filter(userprofile__profile_id__in=[4, 5]).values())
+
+    for item in entryform['identifications']:
+        servicios = {}
+        for item2 in samples_as_dict:
+            if item2['identification']['id'] == item['id']:
+                for key, value in item2['sample_exams_set'].items():
+                    if value['exam_name'] in servicios:
+                        for aux in value['organ_id']:
+                            servicios[value['exam_name']].append(aux['name'])
+                    else:
+                        servicios[value['exam_name']] = []
+                        for aux in value['organ_id']:
+                            servicios[value['exam_name']].append(aux['name'])
+
+        serv = {}
+        for key, value in servicios.items():
+            organs = {}
+            for k in value:
+                if k in organs:
+                    organs[k] += 1
+                else:
+                    organs[k] = 1
+            if key in serv:
+                serv[key].append(organs)
+            else:
+                serv[key] = [organs]
+        
+        item['servicios'] = serv
+                
     data = {
+        'doc_data': doc,
         'entryform': entryform,
         'identifications': identifications,
-        'samples': samples_as_dict,
-        'exams': exams_set,
-        'organs': organs_set,
-        'species_list': species_list,
-        'larvalStages_list': larvalStages_list,
-        'fixtatives_list': fixtatives_list,
-        'waterSources_list': waterSources_list,
-        'customers_list': customers_list,
+        'case_created_by': User.objects.get(pk=entryform['created_by_id']).get_full_name(),
+        'report_generated_by': User.objects.get(pk=userId).get_full_name(),
+        # 'samples': samples_as_dict,
+        # 'exams': exams_set,
+        # 'organs': organs_set,
+        # 'species_list': species_list,
+        # 'larvalStages_list': larvalStages_list,
+        # 'fixtatives_list': fixtatives_list,
+        # 'waterSources_list': waterSources_list,
+        # 'customers_list': customers_list,
         'patologos': patologos
     }
 
-    return render(request, 'app/template_resumen_report.html', data)
+    if doc.lang == 1:
+        return render(request, 'app/template_resumen_report_es.html', data)
+    elif doc.lang == 2:
+        return render(request, 'app/template_resumen_report_en.html', data)
+    else:
+        return render(request, 'app/template_resumen_report_es.html', data)
 
 def sortReport(report):
     return report.organ_id
