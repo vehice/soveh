@@ -10,6 +10,7 @@ function init_step_5(active = true) {
   })
     .done(function (data) {
       $('.showShareBtn').removeClass("hidden");
+      $('.showLogBtn').removeClass("hidden");
       $('.showSummaryBtn').removeClass("hidden");
       $('.newAnalysisBtn').addClass("hidden");
       if(active){

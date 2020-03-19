@@ -15,6 +15,7 @@ function init_step_2() {
     data_step_2 = data
     $('.showSummaryBtn').removeClass("hidden");
     $('.showShareBtn').addClass("hidden");
+    $('.showLogBtn').addClass("hidden");
     $('.newAnalysisBtn').addClass("hidden");
     $('.newAnalysisBtn5').addClass("hidden");
      // fillSummary(data);
