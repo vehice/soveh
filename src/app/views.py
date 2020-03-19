@@ -274,6 +274,13 @@ def get_resume_file(user, formId, lang):
 
         file_name = "Resumen_"+str(entryForm.no_caso)+"_"+lang.upper()+"_v1.pdf"
 
+        if not last_case_version:
+            last_case_version = CaseVersion.objects.create(
+                entryform_id = entryForm.id,
+                version = 1,
+                generated_by_id = user.pk
+            )
+            
         doc_final = DocumentCaseResume.objects.create(
             entryform=entryForm,
             filename=file_name,
