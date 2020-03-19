@@ -49,6 +49,7 @@
           <h3> <strong>CASO N° {{form.content_object.no_caso}}</strong></h3>
           <button class="btn btn-secondary square showSummaryBtn hidden"><i class="fa fa-list fa-fx"></i> Resumen del caso</button>
           <button class="btn btn-secondary square showShareBtn hidden" onclick="shareChoice()"><i class="fa fa-paper-plane fa-fx"></i> Enviar caso</button>
+          <button class="btn btn-secondary square showLogBtn hidden" onclick="logModal()"><i class="fa fa-list fa-fx"></i> Registro de Envíos</button>
           {% if not closed %}
             <button class="btn btn-secondary square newAnalysisBtn hidden"><i class="fa fa-list fa-plus-circle"></i> Nuevo Análisis</button>
             <button class="btn btn-secondary square newAnalysisBtn5 hidden"><i class="fa fa-list fa-plus-circle"></i> Nuevo Análisis</button>
@@ -178,6 +179,33 @@
   </div>
 </div>
 
+<div class="modal fade text-left" id="log_modal" role="dialog" data-backdrop="static" data-keyboard="false">
+  <div class="modal-dialog" role="" style="min-width:40% !important;">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title" id="title"> Registro de Envíos y Descargas Formulario de Recepción de Muestras <span></span></h3>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body" style="font-size:12px !important;">
+        <table class="table table-bordered table-condensed" id="log_table">
+          <thead>
+            <tr>
+              <th>Realizado Por</th>
+              <th>Tipo</th>
+              <th>Versión</th>
+              <th>Fecha</th>
+            </tr>
+          </thead>
+          <tbody id="log_table_tbody">
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div class="modal fade text-left" id="email_modal" role="dialog" data-backdrop="static" data-keyboard="false">
   <div class="modal-dialog" role="" style="min-width:80% !important;">
     <div class="modal-content">
@@ -204,6 +232,9 @@
             <textarea id="body" name="body" class="form-control" rows="9"></textarea>
           </div>
         </div>
+
+        <input type="hidden" id="formId" name="formId">
+        <input type="hidden" id="lang" name="lang">
         <div class="modal-footer" style="font-size:12px !important;">
               <button type="submit" class="btn btn-primary">
               <i class="fa fa-paper-plane fa-fx"></i>
@@ -809,7 +840,7 @@ function shareChoice(){
     }
     swal({
       title: "Información",
-      text: "¿Que idioma desea utilizar?",
+      text: "¿En que idioma desea enviar el documento resúmen?",
       icon: "info",
       className: "multiple-action",
       closeOnClickOutside: false,
@@ -879,6 +910,8 @@ function shareAction(email, download, lang){
         $('#email_modal').modal('show');
         $('#email_to').tagsinput();
         $('#email_to').tagsinput('add', data.email);
+        $('#lang').val(lang);
+        $('#formId').val({{form.id}});
         let template = '<option value="0">Sin Plantilla</option>';
         $.each(data.templates, function(i, v){
           template += '<option value="'+v.id+'">'+v.name+'</option>'
@@ -931,6 +964,41 @@ $(document).on('change', '#plantilla', function(){
 function responsibleModal() {
   $('#responsible_modal').modal('show');
   reloadResponsibleTable();
+}
+
+function logModal() {
+  $('#log_modal').modal('show');
+  reloadLogTable();
+}
+
+function reloadLogTable(entry) {
+  $.ajax({
+    type: "GET",
+    url: '/logactions/{{form.content_object.id}}',
+  })
+    .done(function (data) {
+      if (data.ok)
+      {
+        $('#log_table_tbody').html("");
+        var template = "";
+        $.each(data.data, function(i, v){
+          template += "<tr>";
+          template += "<td>"+ v['done_by'] + "</td>";
+          template += "<td>"+ v['type'] + "</td>";
+          template += "<td>"+ v['version'] + "</td>";
+          template += "<td>"+ v['action_date'] + "</td>";
+          template += "</tr>";
+        })
+
+        $("#log_table_tbody").html(template);
+        $('#log_table').DataTable({
+          "destroy": true,
+          "oLanguage": {
+            "sUrl": "https://cdn.datatables.net/plug-ins/1.10.16/i18n/Spanish.json"
+          }
+        });
+      }
+    });
 }
 
 function reloadResponsibleTable() {
