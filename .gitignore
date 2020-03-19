@@ -42,3 +42,12 @@ local/
 
 # Docker
 Dockerfile
+
+# PDF
+*.pdf
+
+# Diagramas
+*.mwb*
+
+# Instaladores
+*.deb
