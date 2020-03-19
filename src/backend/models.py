@@ -171,6 +171,7 @@ class EntryForm(models.Model):
     responsible = models.CharField(max_length=250, null=True, blank=True)
     company = models.CharField(max_length=250, null=True, blank=True)
     no_request = models.CharField(max_length=250, null=True, blank=True)
+    created_by = models.ForeignKey(User, null=True, on_delete=models.SET_NULL)
 
     def __str__(self):
         return str(self.pk)
@@ -297,7 +298,7 @@ class Img(models.Model):
 
     @property
     def is_new(self):
-        return timezone.now() - timedelta(minutes=1) <= self.time_stamp
+        return datetime.timezone.now() - datetime.timedelta(minutes=1) <= self.time_stamp
 
 class Report(models.Model):
     analysis = models.ForeignKey(
@@ -360,10 +361,38 @@ class EmailTemplateAttachment(models.Model):
     class Meta:
         verbose_name = "Email Adjunto"
         verbose_name_plural = "Email Adjuntos"
-
-class DocumentResumeVersion(models.Model):
+        
+class CaseVersion(models.Model):
     entryform = models.ForeignKey(
         EntryForm, null=True, on_delete=models.SET_NULL)
     version = models.IntegerField(null=True, blank=True)
-    created_by = models.ForeignKey(User, null=True, on_delete=models.SET_NULL)
+    generated_by = models.ForeignKey(User, null=True, on_delete=models.SET_NULL)
+    generated_at = models.DateTimeField(auto_now_add=True)
+
+RESUME_DOCUMENT_LANG =(
+    (1, "es"),
+    (2, "en"),
+)
+
+class DocumentCaseResume(models.Model):
+    entryform = models.ForeignKey(
+        EntryForm, null=True, on_delete=models.SET_NULL)
+    filename = models.CharField(max_length=250, null=True, blank=True)
+    file = models.FileField(upload_to='pdfs', blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    lang = models.IntegerField(choices=RESUME_DOCUMENT_LANG, default=1)
+    case_version = models.ForeignKey(CaseVersion, null=True, on_delete=models.SET_NULL)
+    version = models.IntegerField(null=True, blank=True)
+    generated_by = models.ForeignKey(User, null=True, on_delete=models.SET_NULL)
+
+    def __str__(self):
+        return self.filename
+
+class DocumentResumeActionLog(models.Model):
+    document = models.ForeignKey(DocumentCaseResume, null=True, on_delete=models.SET_NULL)
+    mail_action = models.BooleanField(default=False)
+    download_action = models.BooleanField(default=False)
+    action_date = models.DateTimeField(auto_now_add=True)
+    done_by = models.ForeignKey(User, null=True, on_delete=models.SET_NULL)
+
+
