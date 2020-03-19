@@ -925,7 +925,6 @@ function shareAction(email, download, lang){
 function sendEmail(){
   let form_data = $("#email_form").serialize();
   lockScreen(1);
-  $('#email_modal').modal('close');
 
   $.ajax({
     type: "POST",
@@ -938,12 +937,15 @@ function sendEmail(){
         // reloadResponsibleTable()
         // $("#responsible_form")[0].reset();
         toastr.success('Se envió satisfactoriamente', '');
+        $('#email_modal').modal('close');
+
         lockScreen(0);
 
       }
       else
       {
         toastr.error('No se pudo guardar satisfactoriamente', 'Aviso');
+        $('#email_modal').modal('close');
         lockScreen(0);
       }
     })
