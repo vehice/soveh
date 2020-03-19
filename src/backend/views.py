@@ -1422,7 +1422,7 @@ def step_1_entryform(request):
                         sample_index += 1
                 else:
                     flow_aux = Flow.objects.get(pk=1)
-                    entryform_aux = EntryForm.objects.create()
+                    entryform_aux = EntryForm.objects.create(created_by=request.user)
                     form_aux = Form.objects.create(
                         content_object=entryform_aux, flow=flow_aux, state=flow_aux.step_set.all()[1:2].first().state, parent_id=entryform.forms.first().id)
                     entryform_aux.specie_id = var_post.get('specie')
@@ -1508,7 +1508,7 @@ def step_1_entryform(request):
                         
                 else:
                     flow_aux = Flow.objects.get(pk=1)
-                    entryform_aux = EntryForm.objects.create()
+                    entryform_aux = EntryForm.objects.create(created_by=request.user)
                     form_aux = Form.objects.create(
                         content_object=entryform_aux, flow=flow_aux, state=flow_aux.step_set.all()[1:2].first().state, parent_id=entryform.forms.first().id)
                     entryform_aux.specie_id = var_post.get('specie')
