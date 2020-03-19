@@ -923,15 +923,15 @@ function shareAction(email, download, lang){
 }
 
 function sendEmail(){
-  let form_data = $("#email_form").serialize();
+  var form_data = $("#email_form").serialize();
   lockScreen(1);
-
   $.ajax({
     type: "POST",
     url: '/emailTemplate',
     data: form_data,
   })
     .done(function (data) {
+      $('#email_modal').modal('hide');
       lockScreen(0);
 
 
@@ -939,17 +939,17 @@ function sendEmail(){
       {
         // reloadResponsibleTable()
         // $("#responsible_form")[0].reset();
-        toastr.success('Se envió satisfactoriamente', '');
+        toastr.success("", "Mail enviado exitosamente.");
         
 
       }
       else
       {
         
-        toastr.error('No se pudo guardar satisfactoriamente', 'Aviso');
+        toastr.error("", "No ha sido posible enviar el Mail satisfactoriamente.");
         
       }
-      $('#email_modal').modal('close');
+      
     })
     .fail(function (data) {
       console.log("Fail");
