@@ -1009,8 +1009,11 @@ class EMAILTEMPLATE(View):
     def post(self, request):
         try:
             var_post = request.POST.copy()
-            print(var_post)
-            subject = "Envio de documento"
+            from app import views as appv
+            lang = var_post.get('lang', 'es')
+            formId = var_post.get('formId')
+            doc = appv.get_resume_file(request.user, formId, lang)
+            subject = "Formulario Recepción de Muestras"
             from_email = 'no-reply@solmat.cl'
             to = var_post.get('to').split(',')
             message = var_post.get('body')
@@ -1020,10 +1023,26 @@ class EMAILTEMPLATE(View):
             files = EmailTemplateAttachment.objects.filter(template=plantilla)
             for f in files:
                 msg.attach_file(f.template_file.path)
+
+            if settings.DEBUG:
+                file_path = settings.BASE_DIR + settings.MEDIA_URL + "pdfs/"
+            else:
+                file_path = settings.MEDIA_ROOT + "/pdfs/"
+            
+            with open(file_path + "" + str(doc.file), 'rb') as pdf:
+                msg.attach(doc.filename, pdf.read(), 'application/pdf')
+
             msg.send()
+
+            DocumentResumeActionLog.objects.create(
+                document=doc,
+                mail_action=True,
+                done_by=request.user
+            )
             return JsonResponse({'ok': True})
         except Exception as e:
-             return JsonResponse({'ok': False})
+            print (e)
+            return JsonResponse({'ok': False})
    
 def organs_by_slice(request, slice_id=None):
     if slice_id:
@@ -1368,7 +1387,7 @@ def step_1_entryform(request):
     
     change = change or checkIdentification(entryform_identification, zip_identification1)
     if change:
-        changeDocumentVersion(False, entryform.id, request.user.id)
+        changeCaseVersion(False, entryform.id, request.user.id)
     if strtobool(var_post.get('select_if_divide_flow')):
         if var_post.get('flow_divide_option') == "1":
             i = 0
@@ -1653,7 +1672,7 @@ def step_2_entryform(request):
         SampleExams.objects.bulk_create(bulk_data)
         sample.save()
     if change:
-        changeDocumentVersion(True,entryform.id, request.user.id)
+        changeCaseVersion(True,entryform.id, request.user.id)
     return True
 
 def checkSampleExams(olds, news):
@@ -1672,7 +1691,7 @@ def step_3_entryform(request):
     processor_loaded_at = None
     try:
         processor_loaded_at = datetime.strptime(var_post.get('processor_loaded_at'), '%d/%m/%Y %H:%M')
-    except Exce: 
+    except: 
         pass
 
     cassette_sample_id = [
@@ -1779,13 +1798,13 @@ def step_5_entryform(request):
     print("step_4")
     return True
 
-def changeDocumentVersion(allow_new, form_id, user_id):
-    versions = DocumentResumeVersion.objects.filter(entryform_id= form_id)
+def changeCaseVersion(allow_new, form_id, user_id):
+    versions = CaseVersion.objects.filter(entryform_id= form_id)
     if len(versions) or allow_new:
-        DocumentResumeVersion.objects.create(
-            entryform_id= form_id,
-            version= len(versions) + 1,
-            created_by_id= user_id
+        CaseVersion.objects.create(
+            entryform_id = form_id,
+            version = len(versions) + 1,
+            generated_by_id = user_id
         )
     
 
@@ -2093,7 +2112,7 @@ def save_identification(request, id):
     
     ident.save()
     if change:
-        changeDocumentVersion(True, ident.entryform.id, request.user.id)
+        changeCaseVersion(True, ident.entryform.id, request.user.id)
     return JsonResponse({})
 
 def save_generalData(request, id):
@@ -2141,7 +2160,7 @@ def save_generalData(request, id):
     except:
         pass
     if change:
-        changeDocumentVersion(True, id, request.user.id)
+        changeCaseVersion(True, id, request.user.id)
     entry.save()
     return JsonResponse({})
 
