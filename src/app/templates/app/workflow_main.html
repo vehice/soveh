@@ -936,17 +936,18 @@ function sendEmail(){
       {
         // reloadResponsibleTable()
         // $("#responsible_form")[0].reset();
-        toastr.success('Se envió satisfactoriamente', '');
         $('#email_modal').modal('close');
-
         lockScreen(0);
+        toastr.success('Se envió satisfactoriamente', '');
+        
 
       }
       else
       {
-        toastr.error('No se pudo guardar satisfactoriamente', 'Aviso');
         $('#email_modal').modal('close');
         lockScreen(0);
+        toastr.error('No se pudo guardar satisfactoriamente', 'Aviso');
+        
       }
     })
     .fail(function (data) {
