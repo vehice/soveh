@@ -932,23 +932,24 @@ function sendEmail(){
     data: form_data,
   })
     .done(function (data) {
+      lockScreen(0);
+
+
       if (data.ok)
       {
         // reloadResponsibleTable()
         // $("#responsible_form")[0].reset();
-        $('#email_modal').modal('close');
-        lockScreen(0);
         toastr.success('Se envió satisfactoriamente', '');
         
 
       }
       else
       {
-        $('#email_modal').modal('close');
-        lockScreen(0);
+        
         toastr.error('No se pudo guardar satisfactoriamente', 'Aviso');
         
       }
+      $('#email_modal').modal('close');
     })
     .fail(function (data) {
       console.log("Fail");
