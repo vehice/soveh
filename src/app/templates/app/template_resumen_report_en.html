@@ -47,216 +47,258 @@
     
     
   }
+
+  table.table-bordered{
+    border:1px solid gray;
+  }
+  table.table-bordered > thead > tr > th{
+      border:1px solid gray;
+  }
+  table.table-bordered > tbody > tr > td{
+      border:1px solid gray;
+  }
+
 </style>
 
 {% endblock stylesheets %}
 
 {% block body %}
 <div class="container">
-  <div class="row" style="page-break-inside: avoid !important; border: 1px solid #e0e0e0;">
-    <div class="col-xs-3" style="padding: 10px 0px; border: 1px solid #e0e0e0; height: 60px; text-align: center;">
-      <img alt="" src="{% static 'assets/images/logo/logo.png' %}" class="img-fluid float-left" style="width: 150px;">
-    </div>
-    <div class="col-xs-5" style="padding: 10px 2px 0px 0px; border: 1px solid #e0e0e0; height: 60px;">
-      <center><span class="t1">
-        SAMPLE RECEPTION FORM
-      </span></center>
-    </div>
-    <div class="col-xs-2" style="padding: 0; border: 1px solid #e0e0e0; height: 60px;">
-      <div class="col-xs-12">
-        <span class="t3">Date:</span>
-      </div>
-      <div class="col-xs-12">
-        <span class="t3">Time:</span>
-      </div>
-      <div class="col-xs-12">
-        <span class="t3">Version:</span>
-      </div>
-    </div>
-    <div class="col-xs-2" style="padding: 0; margin:0; border: 1px solid #e0e0e0; height: 60px;">
-      <div class="col-xs-12">
-        <span class="t3_n">{{doc_data.created_at|date:'m/d/Y'}}</span>
-      </div>
-      <div class="col-xs-12">
-        <span class="t3_n">{{doc_data.created_at|date:'H:i'}}</span>
-      </div>
-      <div class="col-xs-12">
-        <span class="t3_n">v{{doc_data.version}}</span>
-      </div>
-    </div>
+  <div class="row" style="page-break-inside: avoid !important;">
+    <table class="table table-bordered">
+      <tr>
+        <td class="col-xs-3" style="text-align: center;""><img alt="" src="{% static 'assets/images/logo/logo.png' %}" class="img-fluid float-left" style="width: 180px;"></td>
+        <td class="col-xs-5">
+          <center>
+            <span class="t1">
+              SAMPLE RECEPTION FORM
+            </span>
+          </center>
+        </td>
+        <td class="col-xs-2">
+          <div clas="row">
+            <div class="col-xs-12">
+              <span class="t3">Date:</span>
+            </div>
+            <div class="col-xs-12">
+              <span class="t3">Time:</span>
+            </div>
+            <div class="col-xs-12">
+              <span class="t3">Version:</span>
+            </div>
+          </div>
+        </td>
+        <td class="col-xs-2">
+          <div class="row">
+            <div class="col-xs-12">
+              <span class="t3_n">{{doc_data.created_at|date:'m/d/Y'}}</span>
+            </div>
+            <div class="col-xs-12">
+              <span class="t3_n">{{doc_data.created_at|date:'H:i'}}</span>
+            </div>
+            <div class="col-xs-12">
+              <span class="t3_n">v{{doc_data.version}}</span>
+            </div>
+          </div>
+        </td>
+      </tr>  
+    </table>
   </div>
 
   <div class="row" style="page-break-inside: avoid !important;">
-    <div class="col-xs-12" style="margin-top:2% !important; border: 1px solid #e0e0e0; text-align: center; background-color: #fbe9e7;">
-      <span class="t2" style="text-transform: uppercase; margin: 3px;">INFORMATION OF CASE</span>
-    </div>
+    <table class="table table-bordered mt-2">
+      <tbody>
+        <tr>
+          <td colspan="6" class="text-center" style="background-color: #fbe9e7;">
+            <span class="t2" style="text-transform: uppercase;">INFORMATION OF CASE</span>
+          </td>
+        </tr>
+        <tr>
+          <td class="col-xs-2">
+            <span class="t3">No. Case:</span>
+          </td>
+          <td colspan="2" class="col-xs-4">
+            <span class="t3_n">{{entryform.no_caso}}</span>
+          </td>
+          <td class="col-xs-2">
+            <span class="t3">Reception Date:</span>
+          </td>
+          <td colspan="2" class="col-xs-4 ">
+            <span class="t3_n">{{ entryform.created_at|date:'m/d/Y, H:i'}}</span>
+          </td>
+        </tr>
+        <tr>
+          <td class="col-xs-2">
+            <span class="t3">Company:</span>
+          </td>
+          <td colspan="2" class="col-xs-4">
+            <span class="t3_n">{{entryform.company | default:""}}</span>
+          </td>
+          <td class="col-xs-2">
+            <span class="t3">No. Request:</span>
+          </td>
+          <td colspan="2" class="col-xs-4">
+            <span class="t3_n">{{ entryform.no_request | default:"" }}</span>
+          </td>
+        </tr>
+        <tr>
+          <td class="col-xs-2">
+            <span class="t3">Site Name:</span>
+          </td>
+          <td colspan="2" class="col-xs-4">
+            <span class="t3_n">{{entryform.center | default:""}}</span>
+          </td>
+          <td class="col-xs-2">
+            <span class="t3">Aplicant Name:</span>
+          </td>
+          <td colspan="2" class="col-xs-4">
+            <span class="t3_n">{{entryform.responsible | default:""}}</span>
+          </td>
+        </tr>
+        <tr>
+          <td colspan="6" class="text-center" style="background-color: #fbe9e7;">
+            <span class="t2" style="text-transform: uppercase;">INFORMATION OF SAMPLE</span>
+          </td>
+        </tr>
+        <tr>
+          <td class="col-xs-2">
+            <span class="t3">Sampling Date:</span>
+          </td>
+          <td colspan="2" class="col-xs-4">
+            <span class="t3_n">{{ entryform.sampled_at|date:'m/d/Y, H:i'}}</span>
+          </td>
+          <td class="col-xs-2">
+            <span class="t3">Fixative:</span>
+          </td>
+          <td colspan="2" class="col-xs-4">
+            <span class="t3_n">{{entryform.fixative.name|default:""|title}}</span>
+          </td>
+        </tr>
 
-    <div class="col-xs-3" style="border: 1px solid #e0e0e0; height: 40px; padding:10px;">
-      <span class="t3">No. Case:</span>
-    </div>
-    <div class="col-xs-3" style="border: 1px solid #e0e0e0; height: 40px; padding:10px;">
-      <span class="t3_n">{{entryform.no_caso}}</span>
-    </div>
-    <div class="col-xs-3" style="border: 1px solid #e0e0e0; height: 40px; padding:10px;">
-      <span class="t3">Reception Date:</span>
-    </div>
-    <div class="col-xs-3" style="border: 1px solid #e0e0e0; height: 40px; padding:10px;">
-      <span class="t3_n">{{ entryform.created_at|date:'m/d/Y, H:i'}}</span>
-    </div>
+        <tr>
+          <td class="col-xs-2">
+            <span class="t3">Specie:</span>
+          </td>
+          <td class="col-xs-2">
+            <span class="t3_n">{{entryform.specie.name |default:""|title}}</span>
+          </td>
+          <td class="col-xs-2">
+            <span class="t3">Development Stage:</span>
+          </td>
+          <td class="col-xs-2">
+            <span class="t3_n">{{entryform.larvalstage.name |default:""|title}}</span>
+          </td>
+          <td class="col-xs-2">
+            <span class="t3">Water Source:</span>
+          </td>
+          <td class="col-xs-2">
+            <span class="t3_n">{{entryform.watersource.name |default:""|title}}</span>
+          </td>
+        </tr>
 
-    <div class="col-xs-3" style="border: 1px solid #e0e0e0; height: 40px; padding:10px;">
-      <span class="t3">Company:</span>
-    </div>
-    <div class="col-xs-3" style="border: 1px solid #e0e0e0; height: 40px; padding:10px;">
-      <span class="t3_n">{{entryform.company | default:""}}</span>
-    </div>
-    <div class="col-xs-3" style="border: 1px solid #e0e0e0; height: 40px; padding:10px;">
-      <span class="t3">No. Request:</span>
-    </div>
-    <div class="col-xs-3" style="border: 1px solid #e0e0e0; height: 40px; padding:10px;">
-      <span class="t3_n">{{ entryform.no_request | default:"" }}</span>
-    </div>
-
-    <div class="col-xs-3" style="border: 1px solid #e0e0e0; height: 40px; padding:10px;">
-      <span class="t3">Site Name:</span>
-    </div>
-    <div class="col-xs-3" style="border: 1px solid #e0e0e0; height: 40px; padding:10px;">
-      <span class="t3_n">{{entryform.center | default:""}}</span>
-    </div>
-    <div class="col-xs-3" style="border: 1px solid #e0e0e0; height: 40px; padding:10px;">
-      <span class="t3">Aplicant Name:</span>
-    </div>
-    <div class="col-xs-3" style="border: 1px solid #e0e0e0; height: 40px; padding:10px;">
-      <span class="t3_n">{{entryform.responsible | default:""}}</span>
-    </div>
-
-    <div class="col-xs-12"
-      style="margin-top:0 !important; border: 1px solid #e0e0e0; text-align: center; background-color: #fbe9e7;">
-      <span class="t2" style="text-transform: uppercase; margin: 3px;"><strong>INFORMATION OF SAMPLE</strong></span>
-    </div>
-
-    <div class="col-xs-3" style="border: 1px solid #e0e0e0; height: 40px; padding:10px;">
-      <span class="t3">Sampling Date:</span>
-    </div>
-    <div class="col-xs-3" style="border: 1px solid #e0e0e0; height: 40px; padding:10px;">
-      <span class="t3_n">{{ entryform.sampled_at|date:'m/d/Y, H:i'}}</span>
-    </div>
-    <div class="col-xs-3" style="border: 1px solid #e0e0e0; height: 40px; padding:10px;">
-      <span class="t3">Fixative:</span>
-    </div>
-    <div class="col-xs-3" style="border: 1px solid #e0e0e0; height: 40px; padding:10px;">
-      <span class="t3_n">{{entryform.fixative.name|default:""|title}}</span>
-    </div>
-
-    <div class="col-xs-2" style="border: 1px solid #e0e0e0; height: 40px; padding:10px;">
-      <span class="t3">Specie:</span>
-    </div>
-    <div class="col-xs-2" style="border: 1px solid #e0e0e0; height: 40px; padding:10px;">
-      <span class="t3_n">{{entryform.specie.name |default:""|title}}</span>
-    </div>
-    <div class="col-xs-2" style="border: 1px solid #e0e0e0; height: 40px; padding:10px;">
-      <span class="t3">Development Stage:</span>
-    </div>
-    <div class="col-xs-2" style="border: 1px solid #e0e0e0; height: 40px; padding:10px;">
-      <span class="t3_n">{{entryform.larvalstage.name |default:""|title}}</span>
-    </div>
-    <div class="col-xs-2" style="padding: 0px 3px; border: 1px solid #e0e0e0; height: 40px; padding:10px;">
-      <span class="t3">Water Source:</span>
-    </div>
-    <div class="col-xs-2" style="border: 1px solid #e0e0e0; height: 40px; padding:10px;">
-      <span class="t3_n">{{entryform.watersource.name |default:""|title}}</span>
-    </div>
-
-    <div class="col-xs-4" style="border: 1px solid #e0e0e0; height: 60px; background-color: #fbe9e7; padding:10px;">
-      <span class="t3">
-        OBSERVATIONS / <br>
-        ANAMNESIS
-      </span>
-    </div>
-    <div class="col-xs-8" style="border: 1px solid #e0e0e0; height: 60px; padding:10px;">
-      <span class="t3_n">{{entryform.anamnesis|default:""}}</span>
-    </div>
+        <tr>
+          <td colspan="2" style="background-color: #fbe9e7;">
+            <span class="t3" >
+              OBSERVATIONS / <br>
+              ANAMNESIS
+            </span>
+          </td>
+          <td colspan="4">
+            <span class="t3_n">{{entryform.anamnesis|default:""}}</span>
+          </td>
+        </tr>
+      </tbody>
+    </table>  
   </div>
 
-  <div class="row"
-    style="margin-top:3% !important; border: 1px solid #e0e0e0; text-align: center; background-color: #fbe9e7;">
-    <span class="t2" style="text-transform: uppercase; margin: 3px;">IDENTIFICATION</span>
-  </div>
   {% for item in entryform.identifications %}
   <div class="row" style="page-break-inside: avoid !important;">
-    <div class="col-xs-12" style="padding:0px !important;" >
-      <table class="table table-bordered">
-        <tbody>
-          <tr>
-            <td class="col-xs-2" style="background-color: #fbe9e7;"><span class="t3"> ID Tank/Cage: </span></td>
-            <td class="col-xs-2">{{item.cage}}</td>
-            <td class="col-xs-2" style="background-color: #fbe9e7;"><span class="t3"> Group/Batch: </span></td>
-            <td class="col-xs-2">{{item.group}}</td>
-            <td class="col-xs-2" style="background-color: #fbe9e7;"><span class="t3"> Weight (g): </span></td>
-            <td class="col-xs-2">{{item.weight}}</td>
-          </tr>
-          <tr>
-            <td class="col-xs-2" style="background-color: #fbe9e7;"><span class="t3">No. Containers: </span></td>
-            <td class="col-xs-2">{{item.no_container}}</td>
-            <td  class="col-xs-2" style="background-color: #fbe9e7;"><span class="t3"> No. Fishes: </span></td>
-            <td class="col-xs-2">{{item.no_fish}}</td>
-            <td class="col-xs-2" style="background-color: #fbe9e7;"><span class="t3"> Optimum? </span></td>
-            <td class="col-xs-2">{% if item.is_optimum %} Yes {%else%} No {% endif %}</td>
-          </tr>
-          <tr>
-            <td class="col-xs-2" style="background-color: #fbe9e7;"><span class="t3">Observations</span></td>
-            <td colspan="5">{{item.observation}}</td>
-          </tr>
-          <tr>
-            <td class="col-xs-2" style="background-color: #fbe9e7;"><span class="t3">ANALYSES REQUESTED</span></td>
-            <td colspan="5">
-              {% for key, value in item.servicios.items %} 
-                <p>
-                  <span class="t3">{{key}}: </span>
-                  <span class="t3_n">
-                    {% for l in value %}
-                      {% if forloop.last %}
-                        {% for k, v in l.items %}
-                          {{k|title}} ({{v}})
-                        {% endfor %}
-                      {% else %}
-                        {% for k, v in l.items %}
-                          {{k|title}} ({{v}}),
-                        {% endfor %}
-                      {% endif %} 
-                    {% endfor %}
-                  </span>
-                </p>
-              {% endfor %}
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+    <table class="table table-bordered">
+      <tbody>
+        {% if forloop.first %}
+        <tr>
+          <td colspan="6" class="text-center" style="background-color: #fbe9e7;">
+            <span class="t2" style="text-transform: uppercase;">IDENTIFICATION</span>
+          </td>
+        </tr>
+        {% endif %}
+        <tr>
+          <td class="col-xs-2" style="background-color: #fbe9e7;"><span class="t3"> ID Tank/Cage: </span></td>
+          <td class="col-xs-2 t3_n">{{item.cage}}</td>
+          <td class="col-xs-2" style="background-color: #fbe9e7;"><span class="t3"> Group/Batch: </span></td>
+          <td class="col-xs-2 t3_n">{{item.group}}</td>
+          <td class="col-xs-2" style="background-color: #fbe9e7;"><span class="t3"> Weight (g): </span></td>
+          <td class="col-xs-2 t3_n">{{item.weight}}</td>
+        </tr>
+        <tr>
+          <td class="col-xs-2" style="background-color: #fbe9e7;"><span class="t3"> No. Containers: </span></td>
+          <td class="col-xs-2 t3_n">{{item.no_container}}</td>
+          <td  class="col-xs-2" style="background-color: #fbe9e7;"><span class="t3"> No. Fishes: </span></td>
+          <td class="col-xs-2 t3_n">{{item.no_fish}}</td>
+          <td class="col-xs-2" style="background-color: #fbe9e7;"><span class="t3"> Optimum? </span></td>
+          <td class="col-xs-2 t3_n">{% if item.is_optimum %} Sí {%else%} No {% endif %}</td>
+        </tr>
+        <tr>
+          <td class="col-xs-2" style="background-color: #fbe9e7;"><span class="t3">Observations</span></td>
+          <td colspan="5" class="t3_n">{{item.observation}}</td>
+        </tr>
+        <tr>
+          <td class="col-xs-2" style="background-color: #fbe9e7;"><span class="t3">ANALYSES REQUESTED</span></td>
+          <td colspan="5">
+            {% for key, value in item.servicios.items %} 
+              <p>
+                <span class="t3">{{key}}: </span>
+                <span class="t3_n">
+                  {% for l in value %}
+                    {% if forloop.last %}
+                      {% for k, v in l.items %}
+                        {{k|title}} ({{v}})
+                      {% endfor %}
+                    {% else %}
+                      {% for k, v in l.items %}
+                        {{k|title}} ({{v}}),
+                      {% endfor %}
+                    {% endif %} 
+                  {% endfor %}
+                </span>
+              </p>
+            {% endfor %}
+          </td>
+        </tr>
+      </tbody>
+    </table>
   </div>
   {% endfor %}
 
   <div class="row" style="page-break-inside: avoid !important;">
-    <div class="col-xs-4" style="border: 1px solid #e0e0e0; height: 40px; padding:10px; background-color: #fbe9e7;">
-      <span class="t3">
-        CASE ENTERED BY:
-      </span>
-    </div>
-    <div class="col-xs-8" style="border: 1px solid #e0e0e0; height: 40px; padding:10px;">
-      <span class="t3_n">{{case_created_by|default:""}}</span>
-    </div>
-    <div class="col-xs-4" style="border: 1px solid #e0e0e0; height: 40px; padding:10px; background-color: #fbe9e7;">
-      <span class="t3">
-        FORM SENT BY:
-      </span>
-    </div>
-    <div class="col-xs-8" style="border: 1px solid #e0e0e0; height: 40px; padding:10px;">
-      <span class="t3_n">{{report_generated_by|default:""}}</span>
-    </div>
+    <table class="table table-bordered">
+      <tbody>
+        <tr>
+          <td class="col-xs-4" colspan="2" style="background-color: #fbe9e7;">
+            <span class="t3" >
+              CASE ENTERED BY:
+            </span>
+          </td>
+          <td class="col-xs-8" colspan="4">
+            <span class="t3_n">{{case_created_by|default:""}}</span>
+          </td>
+        </tr>
+        <tr>
+          <td class="col-xs-4" colspan="2" style="background-color: #fbe9e7;">
+            <span class="t3" >
+              FORM SENT BY:
+            </span>
+          </td>
+          <td class="col-xs-8" colspan="4">
+            <span class="t3_n">{{report_generated_by|default:""}}</span>
+          </td>
+        </tr>
+      </tbody>
+    </table>
   </div>
 
-  <div class="row" style="margin-top:3% !important; page-break-inside: avoid !important;">
-    <span class="t2" style="text-transform: uppercase; margin: 3px;"><strong>Important Notes:</strong></span></br>
+  <div class="row" style="margin-top:1% !important; page-break-inside: avoid !important;">
+    <span class="t2" style="text-transform: uppercase;"><strong>Important Notes:</strong></span></br>
     <span class="t3_n"> <b>&middot;</b> The  number  of  simples is  referential as  indicated  by  applicant.  We  will  notify  in  case  of  any  difference  detected during the process, through the present form.</span></br>
     <span class="t3_n"> <b>&middot;</b> Anyquestion about sample reception and sending information, write to recepcion@vehice.com</span></br>
     <span class="t3_n"> <b>&middot;</b> Any technical question, write to carlos.sandoval@vehice.com</span></br>
