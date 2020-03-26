@@ -1310,6 +1310,7 @@ def step_1_entryform(request):
     if str(entryform.no_order) != var_post.get('no_order') and (entryform.no_order == None and var_post.get('no_order') != ''):
         change = True
     entryform.no_order = var_post.get('no_order')
+
     # TODO: COMPROBAR LOS CAMBIOS DE HORARIO SERVER - BD
     try:
         if entryform.created_at != datetime.strptime(var_post.get('created_at'), '%d/%m/%Y %H:%M') and (entryform.created_at != datetime.strptime(var_post.get('created_at'), '%d/%m/%Y %H:%M') != ''):
@@ -1341,6 +1342,10 @@ def step_1_entryform(request):
     if str(entryform.no_request) != var_post.get('no_request') and (entryform.no_request == None and var_post.get('no_request') != ''):
         change = True
     entryform.no_request = var_post.get('no_request')
+
+    if str(entryform.anamnesis) != var_post.get('anamnesis') and (entryform.anamnesis == None and var_post.get('anamnesis') != ''):
+        change = True
+    entryform.anamnesis = var_post.get('anamnesis')
     
     entryform.save()
 
@@ -2151,6 +2156,9 @@ def save_generalData(request, id):
     if entry.no_request != var_post['no_solic']:
         change = True
     entry.no_request = var_post['no_solic']
+    if entry.anamnesis != var_post['anamnesis']:
+        change = True
+    entry.anamnesis = var_post['anamnesis']
     try:
         entry.created_at = datetime.strptime(var_post.get('recive'), '%d/%m/%Y %H:%M')
     except: 

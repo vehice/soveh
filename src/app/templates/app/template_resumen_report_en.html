@@ -127,7 +127,7 @@
       <span class="t3">Aplicant Name:</span>
     </div>
     <div class="col-xs-3" style="border: 1px solid #e0e0e0; height: 40px; padding:10px;">
-      <span class="t3_n">--</span>
+      <span class="t3_n">{{entryform.responsible | default:""}}</span>
     </div>
 
     <div class="col-xs-12"
@@ -174,7 +174,7 @@
       </span>
     </div>
     <div class="col-xs-8" style="border: 1px solid #e0e0e0; height: 60px; padding:10px;">
-      <span class="t3_n">{{entryform.observation|default:""}}</span>
+      <span class="t3_n">{{entryform.anamnesis|default:""}}</span>
     </div>
   </div>
 
@@ -200,7 +200,7 @@
             <td class="col-xs-2">{{item.no_container}}</td>
             <td  class="col-xs-2" style="background-color: #fbe9e7;"><span class="t3"> No. Fishes: </span></td>
             <td class="col-xs-2">{{item.no_fish}}</td>
-            <td class="col-xs-2" style="background-color: #fbe9e7;"><span class="t3"> ¿Optimum? </span></td>
+            <td class="col-xs-2" style="background-color: #fbe9e7;"><span class="t3"> Optimum? </span></td>
             <td class="col-xs-2">{% if item.is_optimum %} Yes {%else%} No {% endif %}</td>
           </tr>
           <tr>

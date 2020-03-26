@@ -172,6 +172,7 @@ class EntryForm(models.Model):
     company = models.CharField(max_length=250, null=True, blank=True)
     no_request = models.CharField(max_length=250, null=True, blank=True)
     created_by = models.ForeignKey(User, null=True, on_delete=models.SET_NULL)
+    anamnesis = models.TextField(null=True, blank=True)
 
     def __str__(self):
         return str(self.pk)

@@ -201,6 +201,7 @@ function init_step_1() {
         $('#observation').val(entryform.observation);
         $('#order_number_input').val(entryform.no_order);
         $('#request_number_input').val(entryform.no_request);
+        $('#anamnesis_input').val(entryform.anamnesis);
         $('#company_input').val(entryform.company);
         $('#center_input').val(entryform.center);
         $('#responsible_input').val(entryform.responsible);

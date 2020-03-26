@@ -127,7 +127,7 @@
       <span class="t3">Solicitante:</span>
     </div>
     <div class="col-xs-3" style="border: 1px solid #e0e0e0; height: 40px; padding:10px;">
-      <span class="t3_n">--</span>
+      <span class="t3_n">{{entryform.responsible | default:""}}</span>
     </div>
 
     <div class="col-xs-12"
@@ -169,12 +169,12 @@
 
     <div class="col-xs-4" style="border: 1px solid #e0e0e0; height: 60px; background-color: #fbe9e7; padding:10px;">
       <span class="t3">
-        OBERVACIONES / <br>
+        OBSERVACIONES / <br>
         ANAMNESIS
       </span>
     </div>
     <div class="col-xs-8" style="border: 1px solid #e0e0e0; height: 60px; padding:10px;">
-      <span class="t3_n">{{entryform.observation|default:""}}</span>
+      <span class="t3_n">{{entryform.anamnesis|default:""}}</span>
     </div>
   </div>
 
@@ -257,7 +257,7 @@
 
   <div class="row" style="margin-top:3% !important; page-break-inside: avoid !important;">
     <span class="t2" style="text-transform: uppercase; margin: 3px;"><strong>Notas Importantes</strong></span></br>
-    <span class="t3_n"> <b>&middot;</b> La cantidad de muestras es referencial según lo declarado por el cliente, se notificará oportunamente en caso de existir alguna diferencia detectada durante el proceso, a través del presente formulario.</span></br>
+    <span class="t3_n"> <b>&middot;</b> La cantidad de muestras es referencial según lo declarado por el cliente. Se notificará oportunamente en caso de existir alguna diferencia detectada durante el proceso, a través del presente formulario.</span></br>
     <span class="t3_n"> <b>&middot;</b> Para consultas sobre ingreso de muestras y envío de información, dirigirse a recepcion@vehice.com</span></br>
     <span class="t3_n"> <b>&middot;</b> Para consultas técnicas dirigirse a carlos.sandoval@vehice.com</span></br>
     <span class="t3_n"> <b>&middot;</b> Para consultas sobre facturación y otros temas relacionados, dirigirse a gabriela.vera@vehice.com</span></br>

@@ -231,6 +231,8 @@
               </div>
               <div class="col-sm-4 form-group summaryFixative">
               </div>
+              <div class="col-sm-12 form-group summaryAnamnesis">
+              </div>
             </div>
             <hr>
             <h6 class="form-section mt-2"> Detalle</h6>
@@ -496,6 +498,7 @@ function fillSummary(data){
   $('.sumarrySampling').html('<label>Fecha muestreo:</label> <div class="input-group date" id=""><input type="text" class="form-control" name="muestreo" value="'+ moment(data.entryform.sampled_at).format("DD/MM/YYYY HH:mm")+'" {% if not edit %}disabled{% endif %} /><div class="input-group-append"><span class="input-group-text"><span class="fa fa-calendar"></span></span></div></div> ' );
   $('.summaryNoOrder').html('<label>No. orden:</label> <input class="form-control" value="'+ data.entryform.no_order+'" name="no_order" {% if not edit %}disabled{% endif %} />');
   $('.summaryNoRequest').html('<label>No. solicitud:</label> <input class="form-control" value="'+ data.entryform.no_request+'" name="no_solic" {% if not edit %}disabled{% endif %} />');
+  $('.summaryAnamnesis').html('<label>Anamnesis:</label> <textarea class="form-control" row="2" name="anamnesis" {% if not edit %}disabled{% endif %} >'+ data.entryform.anamnesis+'</textarea>');
   $('.summaryFixative').html('<label>Fijador:</label>'+ selectFix);
   
   $('.summarySpecie').html('<label>Especie:</label>'+selectSpecie  );
