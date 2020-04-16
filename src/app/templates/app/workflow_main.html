@@ -246,6 +246,36 @@
     </div>
   </div>
 </div>
+
+<div class="modal fade text-left" id="service_reports_modal" role="dialog" data-backdrop="static" data-keyboard="false">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title">Informes</h3>
+      </div>
+      <div class="modal-body">
+        <div class='row'>
+          <div id='service_reports_internal' class='col-sm-12'>
+
+          </div>
+          <div id='service_reports_external' class='col-sm-12'>
+
+          </div>
+
+          <div id='service_reports_external_uploader' class='col-sm-12'>
+
+          </div>
+
+          <div class='col-sm-12 mt-3'>
+            <button class='btn btn-primary submit-file'>Cargar Informe</button>
+            <button class='btn btn-default' data-dismiss="modal">Salir</button>
+          </div>
+        </div>       
+      </div>
+    </div>
+  </div>
+</div>
+
 {% endblock content %}
 {% block scripts %}
 
@@ -299,6 +329,7 @@ var saltar=false;
 var steps = $("#workflow_form").steps({
     headerTag: "h6",
     bodyTag: "fieldset",
+    enableKeyNavigation: false,
     transitionEffect: "fade",
     titleTemplate: '<span class="step">#index#</span> #title#',
     enablePagination: {{closed}} == 0 && {{edit}} == 1,

@@ -272,10 +272,12 @@
 <script type="text/javascript">
 
 var form = $("#workflow_form");
+var flow_type = {{ form.flow.id }};
 
 $("#workflow_form").steps({
     headerTag: "h6",
     bodyTag: "fieldset",
+    enableKeyNavigation: false,
     transitionEffect: "fade",
     titleTemplate: '<span class="step">#index#</span> #title#',
     enablePagination: {{edit}} == 1,
@@ -362,14 +364,20 @@ $("#workflow_form").steps({
     },
     onFinishing: function (event, currentIndex)
     {
-      var no_reporte = $('input[name=no_reporte]').val()
-      if(no_reporte == ""){
-        toastr.error('Debe ingresar el N° de reporte', 'Datos Incompletos');
-        return false;
+      if (flow_type == 2) {
+        var form_closed = true;
+        var no_reporte = $('input[name=no_reporte]').val()
+        if(no_reporte == ""){
+          toastr.error('Debe ingresar el N° de reporte', 'Datos Incompletos');
+          return false;
+        }
+        fillInputsFromSummernotes();
+      } else {
+          var form_closed = false;
       }
-      fillInputsFromSummernotes();
+
       var url = Urls.workflow();
-      var form_closed = true;
+  
       var form_parent_id = $("#step_" + currentIndex).children("#form_parent_id").val();
       var form_data = $("#step_" + currentIndex + " :input").serialize();
 

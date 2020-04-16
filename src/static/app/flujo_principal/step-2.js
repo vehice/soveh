@@ -1,5 +1,4 @@
 var data_step_2;
-var organs_list;
 var patologos_list;
 
 function init_step_2() {
@@ -55,18 +54,19 @@ function init_step_2() {
 function loadExams(exams) {
   $("#exam_select").html("");
   $.each(exams, function (i, item) {
-    var html = '<option data-examtype="'+item.exam_type+'" value="'+item.id+'">'+item.name+'</option>';
+    var html = '<option data-service="'+item.service_id+'" value="'+item.id+'">'+item.name+'</option>';
     $('#exam_select').append($(html));
   });
 }
 
-function loadSamples(samples, organs){
+function loadSamples(samples){
+
   $("#samples_table tbody").html("");
   $.each(samples, function (i, v){
-    addSampleRow(v, organs);
+    addSampleRow(v);
     $.each(v.sample_exams_set, function(j,item){
       $('.delete-'+v.id).hide();
-      var html = addOrgansOptions(item.exam_name, item.exam_type, v.id, item.exam_id, v.id+"-"+($('#sampleNro-'+v.id)[0].rowSpan + 1));
+      var html = addOrgansOptions(item.exam_name, item.service_id, v.id, item.exam_id, v.identification.organs, v.id+"-"+($('#sampleNro-'+v.id)[0].rowSpan + 1));
       $('#sampleNro-'+v.id)[0].rowSpan = $('#sampleNro-'+v.id)[0].rowSpan + 1; 
       $('#sampleIden-'+v.id)[0].rowSpan = $('#sampleIden-'+v.id)[0].rowSpan + 1; 
       $("#sample-"+v.id).after(html);
@@ -103,9 +103,8 @@ function loadSamples(samples, organs){
 }
 
 function initialData(data) {
-  organs_list = data.organs;
   patologos_list = data.patologos;
-  loadSamples(data.samples, data.organs);
+  loadSamples(data.samples);
   loadExams(data.exams);
 }
 
@@ -133,6 +132,17 @@ function loadData(data){
   });
 }
 
+function getSampleAvailableOrgans(sid){
+  var organs;
+  $.each(data_step_2.samples, function(index, value){
+    if (sid == value.id){
+      organs = value.identification.organs;
+      return false;
+    }
+  });
+  return organs;
+}
+
 function addExamToSamples(exam){
   $('#samples_table .samples_exams').each( function(i){
     // if($(this).val() == "" || $(this).val() == null){
@@ -146,7 +156,8 @@ function addExamToSamples(exam){
       $('#sampleNro-'+sampleId)[0].rowSpan = $('#sampleNro-'+sampleId)[0].rowSpan + 1; 
       $('#sampleIden-'+sampleId)[0].rowSpan = $('#sampleIden-'+sampleId)[0].rowSpan + 1; 
       //show organs options
-      var html = addOrgansOptions(exam.text, $(exam.element).data('examtype'), sampleId, exam.id);
+      avail_organs = getSampleAvailableOrgans(sampleId);
+      var html = addOrgansOptions(exam.text, $(exam.element).data('service'), sampleId, exam.id, avail_organs);
       $("#sample-"+sampleId).after(html);
     // }
   }); 
@@ -229,15 +240,16 @@ function validate_step_2(){
     $('#exam_select').focus();
     return 0;
   }
-  var saltar = 5;
+  var services_selected = [];
   $.each($('#exam_select :selected'), function(i,v){
-    if ($(v).data('examtype') == 1){
-      saltar = 3;
-    }
+    services_selected.push($(v).data('service'));
   });
 
-  return saltar;
- 
+  if (services_selected.includes(1) || services_selected.includes(2) || services_selected.includes(3) ){
+    return 3;
+  } else {
+    return 5;
+  }
 }
 
 
@@ -265,7 +277,7 @@ function addAnalysisTemplate(data) {
   
 }
 
-function addSampleRow(sample, organs) {
+function addSampleRow(sample) {
   var sampleRowTemplate = document.getElementById("sample_row").innerHTML;
 
   var templateFn = _.template(sampleRowTemplate);
@@ -274,11 +286,11 @@ function addSampleRow(sample, organs) {
   $("#samples_table tbody").append(templateHTML)
 }
 
-function addOrgansOptions(analisis, analisis_type, sampleId, sampleIndex, optionId = null) {
+function addOrgansOptions(analisis, analisis_type, sampleId, sampleIndex, organs, optionId = null) {
   var sampleRowTemplate = document.getElementById("add_analisis").innerHTML;
 
   var templateFn = _.template(sampleRowTemplate);
-  var templateHTML = templateFn({'organs': organs_list, 'type': analisis_type, 'analisis': analisis, 'sampleId': sampleId, 'sampleIndex': sampleIndex, 'optionId': optionId});
+  var templateHTML = templateFn({'organs': organs, 'type': analisis_type, 'analisis': analisis, 'sampleId': sampleId, 'sampleIndex': sampleIndex, 'optionId': optionId});
   return templateHTML;
 }
 

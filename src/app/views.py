@@ -190,9 +190,7 @@ def make_pdf_file2(id, url, filename, userId):
 
 @login_required
 def download_report(request, id):
-    form = Form.objects.get(pk=id)
-    entryform_id = form.content_object.id
-    pdf = make_pdf_file(entryform_id, '/template-report/')
+    pdf = make_pdf_file(id, '/template-report/')
     response = HttpResponse(pdf, content_type='application/pdf')
     response['Content-Disposition'] = 'attachment; filename="informe.pdf"'
 
@@ -374,13 +372,13 @@ def template_resumen_report(request, id, userId):
                 sampleExa[sE.exam_id]={
                     'exam_id': sE.exam_id,
                     'exam_name': sE.exam.name,
-                    'exam_type': sE.exam.exam_type,
+                    'exam_type': sE.exam.service_id,
                     'sample_id': sE.sample_id,
                     'organ_id': [{
                     'name':sE.organ.name,
                     'id':sE.organ.id}]
                 }
-            if sE.exam.exam_type == 1:
+            if sE.exam.service_id == 1:
                 try:
                     organs.index(model_to_dict(sE.organ))
                 except:

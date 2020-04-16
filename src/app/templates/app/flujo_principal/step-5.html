@@ -7,7 +7,7 @@
     <h4 class="form-section">
       <i class="ft-user"></i> Análisis
     </h4>
-    <div id="analysis_group" class="list-group list-group-flush media-list">
+    <div id="analysis_group" class="list-group">
     </div>
   </div>
 </fieldset>
@@ -73,64 +73,141 @@
   </div>
 </div>
 
-<script id="analysis_element5" type="text/x-lodash-template">
-<% if (!form_closed)  { %> 
-  <% if (histologico)  { %> 
-    <div href="/workflow/<%= form_id %>" class="list-group-item list-group-item-action">
-      <div class="media-body">
-        <div class="row">
-          <div class="col-sm-4 font-medium-4 text-left"><%= exam_name %></div>
-          {% if not closed  %} 
-            <% if (form_reopened)  { %> 
-              <div class="col-sm-4 font-medium-4 text-center"><a class="btn btn-outline-secondary square" href="/workflow/<%= form_id %>/step_6"><i class="fa fa-arrow-right"></i> Ir al análisis </a></div>
-            <% } else { %>
-              <div class="col-sm-4 font-medium-4 text-center"><a class="btn btn-outline-secondary square" href="/workflow/<%= form_id %>"><i class="fa fa-arrow-right"></i> Ir al análisis </a></div>
-              <% } %>
-          {% else %}
-            <div class="col-sm-4 font-medium-4 text-center"><button class="btn btn-outline-secondary square" type="button" disabled><i class="fa fa-times"></i> Caso Incompleto </button></div>
-          {% endif %}
-            <div class="col-sm-4 font-medium-4 text-right">Tinción: <%= exam_name %></div>
-        </div>
-        <p class="list-group-item-text"><%= no_slice %> cortes</p>
-        <div class="progress" style="height: 18px;">
-          <div class="progress-bar" role="progressbar" style="width:<%= percentage_step %>%" aria-describedby="example-caption-2"> <%= current_step %> de <%= total_step  %> pasos</div>
-        </div>
+<div class="modal fade text-left" id="service_comments_modal" role="dialog" data-backdrop="static" data-keyboard="false">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title">Comentarios</h3>
+      </div>
+      <div class="modal-body">
+        <div class='row'>
+          <div id='service_comments' class='col-sm-12'>
+
+          </div>
+
+          <div class='col-sm-12'>
+            <button class='btn btn-primary'>Agregar Comentario</button>
+            <button class='btn btn-default' data-dismiss="modal">Salir</button>
+          </div>
+        </div>       
       </div>
     </div>
-  <% } else { %>
-    <div href="/workflow/<%= form_id %>/step_5" class="list-group-item list-group-item-action">
+  </div>
+</div>
+
+<script id="analysis_element5" type="text/x-lodash-template">
+<% if (!form_closed)  { %> 
+  <% if ( service == 1 )  { %> 
+    <div href="/workflow/<%= form_id %>" class="list-group-item bg-teal bg-lighten-4 mb-2">
+      <div class="media-body">
+        <div class="row">
+          <div class="col-sm-4 font-medium-4 text-left"><%= exam_name %> (<%= no_slice %> cortes)</div> 
+            <% if (form_reopened)  { %> 
+              <div class="col-sm-4 font-medium-4 text-center"><a class="btn btn-secondary {% if closed %} disabled {% endif %}" href="/workflow/<%= form_id %>/step_6"><i class="fa fa-arrow-right"></i> Ir al análisis </a></div>
+              
+            <% } else { %>
+              <div class="col-sm-4 font-medium-4 text-center"><a class="btn btn-secondary {% if closed %} disabled {% endif %}" href="/workflow/<%= form_id %>"><i class="fa fa-arrow-right"></i> Ir al análisis </a></div>
+            <% } %>
+          
+            <div class="col-sm-4 font-medium-4 text-right">Tinción: <%= exam_stain %></div>
+        </div>
+        <p class="list-group-item-text"></p>
+        <div class='col-sm-8 offset-md-2'>
+          <div class="progress" style="height: 22px;"> 
+            <div class="progress-bar progress-bar-striped bg-blue-grey" role="progressbar" style="width:<%= percentage_step %>%" aria-describedby="example-caption-2"> <b><%= current_step %> de <%= total_step  %> pasos</b></div>
+          </div>
+        </div>
+        <p class="list-group-item-text">Servicio <%= service_name %> - <b>En curso</b></p>
+      </div>
+    </div>
+  <% } else if (service == 2) { %>
+    <div class="list-group-item bg-teal bg-lighten-4 mb-2">
       <div class="media-body">
         <div class="row">
           <div class="col-sm-4 font-medium-4 text-left"><%= exam_name %></div>
-          {% if not closed  %} 
-            <% if (form_reopened)  { %> 
-              <div class="col-sm-4 font-medium-4 text-center"><a class="btn btn-outline-secondary square" href="/workflow/<%= form_id %>/step_6"><i class="fa fa-arrow-right"></i> Ir al análisis </a></div>
-            <% } else { %>
-              <div class="col-sm-4 font-medium-4 text-center"><a class="btn btn-outline-secondary square" href="/workflow/<%= form_id %>/step_5"><i class="fa fa-arrow-right"></i> Ir al análisis </a></div>
+          <div class="col-sm-4 font-medium-4 text-center">
+            <div class="btn-group" role="group" aria-label="Opciones">
+              <% if (form_reopened)  { %> 
+                <a class="btn btn-secondary {% if closed %} disabled {% endif %}" href="/workflow/<%= form_id %>/step_6"><i class="fa fa-arrow-right"></i> Ir al análisis </a>
+                
+              <% } else { %>
+                <a class="btn btn-secondary {% if closed %} disabled {% endif %}" href="/workflow/<%= form_id %>"><i class="fa fa-arrow-right"></i> Ir al análisis </a>
               <% } %>
-          {% else %}
-            <div class="col-sm-4 font-medium-4 text-center"><button class="btn btn-outline-secondary square" type="button" disabled><i class="fa fa-times"></i> Caso Incompleto </button></div>
-          {% endif %}
-          <!-- <div class="col-sm-4 font-medium-4 text-right">Tinción: <%= exam_name %></div> -->
+              <button type="button" class="btn btn-info" onclick='showServiceCommentsModal(<%= id %>)'>Comentarios</button>
+              <button type="button" class="btn btn-success" onclick='showServiceReportsModal(<%= id %>, <%= service %>)'>Informes</button>
+              <button type="button" class="btn btn-danger {% if closed %} disabled {% endif %}">Cerrar Servicio</button>
+            </div>
+          </div>
+          <div class="col-sm-4 font-medium-4 text-right">Tinción: <%= exam_stain %></div>
+
+          <p class="list-group-item-text"></p>
+          <div class='col-sm-8 offset-md-2 mt-1'>
+            <div class="progress" style="height: 22px;"> 
+              <div class="progress-bar progress-bar-striped bg-blue-grey" role="progressbar" style="width:<%= percentage_step %>%" aria-describedby="example-caption-2"> <b><%= current_step %> de <%= total_step  %> pasos</b></div>
+            </div>
+          </div>
         </div>
-        <br/>
-        <div class="progress" style="height: 18px;">
-          <div class="progress-bar" role="progressbar" style="width:<%= percentage_step %>%" aria-describedby="example-caption-2"> <%= current_step %> de 1 pasos</div>
+        <p class="list-group-item-text">Servicio <%= service_name %> - <b>En curso</b></p>
+      </div>
+    </div>
+    
+  <% } else { %>
+    <div class="list-group-item bg-teal bg-lighten-4 mb-2">
+      <div class="media-body">
+        <div class="row">
+          <div class="col-sm-4 font-medium-4 text-left"><%= exam_name %></div>
+          <div class="col-sm-4 font-medium-4 text-center">
+            <div class="btn-group" role="group" aria-label="Opciones">
+              <button type="button" class="btn btn-info" onclick='showServiceCommentsModal(<%= id %>)'>Comentarios</button>
+              <button type="button" class="btn btn-success" onclick='showServiceReportsModal(<%= id %>, <%= service %>)'>Informes</button>
+              <button type="button" class="btn btn-danger {% if closed %} disabled {% endif %}">Cerrar Servicio</button>
+            </div>
+          </div>
         </div>
+        <p class="list-group-item-text">Servicio <%= service_name %> - <b>En curso</b></p>
       </div>
     </div>
   <% } %>
 <% } else { %>
-  <div href="/workflow/<%= form_id %>" class="list-group-item list-group-item-action">
-    <div class="media-body">
-      <div class="row">
-        <div class="col-sm-4 font-medium-4 text-left"><%= exam_name %></div>
-        <div class="col-sm-4 font-medium-4 text-center"><a class="btn btn-outline-secondary square" target="_blank" href="/download-report/<%= form_id %>"><i class="fa fa-download"></i> Descargar Informe</a>{% if not closed %}<a class="btn btn-outline-primary square" href="/workflow/<%= form_id %>/step_6"><i class="fa fa-open"></i> Reabrir</a>{% endif %}</div>
-        <div class="col-sm-4 font-medium-4 text-right">Tinción: <%= exam_name %></div>
+  <% if ( _.includes([1,2], service))  { %> 
+    <div href="/workflow/<%= form_id %>" class="list-group-item bg-teal bg-lighten-4 mb-2">
+      <div class="media-body">
+        <div class="row">
+          <div class="col-sm-4 font-medium-4 text-left"><%= exam_name %> (<%= no_slice %> cortes)</div>
+          <div class="col-sm-4 font-medium-4 text-center">
+            <div class="btn-group" role="group" aria-label="Opciones">
+              <button type="button" class="btn btn-info" onclick='showServiceCommentsModal(<%= id %>)'>Comentarios</button>
+              <button type="button" class="btn btn-success" onclick='showServiceReportsModal(<%= id %>, <%= service %>)'>Informes</button>
+              <a class="btn btn-danger {% if closed %} disabled {% endif %}" href="/workflow/<%= form_id %>/step_6">Reabrir Servicio</a>
+            </div>
+                      {% comment %} <a class="btn btn-success" target="_blank" href="/download-report/<%= form_id %>"><i class="fa fa-download"></i> Descargar Informe</a> {% endcomment %}
+          </div>
+          <div class="col-sm-4 font-medium-4 text-right">Tinción: <%= exam_stain %></div>
+          
+        </div>
+        <p class="list-group-item-text">Servicio <%= service_name %> - <b>Cerrado</b></p>
       </div>
-      <p class="list-group-item-text">Análisis Finalizado</p>
     </div>
-  </div>
+  <% } else { %>
+    <div href="/workflow/<%= form_id %>" class="list-group-item bg-teal bg-lighten-4 mb-2">
+      <div class="media-body">
+        <div class="row">
+          <div class="col-sm-4 font-medium-4 text-left"><%= exam_name %></div>
+          <div class="col-sm-4 font-medium-4 text-center">
+            <div class="btn-group" role="group" aria-label="Opciones">
+              <button type="button" class="btn btn-info" onclick='showServiceCommentsModal(<%= id %>)'>Comentarios</button>
+              <button type="button" class="btn btn-success" onclick='showServiceReportsModal(<%= id %>, <%= service %>)'>Informes</button>
+              <a class="btn btn-danger {% if closed %} disabled {% endif %}" href="">Reabrir Servicio</a>
+            </div>
+                      {% comment %} <a class="btn btn-success" target="_blank" href="/download-report/<%= form_id %>"><i class="fa fa-download"></i> Descargar Informe</a> {% endcomment %}
+          </div>
+          <div class="col-sm-4 font-medium-4 text-right"></div>
+          
+        </div>
+        <p class="list-group-item-text">Servicio <%= service_name %> - <b>Cerrado</b></p>
+      </div>
+    </div>
+  <% } %>
 <% } %>
 </script>
 

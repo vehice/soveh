@@ -108,17 +108,14 @@ class ENTRYFORM(View):
                         sampleExa[sE.exam_id]={
                             'exam_id': sE.exam_id,
                             'exam_name': sE.exam.name,
-                            'exam_type': sE.exam.exam_type,
+                            'exam_type': sE.exam.service_id,
                             'sample_id': sE.sample_id,
                             'organ_id': [{
                             'name':sE.organ.name,
                             'id':sE.organ.id}]
                         }
-                    if sE.exam.exam_type == 1:
-                        try:
-                            organs.index(model_to_dict(sE.organ))
-                        except:
-                            organs.append(model_to_dict(sE.organ))
+                    if sE.exam.service_id in [1,2,3]:
+                        organs.append(model_to_dict(sE.organ))
                 cassettes = Cassette.objects.filter(sample=s)
                 s_dict['organs_set'] = organs
                 s_dict['sample_exams_set'] = sampleExa
@@ -134,6 +131,7 @@ class ENTRYFORM(View):
                     })
                 s_dict['cassettes_set'] = cassettes_set
                 s_dict['identification'] = model_to_dict(s.identification, exclude=["organs",])
+                s_dict['identification']['organs'] = list(s.identification.organs.all().values())
                 samples_as_dict.append(s_dict)
 
             # entryform["identifications"] = list(
@@ -226,7 +224,7 @@ class CASSETTE(View):
 
             sample = model_to_dict(cassette.sample, exclude=["exams", "organs"])
             sample['identification'] = model_to_dict(Identification.objects.get(pk=sample['identification']), exclude=["organs"])
-            sample_exams = [ model_to_dict(sampleexam.exam) for sampleexam in Sample.objects.get(pk=sample['id']).sampleexams_set.all() if sampleexam.exam.exam_type == 1 ]
+            sample_exams = [ model_to_dict(sampleexam.exam) for sampleexam in Sample.objects.get(pk=sample['id']).sampleexams_set.all() if sampleexam.exam.service_id == 1 ]
             sample['exams_set'] = sample_exams
             
             cassette_as_dict = model_to_dict(cassette, exclude=['organs'])
@@ -254,7 +252,7 @@ class CASSETTE(View):
             exams_set = []
             for sampleExam in s.sampleexams_set.all():
                 organs_set.append(model_to_dict(sampleExam.organ))
-                if sampleExam.exam.exam_type == 1:
+                if sampleExam.exam.service_id in [1,2,3]:
                     exams_set.append(model_to_dict(sampleExam.exam))
             cassettes_set = Cassette.objects.filter(sample=s).values()
             sampleexams = s.sampleexams_set.all()
@@ -268,7 +266,7 @@ class CASSETTE(View):
                     sampleExa[sE.exam_id]={
                         'exam_id': sE.exam_id,
                         'exam_name': sE.exam.name,
-                        'exam_type': sE.exam.exam_type,
+                        'exam_type': sE.exam.service_id,
                         'sample_id': sE.sample_id,
                         'organ_id': [{
                             'name':sE.organ.name,
@@ -346,7 +344,15 @@ class ANALYSIS(View):
             current_step_tag = form.state.step.tag
             current_step = form.state.step.order
             total_step = form.flow.step_set.count()
-            percentage_step = (int(current_step) / int(total_step)) * 100
+
+            if exam.service_id == 2:
+                total_step = 2
+                percentage_step = (int(current_step) / int(total_step)) * 100
+            elif exam.service_id in [3,4,5]:
+                total_step = 0
+                percentage_step = 0
+            else:
+                percentage_step = (int(current_step) / int(total_step)) * 100
 
             slices_qs = analysis.slice_set.all()
             slices = []
@@ -355,9 +361,10 @@ class ANALYSIS(View):
 
             analyses.append({
                 'form_id': form_id,
+                'id': analysis.id,
                 'exam_name': exam.name,
                 'exam_stain': exam.stain,
-                'exam_type': exam.exam_type,
+                'exam_type': exam.service_id,
                 'slices': slices,
                 'current_step_tag': current_step_tag,
                 'current_step': current_step,
@@ -365,6 +372,8 @@ class ANALYSIS(View):
                 'percentage_step': percentage_step,
                 'form_closed': form.form_closed,
                 'form_reopened': form.form_reopened,
+                'service': exam.service_id,
+                'service_name': exam.service.name
                 # 'no_caso': analisys.entry_form.no_caso
             })
         
@@ -387,7 +396,7 @@ class ANALYSIS(View):
             sampleexams = s.sampleexams_set.all()
             sampleExa = {}
             for sE in sampleexams:
-                if sE.exam.exam_type == 1:
+                if sE.exam.service_id == 1:
                     try:
                         organs.index(model_to_dict(sE.organ))
                     except:
@@ -405,7 +414,7 @@ class ANALYSIS(View):
                     sampleExa[sE.exam_id]={
                         'exam_id': sE.exam_id,
                         'exam_name': sE.exam.name,
-                        'exam_type': sE.exam.exam_type,
+                        'exam_type': sE.exam.service_id,
                         'sample_id': sE.sample_id,
                         'organ_id': [{
                             'name':sE.organ.name,
@@ -498,7 +507,7 @@ class SLICE(View):
             sampleexams = s.sampleexams_set.all()
             sampleExa = {}
             for sE in sampleexams:
-                if sE.exam.exam_type == 1:
+                if sE.exam.service_id == 1:
                     try:
                         organs.index(model_to_dict(sE.organ))
                     except:
@@ -516,7 +525,7 @@ class SLICE(View):
                     sampleExa[sE.exam_id]={
                         'exam_id': sE.exam_id,
                         'exam_name': sE.exam.name,
-                        'exam_type': sE.exam.exam_type,
+                        'exam_type': sE.exam.service_id,
                         'sample_id': sE.sample_id,
                         'organ_id': [{
                             'name':sE.organ.name,
@@ -581,8 +590,13 @@ class WORKFLOW(View):
             }
         elif (form.content_type.name == 'analysis form'):
             reopen = False
+            analisis = AnalysisForm.objects.get(id=int(object_form_id))
             if step_tag == 'step_6':
-                step_tag = 'step_5'
+                if analisis.exam.service_id == 1:
+                    step_tag = 'step_5'
+                elif analisis.exam.service_id == 2:
+                    step_tag = 'step_2'
+                    
                 reopen = True
                
                 
@@ -600,7 +614,7 @@ class WORKFLOW(View):
                 form.save()
                 
             route = 'app/workflow_analysis.html'
-            analisis = AnalysisForm.objects.get(id=int(object_form_id))
+            
             reports = Report.objects.filter(analysis_id=int(object_form_id))
             from collections import defaultdict
 
@@ -666,7 +680,7 @@ class WORKFLOW(View):
                 'analysis_id': object_form_id,
                 'set_step_tag': step_tag,
                 'exam_name': form.content_object.exam.name,
-                'histologico': form.content_object.exam.exam_type,
+                'histologico': form.content_object.exam.service_id,
                 'form_parent_id': form.parent.id,
                 'entryform_id': analisis.entryform_id,
                 'report': reports,
@@ -741,7 +755,12 @@ class WORKFLOW(View):
         else:
             process_answer = call_process_method(form.content_type.model,
                                                      request)
-            form.form_closed = True
+            
+            if form.content_object.exam.service_id == 2:
+                form.form_closed = False
+            else:
+                form.form_closed = True
+            
             form.form_reopened = False
             form.save()
 
@@ -851,13 +870,13 @@ class REPORT(View):
                         sampleExa[sE.exam_id]={
                             'exam_id': sE.exam_id,
                             'exam_name': sE.exam.name,
-                            'exam_type': sE.exam.exam_type,
+                            'exam_type': sE.exam.service_id,
                             'sample_id': sE.sample_id,
                             'organ_id': [{
                             'name':sE.organ.name,
                             'id':sE.organ.id}]
                         }
-                    if sE.exam.exam_type == 1:
+                    if sE.exam.service_id == 1:
                         try:
                             organs.index(model_to_dict(sE.organ))
                         except:
@@ -986,6 +1005,41 @@ class RESPONSIBLE(View):
 
         return JsonResponse({'ok': True})
 
+class SERVICE_COMMENTS(View):
+    http_method_names = ['get', 'post', 'delete']
+    
+    def get(self, request):
+        responsibles = Responsible.objects.filter(active=True)
+        data = []
+        for r in responsibles:
+            data.append(model_to_dict(r))
+
+        return JsonResponse({'ok': True, 'responsibles': data})
+
+    def post(self, request):
+        try:
+            var_post = request.POST.copy()
+            responsible = Responsible()
+            id = var_post.get('id', None)
+            if id:
+                responsible.id = id
+            responsible.name = var_post.get('name', None)
+            responsible.email = var_post.get('email', None)
+            responsible.phone = var_post.get('phone', None)
+            responsible.job = var_post.get('job', None)
+            responsible.active = var_post.get('active', True)
+            responsible.save()
+            return JsonResponse({'ok': True})
+        except Exception as e:
+             return JsonResponse({'ok': False})
+    
+    def delete(self, request, id):
+        responsible = Responsible.objects.get(pk=id)
+        responsible.active = False
+        responsible.save()
+
+        return JsonResponse({'ok': True})
+
 class EMAILTEMPLATE(View):
     def get(self, request, id=None):
         if id:
@@ -1060,7 +1114,7 @@ def organs_by_slice(request, slice_id=None):
                 sampleExa[sE.exam_id]={
                     'exam_id': sE.exam_id,
                     'exam_name': sE.exam.name,
-                    'exam_type': sE.exam.exam_type,
+                    'exam_type': sE.exam.service_id,
                     'sample_id': sE.sample_id,
                     'organ_id': [{
                         'name':sE.organ.name,
@@ -1413,9 +1467,13 @@ def step_1_entryform(request):
                         is_optimum = True if "si" in values[7] else False,
                         observation = values[8]
                     )
-
-                    for org in values[9]:
-                        identificacion.organs.add(org)
+                    organs_type2_count = Organ.objects.filter(id__in=values[9], organ_type=2).count()
+                    if organs_type2_count > 0:
+                        for org in Organ.objects.all():
+                            identificacion.organs.add(org)
+                    else:
+                        for org in values[9]:
+                            identificacion.organs.add(org)
 
                     sample_index = 1
                     for i in range(int(values[3])):
@@ -1458,8 +1516,13 @@ def step_1_entryform(request):
                         observation = values[8]
                     )
 
-                    for org in values[9]:
-                        identificacion.organs.add(org)
+                    organs_type2_count = Organ.objects.filter(id__in=values[9], organ_type=2).count()
+                    if organs_type2_count > 0:
+                        for org in Organ.objects.all():
+                            identificacion.organs.add(org)
+                    else:
+                        for org in values[9]:
+                            identificacion.organs.add(org)
 
                     sample_index = 1
                     for i in range(int(values[3])):
@@ -1499,8 +1562,13 @@ def step_1_entryform(request):
                                 observation = values[8]
                             )
                             
-                            for org in values[9]:
-                                identificacion.organs.add(org)
+                            organs_type2_count = Organ.objects.filter(id__in=values[9], organ_type=2).count()
+                            if organs_type2_count > 0:
+                                for org in Organ.objects.all():
+                                    identificacion.organs.add(org)
+                            else:
+                                for org in values[9]:
+                                    identificacion.organs.add(org)
 
                             sample_index = 1
                             for k in range(int(new_no_fish)):
@@ -1567,7 +1635,7 @@ def step_1_entryform(request):
         sample_index = 1
 
         for values in zip_identification:
-            print (values)
+            # print (values)
             identificacion = Identification.objects.create(
                 entryform_id=entryform.id,
                 cage=values[0],
@@ -1580,9 +1648,14 @@ def step_1_entryform(request):
                 is_optimum = True if "si" in values[7] else False,
                 observation = values[8]
             )
-            
-            for org in values[9]:
-                identificacion.organs.add(org)
+
+            organs_type2_count = Organ.objects.filter(id__in=values[9], organ_type=2).count()
+            if organs_type2_count > 0:
+                for org in Organ.objects.all():
+                    identificacion.organs.add(org)
+            else:
+                for org in values[9]:
+                    identificacion.organs.add(org)
 
             for i in range(int(values[3])):
                 sample = Sample.objects.create(
@@ -1633,14 +1706,20 @@ def step_2_entryform(request):
 
     analyses_qs.delete()
 
-    flow = Flow.objects.get(pk=2)
 
     for exam in exams_to_do:
+        ex = Exam.objects.get(pk=exam)
         analysis_form = AnalysisForm.objects.create(
             entryform_id=entryform.id,
-            exam_id=exam,
+            exam=ex,
             # patologo_id= int(var_post.get("sample[patologos]["+exam+"]"))
         )
+
+        if ex.service_id in [1,3,4,5]:
+            flow = Flow.objects.get(pk=2)
+        else:
+            flow = Flow.objects.get(pk=3)
+
 
         Form.objects.create(
             content_object=analysis_form,
@@ -1730,7 +1809,7 @@ def step_3_entryform(request):
         cassette.save()
         count += 1
 
-        exams = [ sampleexam.exam for sampleexam in sample.sampleexams_set.all() if sampleexam.exam.exam_type == 1]
+        exams = [ sampleexam.exam for sampleexam in sample.sampleexams_set.all() if sampleexam.exam.service_id in [1,2,3]]
         exams_uniques = []
         _exams = []
 
@@ -1869,7 +1948,7 @@ def step_new_analysis(request):
                             
         for cassette in Cassette.objects.filter(sample=sample):
             cassette.slice_set.all().delete()
-            exams = [ sampleexam.exam for sampleexam in sample.sampleexams_set.all() if sampleexam.exam.exam_type == 1]
+            exams = [ sampleexam.exam for sampleexam in sample.sampleexams_set.all() if sampleexam.exam.service_id == 1]
             exams_uniques = []
             _exams = []
 

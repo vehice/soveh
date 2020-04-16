@@ -13,20 +13,17 @@ class Specie(models.Model):
     def __str__(self):
         return self.name
 
-
 class WaterSource(models.Model):
     name = models.CharField(max_length=250, null=True, blank=True)
 
     def __str__(self):
         return self.name
 
-
 class LarvalStage(models.Model):
     name = models.CharField(max_length=250, null=True, blank=True)
 
     def __str__(self):
         return self.name
-
 
 class Fixative(models.Model):
     name = models.CharField(max_length=250, null=True, blank=True, verbose_name="Nombre")
@@ -38,15 +35,21 @@ class Fixative(models.Model):
         verbose_name = "Fijador"
         verbose_name_plural = "Fijadores"
 
-ANALISIS_TYPE =(
-    (1, "Histológicos"),
-    (2, "No histológicos"),
-    (3, "Planimetrías")
-)
+class Service(models.Model):
+    name = models.CharField(max_length=250, null=True, blank=True, verbose_name="Nombre")
+    description = models.TextField(null=True, blank=True)
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        verbose_name = "Servicio"
+        verbose_name_plural = "Servicios"
+
 class Exam(models.Model):
     name = models.CharField(max_length=250, null=True, blank=True, verbose_name="Nombre")
     stain = models.CharField(max_length=250, null=True, blank=True, verbose_name="Tinción")
-    exam_type = models.IntegerField(choices=ANALISIS_TYPE, default=1)
+    service = models.ForeignKey(Service, null=True, default=1, on_delete=models.SET_NULL, verbose_name="Tipo de Servicio")
 
     def __str__(self):
         return self.name
@@ -55,8 +58,15 @@ class Exam(models.Model):
         verbose_name = "Exámen"
         verbose_name_plural = "Exámenes"
 
+
+ORGAN_TYPE = (
+    (1, "Órgano por sí solo"),
+    (2, "Conjunto de órganos")
+)
+
 class Organ(models.Model):
     name = models.CharField(max_length=250, null=True, blank=True, verbose_name="Nombre")
+    organ_type = models.IntegerField(default=1, choices=ORGAN_TYPE, verbose_name="Tipo")
 
     def __str__(self):
         return self.name
@@ -64,7 +74,6 @@ class Organ(models.Model):
     class Meta:
         verbose_name = "Órgano"
         verbose_name_plural = "Órganos"
-
 
 class OrganLocation(models.Model):
     name = models.CharField(max_length=250, null=True, blank=True, verbose_name="Nombre de localización")
@@ -88,7 +97,6 @@ class Pathology(models.Model):
         verbose_name = "Hallazgo"
         verbose_name_plural = "Hallazgos"
 
-
 class Diagnostic(models.Model):
     name = models.CharField(max_length=250, null=True, blank=True, verbose_name="Nombre del diagnóstico")
     organs = models.ManyToManyField(Organ, verbose_name="Órganos")
@@ -107,24 +115,12 @@ class DiagnosticDistribution(models.Model):
     def __str__(self):
         return self.name
 
-
 class DiagnosticIntensity(models.Model):
     name = models.CharField(max_length=250, null=True, blank=True)
     organs = models.ManyToManyField(Organ)
 
     def __str__(self):
         return self.name
-
-
-# class QuestionReceptionCondition(models.Model):
-#     STATUS = (('a', 'Active'), ('i', 'Inactive'))
-
-#     text = models.CharField(max_length=250, null=True, blank=True)
-#     status = models.CharField(max_length=1, choices=STATUS)
-
-#     def __str__(self):
-#         return self.text
-
 
 class Customer(models.Model):
     TYPE_CUSTOMER = (('l', 'Laboratorio'), ('e', 'Empresa'))
@@ -139,7 +135,6 @@ class Customer(models.Model):
 
     class Meta:
         verbose_name = "Cliente"
-
 
 class EntryForm(models.Model):
     specie = models.ForeignKey(Specie, null=True, on_delete=models.SET_NULL)
@@ -208,29 +203,13 @@ class Identification(models.Model):
     def __str__(self):
         return str(self.pk)
 
-# class AnswerReceptionCondition(models.Model):
-#     ANSWER = (('si', 'Si'), ('no', 'No'), ('n/a', 'N/A'))
+class ServiceComment(models.Model):
+    text = models.TextField(blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
 
-#     question = models.ForeignKey(
-#         QuestionReceptionCondition,
-#         null=True,
-#         on_delete=models.SET_NULL,
-#     )
-#     # entryform = models.ForeignKey(
-#     #     EntryForm,
-#     #     null=True,
-#     #     on_delete=models.SET_NULL,
-#     # )
-#     identification = models.ForeignKey(
-#         Identification,
-#         null=True,
-#         on_delete=models.SET_NULL,
-#     )
-#     answer = models.CharField(max_length=3, choices=ANSWER)
-
-#     def __str__(self):
-#         return str(self.pk)
-
+class ExternalReport(models.Model):
+    file = models.FileField(upload_to='vehice_external_reports')
+    created_at = models.DateTimeField(auto_now_add=True)
 
 class AnalysisForm(models.Model):
     entryform = models.ForeignKey(
@@ -242,6 +221,8 @@ class AnalysisForm(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     closed_at = models.DateTimeField(null=True)
     patologo = models.ForeignKey(User, null=True, on_delete=models.SET_NULL)
+    service_comments = models.ManyToManyField(ServiceComment)
+    external_reports = models.ManyToManyField(ExternalReport)
 
 class Sample(models.Model):
     entryform = models.ForeignKey(
@@ -272,7 +253,6 @@ class Cassette(models.Model):
     # identifications = models.ManyToManyField(Identification)
     sample = models.ForeignKey(Sample, null=True, on_delete=models.SET_NULL)
     organs = models.ManyToManyField(Organ)
-
 
 class Slice(models.Model):
     slice_name = models.CharField(max_length=250, null=True, blank=True)

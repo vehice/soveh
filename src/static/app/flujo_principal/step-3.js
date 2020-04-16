@@ -10,6 +10,7 @@ function init_step_3() {
     async: false,
   })
   .done(function (data) {
+    console.log(data)
     data_step_3 = data
     $('.showShareBtn').removeClass("hidden");
     $('.showLogBtn').removeClass("hidden");
@@ -225,6 +226,7 @@ function loadCassetteData(data) {
     var exams = 0;
     $.each(data.samples, function (i, sample) {
       if(sample.organs_set.length > 0){
+        // if (sample.)
         var row = {
           'sample_id' : sample.id,
           'sample_index' : sample.index,

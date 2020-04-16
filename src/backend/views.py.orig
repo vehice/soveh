@@ -103,13 +103,13 @@ class ENTRYFORM(View):
                         sampleExa[sE.exam_id]={
                             'exam_id': sE.exam_id,
                             'exam_name': sE.exam.name,
-                            'exam_type': sE.exam.exam_type,
+                            'exam_type': sE.exam.service_id,
                             'sample_id': sE.sample_id,
                             'organ_id': [{
                             'name':sE.organ.name,
                             'id':sE.organ.id}]
                         }
-                    if sE.exam.exam_type == 1:
+                    if sE.exam.service_id == 1:
                         try:
                             organs.index(model_to_dict(sE.organ))
                         except:
@@ -220,7 +220,7 @@ class CASSETTE(View):
 
             sample = model_to_dict(cassette.sample, exclude=["exams", "organs"])
             sample['identification'] = model_to_dict(Identification.objects.get(pk=sample['identification']), exclude=["organs"])
-            sample_exams = [ model_to_dict(sampleexam.exam) for sampleexam in Sample.objects.get(pk=sample['id']).sampleexams_set.all() if sampleexam.exam.exam_type == 1 ]
+            sample_exams = [ model_to_dict(sampleexam.exam) for sampleexam in Sample.objects.get(pk=sample['id']).sampleexams_set.all() if sampleexam.exam.service_id == 1 ]
             sample['exams_set'] = sample_exams
             
             cassette_as_dict = model_to_dict(cassette, exclude=['organs'])
@@ -248,7 +248,7 @@ class CASSETTE(View):
             exams_set = []
             for sampleExam in s.sampleexams_set.all():
                 organs_set.append(model_to_dict(sampleExam.organ))
-                if sampleExam.exam.exam_type == 1:
+                if sampleExam.exam.service_id == 1:
                     exams_set.append(model_to_dict(sampleExam.exam))
             cassettes_set = Cassette.objects.filter(sample=s).values()
             sampleexams = s.sampleexams_set.all()
@@ -262,7 +262,7 @@ class CASSETTE(View):
                     sampleExa[sE.exam_id]={
                         'exam_id': sE.exam_id,
                         'exam_name': sE.exam.name,
-                        'exam_type': sE.exam.exam_type,
+                        'exam_type': sE.exam.service_id,
                         'sample_id': sE.sample_id,
                         'organ_id': [{
                             'name':sE.organ.name,
@@ -346,7 +346,7 @@ class ANALYSIS(View):
                 'form_id': form_id,
                 'exam_name': exam.name,
                 'exam_stain': exam.stain,
-                'exam_type': exam.exam_type,
+                'exam_type': exam.service_id,
                 'slices': slices,
                 'current_step_tag': current_step_tag,
                 'current_step': current_step,
@@ -376,7 +376,7 @@ class ANALYSIS(View):
             sampleexams = s.sampleexams_set.all()
             sampleExa = {}
             for sE in sampleexams:
-                if sE.exam.exam_type == 1:
+                if sE.exam.service_id == 1:
                     try:
                         organs.index(model_to_dict(sE.organ))
                     except:
@@ -394,7 +394,7 @@ class ANALYSIS(View):
                     sampleExa[sE.exam_id]={
                         'exam_id': sE.exam_id,
                         'exam_name': sE.exam.name,
-                        'exam_type': sE.exam.exam_type,
+                        'exam_type': sE.exam.service_id,
                         'sample_id': sE.sample_id,
                         'organ_id': [{
                             'name':sE.organ.name,
@@ -485,7 +485,7 @@ class SLICE(View):
             sampleexams = s.sampleexams_set.all()
             sampleExa = {}
             for sE in sampleexams:
-                if sE.exam.exam_type == 1:
+                if sE.exam.service_id == 1:
                     try:
                         organs.index(model_to_dict(sE.organ))
                     except:
@@ -503,7 +503,7 @@ class SLICE(View):
                     sampleExa[sE.exam_id]={
                         'exam_id': sE.exam_id,
                         'exam_name': sE.exam.name,
-                        'exam_type': sE.exam.exam_type,
+                        'exam_type': sE.exam.service_id,
                         'sample_id': sE.sample_id,
                         'organ_id': [{
                             'name':sE.organ.name,
@@ -864,7 +864,7 @@ def organs_by_slice(request, slice_id=None):
                 sampleExa[sE.exam_id]={
                     'exam_id': sE.exam_id,
                     'exam_name': sE.exam.name,
-                    'exam_type': sE.exam.exam_type,
+                    'exam_type': sE.exam.service_id,
                     'sample_id': sE.sample_id,
                     'organ_id': [{
                         'name':sE.organ.name,
@@ -1578,7 +1578,7 @@ def step_3_entryform(request):
         cassette.save()
         count += 1
 
-        exams = [ sampleexam.exam for sampleexam in sample.sampleexams_set.all() if sampleexam.exam.exam_type == 1]
+        exams = [ sampleexam.exam for sampleexam in sample.sampleexams_set.all() if sampleexam.exam.service_id == 1]
         exams_uniques = []
         _exams = []
 
@@ -1706,7 +1706,7 @@ def step_new_analysis(request):
                             
         for cassette in Cassette.objects.filter(sample=sample):
             cassette.slice_set.all().delete()
-            exams = [ sampleexam.exam for sampleexam in sample.sampleexams_set.all() if sampleexam.exam.exam_type == 1]
+            exams = [ sampleexam.exam for sampleexam in sample.sampleexams_set.all() if sampleexam.exam.service_id == 1]
             exams_uniques = []
             _exams = []
 

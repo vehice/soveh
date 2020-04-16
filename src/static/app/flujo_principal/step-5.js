@@ -65,17 +65,20 @@ function populateAnalysisData(data) {
     var row = {};
 
     row.form_id = item.form_id;
+    row.id = item.id;
     row.exam_name = item.exam_name;
     row.exam_stain = item.exam_stain;
     row.no_slice = item.slices.length;
-    row.current_step = item.exam_type == 1 ? item.current_step : Math.floor(item.current_step/5);
+    row.current_step = item.current_step;
     row.total_step = item.total_step;
     row.percentage_step = item.percentage_step;
     row.current_step_tag = item.current_step_tag;
     row.form_closed = item.form_closed;
     row.form_reopened = item.form_reopened;
-    row.histologico = item.exam_type == 1;
-    saltar=saltar && item.exam_type == 2;
+    // row.histologico = item.exam_type == 1;
+    // saltar=saltar && item.exam_type == 2;
+    row.service = item.service
+    row.service_name = item.service_name
     addAnalysisElement(row)
   });
 }
@@ -107,7 +110,7 @@ function fillNewAnalysis2(data) {
 function loadNewExams5(exams) {
   $("#exam_new_select5").html("");
   $.each(exams, function (i, item) {
-    var html = '<option data-examtype="'+item.exam_type+'" value="'+item.id+'">'+item.name+'</option>';
+    var html = '<option data-service="'+item.exam_type+'" value="'+item.id+'">'+item.name+'</option>';
     $('#exam_new_select5').append($(html));
   });
 }
@@ -115,7 +118,7 @@ function loadNewExams5(exams) {
 function loadNewExams(exams) {
   $("#exam_new_select5").html("");
   $.each(exams, function (i, item) {
-    var html = '<option data-examtype="'+item.exam_type+'" value="'+item.id+'">'+item.name+'</option>';
+    var html = '<option data-service="'+item.exam_type+'" value="'+item.id+'">'+item.name+'</option>';
     $('#exam_new_select5').append($(html));
   });
 }
@@ -127,7 +130,7 @@ function addNewExamToSamples5(exam){
       $('#sampleNro_new5-'+sampleId)[0].rowSpan = $('#sampleNro_new5-'+sampleId)[0].rowSpan + 1; 
       $('#sampleIden_new5-'+sampleId)[0].rowSpan = $('#sampleIden_new5-'+sampleId)[0].rowSpan + 1; 
       //show organs options
-      var html = addNewOrgansOptions5(exam.text, $(exam.element).data('examtype'), sampleId, exam.id);
+      var html = addNewOrgansOptions5(exam.text, $(exam.element).data('service'), sampleId, exam.id);
       $("#sample_new5-"+sampleId).after(html);
     // }
   }); 
@@ -272,4 +275,79 @@ function addPatologoRow_5(exam) {
 
 function removePatologoRow_5(exam_id){
   $('#exam_5-'+exam_id).remove();
+}
+
+function showServiceCommentsModal(form_id){
+  $('#service_comments_modal').modal('show');
+}
+
+function showServiceReportsModal(id, service){
+
+  if (service == 1){
+    $('#service_reports_internal').html('');
+    var temp_internal = '<h4>Generado por el sistema</h4>';
+    temp_internal += '<div class="col-sm-12 pl-2 pb-2">';
+    temp_internal += '<a target="_blank" href="/download-report/'+id+'"><i class="fa fa-download"></i> Descargar Informe</a>';
+    temp_internal += '</div>';
+    $('#service_reports_internal').html(temp_internal);
+  }
+
+  $('#service_reports_external').html('');
+  var temp_external = '<h4>Agregados manualmente</h4>';
+  temp_external += '<div class="col-sm-12 pl-2 pb-2">';
+  temp_external += '</div>';
+  $('#service_reports_external').html(temp_external);
+
+  var url = 'saadas';//Urls.upload_service_external_report(id);
+  var temp_uploader = "<h4>Cargador de informes</h4>";
+  temp_uploader += '<div class="col-sm-12"><form id="reports_uploader" action="'+url+'" class="dropzone needsclick">';
+  temp_uploader += '<div class="dz-message" data-dz-message>';
+  temp_uploader += '<center><span><h3>Arrastra o selecciona el informe que deseas cargar</h3></span></center>';
+  temp_uploader += '</div>';    
+  temp_uploader += '</form></div>';
+  // temp += '<input type="reset" class="btn btn-secondary" data-dismiss="modal" value="Salir">';
+  // temp += '<input type="button" class="btn btn-primary submit-file" value="Cargar Imágen""></div></div></div>';
+  $('#service_reports_external_uploader').html('');
+  $('#service_reports_external_uploader').html(temp_uploader);
+
+  $("#reports_uploader").dropzone({
+    autoProcessQueue: false,
+    acceptedFiles: ".doc, .docx, .pdf",
+    init: function() {
+      var submitButton = document.querySelector(".submit-file")
+      myDropzone = this;
+      submitButton.addEventListener("click", function() {
+        myDropzone.processQueue();
+      });
+      this.on('sending', function(file, xhr, formData){
+        lockScreen(1);
+      });
+
+      this.on("success", function(file, responseText) {
+        if (responseText.ok) {
+          toastr.success('', 'Imágen cargada exitosamente.');
+          this.removeFile(file);
+          // $('#image-box-'+report_id).append('<a target="_blank" href="'+responseText.img_url+'">'+responseText.img_name+'</a>');
+        } else {
+          toastr.error('', 'No ha sido posible cargar el informe. Intente nuevamente.');
+        }
+        lockScreen(0);
+      });
+
+      this.on("error", function(file, response) {
+        this.removeFile(file);
+        bootbox.hideAll();
+        toastr.error('', 'No ha sido posible cargar el informe. Intente nuevamente.');
+        lockScreen(0);
+      });
+
+      this.on("addedfile", function() {
+        if (this.files[1]!=null){
+          this.removeFile(this.files[0]);
+        }
+      });
+    },
+  });
+
+  $('#service_reports_modal').modal('show');
 }
