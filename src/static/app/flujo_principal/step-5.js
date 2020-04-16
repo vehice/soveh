@@ -281,10 +281,40 @@ function showServiceCommentsModal(form_id){
   $('#service_comments_modal').modal('show');
 }
 
-function showServiceReportsModal(id, service){
+function deleteExternalReport(analysis_id, id){
+  var url = Urls.service_reports_id(analysis_id, id);
+  $.ajax({
+    type: "DELETE",
+    url: url,
+  })
+  .done(function (data) {
+    toastr.success('', 'Informe eliminado exitosamente.');
+    $('#sr-'+id).remove();
+  })
+  .fail(function () {
+    toastr.error('', 'No ha sido posible eliminar el informe. Intente nuevamente.');
+  });
+}
 
+function deleteServiceComment(analysis_id, id){
+  var url = Urls.service_comments_id(analysis_id, id);
+  $.ajax({
+    type: "DELETE",
+    url: url,
+  })
+  .done(function (data) {
+    toastr.success('', 'Comentaario eliminado exitosamente.');
+    $('#sc-'+id).remove();
+  })
+  .fail(function () {
+    toastr.error('', 'No ha sido posible eliminar el informe. Intente nuevamente.');
+  });
+}
+
+function showServiceReportsModal(id, service, case_closed, form_closed=false){
+
+  $('#service_reports_internal').html('');
   if (service == 1){
-    $('#service_reports_internal').html('');
     var temp_internal = '<h4>Generado por el sistema</h4>';
     temp_internal += '<div class="col-sm-12 pl-2 pb-2">';
     temp_internal += '<a target="_blank" href="/download-report/'+id+'"><i class="fa fa-download"></i> Descargar Informe</a>';
@@ -294,60 +324,219 @@ function showServiceReportsModal(id, service){
 
   $('#service_reports_external').html('');
   var temp_external = '<h4>Agregados manualmente</h4>';
-  temp_external += '<div class="col-sm-12 pl-2 pb-2">';
-  temp_external += '</div>';
-  $('#service_reports_external').html(temp_external);
-
-  var url = 'saadas';//Urls.upload_service_external_report(id);
-  var temp_uploader = "<h4>Cargador de informes</h4>";
-  temp_uploader += '<div class="col-sm-12"><form id="reports_uploader" action="'+url+'" class="dropzone needsclick">';
-  temp_uploader += '<div class="dz-message" data-dz-message>';
-  temp_uploader += '<center><span><h3>Arrastra o selecciona el informe que deseas cargar</h3></span></center>';
-  temp_uploader += '</div>';    
-  temp_uploader += '</form></div>';
-  // temp += '<input type="reset" class="btn btn-secondary" data-dismiss="modal" value="Salir">';
-  // temp += '<input type="button" class="btn btn-primary submit-file" value="Cargar Imágen""></div></div></div>';
-  $('#service_reports_external_uploader').html('');
-  $('#service_reports_external_uploader').html(temp_uploader);
-
-  $("#reports_uploader").dropzone({
-    autoProcessQueue: false,
-    acceptedFiles: ".doc, .docx, .pdf",
-    init: function() {
-      var submitButton = document.querySelector(".submit-file")
-      myDropzone = this;
-      submitButton.addEventListener("click", function() {
-        myDropzone.processQueue();
-      });
-      this.on('sending', function(file, xhr, formData){
-        lockScreen(1);
-      });
-
-      this.on("success", function(file, responseText) {
-        if (responseText.ok) {
-          toastr.success('', 'Imágen cargada exitosamente.');
-          this.removeFile(file);
-          // $('#image-box-'+report_id).append('<a target="_blank" href="'+responseText.img_url+'">'+responseText.img_name+'</a>');
-        } else {
-          toastr.error('', 'No ha sido posible cargar el informe. Intente nuevamente.');
-        }
-        lockScreen(0);
-      });
-
-      this.on("error", function(file, response) {
-        this.removeFile(file);
-        bootbox.hideAll();
-        toastr.error('', 'No ha sido posible cargar el informe. Intente nuevamente.');
-        lockScreen(0);
-      });
-
-      this.on("addedfile", function() {
-        if (this.files[1]!=null){
-          this.removeFile(this.files[0]);
-        }
-      });
-    },
+  temp_external += '<div id="reports_list" class="col-sm-12 pl-2 pb-2">';
+  var url = Urls.service_reports(id);
+  $.ajax({
+    type: "GET",
+    url: url,
+  })
+  .done(function (data) {
+    if (data.reports.length > 0) {
+      if (!form_closed) {
+        $.each(data.reports, function(index, value){
+          temp_external += '<div id="sr-'+value.id+'"><button class="btn btn-sm btn-danger" onclick="deleteExternalReport('+id+', '+value.id+')"><i class="fa fa-close"></i></button> <a target="_blank" href="'+value.path+'"><i class="fa fa-download"></i> '+value.name+'</a></div>';
+        });
+      } else {
+        $.each(data.reports, function(index, value){
+          temp_external += '<div id="sr-'+value.id+'"><a target="_blank" href="'+value.path+'"><i class="fa fa-download"></i> '+value.name+'</a></div>';
+        });
+      }
+    } else {
+      temp_external += '<div><h5 class="not_available_text">No hay informes disponibles</h5>';
+    }
+    temp_external += '</div>';
+    $('#service_reports_external').html(temp_external);
+  })
+  .fail(function () {
+    console.log("Fail")
   });
 
+  if (!form_closed) {
+    var url = Urls.service_reports(id);
+    var temp_uploader = "<h4>Cargador de informes</h4>";
+    temp_uploader += '<div class="col-sm-12"><form id="reports_uploader" action="'+url+'" class="dropzone needsclick">';
+    temp_uploader += '<div class="dz-message" data-dz-message>';
+    temp_uploader += '<center><span><h3>Arrastra o selecciona el informe que deseas cargar</h3></span></center>';
+    temp_uploader += '</div>';    
+    temp_uploader += '</form></div>';
+    // temp += '<input type="reset" class="btn btn-secondary" data-dismiss="modal" value="Salir">';
+    // temp += '<input type="button" class="btn btn-primary submit-file" value="Cargar Imágen""></div></div></div>';
+    $('#service_reports_external_uploader').html('');
+    $('#service_reports_external_uploader').html(temp_uploader);
+
+    $("#reports_uploader").dropzone({
+      autoProcessQueue: false,
+      acceptedFiles: ".doc, .docx, .pdf",
+      init: function() {
+        var submitButton = document.querySelector(".submit-file")
+        myDropzone = this;
+        submitButton.addEventListener("click", function() {
+          myDropzone.processQueue();
+        });
+        this.on('sending', function(file, xhr, formData){
+          lockScreen(1);
+        });
+
+        this.on("success", function(file, responseText) {
+          if (responseText.ok) {
+            toastr.success('', 'Informe cargado exitosamente.');
+            this.removeFile(file);
+            $('.not_available_text').remove();
+            $('#reports_list').prepend('<div id="sr-'+responseText.file.id+'"><button class="btn btn-sm btn-danger" onclick="deleteExternalReport('+id+', '+responseText.file.id+')"><i class="fa fa-close"></i></button> <a target="_blank" href="'+responseText.file.path+'"><i class="fa fa-download"></i> '+responseText.file.name+'</a></div>');
+          } else {
+            toastr.error('', 'No ha sido posible cargar el informe. Intente nuevamente.');
+          }
+          lockScreen(0);
+        });
+
+        this.on("error", function(file, response) {
+          this.removeFile(file);
+          bootbox.hideAll();
+          toastr.error('', 'No ha sido posible cargar el informe. Intente nuevamente.');
+          lockScreen(0);
+        });
+
+        this.on("addedfile", function() {
+          if (this.files[1]!=null){
+            this.removeFile(this.files[0]);
+          }
+        });
+      },
+    });
+  }
+
   $('#service_reports_modal').modal('show');
+}
+
+function showServiceCommentsModal(id, case_closed, form_closed=false){
+  var temp = '';
+  var url = Urls.service_comments(id);
+  $.ajax({
+    type: "GET",
+    url: url,
+  })
+  .done(function (data) {
+    if (data.comments.length > 0){
+      if (!form_closed) {
+        $.each(data.comments, function(index, value){
+          temp += '<p id="sc-'+value.id+'"><button class="btn btn-sm btn-danger" onclick="deleteServiceComment('+id+', '+value.id+')"><i class="fa fa-close"></i></button> <b>'+value.done_by+' ('+value.created_at+'):</b> <br> '+value.text+'</p>';
+        });
+        
+      } else {
+        $.each(data.comments, function(index, value){
+          temp += '<p id="sc-'+value.id+'"><b>'+value.done_by+' ('+value.created_at+'):</b> <br> '+value.text+'</p>';
+        });
+      }
+      
+    } else {
+      temp += '<p><h5 class="not_available_text">No hay comentarios disponibles</h5></p>';
+    }
+
+    if (!form_closed) {
+      temp += '<h3>Ingresar nuevo comentario:</h3>';
+      if (case_closed != 0){
+        temp += '<div class="col-sm-12"><textarea data-id="'+id+'" class="form-control disabled" rows="3" id="input_service_comment"></textarea></div>';
+      } else {
+        temp += '<div class="col-sm-12"><textarea data-id="'+id+'" class="form-control" rows="3" id="input_service_comment"></textarea></div>';
+      }
+    }
+    
+    $('#service_comments').html(temp);
+  })
+  .fail(function () {
+    console.log("Fail")
+  });
+
+
+  $('#service_comments_modal').modal('show');
+}
+
+function saveServiceComment(){
+  var id = $('#input_service_comment').data('id');
+  var text = $('#input_service_comment').val();
+  var url = Urls.service_comments(id);
+  $.ajax({
+    type: "POST",
+    url: url,
+    data: {'comment': text}
+  })
+  .done(function (data) {
+    $('.not_available_text').remove();
+    $('#service_comments').prepend('<p id="sc-'+data.comment.id+'"><button class="btn btn-sm btn-danger" onclick="deleteServiceComment('+id+', '+data.comment.id+')"><i class="fa fa-close"></i></button> <b>'+data.comment.done_by+' ('+data.comment.created_at+'):</b> <br> '+data.comment.text+'</p>');
+    
+  })
+  .fail(function () {
+    console.log("Fail")
+  });
+
+}
+
+function closeService(form_id, analysis_id){
+
+  var got_reports = 0;
+  var got_comments = 0;
+
+  var url = Urls.service_comments(analysis_id);
+  $.ajax({
+    type: "GET",
+    url: url,
+    async: false,
+  })
+  .done(function (data) {
+    if (data.comments.length > 0) {
+      got_comments = data.comments.length;
+    }
+    
+  })
+
+  var url = Urls.service_reports(analysis_id);
+  $.ajax({
+    type: "GET",
+    url: url,
+    async: false,
+  })
+  .done(function (data) {
+    if (data.reports.length > 0) {
+      got_reports = data.reports.length;
+    }
+  })
+
+  swal({
+    title: "Confirmación",
+    text: "Antes de continuar le informamos que el servicio tiene la cantidad de "+got_reports+" reportes adjuntos y "+got_comments+" comentarios. ¿Confirma que desea realizar el cierre del servicio?",
+    icon: "warning",
+    showCancelButton: true,
+    buttons: {
+      cancel: {
+          text: "No, cancelar!",
+          value: null,
+          visible: true,
+          className: "btn-light",
+          closeModal: true,
+      },
+      confirm: {
+          text: "Sí, confirmo!",
+          value: true,
+          visible: true,
+          className: "btn-primary",
+          closeModal: true,
+      }
+    }
+    }).then(isConfirm => {
+    if (isConfirm) {
+      
+      var url = Urls.close_service(form_id);
+      $.ajax({
+        type: "POST",
+        url: url,
+      })
+      .done(function (data) {
+        window.location.reload();
+      })
+      .fail(function () {
+        console.log("Fail")
+      });
+    }
+  });
+
 }

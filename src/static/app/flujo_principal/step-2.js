@@ -248,7 +248,7 @@ function validate_step_2(){
   if (services_selected.includes(1) || services_selected.includes(2) || services_selected.includes(3) ){
     return 3;
   } else {
-    return 5;
+    return 6;
   }
 }
 

@@ -104,4 +104,25 @@ urlpatterns = [
     path('responsible/<int:id>', csrf_exempt(views.RESPONSIBLE.as_view()), name='responsible_detail'),
     path('emailTemplate', csrf_exempt(views.EMAILTEMPLATE.as_view()), name='emailTemplate'),
     path('emailTemplate/<int:id>', csrf_exempt(views.EMAILTEMPLATE.as_view()), name='emailTemplate_detail'),
+    path(
+        'service_reports/<int:analysis_id>',
+        csrf_exempt(views.SERVICE_REPORTS.as_view()),
+        name='service_reports',
+    ),
+    path(
+        'service_reports/<int:analysis_id>/<int:id>',
+        csrf_exempt(views.SERVICE_REPORTS.as_view()),
+        name='service_reports_id',
+    ),
+    path(
+        'service_comments/<int:analysis_id>',
+        csrf_exempt(views.SERVICE_COMMENTS.as_view()),
+        name='service_comments',
+    ),
+    path(
+        'service_comments/<int:analysis_id>/<int:id>',
+        csrf_exempt(views.SERVICE_COMMENTS.as_view()),
+        name='service_comments_id',
+    ),
+    path('close_service/<int:form_id>', csrf_exempt(views.close_service), name='close_service'),
 ]

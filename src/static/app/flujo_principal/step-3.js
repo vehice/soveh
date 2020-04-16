@@ -10,7 +10,7 @@ function init_step_3() {
     async: false,
   })
   .done(function (data) {
-    console.log(data)
+    // console.log(data)
     data_step_3 = data
     $('.showShareBtn').removeClass("hidden");
     $('.showLogBtn').removeClass("hidden");

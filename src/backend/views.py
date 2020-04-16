@@ -720,10 +720,15 @@ class WORKFLOW(View):
                     if previous_step:
                         next_state = Permission.objects.get(to_state=form.state, type_permission='w').from_state
                     else:
-                        next_state = actor.permission.get(
-                            from_state=form.state, type_permission='w').to_state
+                        # fix para saltar bloque cassete slice flujo prinicpal
+
+                        if form.state_id == 3 and int(id_next_step) == 5:
+                            next_state = State.objects.get(pk=5)
+                        else:
+                            next_state = actor.permission.get(
+                                from_state=form.state, type_permission='w').to_state
                     break
-            
+
             if not previous_step:
                 process_answer = call_process_method(form.content_type.model,
                                                      request)
@@ -734,7 +739,6 @@ class WORKFLOW(View):
             # for actor in next_state.step.actors.all():
             #     if actor.profile == up.profile:
             #         next_step_permission = True
-
             if process_answer and next_state:
                 current_state = form.state
                 form.state = next_state
@@ -756,10 +760,8 @@ class WORKFLOW(View):
             process_answer = call_process_method(form.content_type.model,
                                                      request)
             
-            if form.content_object.exam.service_id == 2:
-                form.form_closed = False
-            else:
-                form.form_closed = True
+
+            form.form_closed = False
             
             form.form_reopened = False
             form.save()
@@ -1005,41 +1007,98 @@ class RESPONSIBLE(View):
 
         return JsonResponse({'ok': True})
 
+class SERVICE_REPORTS(View):
+    http_method_names = ['get', 'post', 'delete']
+    
+    def get(self, request, analysis_id):
+        af = AnalysisForm.objects.get(pk=analysis_id)
+
+        data = []
+        for report in af.external_reports.all().order_by('-created_at'):
+            data.append({'id': report.id, 'path': report.file.url, 'name': report.file.name.split("/")[-1]})
+
+        return JsonResponse({'ok': True, 'reports': data})
+
+    def post(self, request, analysis_id):
+        try:
+            if analysis_id:
+                af = AnalysisForm.objects.get(pk=analysis_id)
+                file_report = request.FILES['file']
+                external_report = ExternalReport.objects.create(
+                    file = file_report,
+                    loaded_by = request.user
+                )
+                af.external_reports.add(external_report)
+                return JsonResponse({'ok': True, 'file': {'id': external_report.id, 'path': external_report.file.url, 'name': external_report.file.name.split("/")[-1]} })
+            else:
+                return JsonResponse({'ok': False})
+        except:
+             return JsonResponse({'ok': False})
+
+    
+    def delete(self, request, analysis_id, id):
+        try:
+            report = ExternalReport.objects.get(pk=id)
+            af = AnalysisForm.objects.get(pk=analysis_id)
+            af.external_reports.remove(report)
+            return JsonResponse({'ok': True})
+        except:
+            return JsonResponse({'ok': False})
+
 class SERVICE_COMMENTS(View):
     http_method_names = ['get', 'post', 'delete']
     
-    def get(self, request):
-        responsibles = Responsible.objects.filter(active=True)
+    def get(self, request, analysis_id):
+        af = AnalysisForm.objects.get(pk=analysis_id)
+
         data = []
-        for r in responsibles:
-            data.append(model_to_dict(r))
+        for cmm in af.service_comments.all().order_by('-created_at'):
+            response = {
+                'id': cmm.id,
+                'text': cmm.text,
+                'created_at': cmm.created_at.strftime('%d/%m/%Y %H:%M:%S'),
+                'done_by': cmm.done_by.get_full_name()
+            }
+            data.append(response)
 
-        return JsonResponse({'ok': True, 'responsibles': data})
+        return JsonResponse({'ok': True, 'comments': data})
 
-    def post(self, request):
+    def post(self, request, analysis_id):
         try:
-            var_post = request.POST.copy()
-            responsible = Responsible()
-            id = var_post.get('id', None)
-            if id:
-                responsible.id = id
-            responsible.name = var_post.get('name', None)
-            responsible.email = var_post.get('email', None)
-            responsible.phone = var_post.get('phone', None)
-            responsible.job = var_post.get('job', None)
-            responsible.active = var_post.get('active', True)
-            responsible.save()
-            return JsonResponse({'ok': True})
-        except Exception as e:
+            if analysis_id:
+                af = AnalysisForm.objects.get(pk=analysis_id)
+                var_post = request.POST.copy()
+                comment = var_post.get('comment', None)
+                if comment:
+                    service_comment = ServiceComment.objects.create(
+                        text = comment,
+                        done_by = request.user
+                    )
+                    af.service_comments.add(service_comment)
+                    response = {
+                        'id': service_comment.id,
+                        'text': service_comment.text,
+                        'created_at': service_comment.created_at.strftime('%d/%m/%Y %H:%M:%S'),
+                        'done_by': service_comment.done_by.get_full_name()
+                    }
+                    return JsonResponse({'ok': True, 'comment': response})
+                else:
+                    return JsonResponse({'ok': True})
+            else:
+                return JsonResponse({'ok': False})
+        except:
              return JsonResponse({'ok': False})
+
     
-    def delete(self, request, id):
-        responsible = Responsible.objects.get(pk=id)
-        responsible.active = False
-        responsible.save()
-
-        return JsonResponse({'ok': True})
-
+    def delete(self, request, analysis_id, id):
+        try:
+            sc = ServiceComment.objects.get(pk=id)
+            af = AnalysisForm.objects.get(pk=analysis_id)
+            af.service_comments.remove(sc)
+            return JsonResponse({'ok': True})
+        except:
+            return JsonResponse({'ok': False})
+   
 class EMAILTEMPLATE(View):
     def get(self, request, id=None):
         if id:
@@ -1709,17 +1768,19 @@ def step_2_entryform(request):
 
     for exam in exams_to_do:
         ex = Exam.objects.get(pk=exam)
+
+        if ex.service_id in [1,3,4]:
+            flow = Flow.objects.get(pk=2)
+        elif ex.service_id == 5:
+            continue;
+        else:
+            flow = Flow.objects.get(pk=3)
+
         analysis_form = AnalysisForm.objects.create(
             entryform_id=entryform.id,
             exam=ex,
             # patologo_id= int(var_post.get("sample[patologos]["+exam+"]"))
         )
-
-        if ex.service_id in [1,3,4,5]:
-            flow = Flow.objects.get(pk=2)
-        else:
-            flow = Flow.objects.get(pk=3)
-
 
         Form.objects.create(
             content_object=analysis_form,
@@ -2399,4 +2460,9 @@ def dashboard_reports(request):
     data = cursor1.fetchall()
 
     return JsonResponse({'data': data})
-    
+
+def close_service(request, form_id):
+    form = Form.objects.get(pk=form_id)
+    form.form_closed = True
+    form.save()
+    return JsonResponse({'ok':True})

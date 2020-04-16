@@ -205,10 +205,12 @@ class Identification(models.Model):
 
 class ServiceComment(models.Model):
     text = models.TextField(blank=True, null=True)
+    done_by = models.ForeignKey(User, null=True, on_delete=models.SET_NULL)
     created_at = models.DateTimeField(auto_now_add=True)
 
 class ExternalReport(models.Model):
     file = models.FileField(upload_to='vehice_external_reports')
+    loaded_by = models.ForeignKey(User, null=True, on_delete=models.SET_NULL)
     created_at = models.DateTimeField(auto_now_add=True)
 
 class AnalysisForm(models.Model):
