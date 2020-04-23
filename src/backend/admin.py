@@ -7,12 +7,12 @@ from django.forms import Textarea, TextInput
 
 class CustomExam(admin.ModelAdmin):
     list_display = ('name', 'stain', 'service')
-    readonly_fields  = ('get_service_desc',)
+    # readonly_fields  = ('get_service_desc',)
 
     def get_service_desc(self, obj):
         return obj.service.description
 
-    get_service_desc.short_description = 'Descripción del Servicio'
+    # get_service_desc.short_description = 'Descripción del Servicio'
 
 admin.site.register(Exam, CustomExam)
 

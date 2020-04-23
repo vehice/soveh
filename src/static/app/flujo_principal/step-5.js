@@ -74,6 +74,7 @@ function populateAnalysisData(data) {
     row.percentage_step = item.percentage_step;
     row.current_step_tag = item.current_step_tag;
     row.form_closed = item.form_closed;
+    row.cancelled = item.cancelled;
     row.form_reopened = item.form_reopened;
     // row.histologico = item.exam_type == 1;
     // saltar=saltar && item.exam_type == 2;
@@ -526,6 +527,48 @@ function closeService(form_id, analysis_id){
     if (isConfirm) {
       
       var url = Urls.close_service(form_id);
+      $.ajax({
+        type: "POST",
+        url: url,
+      })
+      .done(function (data) {
+        window.location.reload();
+      })
+      .fail(function () {
+        console.log("Fail")
+      });
+    }
+  });
+
+}
+
+function cancelService(form_id){
+
+  swal({
+    title: "Confirmación",
+    text: "¿Confirma que desea anular el servicio?",
+    icon: "warning",
+    showCancelButton: true,
+    buttons: {
+      cancel: {
+          text: "No, cancelar!",
+          value: null,
+          visible: true,
+          className: "btn-light",
+          closeModal: true,
+      },
+      confirm: {
+          text: "Sí, confirmo!",
+          value: true,
+          visible: true,
+          className: "btn-primary",
+          closeModal: true,
+      }
+    }
+    }).then(isConfirm => {
+    if (isConfirm) {
+      
+      var url = Urls.cancel_service(form_id);
       $.ajax({
         type: "POST",
         url: url,

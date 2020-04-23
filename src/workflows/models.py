@@ -85,5 +85,10 @@ class Form(models.Model):
     object_id = models.PositiveIntegerField(null=True)
     content_object = GenericForeignKey()
     deleted = models.BooleanField(default=False)
+    cancelled = models.BooleanField(default=False)
+    cancelled_at = models.DateTimeField(null=True)
+    closed_at = models.DateTimeField(null=True)
+
+
     def __str__(self):
         return str(self.content_type)

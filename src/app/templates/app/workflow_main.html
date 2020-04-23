@@ -682,8 +682,11 @@ function fillSummary(data){
     var selectOptimum = '<select class="select2 form-control selectOpt" name="optimo" {% if not edit or closed  %}disabled{% endif %} ><option value="1">Si</option><option value="0" '+optimum+'>No</option></select>'
     
     var selectOrgans = '<select class="select2 form-control selectOrgs" name="organs" multiple {% if not edit or closed  %}disabled{% endif %} >';
+
+    console.log(item.organs_bv_set)
+    console.log(data.organs)
     $.each(data.organs, function(j, o){
-      if(item.organs_set.findIndex(x => x.id === o.id) != -1){
+      if(item.organs_bv_set.findIndex(x => x.id === o.id) != -1){
         selectOrgans += '<option value="'+o.id+'" selected>'+o.name+'</option>';
       }
       else
@@ -714,12 +717,22 @@ function fillSummary(data){
 
   var tpl_exams = '<div class="col-sm-12"><h6 class="form-section mt-2"> Servicios</h6></br>';
   $.each(data.entryform.analyses, function(i, item){
-    tpl_exams += '<div class="alert alert-light"><b>'+ item.exam__name +'</b> <b class="pull-right">'
+    tpl_exams += '<div class="alert alert-light"><b>'+ item.exam__name +'</b> <span class="pull-right">'
     if(item.patologo__first_name != null)
-      tpl_exams += item.patologo__first_name+' ';
+      tpl_exams += '<b>Patólogo:</b> '+item.patologo__first_name+' ';
     if(item.patologo__last_name != null)
       tpl_exams += item.patologo__last_name;
-    tpl_exams += '</b> <br>'+ moment(item.created_at).format("DD/MM/YYYY HH:mm") +'</div>';
+    tpl_exams += '</span> <br> <b>Fecha: </b>'+ moment(item.created_at).format("DD/MM/YYYY HH:mm");
+    
+    if (item.service_comments.length > 0) {
+      tpl_exams += '<br> <b>Comentarios:</b><br><br>';
+      $.each(item.service_comments, function(j, item2){
+        tpl_exams += '<p style="margin-left: 5%;"><b>'+item2.done_by+' ('+item2.created_at+'):</b> <br> '+item2.text+'</p>'
+      });
+    }
+    
+
+    tpl_exams += '</div>';
   });
 
   tpl_exams += '</div>';

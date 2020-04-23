@@ -95,7 +95,7 @@ class ENTRYFORM(View):
             
             samples_as_dict = []
             for s in samples:
-                s_dict = model_to_dict(s, exclude=['organs', 'sampleexams', 'exams', 'identification'])
+                s_dict = model_to_dict(s, exclude=['organs', 'sampleexams', 'exams', 'identification', 'organs_before_validations'])
                 organs = []
                 sampleexams = s.sampleexams_set.all()
                 sampleExa = {}
@@ -130,20 +130,47 @@ class ENTRYFORM(View):
                         'organs_set': list(c.organs.values())
                     })
                 s_dict['cassettes_set'] = cassettes_set
-                s_dict['identification'] = model_to_dict(s.identification, exclude=["organs",])
+                s_dict['identification'] = model_to_dict(s.identification, exclude=["organs",'organs_before_validations'])
                 s_dict['identification']['organs'] = list(s.identification.organs.all().values())
+                s_dict['identification']['organs_bv'] = list(s.identification.organs_before_validations.all().values())
                 samples_as_dict.append(s_dict)
 
             # entryform["identifications"] = list(
             #     entryform_object.identification_set.all().values())
             entryform["identifications"] = []
             for ident in entryform_object.identification_set.all():
-                ident_json = model_to_dict(ident, exclude=["organs"])
+                ident_json = model_to_dict(ident, exclude=["organs", "organs_before_validations"])
                 ident_json['organs_set'] = list(ident.organs.all().values())
+                ident_json['organs_bv_set'] = list(ident.organs_before_validations.all().values())
                 entryform["identifications"].append(ident_json)              
 
-            entryform["analyses"] = list(
-                entryform_object.analysisform_set.all().values('id', 'created_at', 'comments', 'entryform_id', 'exam_id', 'exam__name', 'patologo_id', 'patologo__first_name', 'patologo__last_name'))
+            # entryform["analyses"] = list(
+            #     entryform_object.analysisform_set.all().values('id', 'created_at', 'comments', 'entryform_id', 'exam_id', 'exam__name', 'patologo_id', 'patologo__first_name', 'patologo__last_name'))
+            
+            entryform["analyses"] = []
+            for analysis in entryform_object.analysisform_set.all():
+                aux = {
+                    'id': analysis.id,
+                    'created_at' : analysis.created_at,
+                    'comments' : analysis.comments,
+                    'entryform_id' : analysis.entryform_id,
+                    'exam_id' : analysis.exam_id,
+                    'exam__name' : analysis.exam.name,
+                    'patologo_id' : analysis.patologo_id,
+                    'patologo__first_name' : analysis.patologo.first_name if analysis.patologo else None,
+                    'patologo__last_name' : analysis.patologo.first_name if analysis.patologo else None,
+                    'service_comments': []
+                }
+
+                for cmm in analysis.service_comments.all():
+                    aux['service_comments'].append({
+                        'text': cmm.text,
+                        'created_at': cmm.created_at.strftime('%d/%m/%Y %H:%M:%S'),
+                        'done_by': cmm.done_by.get_full_name()
+                    })
+                
+                entryform["analyses"].append(aux)
+            
             entryform["cassettes"] = list(
                 entryform_object.cassette_set.all().values())
             entryform["customer"] = model_to_dict(entryform_object.customer) if entryform_object.customer else None
@@ -192,7 +219,7 @@ class ENTRYFORM(View):
                 'organs': organs,
                 'customers': customers,
             }
-
+        # print (data)
         return JsonResponse(data)
 
 
@@ -373,7 +400,8 @@ class ANALYSIS(View):
                 'form_closed': form.form_closed,
                 'form_reopened': form.form_reopened,
                 'service': exam.service_id,
-                'service_name': exam.service.name
+                'service_name': exam.service.name,
+                'cancelled': form.cancelled
                 # 'no_caso': analisys.entry_form.no_caso
             })
         
@@ -1533,6 +1561,9 @@ def step_1_entryform(request):
                     else:
                         for org in values[9]:
                             identificacion.organs.add(org)
+                    
+                    for org in values[9]:
+                        identificacion.organs_before_validations.add(org)
 
                     sample_index = 1
                     for i in range(int(values[3])):
@@ -1582,6 +1613,9 @@ def step_1_entryform(request):
                     else:
                         for org in values[9]:
                             identificacion.organs.add(org)
+                    
+                    for org in values[9]:
+                        identificacion.organs_before_validations.add(org)
 
                     sample_index = 1
                     for i in range(int(values[3])):
@@ -1628,6 +1662,9 @@ def step_1_entryform(request):
                             else:
                                 for org in values[9]:
                                     identificacion.organs.add(org)
+                            
+                            for org in values[9]:
+                                identificacion.organs_before_validations.add(org)
 
                             sample_index = 1
                             for k in range(int(new_no_fish)):
@@ -1715,6 +1752,9 @@ def step_1_entryform(request):
             else:
                 for org in values[9]:
                     identificacion.organs.add(org)
+            
+            for org in values[9]:
+                identificacion.organs_before_validations.add(org)
 
             for i in range(int(values[3])):
                 sample = Sample.objects.create(
@@ -2243,7 +2283,7 @@ def save_identification(request, id):
 
     organs = var_post.getlist('organs')
     orgs = []
-    for org in ident.organs.all():
+    for org in ident.organs_before_validations.all():
         orgs.append(str(org.id))
     if len(orgs) != len(organs):
         change = True
@@ -2252,8 +2292,18 @@ def save_identification(request, id):
             change = True
 
     ident.organs.set([])
+    ident.organs_before_validations.set([])
+
+    organs_type2_count = Organ.objects.filter(id__in=organs, organ_type=2).count()
+    if organs_type2_count > 0:
+        for org in Organ.objects.all():
+            ident.organs.add(org)
+    else:
+        for org in organs:
+            ident.organs.add(int(org))
+    
     for org in organs:
-        ident.organs.add(int(org))
+        ident.organs_before_validations.add(int(org))
     
     ident.save()
     if change:
@@ -2389,7 +2439,7 @@ def dashboard_analysis(request):
                 INNER JOIN backend_analysisform a ON s.entryform_id = a.entryform_id
                 INNER JOIN backend_entryform e ON a.entryform_id = e.id
                 INNER JOIN workflows_form f ON a.entryform_id = f.object_id
-                WHERE f.flow_id = 1 AND f.deleted = 0
+                WHERE f.flow_id in (2,3) AND f.deleted = 0
                 AND YEAR(a.created_at) = {0}
                 AND MONTH(a.created_at) IN {1}
             """.format(year, tuple(mes))
@@ -2416,7 +2466,7 @@ def dashboard_lefts(request):
                 FROM backend_analysisform e 
                 LEFT JOIN auth_user u ON e.patologo_id = u.id
                 INNER JOIN workflows_form f ON f.object_id = e.id
-                WHERE f.form_closed = 0 AND f.flow_id = 2 AND f.deleted = 0
+                WHERE f.form_closed = 0 AND f.flow_id in (2,3) AND f.deleted = 0
                 AND YEAR(e.created_at) = {0}
                 AND MONTH(e.created_at) IN {1}
             """.format(year, tuple(mes))
@@ -2440,12 +2490,12 @@ def dashboard_reports(request):
     mes = request.GET.getlist('mes')
     
     query = """
-                SELECT YEAR(e.closed_at) AS `year`, MONTH(e.closed_at) AS `month`, COUNT(e.id) AS count
+                SELECT YEAR(f.closed_at) AS `year`, MONTH(f.closed_at) AS `month`, COUNT(e.id) AS count
                 FROM backend_analysisform e
                 INNER JOIN workflows_form f ON f.object_id = e.id
-                WHERE f.form_closed = 1 AND f.flow_id = 2 AND f.deleted = 0
-                AND YEAR(e.closed_at) = {0}
-                AND MONTH(e.closed_at) IN {1}
+                WHERE f.form_closed = 1 AND f.flow_id in (2,3) AND f.deleted = 0
+                AND YEAR(f.closed_at) = {0}
+                AND MONTH(f.closed_at) IN {1}
             """.format(year, tuple(mes))
     if exam != '0':
        query += """
@@ -2464,5 +2514,13 @@ def dashboard_reports(request):
 def close_service(request, form_id):
     form = Form.objects.get(pk=form_id)
     form.form_closed = True
+    form.closed_at = datetime.now()
+    form.save()
+    return JsonResponse({'ok':True})
+
+def cancel_service(request, form_id):
+    form = Form.objects.get(pk=form_id)
+    form.cancelled = True
+    form.cancelled_at = datetime.now()
     form.save()
     return JsonResponse({'ok':True})

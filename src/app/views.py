@@ -19,7 +19,7 @@ import json
 @login_required
 def home(request):
     services = Exam.objects.values('id', 'name')
-    dates = EntryForm.objects.all().values_list('created_at', flat = True).distinct()
+    dates = EntryForm.objects.all().values_list('created_at', flat = True).order_by('-created_at').distinct()
     years = []
     for d in dates:
         if d and not d.year in years: 

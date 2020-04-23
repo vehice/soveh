@@ -199,6 +199,7 @@ class Identification(models.Model):
     group = models.CharField(max_length=250, null=True, blank=True)
     temp_id = models.CharField(max_length=250, null=True, blank=True)
     organs = models.ManyToManyField(Organ)
+    organs_before_validations = models.ManyToManyField(Organ, related_name='organs_before_validations')
 
     def __str__(self):
         return str(self.pk)
@@ -221,7 +222,6 @@ class AnalysisForm(models.Model):
     forms = GenericRelation(Form)
     comments = models.TextField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
-    closed_at = models.DateTimeField(null=True)
     patologo = models.ForeignKey(User, null=True, on_delete=models.SET_NULL)
     service_comments = models.ManyToManyField(ServiceComment)
     external_reports = models.ManyToManyField(ExternalReport)
