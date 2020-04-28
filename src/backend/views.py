@@ -249,12 +249,12 @@ class CASSETTE(View):
                 _slice_mtd['exam'] = slic.analysis.exam.name
                 slices.append(_slice_mtd)
 
-            sample = model_to_dict(cassette.sample, exclude=["exams", "organs"])
-            sample['identification'] = model_to_dict(Identification.objects.get(pk=sample['identification']), exclude=["organs"])
+            sample = model_to_dict(cassette.sample, exclude=["exams", "organs", 'organs_before_validations'])
+            sample['identification'] = model_to_dict(Identification.objects.get(pk=sample['identification']), exclude=["organs", 'organs_before_validations'])
             sample_exams = [ model_to_dict(sampleexam.exam) for sampleexam in Sample.objects.get(pk=sample['id']).sampleexams_set.all() if sampleexam.exam.service_id == 1 ]
             sample['exams_set'] = sample_exams
             
-            cassette_as_dict = model_to_dict(cassette, exclude=['organs'])
+            cassette_as_dict = model_to_dict(cassette, exclude=['organs', 'organs_before_validations'])
             cassette_as_dict['slices_set'] = slices
             cassette_as_dict['organs_set'] = organs
             cassette_as_dict['sample'] = sample
@@ -274,7 +274,7 @@ class CASSETTE(View):
         
         samples_as_dict = []
         for s in samples:
-            s_dict = model_to_dict(s, exclude=['organs', 'exams', 'identification'])
+            s_dict = model_to_dict(s, exclude=['organs', 'exams', 'identification','organs_before_validations'])
             organs_set = []
             exams_set = []
             for sampleExam in s.sampleexams_set.all():
@@ -306,12 +306,12 @@ class CASSETTE(View):
             s_dict['organs_set'] = list(organs_set)
             # s_dict['exams_set'] = list(exams_set)
             s_dict['cassettes_set'] = list(cassettes_set)
-            s_dict['identification'] = model_to_dict(s.identification, exclude=["organs"])
+            s_dict['identification'] = model_to_dict(s.identification, exclude=["organs", 'organs_before_validations'])
             samples_as_dict.append(s_dict)
 
         entryform["identifications"] = []
         for ident in entryform_object.identification_set.all():
-            ident_json = model_to_dict(ident, exclude=["organs"])
+            ident_json = model_to_dict(ident, exclude=["organs", 'organs_before_validations'])
             ident_json['organs_set'] = list(ident.organs.all().values())
             entryform["identifications"].append(ident_json)           
         # entryform["answer_questions"] = list(
@@ -419,7 +419,7 @@ class ANALYSIS(View):
         
         samples_as_dict = []
         for s in samples:
-            s_dict = model_to_dict(s, exclude=['organs', 'exams', 'identification'])
+            s_dict = model_to_dict(s, exclude=['organs', 'exams', 'identification', 'organs_before_validations'])
             organs = []
             sampleexams = s.sampleexams_set.all()
             sampleExa = {}
@@ -454,12 +454,12 @@ class ANALYSIS(View):
             s_dict['organs_set'] = list(organs_set)
             # s_dict['exams_set'] = list(exams_set)
             s_dict['cassettes_set'] = list(cassettes_set)
-            s_dict['identification'] = model_to_dict(s.identification, exclude=["organs"])
+            s_dict['identification'] = model_to_dict(s.identification, exclude=["organs", 'organs_before_validations'])
             samples_as_dict.append(s_dict)
 
         entryform["identifications"] = []
         for ident in entryform_object.identification_set.all():
-            ident_json = model_to_dict(ident, exclude=["organs"])
+            ident_json = model_to_dict(ident, exclude=["organs", 'organs_before_validations'])
             ident_json['organs_set'] = list(ident.organs.all().values())
             entryform["identifications"].append(ident_json)           
 
@@ -507,11 +507,11 @@ class SLICE(View):
 
         for slice_new in slices_qs:
             slice_as_dict = model_to_dict(slice_new, exclude=['cassette'])
-            slice_as_dict['cassette'] = model_to_dict(slice_new.cassette, exclude=['organs'])
+            slice_as_dict['cassette'] = model_to_dict(slice_new.cassette, exclude=['organs', 'organs_before_validations'])
             slice_as_dict['organs'] = list(slice_new.cassette.organs.all().values())
             sample = slice_new.cassette.sample
-            slice_as_dict['sample'] = model_to_dict(sample, exclude=['exams', 'organs', 'cassettes'])
-            slice_as_dict['sample']['identification'] = model_to_dict(sample.identification, exclude=["organs"])
+            slice_as_dict['sample'] = model_to_dict(sample, exclude=['exams', 'organs', 'cassettes', 'organs_before_validations'])
+            slice_as_dict['sample']['identification'] = model_to_dict(sample.identification, exclude=["organs", 'organs_before_validations'])
             slice_as_dict['paths_count'] = Report.objects.filter(slice_id=slice_new.pk).count()
             slice_as_dict['analysis_exam'] = slice_new.analysis.exam.id
             slices.append(slice_as_dict)
@@ -530,7 +530,7 @@ class SLICE(View):
         
         samples_as_dict = []
         for s in samples:
-            s_dict = model_to_dict(s, exclude=['organs', 'exams', 'identification'])
+            s_dict = model_to_dict(s, exclude=['organs', 'exams', 'identification', 'organs_before_validations'])
             organs = []
             sampleexams = s.sampleexams_set.all()
             sampleExa = {}
@@ -565,12 +565,12 @@ class SLICE(View):
             s_dict['organs_set'] = list(organs_set)
             # s_dict['exams_set'] = list(exams_set)
             s_dict['cassettes_set'] = list(cassettes_set)
-            s_dict['identification'] = model_to_dict(s.identification, exclude=["organs"])
+            s_dict['identification'] = model_to_dict(s.identification, exclude=["organs", 'organs_before_validations'])
             samples_as_dict.append(s_dict)
 
         entryform["identifications"] = []
         for ident in entryform_object.identification_set.all():
-            ident_json = model_to_dict(ident, exclude=["organs"])
+            ident_json = model_to_dict(ident, exclude=["organs", 'organs_before_validations'])
             ident_json['organs_set'] = list(ident.organs.all().values())
             entryform["identifications"].append(ident_json)   
 
@@ -2522,5 +2522,15 @@ def cancel_service(request, form_id):
     form = Form.objects.get(pk=form_id)
     form.cancelled = True
     form.cancelled_at = datetime.now()
+    form.save()
+    return JsonResponse({'ok':True})
+
+def reopen_service(request, form_id):
+    form = Form.objects.get(pk=form_id)
+    form.cancelled = False
+    form.cancelled_at = None
+    form.form_reopened = True
+    form.form_closed = False
+    form.closed_at = None
     form.save()
     return JsonResponse({'ok':True})

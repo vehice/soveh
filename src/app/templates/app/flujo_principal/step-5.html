@@ -83,8 +83,9 @@
           <div class="col-sm-4 font-medium-4 text-center">
             <div class="btn-group" role="group" aria-label="Opciones">
               <% if (form_reopened)  { %> 
-                <a class="btn btn-secondary {% if closed %} disabled {% endif %}" href="/workflow/<%= form_id %>/step_6"><i class="fa fa-arrow-right"></i> Ir al análisis </a>
-                
+                {% comment %} <a class="btn btn-secondary {% if closed %} disabled {% endif %}" href="/workflow/<%= form_id %>/step_6"><i class="fa fa-arrow-right"></i> Ir al análisis </a>
+                 {% endcomment %}
+                 <a class="btn btn-secondary {% if closed %} disabled {% endif %}" href="/workflow/<%= form_id %>"><i class="fa fa-arrow-right"></i> Ir al análisis </a>
               <% } else { %>
                 <a class="btn btn-secondary {% if closed %} disabled {% endif %}" href="/workflow/<%= form_id %>"><i class="fa fa-arrow-right"></i> Ir al análisis </a>
               <% } %>
@@ -135,9 +136,8 @@
             <div class="btn-group" role="group" aria-label="Opciones">
               <button type="button" class="btn btn-info" onclick='showServiceCommentsModal(<%= id %>, {{closed}}, true)'>Comentarios</button>
               <button type="button" class="btn btn-success" onclick='showServiceReportsModal(<%= id %>, <%= service %>, {{closed}}, true)'>Informes</button>
-              <a class="btn btn-warning {% if closed %} disabled {% endif %}" href="/workflow/<%= form_id %>/step_6">Reabrir Servicio</a>
+              <button type="button" class="btn btn-warning {% if closed %} disabled {% endif %}" onclick='reopenSerivce(<%= form_id %>)'>Reabrir Servicio</button>
             </div>
-                      {% comment %} <a class="btn btn-success" target="_blank" href="/download-report/<%= form_id %>"><i class="fa fa-download"></i> Descargar Informe</a> {% endcomment %}
           </div>
           <div class="col-sm-4 font-medium-4 text-right">Tinción: <%= exam_stain %></div>
           
@@ -158,9 +158,8 @@
             <div class="btn-group" role="group" aria-label="Opciones">
               <button type="button" class="btn btn-info" onclick='showServiceCommentsModal(<%= id %>, {{closed}}, true)'>Comentarios</button>
               <button type="button" class="btn btn-success" onclick='showServiceReportsModal(<%= id %>, <%= service %>, {{closed}}, true)'>Informes</button>
-              <a class="btn btn-warning {% if closed %} disabled {% endif %}" href="">Reabrir Servicio</a>
+              <button type="button" class="btn btn-warning {% if closed %} disabled {% endif %}" onclick='reopenSerivce(<%= form_id %>)'>Reabrir Servicio</button>
             </div>
-                      {% comment %} <a class="btn btn-success" target="_blank" href="/download-report/<%= form_id %>"><i class="fa fa-download"></i> Descargar Informe</a> {% endcomment %}
           </div>
           <div class="col-sm-4 font-medium-4 text-right"></div>
           

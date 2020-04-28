@@ -583,3 +583,45 @@ function cancelService(form_id){
   });
 
 }
+
+function reopenSerivce(form_id){
+
+  swal({
+    title: "Confirmación",
+    text: "¿Confirma que desea reabrir el servicio?",
+    icon: "warning",
+    showCancelButton: true,
+    buttons: {
+      cancel: {
+          text: "No, cancelar!",
+          value: null,
+          visible: true,
+          className: "btn-light",
+          closeModal: true,
+      },
+      confirm: {
+          text: "Sí, confirmo!",
+          value: true,
+          visible: true,
+          className: "btn-primary",
+          closeModal: true,
+      }
+    }
+    }).then(isConfirm => {
+    if (isConfirm) {
+      
+      var url = Urls.reopen_service(form_id);
+      $.ajax({
+        type: "POST",
+        url: url,
+      })
+      .done(function (data) {
+        window.location.reload();
+      })
+      .fail(function () {
+        console.log("Fail")
+      });
+    }
+  });
+
+}
