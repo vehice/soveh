@@ -297,6 +297,41 @@
     </div>
   </div>
 </div>
+
+<div class="modal fade text-left" id="rename_cassettes_modal" role="dialog" data-backdrop="static" data-keyboard="false">
+  <div class="modal-dialog" role="">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title" id="title"> Renombrando Cassettes Configurados <span></span></h3>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class='row'>
+          <div class='col-sm-12'>
+            <table class="table table-bordered table-condensed" id="cassette_names_table">
+              <thead>
+                <tr>
+                  <th>Nombre Cassettes Actuales</th>
+                  <th>Ingresa el nuevo nombre</th>
+                </tr>
+              </thead>
+              <tbody id="cassette_names_table_tbody">
+
+              </tbody>
+            </table>
+          </div>
+
+          <div class='col-sm-12 mt-3 pull-right'>
+            <button class='btn btn-primary' onclick='saveCassettesNames()'>Guardar y Reemplazar Nombres</button>
+            <button class='btn btn-default' data-dismiss="modal">Salir</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 {% endblock content %}
 {% block scripts %}
 
@@ -683,8 +718,6 @@ function fillSummary(data){
     
     var selectOrgans = '<select class="select2 form-control selectOrgs" name="organs" multiple {% if not edit or closed  %}disabled{% endif %} >';
 
-    console.log(item.organs_bv_set)
-    console.log(data.organs)
     $.each(data.organs, function(j, o){
       if(item.organs_bv_set.findIndex(x => x.id === o.id) != -1){
         selectOrgans += '<option value="'+o.id+'" selected>'+o.name+'</option>';

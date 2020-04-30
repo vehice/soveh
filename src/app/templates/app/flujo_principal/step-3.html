@@ -53,13 +53,16 @@
         </tbody>
         </table>
     </div>
+    <div class='pull-right mb-2'>
+      <button type="button"class='btn btn-secondary' onclick='renameCassettes();'><i class='fa fa-edit fa-fx'></i> Renombrar Cassettes Configurados</button>
+    </div>
   </div>
 </fieldset>
 
 <script id="cassette_row" type="text/x-lodash-template">
-  <tr>
-    <input type="hidden" name="cassette[sample_id][<%= cassette_index %>]" value="<%= sample_id %>" >
-    <input type="hidden" name="cassette[cassette_name][<%= cassette_index %>]" value="<%= cassette_name %>" >
+  <tr id="cassette-index-<%= cassette_index %>">
+    <input type="hidden" name="cassette[sample_id][<%= sample_index %>]" value="<%= sample_id %>" >
+    {% comment %} <input type="hidden" name="cassette[cassette_name][<%= cassette_index %>]" value="<%= cassette_name %>" > {% endcomment %}
     <td>
       <%= sample_index %>
     </td>
@@ -67,18 +70,31 @@
       <%= sample_name %>
     </td>
     <td>
-      <%= cassette_name %>
+      {% comment %} <%= cassette_name %> {% endcomment %}
+      <select class="form-control cassetteSelector" name="cassette[cassette_name][<%= sample_index %>]" style="width:85%">
+        <% _.each( cassettes, function( cassette ){ %>
+          <% if (cassette.sample_id == sample_id) { %>
+            <option selected value="<%= cassette.cassette_name %>"><%= cassette.cassette_name %></option>
+          <% } else { %>
+            <option value="<%= cassette.cassette_name %>"><%= cassette.cassette_name %></option>
+          <% } %>
+        <% }); %>
+      </select>
     </td>
     <td style="width:40%">
       <select class="select2 form-control form-control-sm" style="width:100%" {% if not edit %}disabled{% endif %}
-        id="cassette-organ-<%= cassette_index %>" name="cassette[organ][<%= cassette_index %>]" multiple="multiple">
+        id="cassette-organ-<%= sample_index %>" name="cassette[organ][<%= sample_index %>]" multiple="multiple">
         <% _.each( organs, function( organ ){ %>
           <option value=<%= organ.id %>> <%= organ.name %> </option>
         <% }); %>
       </select>
     </td>
     <td>
-      <button {% if not edit %}disabled{% endif %} title="Añadir cassette a la muestra" tooltip="" type="button" data-cassette="<%= cassette_index %>" class="btn btn-icon btn-secondary add_cassette_to_sample"><i class="fa fa-plus"></i></button>
+      <% if (extra) { %>
+        <button title="Eliminar Cassette" tooltip="" type="button" data-cassette="<%= cassette_index %>" class="btn btn-icon btn-danger remove_cassette"><i class="fa fa-trash"></i></button>
+      <% } else { %>
+        <button {% if not edit %}disabled{% endif %} title="Añadir cassette a la muestra" tooltip="" type="button" data-sample="<%= sample_id %>" class="btn btn-icon btn-secondary add_cassette_to_sample"><i class="fa fa-plus"></i></button>
+      <% } %>
     </td>
   </tr>
 </script>

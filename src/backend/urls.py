@@ -44,7 +44,7 @@ urlpatterns = [
         name='report_by_id'),
     path('report', csrf_exempt(views.REPORT.as_view()), name='report'),
     path(
-        'organs-slice/<int:slice_id>',
+        'organs-slice/<int:slice_id>/<int:sample_id>',
         csrf_exempt(views.organs_by_slice),
         name="organs_by_slice"),
     path(

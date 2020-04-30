@@ -54,7 +54,6 @@
     </td>
     <td>
       <%= slice_name %>
-      <input type="hidden" name="store[slice_id][<%= store_index %>]" value="<%= slice_id %>" >
     </td>
     <td>
       <% _.each( organs, function( organ ){ %>
@@ -70,7 +69,7 @@
     </td>
     {% if edit %}
       <td class="text-center">
-        <a title="Agregar nuevo hallazgo" id="new_pathology_link" data-slice-id="<%= slice_id %>" <i class="fa fa-plus fa-fw fa-2x"></i></a>
+        <a title="Agregar nuevo hallazgo" id="new_pathology_link" data-sample-id="<%= sample_id %>" data-slice-id="<%= slice_id %>" <i class="fa fa-plus fa-fw fa-2x"></i></a>
         <a title="Editar hallazgos" id="show_pathology_link" data-slice-id="<%= slice_id %>" <i class="fa fa-edit fa-fw fa-2x"></i></a>
       </td>
     {% endif %}

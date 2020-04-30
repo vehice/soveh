@@ -383,26 +383,14 @@ def template_resumen_report(request, id, userId):
                     organs.index(model_to_dict(sE.organ))
                 except:
                     organs.append(model_to_dict(sE.organ))
-        cassettes = Cassette.objects.filter(sample=s)
         s_dict['organs_set'] = organs
         s_dict['sample_exams_set'] = sampleExa
-        cassettes_set = []
-        for c in cassettes:
-            cassettes_set.append({
-                'cassette_name': c.cassette_name,
-                'entryform_id': c.entryform_id,
-                'id': c.id,
-                'index': c.index,
-                'sample_id': c.sample_id,
-                'organs_set': list(c.organs.values())
-            })
-        s_dict['cassettes_set'] = cassettes_set
-        s_dict['identification'] = model_to_dict(s.identification, exclude=["organs",])
+        s_dict['identification'] = model_to_dict(s.identification, exclude=["organs", 'organs_before_validations'])
         samples_as_dict.append(s_dict)
 
     entryform["identifications"] = []
     for ident in entryform_object.identification_set.all():
-        ident_json = model_to_dict(ident, exclude=["organs"])
+        ident_json = model_to_dict(ident, exclude=["organs", 'organs_before_validations'])
         ident_json['organs_set'] = list(ident.organs.all().values())
         entryform["identifications"].append(ident_json)              
 
@@ -416,14 +404,6 @@ def template_resumen_report(request, id, userId):
     entryform["watersource"] = model_to_dict(entryform_object.watersource) if entryform_object.watersource else None
     entryform["specie"] = model_to_dict(entryform_object.specie) if entryform_object.specie else None
 
-    # exams_set = list(Exam.objects.all().values())
-    # organs_set = list(Organ.objects.all().values())
-
-    # species_list = list(Specie.objects.all().values())
-    # larvalStages_list = list(LarvalStage.objects.all().values())
-    # fixtatives_list = list(Fixative.objects.all().values())
-    # waterSources_list = list(WaterSource.objects.all().values())
-    # customers_list = list(Customer.objects.all().values())
     patologos = list(User.objects.filter(userprofile__profile_id__in=[4, 5]).values())
 
     for item in entryform['identifications']:
@@ -460,14 +440,6 @@ def template_resumen_report(request, id, userId):
         'identifications': identifications,
         'case_created_by': User.objects.get(pk=entryform['created_by_id']).get_full_name(),
         'report_generated_by': User.objects.get(pk=userId).get_full_name(),
-        # 'samples': samples_as_dict,
-        # 'exams': exams_set,
-        # 'organs': organs_set,
-        # 'species_list': species_list,
-        # 'larvalStages_list': larvalStages_list,
-        # 'fixtatives_list': fixtatives_list,
-        # 'waterSources_list': waterSources_list,
-        # 'customers_list': customers_list,
         'patologos': patologos
     }
 
@@ -495,11 +467,13 @@ def preview_report(request, id):
 
     data = {}
     for key, value in res.items():
-        samples = Sample.objects.filter(identification_id=key).order_by('index')
+        samples = Sample.objects.filter(id__in=list(map(lambda x: x.sample_id, value))).order_by('index')
         matrix = []
         first_column = [["MUESTRA / HALLAZGO", 1], ""]
         first_column = first_column + list(map(lambda x: x.identification.cage+"-"+x.identification.group+"-"+str(x.index), samples))
         matrix.append(first_column + [""])
+
+        # print (matrix)
         
         res2 = defaultdict(list)
         value.sort(key=sortReport)
@@ -517,6 +491,7 @@ def preview_report(request, id):
             else:
                 lastOrgan = value2[0].organ.name
                 column = [[value2[0].organ.name, 1], key2]
+
             samples_by_index = {}
             
             for sam in samples:
@@ -524,7 +499,7 @@ def preview_report(request, id):
 
             for item in value2:
                 if item.identification_id == key:
-                    samples_by_index[item.slice.cassette.sample.index].append(item.diagnostic_intensity.name)
+                    samples_by_index[item.sample.index].append(item.diagnostic_intensity.name)
 
             aux = []
             count_hallazgos = 0
@@ -541,6 +516,7 @@ def preview_report(request, id):
             matrix.append(column)
 
         data[key] = list(zip(*matrix))
+        # print (data)
         
     return render(request, 'app/preview_report.html', {'report': reports, 'form_id': form.pk, 'form_parent_id': form.parent.id, 'reports2': data})
 

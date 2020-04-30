@@ -23,8 +23,8 @@
         <table id="block_table" class="table table-bordered table-condensed" width="100%" cellpadding="0" cellspacing="0" border="0">
           <thead>
             <tr>
-              <th>Muestra</th>
               <th>Cassette</th>
+              <th>Muestra</th>
               <th>Organos</th>
               <th>Nro Cortes</th>
               <th>Inicio Bloque <br> <span class="btn btn-sm btn-success square block_start_all"><i class="fa fa-check-square-o"></i> Todos</span></th>
@@ -105,15 +105,14 @@
 </div>
 
 <script id="block_dyeing_row" type="text/x-lodash-template">
-  <tr data-index="<%= block_index %>">
-    <td>
-      <%= sample_index %>
-      <input type="hidden" name="cassette_sample_id_<%= block_index %>" value="<%= sample_id %>" >
-    </td>
+  <tr data-index="<%= cassette_index %>">
     <td>
       <%= cassette_name %>
-      <input type="hidden" name="block_cassette_pk_<%= block_index %>" value="<%= cassette_pk %>" >
-      <input type="hidden" name="block_cassette_name_<%= block_index %>" value="<%= cassette_name %>" >
+      <input type="hidden" name="block_cassette_pk_<%= cassette_index %>" value="<%= cassette_pk %>" >
+      <input type="hidden" name="block_cassette_name_<%= cassette_index %>" value="<%= cassette_name %>" >
+    </td>
+    <td>
+      <%= samples %>
     </td>
     <td>
       <%= organs %>
@@ -122,20 +121,20 @@
       <%= no_slice %>
     </td>
     <td>
-      <input type="checkbox" id="block_start_block_<%= block_index %>" class="switchery" />
-      <input type="hidden" name="block_start_block_<%= block_index %>" value="<%= start_block %>"  />
+      <input type="checkbox" id="block_start_block_<%= cassette_index %>" class="switchery" />
+      <input type="hidden" name="block_start_block_<%= cassette_index %>" value="<%= start_block %>"  />
     </td>
     <td>
-      <input type="checkbox" id="block_end_block_<%= block_index %>" class="switchery" />
-      <input type="hidden" name="block_end_block_<%= block_index %>" value="<%= end_block %>" />
+      <input type="checkbox" id="block_end_block_<%= cassette_index %>" class="switchery" />
+      <input type="hidden" name="block_end_block_<%= cassette_index %>" value="<%= end_block %>" />
     </td>
     <td>
-      <input type="checkbox" id="block_start_slice_<%= block_index %>" class="switchery" />
-      <input type="hidden" name="block_start_slice_<%= block_index %>" value="<%= start_slice %>" />
+      <input type="checkbox" id="block_start_slice_<%= cassette_index %>" class="switchery" />
+      <input type="hidden" name="block_start_slice_<%= cassette_index %>" value="<%= start_slice %>" />
     </td>
     <td>
-      <input type="checkbox" id="block_end_slice_<%= block_index %>" class="switchery" />
-      <input type="hidden" name="block_end_slice_<%= block_index %>" value="<%= end_slice %>" />
+      <input type="checkbox" id="block_end_slice_<%= cassette_index %>" class="switchery" />
+      <input type="hidden" name="block_end_slice_<%= cassette_index %>" value="<%= end_slice %>" />
     </td>
     <td>
       <span id="slice-info" data-trigger="hover" data-toggle="popover" data-html="true" title="Visualizar Cortes" data-content="<%= slice_info %>"><i class="fa fa-search-plus fa-fw fa-2x"></i></span>

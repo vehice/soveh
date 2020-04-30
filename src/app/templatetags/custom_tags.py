@@ -6,7 +6,7 @@ register = Library()
 def join_diagnostic(value):
     text = ''
     for i in value:
-        text+= str(i.slice.cassette.sample.index)+', '
+        text+= str(i.sample.index)+', '
     return text[:-2]
 
 @register.filter(name='navigations')

@@ -81,16 +81,25 @@ function loadStainTable(data, active = true) {
 }
 
 function populateStainTable(data, active = true) {
+  console.log(data.slices)
   $.each(data.slices, function (i, item) {
     var row = {};
 
     row.slice_id = item.id;
-    row.sample_index = item.sample.index;
     row.slice_name = item.slice_name;
     row.stain_index = i;
-    row.sample_identification = item.sample.identification.cage + '-' + item.sample.identification.group;
     row.start_stain = item.start_stain;
     row.end_stain = item.end_stain;
+
+    var samples_index_comm_sep = '';
+    $.each(item.samples, function(j, sample){
+      if (j == 0){
+        samples_index_comm_sep += sample.index;
+      } else {
+        samples_index_comm_sep += ', '+sample.index;
+      }
+    });
+    row.samples = samples_index_comm_sep;
 
     addStainRow(row)
     console.log(active)

@@ -136,17 +136,26 @@ function loadBlockTable(data, active = true) {
 }
 
 function populateBlockTable(data, active = true) {
+  console.log(data)
   $.each(data.cassettes, function (i, item) {
     var row = {};
 
-    row.sample_id = item.sample.id;
-    row.sample_index = item.sample.index;
+    // row.sample_id = item.sample.id;
+    // row.sample_index = item.sample.index;
     row.cassette_name = item.cassette_name;
     row.cassette_pk = item.id;
     row.cassette_index = item.index;
-    row.organs = item.organs_set.join(", ")
-    row.block_index = i;
+    row.organs = item.organs_set.join(", ");
 
+    var samples_index_comm_sep = '';
+    $.each(item.samples_set, function(j, sample){
+      if (j == 0){
+        samples_index_comm_sep += sample.index;
+      } else {
+        samples_index_comm_sep += ', '+sample.index;
+      }
+    });
+    row.samples = samples_index_comm_sep;
     row.no_slice = item.slices_set.length;
 
     if (item.slices_set.length > 0) {
@@ -163,8 +172,8 @@ function populateBlockTable(data, active = true) {
 
     row.slice_info = "<ol>";
     $.each(item.slices_set, function (k, v) {
-      row.slice_info += "<li><p><strong>Cassette:</strong> " + row.cassette_name + " <strong> </br>Muestra: </strong>\
-      " + row.sample_index + " <strong> </br>Corte: </strong>" +v.slice_name+" <strong>\
+      row.slice_info += "<li><p><strong>Cassette:</strong> " + row.cassette_name + " <strong> </br>Muestras: </strong>\
+      " + row.samples + " <strong> </br>Corte: </strong>" +v.slice_name+" <strong>\
       </br>An&aacute;lisis: </strong>" + v.exam + "</p></li>"
     });
     row.slice_info += "</ol>";

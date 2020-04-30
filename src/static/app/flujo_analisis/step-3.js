@@ -37,11 +37,17 @@ function populateStoreTable(data) {
 
     row.slice_id = item.id;
     row.slice_name = item.slice_name;
-    row.sample_index = item.sample.index;
     row.store_index = i;
-    row.sample_identification = item.sample.identification.cage + '-' + item.sample.identification.group;
     row.box_id = item.box_id
-
+    var samples_index_comm_sep = '';
+    $.each(item.samples, function(j, sample){
+      if (j == 0){
+        samples_index_comm_sep += sample.index;
+      } else {
+        samples_index_comm_sep += ', '+sample.index;
+      }
+    });
+    row.samples = samples_index_comm_sep;
     addStoreRow(row)
   });
 }

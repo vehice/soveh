@@ -119,7 +119,7 @@
                                         <ul>
                                           {% for item in organ.list %}
                                             <li>
-                                              Se observa {{ item.pathology.name }} en {{ item.organ_location.name }} {{ item.diagnostic_intensity.name }} (Muestra {{item.slice.cassette.sample.index}})
+                                              Se observa {{ item.pathology.name }} en {{ item.organ_location.name }} {{ item.diagnostic_intensity.name }} (Muestra {{item.sample.index}})
                                             </li>
                                           {% endfor %}
                                         </ul>

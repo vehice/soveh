@@ -18,7 +18,8 @@ function init_step_4() {
 
   $(document).on('click', '#new_pathology_link', function (e) {
     var slice_id = $(this).data("slice-id");
-    var url = Urls.organs_by_slice(slice_id);
+    var sample_id = $(this).data("sample-id");
+    var url = Urls.organs_by_slice(slice_id, sample_id);
 
     $(this).closest('tr').addClass("select");
 
@@ -29,7 +30,7 @@ function init_step_4() {
       .done(function (data) {
         new_pathology_data = data.organs;
         $("#slice_id").val(slice_id);
-
+        $("#sample_id").val(sample_id);
         $("#organ_select").children('option:not(:first)').remove();
 
         $.each(data.organs, function (i, item) {
@@ -304,25 +305,27 @@ function loadDiagnosticTable(data) {
 }
 
 function populateDiagnosticTable(data) {
-  $.each(data.slices, function (i, item) {
-    var row = {};
+  console.log(data)
+  var slice_counter = 0;
+  $.each(data.samples, function (i, item) {
 
-    row.slice_id = item.id;
-    row.slice_name = item.slice_name;
-    row.sample_index = item.sample.index;
-    
-    $.each(data.samples, function (j, item2){
-      if ( item2.id == item.sample.id ) {
-        row.organs = item2.sample_exams_set[item.analysis_exam].organ_id;
-        return false;
-      }
+    // row.slice_id = item.id;
+    // row.slice_name = item.slice_name;
+    // row.sample_index = item.sample.index;
+    $.each(item.exam_slices_set, function (j, slice) {
+
+      var row = {};
+      row.slice_id = slice.id;
+      row.slice_name = slice.slice_name;
+      row.sample_index = item.index;
+      row.sample_id = item.id;
+      row.organs = item.organs_set;
+      row.paths = slice.paths_count;
+      row.store_index = slice_counter;
+      row.sample_identification = item.identification.cage + '-' + item.identification.group;
+      addDiagnosticRow(row)
+      slice_counter += 1;
     });
-    // row.organs = item.organs;
-    row.store_index = i;
-    row.sample_identification = item.sample.identification.cage + '-' + item.sample.identification.group;
-    row.paths = item.paths_count;
-
-    addDiagnosticRow(row)
   });
 }
 

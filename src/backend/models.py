@@ -253,7 +253,7 @@ class Cassette(models.Model):
     cassette_name = models.CharField(max_length=250, null=True, blank=True)
     processor_loaded_at = models.DateTimeField(null=True, blank=True)
     # identifications = models.ManyToManyField(Identification)
-    sample = models.ForeignKey(Sample, null=True, on_delete=models.SET_NULL)
+    samples = models.ManyToManyField(Sample)
     organs = models.ManyToManyField(Organ)
 
 class Slice(models.Model):
@@ -301,6 +301,7 @@ class Report(models.Model):
     images = models.ManyToManyField(Img)
     identification = models.ForeignKey(
         Identification, null=True, on_delete=models.SET_NULL)
+    sample = models.ForeignKey(Sample, null=True, on_delete=models.SET_NULL)
 
 class ReportFinal(models.Model):
     analysis = models.ForeignKey(
