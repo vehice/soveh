@@ -2197,7 +2197,7 @@ def step_new_analysis2(request):
                         exam_id= exam,
                         organ_id= organ
                     )
-                    for cassette in Cassette.objects.filter(sample=sample):
+                    for cassette in Cassette.objects.filter(samples__in=[sample]):
                         if not len(cassette.organs.filter(id=organ)):
                             cassette.organs.add(organ)
                             cassette.save()
