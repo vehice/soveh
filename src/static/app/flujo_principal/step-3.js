@@ -231,7 +231,6 @@ function refreshCassettesOptions(){
 
 function loadCassetteData(data) {
   cassettes = [];
-  console.log(data)
   if (data.entryform.cassettes.length > 0){
     $('[name="processor_loaded_at"]').val(moment(data.entryform.cassettes[0].processor_loaded_at).format("DD/MM/YYYY HH:mm") || "");
     $('#processor_loaded_at_submit').val(data.entryform.cassettes[0].processor_loaded_at);
@@ -273,7 +272,6 @@ function loadCassetteData(data) {
 
     $.each(data.samples, function (i, sample) {
       if(sample.organs_set.length > 0){
-        // if (sample.)
         var row = {
           'sample_id' : sample.id,
           'sample_index' : sample.index,
@@ -285,8 +283,6 @@ function loadCassetteData(data) {
         cassettes.push(row);
       }
     });
-
-    // console.log(prev_cassettes)
 
     $.each(cassettes, function (i, cassette) {
 
