@@ -2076,14 +2076,19 @@ def step_new_analysis(request):
 
     analyses_qs.delete()
 
-    flow = Flow.objects.get(pk=2)
-
     for exam in exams_to_do:
+        ex = Exam.objects.get(pk=exam)
         if AnalysisForm.objects.filter(entryform_id=entryform.id, exam_id=exam).count() == 0:
+            if ex.service_id in [1,3,4]:
+                flow = Flow.objects.get(pk=2)
+            elif ex.service_id == 5:
+                continue;
+            else:
+                flow = Flow.objects.get(pk=3)
+
             analysis_form = AnalysisForm.objects.create(
                 entryform_id=entryform.id,
-                exam_id=exam,
-                # patologo_id=int(var_post.get("sample[patologos]["+exam+"]"))
+                exam=ex,
             )
 
             Form.objects.create(
@@ -2158,15 +2163,20 @@ def step_new_analysis2(request):
     exams_to_do = var_post.getlist("analysis")
     analyses_qs = entryform.analysisform_set.all()
 
-    flow = Flow.objects.get(pk=2)
-
     new_analysisform = {}
     for exam in exams_to_do:
+        ex = Exam.objects.get(pk=exam)
         if AnalysisForm.objects.filter(entryform_id=entryform.id, exam_id=exam).count() == 0:
+            if ex.service_id in [1,3,4]:
+                flow = Flow.objects.get(pk=2)
+            elif ex.service_id == 5:
+                continue;
+            else:
+                flow = Flow.objects.get(pk=3)
+
             analysis_form = AnalysisForm.objects.create(
                 entryform_id=entryform.id,
-                exam_id=exam,
-                # patologo_id=int(var_post.get("sample[patologos]["+exam+"]"))
+                exam=ex,
             )
             new_analysisform[exam] = analysis_form.pk
 
