@@ -115,7 +115,10 @@ class ENTRYFORM(View):
                             'id':sE.organ.id}]
                         }
                     if sE.exam.service_id in [1,2,3]:
-                        organs.append(model_to_dict(sE.organ))
+                        try:
+                            organs.index(model_to_dict(sE.organ))
+                        except:
+                            organs.append(model_to_dict(sE.organ))
                 cassettes = Cassette.objects.filter(samples__in=[s])
                 s_dict['organs_set'] = organs
                 s_dict['sample_exams_set'] = sampleExa
@@ -611,7 +614,7 @@ class SLICE(View):
                 s_dict['exam_slices_set'] = []
                 for l in exam_slices:
                     exam_slice = model_to_dict(l)
-                    exam_slice['paths_count'] = Report.objects.filter(slice_id=l.pk).count()
+                    exam_slice['paths_count'] = Report.objects.filter(slice_id=l.pk, sample_id=s.id).count()
                     exam_slice['analysis_exam'] = l.analysis.exam.id
                     s_dict['exam_slices_set'].append(exam_slice)
                 # s_dict['cassettes_set'] = list(cassettes_set)
@@ -703,7 +706,7 @@ class WORKFLOW(View):
 
             data = {}
             for key, value in res.items():
-                samples = Sample.objects.filter(id__in=list(map(lambda x: x.sample_id, value))).order_by('index')
+                samples = Sample.objects.filter(identification_id=key).order_by('index')
                 matrix = []
                 first_column = [["MUESTRA / HALLAZGO", 1], ""]
                 first_column = first_column + list(map(lambda x: x.identification.cage+"-"+x.identification.group+"-"+str(x.index), samples))

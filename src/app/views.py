@@ -467,7 +467,7 @@ def preview_report(request, id):
 
     data = {}
     for key, value in res.items():
-        samples = Sample.objects.filter(id__in=list(map(lambda x: x.sample_id, value))).order_by('index')
+        samples = Sample.objects.filter(identification_id=key).order_by('index')
         matrix = []
         first_column = [["MUESTRA / HALLAZGO", 1], ""]
         first_column = first_column + list(map(lambda x: x.identification.cage+"-"+x.identification.group+"-"+str(x.index), samples))

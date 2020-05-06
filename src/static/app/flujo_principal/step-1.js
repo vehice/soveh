@@ -267,7 +267,7 @@ function init_step_1() {
             $(identifications_extra_features_detail[i]).val(item.extra_features_detail);
             $(identifications_observations[i]).val(item.observation);
             var orgs = [];
-            $.each(item.organs_set, function (j, v) {
+            $.each(item.organs_bv_set, function (j, v) {
               orgs.push(v.id);
             });
             $(identifications_organs[0]).val(orgs);
