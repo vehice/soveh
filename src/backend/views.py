@@ -662,13 +662,23 @@ class WORKFLOW(View):
             permisos =  actor.permission.filter(from_state_id=step_tag.split('_')[1])
             edit = 1 if permisos.filter(type_permission='w').first() else 0
             route = 'app/workflow_main.html'
+
+            childrens = Form.objects.filter(parent_id=form)
+            close_allowed = 1
+
+            for ch in childrens:
+                if not ch.form_closed and not ch.cancelled:
+                    close_allowed = 0
+                    break
+
             data = {
                 'form': form,
                 'form_id': form_id,
                 'entryform_id': object_form_id,
                 'set_step_tag': step_tag,
                 'edit': edit,
-                'closed': 1 if form.form_closed else 0
+                'closed': 1 if form.form_closed else 0,
+                'close_allowed': close_allowed
             }
         elif (form.content_type.name == 'analysis form'):
             reopen = False

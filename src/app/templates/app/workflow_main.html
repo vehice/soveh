@@ -549,51 +549,62 @@ var steps = $("#workflow_form").steps({
     }, 
     onFinishing: function (event, currentIndex)
     {
-      swal({
-        title: "Confirmación",
-        text: "¿Está seguro que completó todo el proceso?",
-        icon: "warning",
-        showCancelButton: true,
-        buttons: {
-          cancel: {
-              text: "No, cancelar!",
-              value: null,
-              visible: true,
-              className: "btn-warning",
-              closeModal: true,
-          },
-          confirm: {
-              text: "Sí!",
-              value: true,
-              visible: true,
-              className: "",
-              closeModal: true,
-          }
-        }
-      }).then(isConfirm => {
-        if (isConfirm) {
-          var url = Urls.complete_form({{form_id}});
-          $.ajax({
-            type: "GET",
-            url: url,
-            async: false,
-          })
-          .done(function (data) {
-            response = data;
-            if (response.ok) {
-              toastr.success('', 'Se ha completado el caso exitosamente.');
-              var timer = setTimeout(function() {
-                window.location='/ingresos'
-              }, 2000);
-            } else {
-              toastr.error('', 'No ha sido posible completar el caso.');
+      if ({{close_allowed}}){
+        swal({
+          title: "Confirmación",
+          text: "¿Está seguro que desea finalizar el caso?",
+          icon: "warning",
+          showCancelButton: true,
+          buttons: {
+            cancel: {
+                text: "No, cancelar!",
+                value: null,
+                visible: true,
+                className: "btn-warning",
+                closeModal: true,
+            },
+            confirm: {
+                text: "Sí!",
+                value: true,
+                visible: true,
+                className: "",
+                closeModal: true,
             }
-          })
-          .fail(function (data) {
-            toastr.error('', 'No ha sido posible completar el caso.');
-          });
-        }
-      });
+          }
+        }).then(isConfirm => {
+          if (isConfirm) {
+            var url = Urls.complete_form({{form_id}});
+            $.ajax({
+              type: "GET",
+              url: url,
+              async: false,
+            })
+            .done(function (data) {
+              response = data;
+              if (response.ok) {
+                toastr.success('', 'Se ha completado el caso exitosamente.');
+                var timer = setTimeout(function() {
+                  window.location='/ingresos'
+                }, 2000);
+              } else {
+                toastr.error('', 'No ha sido posible completar el caso.');
+              }
+            })
+            .fail(function (data) {
+              toastr.error('', 'No ha sido posible completar el caso.');
+            });
+          }
+        });
+      
+      } else {
+        swal({
+          title: "Información",
+          text: "Lo sentimos, aún se encuentran servicios abiertos que deben ser cerrados o anulados antes de cerrar el caso.",
+          icon: "info",
+          showCancelButton: true,
+        });
+      }
+      
     },
     onFinished: function (event, currentIndex)
     {
