@@ -115,10 +115,18 @@ class ENTRYFORM(View):
                             'id':sE.organ.id}]
                         }
                     if sE.exam.service_id in [1,2,3]:
-                        try:
-                            organs.index(model_to_dict(sE.organ))
-                        except:
-                            organs.append(model_to_dict(sE.organ))
+                        if sE.organ in s.identification.organs_before_validations.all():
+                            try:
+                                organs.index(model_to_dict(sE.organ))
+                            except:
+                                organs.append(model_to_dict(sE.organ))
+                        else:
+                            for org in s.identification.organs_before_validations.all():
+                                if org.organ_type == 2:
+                                    try:
+                                        organs.index(model_to_dict(org))
+                                    except:
+                                        organs.append(model_to_dict(org))
                 cassettes = Cassette.objects.filter(samples__in=[s])
                 s_dict['organs_set'] = organs
                 s_dict['sample_exams_set'] = sampleExa
@@ -459,11 +467,19 @@ class ANALYSIS(View):
             sampleexams = s.sampleexams_set.all()
             sampleExa = {}
             for sE in sampleexams:
-                if sE.exam.service_id == 1:
-                    try:
-                        organs.index(model_to_dict(sE.organ))
-                    except:
-                        organs.append(model_to_dict(sE.organ))
+                if sE.exam.service_id in [1,2,3]:
+                    if sE.organ in s.identification.organs_before_validations.all():
+                        try:
+                            organs.index(model_to_dict(sE.organ))
+                        except:
+                            organs.append(model_to_dict(sE.organ))
+                    else:
+                        for org in s.identification.organs_before_validations.all():
+                            if org.organ_type == 2:
+                                try:
+                                    organs.index(model_to_dict(org))
+                                except:
+                                    organs.append(model_to_dict(org))
             organs_set = organs
             # exams_set = s.exams.all().values()
             sampleexams = s.sampleexams_set.all()
@@ -971,10 +987,18 @@ class REPORT(View):
                             'id':sE.organ.id}]
                         }
                     if sE.exam.service_id in [1,2,3]:
-                        try:
-                            organs.index(model_to_dict(sE.organ))
-                        except:
-                            organs.append(model_to_dict(sE.organ))
+                        if sE.organ in s.identification.organs_before_validations.all():
+                            try:
+                                organs.index(model_to_dict(sE.organ))
+                            except:
+                                organs.append(model_to_dict(sE.organ))
+                        else:
+                            for org in s.identification.organs_before_validations.all():
+                                if org.organ_type == 2:
+                                    try:
+                                        organs.index(model_to_dict(org))
+                                    except:
+                                        organs.append(model_to_dict(org))
                 s_dict['organs_set'] = organs
                 s_dict['exams_set'] = sampleExa
                 cassettes_set = []
