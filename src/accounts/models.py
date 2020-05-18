@@ -22,6 +22,15 @@ class UserProfile(models.Model):
     def __str__(self):
         return self.profile.name
 
+    def save(self, *args, **kwargs):
+        if self.profile_id == 1:
+            self.user.is_staff = True
+            self.user.is_superuser = True
+            self.user.save()
+
+        super(UserProfile, self).save(*args, **kwargs)
+   
+
     class Meta:
         verbose_name = "Perfil de Usuario"
         verbose_name_plural = "Perfiles de Usuario"

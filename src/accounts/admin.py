@@ -25,5 +25,8 @@ class CustomUserProfile(UserAdmin):
             return list()
         return super(CustomUserProfile, self).get_inline_instances(request, obj)
 
+    def save_model(self, request, obj, form, change):
+        super(CustomUserProfile, self).save_model(request, obj, form, change)
+
 admin.site.unregister(User)
 admin.site.register(User, CustomUserProfile)
