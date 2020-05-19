@@ -647,11 +647,11 @@ class SLICE(View):
             entryform_object.analysisform_set.all().values('id', 'created_at', 'comments', 'entryform_id', 'exam_id', 'exam__name', 'patologo_id', 'patologo__first_name', 'patologo__last_name'))
         entryform["cassettes"] = list(
             entryform_object.cassette_set.all().values())
-        entryform["customer"] = entryform_object.customer.name
-        entryform["larvalstage"] = entryform_object.larvalstage.name
-        entryform["fixative"] = entryform_object.fixative.name
-        entryform["watersource"] = entryform_object.watersource.name
-        entryform["specie"] = entryform_object.specie.name
+        entryform["customer"] = entryform_object.customer.name if entryform_object.customer else ""
+        entryform["larvalstage"] = entryform_object.larvalstage.name if entryform_object.larvalstage else ""
+        entryform["fixative"] = entryform_object.fixative.name if entryform_object.fixative else ""
+        entryform["watersource"] = entryform_object.watersource.name if entryform_object.watersource else ""
+        entryform["specie"] = entryform_object.specie.name if entryform_object.specie else ""
         organs_set = list(Organ.objects.all().values())
         exams_set = list(Exam.objects.all().values())
         
@@ -1024,11 +1024,11 @@ class REPORT(View):
                 entryform_object.analysisform_set.all().values())
             entryform["cassettes"] = list(
                 entryform_object.cassette_set.all().values())
-            entryform["customer"] = entryform_object.customer.name
-            entryform["larvalstage"] = entryform_object.larvalstage.name
-            entryform["fixative"] = entryform_object.fixative.name
-            entryform["watersource"] = entryform_object.watersource.name
-            entryform["specie"] = entryform_object.specie.name
+            entryform["customer"] = entryform_object.customer.name if entryform_object.customer else ""
+            entryform["larvalstage"] = entryform_object.larvalstage.name if entryform_object.larvalstage else ""
+            entryform["fixative"] = entryform_object.fixative.name if entryform_object.fixative else ""
+            entryform["watersource"] = entryform_object.watersource.name if entryform_object.watersource else ""
+            entryform["specie"] = entryform_object.specie.name if entryform_object.specie else ""
 
             data = {'reports': reports, "entryform": entryform}
         return JsonResponse(data)
