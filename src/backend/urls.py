@@ -126,5 +126,5 @@ urlpatterns = [
     ),
     path('close_service/<int:form_id>', csrf_exempt(views.close_service), name='close_service'),
     path('cancel_service/<int:form_id>', csrf_exempt(views.cancel_service), name='cancel_service'),
-    path('reopen_service/<int:form_id>', csrf_exempt(views.reopen_service), name='reopen_service'),
+    path('reopen_form/<int:form_id>', csrf_exempt(views.reopen_form), name='reopen_form'),
 ]

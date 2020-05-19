@@ -610,7 +610,7 @@ function reopenSerivce(form_id){
     }).then(isConfirm => {
     if (isConfirm) {
       
-      var url = Urls.reopen_service(form_id);
+      var url = Urls.reopen_form(form_id);
       $.ajax({
         type: "POST",
         url: url,

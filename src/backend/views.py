@@ -2643,7 +2643,7 @@ def cancel_service(request, form_id):
     form.save()
     return JsonResponse({'ok':True})
 
-def reopen_service(request, form_id):
+def reopen_form(request, form_id):
     form = Form.objects.get(pk=form_id)
     form.cancelled = False
     form.cancelled_at = None

@@ -91,8 +91,13 @@
                     <td>
                       <div class="btn-group" role="group" aria-label="Opciones">
                         <button class="btn btn-sm btn-primary showSummaryBtn" data-id="{{ entryForm.content_object.pk }}" data-closed="{{ entryForm.form_closed }}"><i class="fa fa-list fa-fx"></i> Resumen</button>
+                        
+                        {% if entryForm.form_closed and request.user.is_superuser %}
+                          <button type="button" data-id="{{ entryForm.id }}" class="btn btn-blue btn-sm reopenFlow"><i class="fa fa-check-square-o fa-fx"></i> Reabrir</button>                   
+                        {% endif %}
+
                         {% if eliminar %}
-                        <button type="button" data-id="{{ entryForm.id }}" class="btn btn-danger btn-sm deleteFlow"><i class="fa fa-trash fa-fx"></i> Anular</button>
+                          <button type="button" data-id="{{ entryForm.id }}" class="btn btn-danger btn-sm deleteFlow"><i class="fa fa-trash fa-fx"></i> Anular</button>
                         {% endif %}
                       </div>
                     </td>
@@ -219,6 +224,49 @@
         })
         .fail(function (data) {
           toastr.error('', 'No ha sido posible eliminar el caso.');
+        });
+      }
+    });
+  });
+
+  $(document).on('click', '.reopenFlow', function(e){
+    swal({
+      title: "Confirmación",
+      text: "¿Está seguro que desea reabrir este caso definitivamente?",
+      icon: "warning",
+      showCancelButton: true,
+      buttons: {
+        cancel: {
+            text: "No",
+            value: null,
+            visible: true,
+            className: "btn-warning",
+            closeModal: true,
+        },
+        confirm: {
+            text: "Sí, reabrir caso",
+            value: true,
+            visible: true,
+            className: "",
+            closeModal: true,
+        }
+      }
+    }).then(isConfirm => {
+      if (isConfirm) {
+        var form_id = $(this).data('id');
+        var url = Urls.reopen_form(form_id);
+        $.ajax({
+          type: "POST",
+          url: url,
+        })
+        .done(function (data) {
+          toastr.success('', 'Se ha reabierto el caso exitosamente.');
+            var timer = setTimeout(function() {
+              window.location='/ingresos'
+            }, 2000);
+        })
+        .fail(function () {
+          toastr.error('', 'No ha sido posible reabrir el caso, intente nuevamente o contacte un administrador.');
         });
       }
     });
