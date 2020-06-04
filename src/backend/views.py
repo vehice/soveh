@@ -878,11 +878,13 @@ class WORKFLOW(View):
 
     def delete(self, request, form_id):
         form =  Form.objects.get(pk=form_id)
-        form.deleted = True
+        form.cancelled = True
+        form.cancelled_at = datetime.now()
         form.save()
-        forms = Form.objects.filter(parent_id=form_id)
+        forms = Form.objects.filter(parent_id=form_id, form_closed=False, cancelled=False)
         for f in forms:
-            f.deleted = True
+            f.cancelled = True
+            f.cancelled_at = datetime.now()
             f.save()
         # object_form_id = form.content_object.id
         return JsonResponse({'ok': True})
@@ -2557,7 +2559,7 @@ def dashboard_analysis(request):
                 INNER JOIN backend_analysisform a ON s.entryform_id = a.entryform_id
                 INNER JOIN backend_entryform e ON a.entryform_id = e.id
                 INNER JOIN workflows_form f ON a.entryform_id = f.object_id
-                WHERE f.flow_id in (2,3) AND f.deleted = 0
+                WHERE f.flow_id in (2,3) AND f.cancelled = 0
                 AND YEAR(a.created_at) = {0}
                 AND MONTH(a.created_at) IN {1}
             """.format(year, tuple(mes))
@@ -2584,7 +2586,7 @@ def dashboard_lefts(request):
                 FROM backend_analysisform e 
                 LEFT JOIN auth_user u ON e.patologo_id = u.id
                 INNER JOIN workflows_form f ON f.object_id = e.id
-                WHERE f.form_closed = 0 AND f.flow_id in (2,3) AND f.deleted = 0
+                WHERE f.form_closed = 0 AND f.flow_id in (2,3) AND f.cancelled = 0
                 AND YEAR(e.created_at) = {0}
                 AND MONTH(e.created_at) IN {1}
             """.format(year, tuple(mes))
@@ -2611,7 +2613,7 @@ def dashboard_reports(request):
                 SELECT YEAR(f.closed_at) AS `year`, MONTH(f.closed_at) AS `month`, COUNT(e.id) AS count
                 FROM backend_analysisform e
                 INNER JOIN workflows_form f ON f.object_id = e.id
-                WHERE f.form_closed = 1 AND f.flow_id in (2,3) AND f.deleted = 0
+                WHERE f.form_closed = 1 AND f.flow_id in (2,3) AND f.cancelled = 0
                 AND YEAR(f.closed_at) = {0}
                 AND MONTH(f.closed_at) IN {1}
             """.format(year, tuple(mes))

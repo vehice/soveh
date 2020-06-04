@@ -33,7 +33,7 @@ def home(request):
         INNER JOIN backend_analysisform a ON s.entryform_id = a.entryform_id
         INNER JOIN backend_exam e ON a.exam_id = e.id
         INNER JOIN workflows_form f ON a.entryform_id = f.object_id
-        WHERE f.flow_id = 1 AND f.deleted = 0
+        WHERE f.flow_id = 1 AND f.cancelled = 0
         GROUP BY e.`name`, e.id
         ORDER BY count DESC;
     """)
@@ -78,7 +78,7 @@ def show_ingresos(request):
     eliminar = editar and request.user.is_superuser
     check_forms = Form.objects.filter(content_type__model='entryform', state__id=1)
 
-    form = Form.objects.filter(content_type__model='entryform', deleted=False).order_by('-object_id')
+    form = Form.objects.filter(content_type__model='entryform').order_by('-object_id')
     if up.profile_id == 5:
         ids = EntryForm.objects.filter(analysisform__patologo_id=up.user_id).values_list('id')
         form_ids = form.filter(object_id__in=ids).values_list('id')
@@ -540,7 +540,7 @@ def show_patologos(request):
     patologos = list(User.objects.filter(userprofile__profile_id__in=[4, 5]).values())
 
     for a in analysis:
-        if not a.entryform.forms.first().deleted:
+        if not a.entryform.forms.first().cancelled:
             parte = a.entryform.get_subflow
             
             if parte == "N/A":

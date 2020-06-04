@@ -81,22 +81,24 @@
                     </td>
                     <td>{{ entryForm.content_object.customer|default:"" }}</td>
                     <td>{{ entryForm.content_object.created_at|date:"d/m/Y" }}</td>
-                    <td><a href="workflow/{{ entryForm.id }}">
+                    <td>
                       {% if entryForm.form_closed %}
-                        Caso Cerrado 
+                        <a href="workflow/{{ entryForm.id }}"> Caso Cerrado </a>
+                      {% elif entryForm.cancelled %}
+                        Caso Anulado 
                       {% else %}
-                        {{ entryForm.state.step }}
+                        <a href="workflow/{{ entryForm.id }}"> {{ entryForm.state.step }}</a>
                       {% endif %}
-                    </a></td>
+                    </td>
                     <td>
                       <div class="btn-group" role="group" aria-label="Opciones">
                         <button class="btn btn-sm btn-primary showSummaryBtn" data-id="{{ entryForm.content_object.pk }}" data-closed="{{ entryForm.form_closed }}"><i class="fa fa-list fa-fx"></i> Resumen</button>
                         
-                        {% if entryForm.form_closed and request.user.is_superuser %}
+                        {% if entryForm.form_closed and request.user.is_superuser and not entryForm.cancelled %}
                           <button type="button" data-id="{{ entryForm.id }}" class="btn btn-blue btn-sm reopenFlow"><i class="fa fa-check-square-o fa-fx"></i> Reabrir</button>                   
                         {% endif %}
 
-                        {% if eliminar %}
+                        {% if eliminar and not entryForm.cancelled %}
                           <button type="button" data-id="{{ entryForm.id }}" class="btn btn-danger btn-sm deleteFlow"><i class="fa fa-trash fa-fx"></i> Anular</button>
                         {% endif %}
                       </div>
@@ -182,7 +184,7 @@
   $(document).on('click', '.deleteFlow', function(e){
     swal({
       title: "Confirmación",
-      text: "¿Está seguro que desea eliminar este caso definitivamente?",
+      text: "Le notificamos que al anular un caso no será posible reabrirlo. Además, automáticamente serán anulados todos los servicios que se encuentren abiertos o en curso. ¿Está seguro que desea continuar con la anulación?",
       icon: "warning",
       showCancelButton: true,
       buttons: {
@@ -194,7 +196,7 @@
             closeModal: true,
         },
         confirm: {
-            text: "Sí, eliminar!",
+            text: "Sí, anular!",
             value: true,
             visible: true,
             className: "",
@@ -214,7 +216,7 @@
         .done(function (data) {
           response = data;
           if (response.ok) {
-            toastr.success('', 'Se ha eliminado el caso exitosamente.');
+            toastr.success('', 'Se ha anulado el caso exitosamente.');
             var timer = setTimeout(function() {
               window.location='/ingresos'
             }, 2000);
