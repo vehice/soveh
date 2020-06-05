@@ -52,6 +52,12 @@
           <input type='text' class="form-control" id="request_number_input" name="no_request"
             {% if not edit %}disabled{% endif %} />
         </div>
+        <div class="form-group">
+          <label for="entryform_type_select">Tipo de ingreso :</label>
+          <select class="select2 form-control" id="entryform_type_select" name="entryform_type"
+            {% if not edit %}disabled{% endif %}>
+          </select>
+        </div>
 
       </div>
       <div class="col-sm-6">

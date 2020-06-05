@@ -136,6 +136,16 @@ class Customer(models.Model):
     class Meta:
         verbose_name = "Cliente"
 
+class EntryForm_Type(models.Model):
+    name = models.CharField(max_length=250, null=True, blank=True)
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        verbose_name = "Tipo de Ingreso"
+        verbose_name_plural = "Tipos de Ingreso"
+
 class EntryForm(models.Model):
     specie = models.ForeignKey(Specie, null=True, on_delete=models.SET_NULL)
     watersource = models.ForeignKey(
@@ -168,6 +178,11 @@ class EntryForm(models.Model):
     no_request = models.CharField(max_length=250, null=True, blank=True)
     created_by = models.ForeignKey(User, null=True, on_delete=models.SET_NULL)
     anamnesis = models.TextField(null=True, blank=True)
+    entryform_type = models.ForeignKey(
+        EntryForm_Type,
+        null=True,
+        on_delete=models.SET_NULL,
+    )
 
     def __str__(self):
         return str(self.pk)

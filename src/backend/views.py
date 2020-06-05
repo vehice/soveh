@@ -187,6 +187,7 @@ class ENTRYFORM(View):
             entryform["customer"] = model_to_dict(entryform_object.customer) if entryform_object.customer else None
             entryform["larvalstage"] = model_to_dict(entryform_object.larvalstage) if entryform_object.larvalstage else None
             entryform["fixative"] = model_to_dict(entryform_object.fixative) if entryform_object.fixative else None
+            entryform["entryform_type"] = model_to_dict(entryform_object.entryform_type) if entryform_object.entryform_type else None
             entryform["watersource"] = model_to_dict(entryform_object.watersource) if entryform_object.watersource else None
             entryform["specie"] = model_to_dict(entryform_object.specie) if entryform_object.specie else None
 
@@ -199,6 +200,8 @@ class ENTRYFORM(View):
             waterSources_list = list(WaterSource.objects.all().values())
             customers_list = list(Customer.objects.all().values())
             patologos = list(User.objects.filter(userprofile__profile_id__in=[4, 5]).values())
+            entryform_types = list(EntryForm_Type.objects.all().values())
+
             data = {
                 'entryform': entryform,
                 'identifications': identifications,
@@ -210,7 +213,8 @@ class ENTRYFORM(View):
                 'fixtatives_list': fixtatives_list,
                 'waterSources_list': waterSources_list,
                 'customers_list': customers_list,
-                'patologos': patologos
+                'patologos': patologos,
+                'entryform_types_list': entryform_types
             }
         else:
             species = list(Specie.objects.all().values())
@@ -220,6 +224,7 @@ class ENTRYFORM(View):
             exams = list(Exam.objects.all().values())
             organs = list(Organ.objects.all().values())
             customers = list(Customer.objects.all().values())
+            entryform_types = list(EntryForm_Type.objects.all().values())
 
             data = {
                 'species': species,
@@ -229,6 +234,7 @@ class ENTRYFORM(View):
                 'exams': exams,
                 'organs': organs,
                 'customers': customers,
+                'entryform_types': entryform_types
             }
         # print (data)
         return JsonResponse(data)
@@ -377,6 +383,7 @@ class CASSETTE(View):
         waterSources_list = list(WaterSource.objects.all().values())
         customers_list = list(Customer.objects.all().values())
         patologos = list(User.objects.filter(userprofile__profile_id__in=[4, 5]).values())
+        entryform_types = list(EntryForm_Type.objects.all().values())
 
         data = {
             'cassettes': cassettes,
@@ -391,7 +398,8 @@ class CASSETTE(View):
             'fixtatives_list': fixtatives_list,
             'waterSources_list': waterSources_list,
             'customers_list': customers_list,
-            'patologos': patologos
+            'patologos': patologos,
+            'entryform_types_list': entryform_types
          }
 
         return JsonResponse(data)
@@ -533,6 +541,7 @@ class ANALYSIS(View):
         waterSources_list = list(WaterSource.objects.all().values())
         customers_list = list(Customer.objects.all().values())
         patologos = list(User.objects.filter(userprofile__profile_id__in=[4, 5]).values())
+        entryform_types = list(EntryForm_Type.objects.all().values())
 
         data = {
             'analyses': analyses,
@@ -546,6 +555,7 @@ class ANALYSIS(View):
             'waterSources_list': waterSources_list,
             'customers_list': customers_list,
             'patologos': patologos,
+            'entryform_types_list': entryform_types
         }
         
         return JsonResponse(data)
@@ -679,13 +689,17 @@ class WORKFLOW(View):
             edit = 1 if permisos.filter(type_permission='w').first() else 0
             route = 'app/workflow_main.html'
 
-            childrens = Form.objects.filter(parent_id=form)
             close_allowed = 1
-
-            for ch in childrens:
-                if not ch.form_closed and not ch.cancelled:
-                    close_allowed = 0
-                    break
+            closed = 0
+            if form.form_closed or form.cancelled:
+                close_allowed = 0
+                closed = 1
+            else:
+                childrens = Form.objects.filter(parent_id=form)
+                for ch in childrens:
+                    if not ch.form_closed and not ch.cancelled:
+                        close_allowed = 0
+                        break
 
             data = {
                 'form': form,
@@ -693,7 +707,7 @@ class WORKFLOW(View):
                 'entryform_id': object_form_id,
                 'set_step_tag': step_tag,
                 'edit': edit,
-                'closed': 1 if form.form_closed else 0,
+                'closed': closed,
                 'close_allowed': close_allowed
             }
         elif (form.content_type.name == 'analysis form'):
@@ -1542,6 +1556,10 @@ def step_1_entryform(request):
     if str(entryform.customer_id) != var_post.get('customer') and (entryform.customer_id == None and var_post.get('customer') != ''):
         change = True
     entryform.customer_id = var_post.get('customer')
+
+    if str(entryform.entryform_type_id) != var_post.get('entryform_type') and (entryform.entryform_type_id == None and var_post.get('entryform_type') != ''):
+        change = True
+    entryform.entryform_type_id = var_post.get('entryform_type')
     
     if str(entryform.no_order) != var_post.get('no_order') and (entryform.no_order == None and var_post.get('no_order') != ''):
         change = True
@@ -2450,6 +2468,10 @@ def save_generalData(request, id):
     if entry.customer_id != int(var_post['client']):
         change = True
     entry.customer_id = int(var_post['client'])
+
+    if entry.entryform_type_id != int(var_post['entryform_type']):
+        change = True
+    entry.entryform_type_id = int(var_post['entryform_type'])
 
     if entry.company != var_post['company']:
         change = True

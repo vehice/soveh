@@ -194,7 +194,12 @@ function init_step_1() {
       .done(function (data) {
         $('#identification_group_list').html('');
         var entryform = data.entryform;
-        // $('#customer_select').val(entryform.customer_id).trigger('change');
+        if (entryform.customer_id) {
+          $('#customer_select').val(entryform.customer_id).trigger('change');
+        }
+        if (entryform.entryform_type_id) {
+          $('#entryform_type_select').val(entryform.entryform_type_id).trigger('change');
+        }
         $('#fixtative_select').val(entryform.fixative_id).trigger('change');
         $('#specie_select').val(entryform.specie_id).trigger('change');
 
@@ -294,6 +299,7 @@ function init_step_1() {
     loadSpecies(data.species)
     loadLarvalStages(data.larvalStages)
     loadWaterSources(data.waterSources)
+    loadEntryFormType(data.entryform_types)
     // loadExams(data.exams)
     // loadOrgans(data.organs)
     // loadQuestions(data.questionReceptionCondition)
@@ -355,6 +361,12 @@ function init_step_1() {
 
     $('#watersource_select').select2({
       placeholder: "Porfavor seleccione una fuente de agua"
+    }).on("select2:select", function (e) {
+      formChanged = true;
+    });;
+
+    $('#entryform_type_select').select2({
+      placeholder: "Porfavor seleccione un tipo de ingreso"
     }).on("select2:select", function (e) {
       formChanged = true;
     });;
@@ -619,6 +631,15 @@ function loadCustomers(customers) {
 function loadFixtatives(fixtatives) {
   $.each(fixtatives, function (i, item) {
     $('#fixtative_select').append($('<option>', {
+      value: item.id,
+      text: item.name
+    }));
+  });
+}
+
+function loadEntryFormType(entryform_types) {
+  $.each(entryform_types, function (i, item) {
+    $('#entryform_type_select').append($('<option>', {
       value: item.id,
       text: item.name
     }));

@@ -551,8 +551,8 @@ def show_patologos(request):
                 data.append({
                     'analisis': a.id,
                     'patologo': a.patologo_id,
-                    'closed': a.entryform.forms.first().form_closed,
-                    'edit': not a.entryform.forms.first().form_closed and up.profile.id == 1,
+                    'closed': 1 if a.entryform.forms.first().form_closed or a.entryform.forms.first().cancelled else 0,
+                    'edit': not a.entryform.forms.first().form_closed and not a.entryform.forms.first().cancelled and up.profile.id == 1,
                     'no_caso': a.entryform.no_caso + parte, 
                     'exam': a.exam.name
                 })

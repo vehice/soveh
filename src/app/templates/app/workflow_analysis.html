@@ -232,7 +232,9 @@
               </div>
               <div class="col-sm-4 form-group summaryFixative">
               </div>
-              <div class="col-sm-12 form-group summaryAnamnesis">
+              <div class="col-sm-8 form-group summaryAnamnesis">
+              </div>
+              <div class="col-sm-4 form-group summaryEntryformType">
               </div>
             </div>
             <hr>
@@ -460,6 +462,14 @@ $(document).on('click', '.showSummaryBtn', function(e){
   })
   .done(function (data) {
     fillSummary(data);
+    if(closed == 1){
+      $('#btn_save').hide();
+      $('.btn-save-identification').hide();
+    }
+    else{
+      $('#btn_save').show();
+      $('.btn-save-identification').show();
+    }
     $("#show_summary").modal("show");
   })
   .fail(function () {
@@ -479,6 +489,12 @@ function fillSummary(data){
       selectFix += '<option value="'+o.id+'">'+o.name+'</option>';
   });
   selectFix +='</select>';
+
+  var selectEntryformType = '<select class="select2 form-control selectOpt" id="entryform_type" name="entryform_type" {% if not edit or closed  %}disabled{% endif %} >';
+  $.each(data.entryform_types_list, function(j, o){
+      selectEntryformType += '<option value="'+o.id+'">'+o.name+'</option>';
+  });
+  selectEntryformType +='</select>';
 
   var selectSpecie = '<select class="select2 form-control selectOpt" id="specie" name="specie" {% if not edit %}disabled{% endif %} >';
   $.each(data.species_list, function(j, o){
@@ -509,6 +525,7 @@ function fillSummary(data){
   $('.summaryNoRequest').html('<label>No. solicitud:</label> <input class="form-control" value="'+ data.entryform.no_request+'" name="no_solic" {% if not edit %}disabled{% endif %} />');
   $('.summaryAnamnesis').html('<label>Anamnesis:</label> <textarea class="form-control" row="2" name="anamnesis" {% if not edit %}disabled{% endif %} >'+ data.entryform.anamnesis+'</textarea>');
   $('.summaryFixative').html('<label>Fijador:</label>'+ selectFix);
+  $('.summaryEntryformType').html('<label>Tipo de Ingreso:</label>'+ selectEntryformType);
   
   $('.summarySpecie').html('<label>Especie:</label>'+selectSpecie  );
   $('.summaryDevStatus').html('<label>Estadío Desarrollo:</label>'+selectlarvalstage ); 
@@ -605,6 +622,7 @@ function fillSummary(data){
   $('.summarySamples').html(tpl_samples);
 
   $('#client').val(data.entryform.customer.id);
+  $('#entryform_type').val(data.entryform.entryform_type.id);
   $('#fixative').val(data.entryform.fixative.id);
   $('#specie').val(data.entryform.specie.id);
   $('#watersource').val(data.entryform.watersource.id);
