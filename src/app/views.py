@@ -106,7 +106,8 @@ def show_ingresos_by_id(request, form_id):
 def new_ingreso(request):
     flow = Flow.objects.get(pk=1)
     entryform = EntryForm.objects.create(created_by=request.user)
-    folio = ('000000'+str(Form.objects.filter(flow_id=1, parent_id=None).count()+1))[-4:]
+    no_caso_initial = 3795
+    folio = ('000000'+str(Form.objects.filter(flow_id=1, parent_id=None).count()+no_caso_initial))[-4:]
     no_caso = "V{0}".format(folio)
     entryform.no_caso = no_caso
     entryform.save()
