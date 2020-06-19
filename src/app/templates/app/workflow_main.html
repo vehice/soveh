@@ -54,6 +54,7 @@
             <button class="btn btn-secondary square newAnalysisBtn hidden"><i class="fa fa-list fa-plus-circle"></i> Nuevo Análisis</button>
             <button class="btn btn-secondary square newAnalysisBtn5 hidden"><i class="fa fa-list fa-plus-circle"></i> Nuevo Análisis</button>
           {% endif %}
+          <button class="btn btn-secondary square showAttachedFilesBtn hidden" onclick='showAttachedFilesModal({{form.content_object.id}}, {{closed}})'><i class="fa fa-cloud-upload fa-fx"></i> Documentos Adjuntos</button>
         </center>
       </div>
       <div class="card-content">
@@ -270,6 +271,32 @@
 
           <div class='col-sm-12 mt-3'>
             <button class='btn btn-primary submit-file'>Cargar Informe</button>
+            <button class='btn btn-default' data-dismiss="modal">Salir</button>
+          </div>
+        </div>       
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade text-left" id="attached_files_modal" role="dialog" data-backdrop="static" data-keyboard="false">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title">Documentos Adjuntos</h3>
+      </div>
+      <div class="modal-body">
+        <div class='row'>
+          <div id='attached_files' class='col-sm-12'>
+
+          </div>
+
+          <div id='attached_files_uploader' class='col-sm-12'>
+
+          </div>
+
+          <div class='col-sm-12 mt-3'>
+            <button class='btn btn-primary attach-file'>Cargar</button>
             <button class='btn btn-default' data-dismiss="modal">Salir</button>
           </div>
         </div>       
@@ -639,8 +666,15 @@ $(window).on('load', function (e) {
   {% if set_step_tag != "step_1" %}
   window.onbeforeunload = function(){};
   {% endif %}
+  
+  // PARCHE MOMENTANEO PARA OCULTAR PASO 3 Y 4
   var step_wizard = parseInt("{{ set_step_tag }}".split("_")[1]) - 1; // Se resta 1 para igualar a los indices del plugin
-  var step_tag_function = "init_{{ set_step_tag }}";
+  if (step_wizard == 4) {
+    var step_tag_function = "init_step_5";
+    var step_wizard = 2;
+  } else {
+    var step_tag_function = "init_{{ set_step_tag }}";
+  }
   
   form.steps("setStep", step_wizard);
   set_state = false;
@@ -657,6 +691,7 @@ $(document).on('click', '.showSummaryBtn', function(e){
   })
   .done(function (data) {
     fillSummary(data);
+    console.log(closed)
     if(closed == 1){
       $('#btn_save').hide();
       $('.btn-save-identification').hide();
@@ -1084,6 +1119,110 @@ function sendEmail(){
     .fail(function (data) {
       console.log("Fail");
     })
+}
+
+function showAttachedFilesModal(id, closed){
+
+  $('#attached_files').html('');
+  var temp = '<h4>Archivos</h4>';
+  temp += '<div id="file_list" class="col-sm-12 pl-2 pb-2">';
+  var url = Urls.case_files(id);
+  $.ajax({
+    type: "GET",
+    url: url,
+  })
+  .done(function (data) {
+    console.log(data)
+    if (data.files.length > 0) {
+      if (!closed) {
+        $.each(data.files, function(index, value){
+          temp += '<div id="cf-'+value.id+'"><button class="btn btn-sm btn-danger" onclick="deleteCaseFile('+id+', '+value.id+')"><i class="fa fa-close"></i></button> <a target="_blank" href="'+value.path+'"><i class="fa fa-download"></i> '+value.name+'</a></div>';
+        });
+      } else {
+        $.each(data.files, function(index, value){
+          temp += '<div id="cf-'+value.id+'"><a target="_blank" href="'+value.path+'"><i class="fa fa-download"></i> '+value.name+'</a></div>';
+        });
+      }
+    } else {
+      temp += '<div><h5 class="not_available_text">No hay archivos disponibles</h5>';
+    }
+    temp += '</div>';
+    $('#attached_files').html(temp);
+  })
+  .fail(function () {
+    console.log("Fail")
+  });
+
+  if (!closed) {
+    var url = Urls.case_files(id);
+    var temp_uploader = "<h4>Cargador de archivos</h4>";
+    temp_uploader += '<div class="col-sm-12"><form id="case_files_uploader" action="'+url+'" class="dropzone needsclick">';
+    temp_uploader += '<div class="dz-message" data-dz-message>';
+    temp_uploader += '<center><span><h3>Arrastra o selecciona archivo que deseas cargar</h3></span></center>';
+    temp_uploader += '</div>';    
+    temp_uploader += '</form></div>';
+    // temp += '<input type="reset" class="btn btn-secondary" data-dismiss="modal" value="Salir">';
+    // temp += '<input type="button" class="btn btn-primary submit-file" value="Cargar Imágen""></div></div></div>';
+    $('#attached_files_uploader').html('');
+    $('#attached_files_uploader').html(temp_uploader);
+
+    $("#case_files_uploader").dropzone({
+      autoProcessQueue: false,
+      acceptedFiles: ".doc, .docx, .pdf, .xls, .xlsx",
+      init: function() {
+        var submitButton = document.querySelector(".attach-file")
+        myDropzone = this;
+        submitButton.addEventListener("click", function() {
+          myDropzone.processQueue();
+        });
+        this.on('sending', function(file, xhr, formData){
+          lockScreen(1);
+        });
+
+        this.on("success", function(file, responseText) {
+          if (responseText.ok) {
+            toastr.success('', 'Archivo cargado exitosamente.');
+            this.removeFile(file);
+            $('.not_available_text').remove();
+            $('#file_list').prepend('<div id="cf-'+responseText.file.id+'"><button class="btn btn-sm btn-danger" onclick="deleteCaseFile('+id+', '+responseText.file.id+')"><i class="fa fa-close"></i></button> <a target="_blank" href="'+responseText.file.path+'"><i class="fa fa-download"></i> '+responseText.file.name+'</a></div>');
+          } else {
+            toastr.error('', 'No ha sido posible cargar el archivo. Intente nuevamente.');
+          }
+          lockScreen(0);
+        });
+
+        this.on("error", function(file, response) {
+          this.removeFile(file);
+          bootbox.hideAll();
+          toastr.error('', 'No ha sido posible cargar el archivo. Intente nuevamente.');
+          lockScreen(0);
+        });
+
+        this.on("addedfile", function() {
+          if (this.files[1]!=null){
+            this.removeFile(this.files[0]);
+          }
+        });
+      },
+    });
+  }
+
+  $('#attached_files_modal').modal('show');
+}
+
+function deleteCaseFile(entryform_id, id){
+  var url = Urls.case_files_id(entryform_id, id);
+  $.ajax({
+    type: "DELETE",
+    url: url,
+  })
+  .done(function (data) {
+    toastr.success('', 'Archivo eliminado exitosamente.');
+    $('#cf-'+id).remove();
+  })
+  .fail(function () {
+    toastr.error('', 'No ha sido posible eliminar el archivo. Intente nuevamente.');
+  });
 }
 
 $(document).on('change', '#plantilla', function(){

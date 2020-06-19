@@ -15,6 +15,7 @@ function init_step_3() {
     // console.log(data)
     data_step_3 = data
     $('.showShareBtn').removeClass("hidden");
+    $('.showAttachedFilesBtn').removeClass("hidden");
     $('.showLogBtn').removeClass("hidden");
     $('.showSummaryBtn').removeClass("hidden");
     $('.newAnalysisBtn').addClass("hidden");

@@ -128,11 +128,11 @@
             <div class="col-sm-4 font-medium-4 text-left"><%= exam_name %></div>
             <div class="col-sm-4 font-medium-4 text-center">
               <div class="btn-group" role="group" aria-label="Opciones">
-                <% if (form_reopened)  { %> 
+                {% comment %} <% if (form_reopened)  { %> 
                   <a class="btn btn-secondary" href="/workflow/<%= form_id %>"><i class="fa fa-arrow-right"></i> Ir al análisis </a>
                 <% } else { %>
                   <a class="btn btn-secondary" href="/workflow/<%= form_id %>"><i class="fa fa-arrow-right"></i> Ir al análisis </a>
-                <% } %>
+                <% } %> {% endcomment %}
                 <button type="button" class="btn btn-info" onclick='showServiceCommentsModal(<%= id %>, {{closed}})'>Comentarios</button>
                 <button type="button" class="btn btn-success" onclick='showServiceReportsModal(<%= id %>, <%= service %>, {{closed}})'>Informes</button>
                 <button type="button" class="btn btn-warning" onclick='closeService(<%= form_id %>, <%= id %>);'>Cerrar Servicio</button>

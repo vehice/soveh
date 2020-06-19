@@ -710,6 +710,8 @@ class WORKFLOW(View):
                 'closed': closed,
                 'close_allowed': close_allowed
             }
+
+            print (data)
         elif (form.content_type.name == 'analysis form'):
             reopen = False
             analisis = AnalysisForm.objects.get(id=int(object_form_id))
@@ -1290,7 +1292,45 @@ class EMAILTEMPLATE(View):
         except Exception as e:
             print (e)
             return JsonResponse({'ok': False})
-   
+
+class CASE_FILES(View):
+    http_method_names = ['get', 'post', 'delete']
+    
+    def get(self, request, entryform_id):
+        ef = EntryForm.objects.get(pk=entryform_id)
+
+        data = []
+        for file in ef.attached_files.all().order_by('-created_at'):
+            data.append({'id': file.id, 'path': file.file.url, 'name': file.file.name.split("/")[-1]})
+
+        return JsonResponse({'ok': True, 'files': data})
+
+    def post(self, request, entryform_id):
+        try:
+            if entryform_id:
+                ef = EntryForm.objects.get(pk=entryform_id)
+                file = request.FILES['file']
+                case_file = CaseFile.objects.create(
+                    file = file,
+                    loaded_by = request.user
+                )
+                ef.attached_files.add(case_file)
+                return JsonResponse({'ok': True, 'file': {'id': case_file.id, 'path': case_file.file.url, 'name': case_file.file.name.split("/")[-1]} })
+            else:
+                return JsonResponse({'ok': False})
+        except:
+             return JsonResponse({'ok': False})
+
+    
+    def delete(self, request, entryform_id, id):
+        try:
+            file = CaseFile.objects.get(pk=id)
+            ef = EntryForm.objects.get(pk=entryform_id)
+            ef.attached_files.remove(file)
+            return JsonResponse({'ok': True})
+        except:
+            return JsonResponse({'ok': False})
+
 def organs_by_slice(request, slice_id=None, sample_id=None):
     if slice_id and sample_id:
         slice_obj = Slice.objects.get(

@@ -146,6 +146,11 @@ class EntryForm_Type(models.Model):
         verbose_name = "Tipo de Ingreso"
         verbose_name_plural = "Tipos de Ingreso"
 
+class CaseFile(models.Model):
+    file = models.FileField(upload_to='vehice_case_files')
+    loaded_by = models.ForeignKey(User, null=True, on_delete=models.SET_NULL)
+    created_at = models.DateTimeField(auto_now_add=True)
+    
 class EntryForm(models.Model):
     specie = models.ForeignKey(Specie, null=True, on_delete=models.SET_NULL)
     watersource = models.ForeignKey(
@@ -183,6 +188,7 @@ class EntryForm(models.Model):
         null=True,
         on_delete=models.SET_NULL,
     )
+    attached_files = models.ManyToManyField(CaseFile)
 
     def __str__(self):
         return str(self.pk)

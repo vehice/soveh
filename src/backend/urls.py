@@ -124,6 +124,16 @@ urlpatterns = [
         csrf_exempt(views.SERVICE_COMMENTS.as_view()),
         name='service_comments_id',
     ),
+    path(
+        'case_files/<int:entryform_id>',
+        csrf_exempt(views.CASE_FILES.as_view()),
+        name='case_files',
+    ),
+    path(
+        'case_files/<int:entryform_id>/<int:id>',
+        csrf_exempt(views.CASE_FILES.as_view()),
+        name='case_files_id',
+    ),
     path('close_service/<int:form_id>', csrf_exempt(views.close_service), name='close_service'),
     path('cancel_service/<int:form_id>', csrf_exempt(views.cancel_service), name='cancel_service'),
     path('reopen_form/<int:form_id>', csrf_exempt(views.reopen_form), name='reopen_form'),

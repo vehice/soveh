@@ -13,6 +13,7 @@ function init_step_2() {
   .done(function (data) {
     data_step_2 = data
     $('.showSummaryBtn').removeClass("hidden");
+    $('.showAttachedFilesBtn').removeClass("hidden");
     $('.showShareBtn').addClass("hidden");
     $('.showLogBtn').addClass("hidden");
     $('.newAnalysisBtn').addClass("hidden");

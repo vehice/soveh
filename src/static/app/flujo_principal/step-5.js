@@ -12,6 +12,7 @@ function init_step_5(active = true) {
       $('.showShareBtn').removeClass("hidden");
       $('.showLogBtn').removeClass("hidden");
       $('.showSummaryBtn').removeClass("hidden");
+      $('.showAttachedFilesBtn').removeClass("hidden");
       $('.newAnalysisBtn').addClass("hidden");
       if(active){
         $('.newAnalysisBtn5').removeClass("hidden");
