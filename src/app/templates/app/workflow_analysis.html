@@ -557,7 +557,7 @@ function fillSummary(data){
     tpl_identification += '<div class="form-group col-md-6"><label>Grupo/Nro Caso Cliente:</label> <input class="form-control" value="'+ item.group+'"  name="grupo" {% if not edit %}disabled{% endif %} /></div>';
     tpl_identification += '<div class="form-group col-md-6"><label>Peces:</label> <input class="form-control" value="'+ item.no_fish+'" disabled {% if not edit %}disabled{% endif %} /></div>';
     tpl_identification += '<div class="form-group col-md-6"><label>Contenedores:</label> <input class="form-control" type="number" value="'+ item.no_container+'"  name="contenedores" {% if not edit %}disabled{% endif %} /></div>';
-    tpl_identification += '<div class="form-group col-md-6"><label>Peso:</label> <input class="form-control" type="number" value="'+ item.weight+'"  name="peso" {% if not edit %}disabled{% endif %} /></div>';
+    tpl_identification += '<div class="form-group col-md-6"><label>Peso (gramos):</label> <input class="form-control" type="number" value="'+ item.weight+'"  name="peso" {% if not edit %}disabled{% endif %} /></div>';
     tpl_identification += '<div class="form-group col-md-6"><label>Óptimo?:</label>'+ selectOptimum+'</div>';
     tpl_identification += '<div class="form-group col-md-6"><label>Características Extras:</label> <textarea class="form-control" rows="2" name="extras" {% if not edit %}disabled{% endif %} >'+ item.extra_features_detail+' </textarea></div>';
     tpl_identification += '<div class="form-group col-md-6"><label>Observaciones:</label> <textarea class="form-control" rows="2" name="observation" {% if not edit %}disabled{% endif %} >'+ item.observation+' </textarea></div>';
