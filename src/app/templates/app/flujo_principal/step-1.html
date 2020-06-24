@@ -40,14 +40,14 @@
         </div>
         <div class="form-group" id="order_number">
           <label for="order_number">
-            Nro Orden :
+            Nro Orden de Trabajo :
           </label>
           <input type='text' class="form-control" id="order_number_input" name="no_order"
             {% if not edit %}disabled{% endif %} />
         </div>
         <div class="form-group" id="request_number">
           <label for="request_number">
-            Nro Solicitud Interna :
+            Nro Solicitud Interlaboratorio :
           </label>
           <input type='text' class="form-control" id="request_number_input" name="no_request"
             {% if not edit %}disabled{% endif %} />
@@ -218,7 +218,7 @@
     </div>
     <div class="col-sm-3">
       <div class="form-group">
-        <label for="group">Grupo</label>
+        <label for="group">Grupo/Nro Caso Cliente</label>
         <input name="identification[group]" class="form-control estanque-cage" {% if not edit %}disabled{% endif %} >
       </div>
     </div>
@@ -242,7 +242,7 @@
     </div>
     <div class="col-sm-3">
       <div class="form-group">
-        <label for="wheight">Carácteristicas Extras</label>
+        <label for="wheight">Características Extras</label>
         <textarea name="identification[extra_features_detail]" row="2" class="form-control" {% if not edit %}disabled{% endif %} ></textarea>
       </div>
     </div>

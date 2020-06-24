@@ -364,8 +364,8 @@
     $('.summaryResponsible').html('<label>Responsable:</label> <input class="form-control responsible_place" readonly value="'+ data.entryform.responsible+'" name="responsable" onclick="responsibleModal()" {% if not edit or closed  %}disabled{% endif %} />');
     $('.summaryReception').html('<label>Fecha recepción:</label> <div class="input-group date" id=""><input type="text" class="form-control" name="recive" value="'+ moment(data.entryform.created_at).format("DD/MM/YYYY HH:mm")+'" {% if not edit or closed  %}disabled{% endif %} /><div class="input-group-append"><span class="input-group-text"><span class="fa fa-calendar"></span></span></div></div> ' );
     $('.sumarrySampling').html('<label>Fecha muestreo:</label> <div class="input-group date" id=""><input type="text" class="form-control" name="muestreo" value="'+ moment(data.entryform.sampled_at).format("DD/MM/YYYY HH:mm")+'" {% if not edit or closed  %}disabled{% endif %} /><div class="input-group-append"><span class="input-group-text"><span class="fa fa-calendar"></span></span></div></div> ' );
-    $('.summaryNoOrder').html('<label>No. orden:</label> <input class="form-control" value="'+ data.entryform.no_order+'" name="no_order" {% if not edit or closed  %}disabled{% endif %} />');
-    $('.summaryNoRequest').html('<label>No. solicitud:</label> <input class="form-control" value="'+ data.entryform.no_request+'" name="no_solic" {% if not edit or closed  %}disabled{% endif %} />');
+    $('.summaryNoOrder').html('<label>Nro Orden de Trabajo:</label> <input class="form-control" value="'+ data.entryform.no_order+'" name="no_order" {% if not edit or closed  %}disabled{% endif %} />');
+    $('.summaryNoRequest').html('<label>Nro Solicitud Interlaboratorio:</label> <input class="form-control" value="'+ data.entryform.no_request+'" name="no_solic" {% if not edit or closed  %}disabled{% endif %} />');
     $('.summaryAnamnesis').html('<label>Anamnesis:</label> <textarea class="form-control" row="2" name="anamnesis" {% if not edit %}disabled{% endif %} >'+ data.entryform.anamnesis+'</textarea>');
     $('.summaryFixative').html('<label>Fijador:</label>'+ selectFix);
     $('.summaryEntryformType').html('<label>Tipo de Ingreso:</label>'+ selectEntryformType);
@@ -398,12 +398,12 @@
       tpl_identification += '<div class="col-md-4"><form id="identification-'+item.id+'" action="#" method="POST">';
       tpl_identification += '<div class="alert alert-light"><div class="row">';
       tpl_identification += '<div class="form-group col-md-6"><label>Estanque/Jaula:</label> <input class="form-control" value="'+ item.cage+'"  name="jaula" {% if not edit or closed  %}disabled{% endif %} /></div>';
-      tpl_identification += '<div class="form-group col-md-6"><label>Grupo:</label> <input class="form-control" value="'+ item.group+'"  name="grupo" {% if not edit or closed  %}disabled{% endif %} /></div>';
+      tpl_identification += '<div class="form-group col-md-6"><label>Grupo/Nro Caso Cliente:</label> <input class="form-control" value="'+ item.group+'"  name="grupo" {% if not edit or closed  %}disabled{% endif %} /></div>';
       tpl_identification += '<div class="form-group col-md-6"><label>Peces:</label> <input class="form-control just_increasing" name="no_fish" data-val="'+ item.no_fish+'" value="'+ item.no_fish+'" {% if not edit or closed  %}disabled{% endif %} /></div>';
       tpl_identification += '<div class="form-group col-md-6"><label>Contenedores:</label> <input class="form-control" type="number" value="'+ item.no_container+'"  name="contenedores" {% if not edit or closed  %}disabled{% endif %} /></div>';
       tpl_identification += '<div class="form-group col-md-6"><label>Peso:</label> <input class="form-control" type="number" value="'+ item.weight+'"  name="peso" {% if not edit or closed  %}disabled{% endif %} /></div>';
       tpl_identification += '<div class="form-group col-md-6"><label>Óptimo?:</label>'+ selectOptimum+'</div>';
-      tpl_identification += '<div class="form-group col-md-6"><label>Comentarios Extras:</label> <textarea class="form-control" rows="2" name="extras" {% if not edit or closed  %}disabled{% endif %} >'+ item.extra_features_detail+' </textarea></div>';
+      tpl_identification += '<div class="form-group col-md-6"><label>Características Extras:</label> <textarea class="form-control" rows="2" name="extras" {% if not edit or closed  %}disabled{% endif %} >'+ item.extra_features_detail+' </textarea></div>';
       tpl_identification += '<div class="form-group col-md-6"><label>Observaciones:</label> <textarea class="form-control" rows="2" name="observation" {% if not edit or closed  %}disabled{% endif %} >'+ item.observation+' </textarea></div>';
       tpl_identification += '<div class="form-group col-md-10"><label>Órganos:</label>'+selectOrgans+'</div>';
       {% if edit and not closed %}
