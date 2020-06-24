@@ -5,96 +5,295 @@
     <input type="hidden" id="form_id" name="form_id" value="{{form_id}}" >
     <input type="hidden" id="entryform_id" name="entryform_id" value="{{entryform_id}}" >
     <h4 class="form-section">
-      <i class="ft-user"></i> Cargar Procesador Tejido
+      <i class="ft-user"></i> Análisis
     </h4>
-    <div class="row">
-      <div class="col-md-6">
-        <div class="form-group">
-          <label>Fecha / Hora Procesado Tejido : </label>
-          <div class='input-group date' id='datetime_processor_loaded_at'>
-            <input type="text" class="form-control" name="processor_loaded_at" id="processor_loaded_at" {% if not edit %}disabled{% endif %}/>
-            <div class="input-group-append">
-              <span class="input-group-text">
-                <span class="fa fa-calendar"></span>
-              </span>
-            </div>
-          </div>
-          <input type="hidden" name="processor_loaded_at_submit" id="processor_loaded_at_submit" />
-        </div>
-      </div>
-      <div class="col-md-6">
-        <div class="form-group">
-        </div>
-      </div>
-      <!-- <div class="col-md-6">
-        <div class="form-group">
-          <label for="date3">Nro muestras por cassettes</label>
-          <select class="select2 form-control" id="no_cassette" name="cassette">
-            <option value='1' selected>x1</option>
-            <option value='2'>x2</option>
-            <option value='3'>x3</option>
-            <option value='4'>x4</option>
-          </select>
-        </div>
-      </div> -->
-    </div>
-    <div id="cassette_group">
-      <table id="cassettes_table" class="table table-bordered table-hover table-condensed" width="100%">
-        <thead>
-          <tr>
-            <th>No. Muestra</th>
-            <th>Identificación</th>
-            <th>Nombre Cassette</th>
-            <th>Organos</th>
-            <th></th>
-          </tr>
-        </thead>
-        <tbody>
-        </tbody>
-        </table>
-    </div>
-    <div class='pull-right mb-2'>
-      <button type="button"class='btn btn-secondary' onclick='renameCassettes();'><i class='fa fa-edit fa-fx'></i> Renombrar Cassettes Configurados</button>
+    <div id="analysis_group" class="list-group">
     </div>
   </div>
 </fieldset>
 
-<script id="cassette_row" type="text/x-lodash-template">
-  <tr id="cassette-index-<%= cassette_index %>">
-    <input type="hidden" name="cassette[sample_id][<%= sample_index %>]" value="<%= sample_id %>" >
-    {% comment %} <input type="hidden" name="cassette[cassette_name][<%= cassette_index %>]" value="<%= cassette_name %>" > {% endcomment %}
-    <td>
-      <%= sample_index %>
-    </td>
-    <td>
-      <%= sample_name %>
-    </td>
-    <td>
-      {% comment %} <%= cassette_name %> {% endcomment %}
-      <select class="form-control cassetteSelector" name="cassette[cassette_name][<%= sample_index %>]" style="width:85%">
-        <% _.each( cassettes, function( cassette ){ %>
-          <% if (cassette.sample_id == sample_id) { %>
-            <option selected value="<%= cassette.cassette_name %>"><%= cassette.cassette_name %></option>
-          <% } else { %>
-            <option value="<%= cassette.cassette_name %>"><%= cassette.cassette_name %></option>
+<div class="modal fade text-left" id="new_analysis5" role="dialog" data-backdrop="static" data-keyboard="false">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title" id="title">Nuevo Análisis <span class="NoCasoSummary"></span></h3>
+      </div>
+      <div class="modal-body">
+        <fieldset>
+          <div id="modal_{{ step_tab }}">
+            <input type="hidden" name="step_id" value="{{step_id}}">
+            <input type="hidden" name="step_tag" value="step_4_new">
+            <input type="hidden" name="form_id" value="{{form_id}}" >
+            <input type="hidden" name="entryform_id" value="{{entryform_id}}" >
+            <h4 class="form-section">
+              <i class="ft-search"></i> Servicios
+            </h4>
+            <div class="row">
+              <div class="col-sm-12">
+                <p><label for="exam">Seleccione los análisis:</label></p>
+                <div class="input-group">
+                  <select class="select2" id="exam_new_select5" name="analysis" multiple="multiple" style="width:100%;">
+                  </select>
+                </div>
+              </div>
+              <div class="col-sm-12 mt-3">
+                <table class="table table-bordered table-condensed" id="patologo_table_5" style="font-size:13px;">
+                  <thead>
+                    <tr>
+                      <th style="width:40%">Análisis</th>
+                      <th style="width:60%">Patólogo</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                  </tbody>
+                </table>
+              </div>
+              <div class="col-sm-12 mt-3">
+                <table class="table table-bordered table-condensed" id="samples_new_table5" style="font-size:13px;">
+                  <thead>
+                    <tr>
+                      <th style="width:5%">Nº Muestra</th>
+                      <th style="width:15%">Identificación</th>
+                      <th style="width:37%">Análisis</th>
+                      <th style="width:37%">Órganos</th>
+                      <th style="width:6%">Acciones</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+            
+          </div>
+        </fieldset>
+        <a class="btn btn-primary" href="javascript:void(0);" onclick="submitNewAnalysis5();"> Guardar </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script id="analysis_element5" type="text/x-lodash-template">
+
+{% if closed %}
+  <% if ( _.includes([1,2], service))  { %> 
+    <div href="/workflow/<%= form_id %>" class="list-group-item bg-teal bg-lighten-4 mb-2">
+      <div class="media-body">
+        <div class="row">
+          <div class="col-sm-4 font-medium-4 text-left"><%= exam_name %> (<%= no_slice %> cortes)</div>
+          <div class="col-sm-4 font-medium-4 text-center">
+            <div class="btn-group" role="group" aria-label="Opciones">
+              <button type="button" class="btn btn-info" onclick='showServiceCommentsModal(<%= id %>, {{closed}}, true)'>Comentarios</button>
+              <button type="button" class="btn btn-success" onclick='showServiceReportsModal(<%= id %>, <%= service %>, {{closed}}, true)'>Informes</button>
+            </div>
+          </div>
+          <div class="col-sm-4 font-medium-4 text-right">Tinción: <%= exam_stain %></div>
+          
+        </div>
+        <% if (form_closed) { %>
+          <p class="list-group-item-text">Servicio <%= service_name %> - <b>Cerrado</b></p>
+        <% } else if (cancelled) { %>
+          <p class="list-group-item-text">Servicio <%= service_name %> - <b>Anulado</b></p>
+        <% } %>
+      </div>
+    </div>
+  <% } else { %>
+    <div href="/workflow/<%= form_id %>" class="list-group-item bg-teal bg-lighten-4 mb-2">
+      <div class="media-body">
+        <div class="row">
+          <div class="col-sm-4 font-medium-4 text-left"><%= exam_name %></div>
+          <div class="col-sm-4 font-medium-4 text-center">
+            <div class="btn-group" role="group" aria-label="Opciones">
+              <button type="button" class="btn btn-info" onclick='showServiceCommentsModal(<%= id %>, {{closed}}, true)'>Comentarios</button>
+              <button type="button" class="btn btn-success" onclick='showServiceReportsModal(<%= id %>, <%= service %>, {{closed}}, true)'>Informes</button>
+            </div>
+          </div>
+          <div class="col-sm-4 font-medium-4 text-right"></div>
+          
+        </div>
+        <% if (form_closed) { %>
+          <p class="list-group-item-text">Servicio <%= service_name %> - <b>Cerrado</b></p>
+        <% } else if (cancelled) { %>
+          <p class="list-group-item-text">Servicio <%= service_name %> - <b>Anulado</b></p>
+        <% } %>
+      </div>
+    </div>
+  <% } %>
+{% else %}
+  <% if (!form_closed && !cancelled)  { %> 
+    <% if ( _.includes([1,2], service)) { %>
+      <div class="list-group-item bg-teal bg-lighten-4 mb-2">
+        <div class="media-body">
+          <div class="row">
+            <div class="col-sm-4 font-medium-4 text-left"><%= exam_name %></div>
+            <div class="col-sm-4 font-medium-4 text-center">
+              <div class="btn-group" role="group" aria-label="Opciones">
+                {% comment %} <% if (form_reopened)  { %> 
+                  <a class="btn btn-secondary" href="/workflow/<%= form_id %>"><i class="fa fa-arrow-right"></i> Ir al análisis </a>
+                <% } else { %>
+                  <a class="btn btn-secondary" href="/workflow/<%= form_id %>"><i class="fa fa-arrow-right"></i> Ir al análisis </a>
+                <% } %> {% endcomment %}
+                <button type="button" class="btn btn-info" onclick='showServiceCommentsModal(<%= id %>, {{closed}})'>Comentarios</button>
+                <button type="button" class="btn btn-success" onclick='showServiceReportsModal(<%= id %>, <%= service %>, {{closed}})'>Informes</button>
+                <button type="button" class="btn btn-warning" onclick='closeService(<%= form_id %>, <%= id %>);'>Cerrar Servicio</button>
+                <button type="button" class="btn btn-danger" onclick='cancelService(<%= form_id %>);'>Anular Servicio</button>
+              </div>
+            </div>
+            <div class="col-sm-4 font-medium-4 text-right">Tinción: <%= exam_stain %></div>
+
+            <p class="list-group-item-text"></p>
+            <div class='col-sm-8 offset-md-2 mt-1'>
+              <div class="progress" style="height: 22px;"> 
+                <div class="progress-bar progress-bar-striped bg-blue-grey" role="progressbar" style="width:<%= percentage_step %>%" aria-describedby="example-caption-2"> <b><%= current_step %> de <%= total_step  %> pasos</b></div>
+              </div>
+            </div>
+          </div>
+          <p class="list-group-item-text">Servicio <%= service_name %> - <b>En curso</b></p>
+        </div>
+      </div>
+    <% } else { %>
+      <div class="list-group-item bg-teal bg-lighten-4 mb-2">
+        <div class="media-body">
+          <div class="row">
+            <div class="col-sm-4 font-medium-4 text-left"><%= exam_name %></div>
+            <div class="col-sm-4 font-medium-4 text-center">
+              <div class="btn-group" role="group" aria-label="Opciones">
+                <button type="button" class="btn btn-info" onclick='showServiceCommentsModal(<%= id %>, {{closed}})'>Comentarios</button>
+                <button type="button" class="btn btn-success" onclick='showServiceReportsModal(<%= id %>, <%= service %>, {{closed}})'>Informes</button>
+                <button type="button" class="btn btn-warning {% if closed %} disabled {% endif %}" onclick='closeService(<%= form_id %>, <%= id %>);'>Cerrar Servicio</button>
+                <button type="button" class="btn btn-danger {% if closed %} disabled {% endif %}" onclick='cancelService(<%= form_id %>);'>Anular Servicio</button>
+              </div>
+            </div>
+          </div>
+          <p class="list-group-item-text">Servicio <%= service_name %> - <b>En curso</b></p>
+        </div>
+      </div>
+    <% } %>
+  <% } else { %>
+    <% if ( _.includes([1,2], service))  { %> 
+      <div href="/workflow/<%= form_id %>" class="list-group-item bg-teal bg-lighten-4 mb-2">
+        <div class="media-body">
+          <div class="row">
+            <div class="col-sm-4 font-medium-4 text-left"><%= exam_name %> (<%= no_slice %> cortes)</div>
+            <div class="col-sm-4 font-medium-4 text-center">
+              <div class="btn-group" role="group" aria-label="Opciones">
+                <button type="button" class="btn btn-info" onclick='showServiceCommentsModal(<%= id %>, {{closed}}, true)'>Comentarios</button>
+                <button type="button" class="btn btn-success" onclick='showServiceReportsModal(<%= id %>, <%= service %>, {{closed}}, true)'>Informes</button>
+                <button type="button" class="btn btn-warning" onclick='reopenSerivce(<%= form_id %>)'>Reabrir Servicio</button>
+              </div>
+            </div>
+            <div class="col-sm-4 font-medium-4 text-right">Tinción: <%= exam_stain %></div>
+            
+          </div>
+          <% if (form_closed) { %>
+            <p class="list-group-item-text">Servicio <%= service_name %> - <b>Cerrado</b></p>
+          <% } else if (cancelled) { %>
+            <p class="list-group-item-text">Servicio <%= service_name %> - <b>Anulado</b></p>
           <% } %>
-        <% }); %>
-      </select>
+        </div>
+      </div>
+    <% } else { %>
+      <div href="/workflow/<%= form_id %>" class="list-group-item bg-teal bg-lighten-4 mb-2">
+        <div class="media-body">
+          <div class="row">
+            <div class="col-sm-4 font-medium-4 text-left"><%= exam_name %></div>
+            <div class="col-sm-4 font-medium-4 text-center">
+              <div class="btn-group" role="group" aria-label="Opciones">
+                <button type="button" class="btn btn-info" onclick='showServiceCommentsModal(<%= id %>, {{closed}}, true)'>Comentarios</button>
+                <button type="button" class="btn btn-success" onclick='showServiceReportsModal(<%= id %>, <%= service %>, {{closed}}, true)'>Informes</button>
+                <button type="button" class="btn btn-warning" {% if closed %} disabled {% endif %} onclick='reopenSerivce(<%= form_id %>)'>Reabrir Servicio</button>
+              </div>
+            </div>
+            <div class="col-sm-4 font-medium-4 text-right"></div>
+            
+          </div>
+          <% if (form_closed) { %>
+            <p class="list-group-item-text">Servicio <%= service_name %> - <b>Cerrado</b></p>
+          <% } else if (cancelled) { %>
+            <p class="list-group-item-text">Servicio <%= service_name %> - <b>Anulado</b></p>
+          <% } %>
+        </div>
+      </div>
+    <% } %>
+  <% } %>
+{% endif %}
+
+
+</script>
+
+<script id="sample_new_row5" type="text/x-lodash-template">
+  <tr id="sample_new5-<%= sample.id %>">
+    <td id="sampleNro_new5-<%= sample.id %>" rowspan="1">
+        <input type="hidden" value="<%= sample.id %>" name="sample[id][<%= sample.index %>]">
+        <%= sample.index %>
     </td>
-    <td style="width:40%">
-      <select class="select2 form-control form-control-sm" style="width:100%" {% if not edit %}disabled{% endif %}
-        id="cassette-organ-<%= sample_index %>" name="cassette[organ][<%= sample_index %>]" multiple="multiple">
-        <% _.each( organs, function( organ ){ %>
-          <option value=<%= organ.id %>> <%= organ.name %> </option>
+
+    <td id="sampleIden_new5-<%= sample.id %>" rowspan="1">
+        <%= sample.identification.cage %>-<%= sample.identification.group %>
+    </td>
+  
+    <!-- Análisis -->
+    <td class="samples_new_exams_list samples_new_exams delete_new5-<%= sample.id %>" data-index="<%= sample.id %>">
+    </td>
+
+    <!-- Organs -->
+    <td class="delete_new5-<%= sample.id %>">
+    </td>
+
+    <!-- Actions -->
+    <td class="delete_new5-<%= sample.id %>">
+    </td>
+  </tr> 
+</script>
+
+<script id="add_old_analisis5" type="text/x-lodash-template">
+  <tr id="analisis_new5-<%= sampleId %>-<%= sampleIndex %>" class="old_row analis_new_row analis_new_row-<%= sampleId %>" data-sampleid="<%= sampleIndex %>" data-sampleindex="<%= sampleId %>">
+    <td class="samples_new_exams_list" data-index="<%= sampleId %>">
+      <input class="form-control" style="width:100% !important;" readonly value="<%= analisis %>"/>
+    </td>
+    <td>
+      <select id="select5-<%= optionId %>" class="select2 form-control organs_new_select organs_new_select5-<%= sampleIndex %>" style="width:100% !important;" multiple="multiple" disabled>
+        <% _.each(organs, function (organ) { %>
+          <option value=<%= organ.id %>> <%= _.toUpper(organ.name) %> </option>
         <% }); %>
       </select>
     </td>
     <td>
-      <% if (extra) { %>
-        <button title="Eliminar Cassette" tooltip="" type="button" data-cassette="<%= cassette_index %>" class="btn btn-icon btn-danger remove_cassette"><i class="fa fa-trash"></i></button>
-      <% } else { %>
-        <button {% if not edit %}disabled{% endif %} title="Añadir cassette a la muestra" tooltip="" type="button" data-sample="<%= sample_id %>" class="btn btn-icon btn-secondary add_cassette_to_sample"><i class="fa fa-plus"></i></button>
-      <% } %>
+      <a href="javascript:void(0);" class="btn btn-warning" disabled><i class="fa fa-trash "></i></a>
     </td>
   </tr>
+</script>
+
+<script id="add_new_analisis5" type="text/x-lodash-template">
+  <tr id="analisis_new5-<%= sampleId %>-<%= sampleIndex %>" class="analis_new_row analis_new_row-<%= sampleId %>" data-sampleid="<%= sampleIndex %>" data-sampleindex="<%= sampleId %>">
+    <td class="samples_new_exams_list" data-index="<%= sampleId %>">
+      <input class="form-control" style="width:100% !important;" readonly value="<%= analisis %>"/>
+      <input class="form-control" style="width:100% !important;" name="sample[exams][<%= sampleId %>][<%= sampleIndex %>]" hidden value="<%= sampleIndex %>"/>
+    </td>
+    <td>
+      <select id="select5-<%= optionId %>" class="select2 form-control organs_new_select organs_new_select5-<%= sampleIndex %>" style="width:100% !important;" name="sample[organs][<%= sampleId %>][<%= sampleIndex %>]" multiple="multiple">
+        <% _.each(organs, function (organ) { %>
+          <option value=<%= organ.id %>> <%= _.toUpper(organ.name) %> </option>
+        <% }); %>
+      </select>
+    </td>
+    <td>
+      <a href="javascript:void(0);" class="btn btn-warning" onclick="deleteNewAnalisis5(<%= sampleId %>, <%= sampleIndex %>);"><i class="fa fa-trash "></i></a>
+    </td>
+  </tr>
+</script>
+
+<script id="patologo_row_5" type="text/x-lodash-template">
+  <tr id="exam_5-<%= exam.id %>">
+    <td>
+      <%= exam.text %>
+    </td>
+    <td>
+      <select id="patologos-select_5-<%= exam.id %>" class="select2 form-control patologos-select_5" style="width:100% !important;" name="sample[patologos][<%= exam.id %>]" {% if not edit %}disabled{% endif %}>
+        <% _.each(patologos, function (patologo) { %>
+          <option value=<%= patologo.id %>> <%= _.toUpper(patologo.first_name +' '+ patologo.last_name) %> </option>
+        <% }); %>
+      </select>
+    </td>
+  </tr> 
 </script>

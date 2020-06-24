@@ -284,199 +284,214 @@
       ordering: false,
     });
   });
+  
   var resumenId;
+  var closed;
+  
   $(document).on('click', '.showSummaryBtn', function(e){
     var entryform_id = $(this).data('id');
-    var closed = $(this).data('closed');
+    closed = $(this).data('closed');
     resumenId = entryform_id;
-    fillSummary(entryform_id)
-    if(closed == 1){
-      $('#btn_save').hide();
-      $('.btn-save-identification').hide();
-    }
-    else{
-      $('#btn_save').show();
-      $('.btn-save-identification').show();
-    }
-    $("#show_summary").modal("show");
+    getSummaryData();
   });
 
-  function fillSummary(entryform_id){
+  function getSummaryData(){
+    var entryform_id = resumenId;
+    var closed = closed;
     var url = Urls.entryform_id(entryform_id);
-
     $.ajax({
       type: "GET",
       url: url,
-      async: false,
     })
     .done(function (data) {
-      var selectClient = '<select class="select2 form-control selectOpt" id="client" name="client" {% if not edit %}disabled{% endif %}>';
-      $.each(data.customers_list, function(j, o){
-          selectClient += '<option value="'+o.id+'">'+o.name+'</option>';
-      });
-      selectClient +='</select>';
+      fillSummary(data);
+      if(closed == 1){
+        $('#btn_save').hide();
+        $('.btn-save-identification').hide();
+      }
+      else{
+        $('#btn_save').show();
+        $('.btn-save-identification').show();
+      }
+      $("#show_summary").modal("show");
+    })
+    .fail(function () {
+      console.log("Fail")
+    });
+  }
 
-      var selectFix = '<select class="select2 form-control selectOpt" id="fixative" name="fixative" {% if not edit %}disabled{% endif %}>';
-      $.each(data.fixtatives_list, function(j, o){
-          selectFix += '<option value="'+o.id+'">'+o.name+'</option>';
-      });
-      selectFix +='</select>';
+  function fillSummary(data){
+    var selectClient = '<select class="select2 form-control selectOpt" id="client" name="client" {% if not edit or closed  %}disabled{% endif %} >';
+    $.each(data.customers_list, function(j, o){
+        selectClient += '<option value="'+o.id+'">'+o.name+'</option>';
+    });
+    selectClient +='</select>';
 
-      var selectEntryformType = '<select class="select2 form-control selectOpt" id="entryform_type" name="entryform_type" {% if not edit %}disabled{% endif %}>';
-      $.each(data.entryform_types_list, function(j, o){
-          selectEntryformType += '<option value="'+o.id+'">'+o.name+'</option>';
-      });
-      selectEntryformType +='</select>';
+    var selectFix = '<select class="select2 form-control selectOpt" id="fixative" name="fixative" {% if not edit or closed  %}disabled{% endif %} >';
+    $.each(data.fixtatives_list, function(j, o){
+        selectFix += '<option value="'+o.id+'">'+o.name+'</option>';
+    });
+    selectFix +='</select>';
 
-      var selectSpecie = '<select class="select2 form-control selectOpt" id="specie" name="specie" {% if not edit %}disabled{% endif %}>';
-      $.each(data.species_list, function(j, o){
-          selectSpecie += '<option value="'+o.id+'">'+o.name+'</option>';
-      });
-      selectSpecie +='</select>';
+    var selectEntryformType = '<select class="select2 form-control selectOpt" id="entryform_type" name="entryform_type" {% if not edit or closed  %}disabled{% endif %} >';
+    $.each(data.entryform_types_list, function(j, o){
+        selectEntryformType += '<option value="'+o.id+'">'+o.name+'</option>';
+    });
+    selectEntryformType +='</select>';
 
-      var selectlarvalstage = '<select class="select2 form-control selectOpt" id="larvalstage" name="larvalstage" {% if not edit %}disabled{% endif %}>';
-      $.each(data.larvalStages_list, function(j, o){
-          selectlarvalstage += '<option value="'+o.id+'">'+o.name+'</option>';
-      });
-      selectlarvalstage +='</select>';
+    var selectSpecie = '<select class="select2 form-control selectOpt" id="specie" name="specie" {% if not edit or closed  %}disabled{% endif %} >';
+    $.each(data.species_list, function(j, o){
+        selectSpecie += '<option value="'+o.id+'">'+o.name+'</option>';
+    });
+    selectSpecie +='</select>';
 
-      var selectwatersource = '<select class="select2 form-control selectOpt" id="watersource" name="watersource" {% if not edit %}disabled{% endif %}>';
-      $.each(data.waterSources_list, function(j, o){
-          selectwatersource += '<option value="'+o.id+'">'+o.name+'</option>';
-      });
-      selectwatersource +='</select>';
+    var selectlarvalstage = '<select class="select2 form-control selectOpt" id="larvalstage" name="larvalstage" {% if not edit or closed  %}disabled{% endif %} >';
+    $.each(data.larvalStages_list, function(j, o){
+        selectlarvalstage += '<option value="'+o.id+'">'+o.name+'</option>';
+    });
+    selectlarvalstage +='</select>';
 
-      $('.NoCasoSummary').html(data.entryform.no_caso);
-      $('.summaryClient').html('<label>Cliente:</label>' + selectClient);
-      $('.summaryCompany').html('<label>Empresa:</label> <input class="form-control" value="'+ data.entryform.company+'" name="company" {% if not edit %}disabled{% endif %} />');
-      $('.summaryCenter').html('<label>Centro:</label> <input class="form-control" value="'+ data.entryform.center+'" name="center" {% if not edit %}disabled{% endif %} />');
-      $('.summaryResponsible').html('<label>Responsable:</label> <input class="form-control" value="'+ data.entryform.responsible+'" name="responsable" {% if not edit %}disabled{% endif %} />');
-      $('.summaryReception').html('<label>Fecha recepción:</label> <div class="input-group date" id=""><input type="text" class="form-control" name="recive" {% if not edit %}disabled{% endif %} value="'+ moment(data.entryform.created_at).format("DD/MM/YYYY HH:mm")+'" /><div class="input-group-append"><span class="input-group-text"><span class="fa fa-calendar"></span></span></div></div> ' );
-      $('.sumarrySampling').html('<label>Fecha muestreo:</label> <div class="input-group date" id=""><input type="text" class="form-control" name="muestreo" {% if not edit %}disabled{% endif %} value="'+ moment(data.entryform.sampled_at).format("DD/MM/YYYY HH:mm")+'" /><div class="input-group-append"><span class="input-group-text"><span class="fa fa-calendar"></span></span></div></div> ' );
-      $('.summaryNoOrder').html('<label>No. orden:</label> <input class="form-control" value="'+ data.entryform.no_order+'" name="no_order" {% if not edit %}disabled{% endif %} />');
-      $('.summaryNoRequest').html('<label>No. solicitud:</label> <input class="form-control" value="'+ data.entryform.no_request+'" name="no_solic" {% if not edit %}disabled{% endif %} />');
-      $('.summaryAnamnesis').html('<label>Anamnesis:</label> <textarea class="form-control" row="2" name="anamnesis" {% if not edit %}disabled{% endif %} >'+ data.entryform.anamnesis+'</textarea>');
-      $('.summaryFixative').html('<label>Fijador:</label>'+ selectFix);
-      $('.summaryEntryformType').html('<label>Tipo de Ingreso:</label>'+ selectEntryformType);
+    var selectwatersource = '<select class="select2 form-control selectOpt" id="watersource" name="watersource" {% if not edit or closed  %}disabled{% endif %} >';
+    $.each(data.waterSources_list, function(j, o){
+        selectwatersource += '<option value="'+o.id+'">'+o.name+'</option>';
+    });
+    selectwatersource +='</select>';
+
+    $('.NoCasoSummary').html(data.entryform.no_caso);
+    $('.summaryClient').html('<label>Cliente:</label>' + selectClient);
+    $('.summaryCompany').html('<label>Empresa:</label> <input class="form-control" value="'+ data.entryform.company+'" name="company" {% if not edit or closed  %}disabled{% endif %} />');
+    $('.summaryCenter').html('<label>Centro:</label> <input class="form-control" value="'+ data.entryform.center+'" name="center" {% if not edit or closed  %}disabled{% endif %} />');
+    $('.summaryResponsible').html('<label>Responsable:</label> <input class="form-control responsible_place" readonly value="'+ data.entryform.responsible+'" name="responsable" onclick="responsibleModal()" {% if not edit or closed  %}disabled{% endif %} />');
+    $('.summaryReception').html('<label>Fecha recepción:</label> <div class="input-group date" id=""><input type="text" class="form-control" name="recive" value="'+ moment(data.entryform.created_at).format("DD/MM/YYYY HH:mm")+'" {% if not edit or closed  %}disabled{% endif %} /><div class="input-group-append"><span class="input-group-text"><span class="fa fa-calendar"></span></span></div></div> ' );
+    $('.sumarrySampling').html('<label>Fecha muestreo:</label> <div class="input-group date" id=""><input type="text" class="form-control" name="muestreo" value="'+ moment(data.entryform.sampled_at).format("DD/MM/YYYY HH:mm")+'" {% if not edit or closed  %}disabled{% endif %} /><div class="input-group-append"><span class="input-group-text"><span class="fa fa-calendar"></span></span></div></div> ' );
+    $('.summaryNoOrder').html('<label>No. orden:</label> <input class="form-control" value="'+ data.entryform.no_order+'" name="no_order" {% if not edit or closed  %}disabled{% endif %} />');
+    $('.summaryNoRequest').html('<label>No. solicitud:</label> <input class="form-control" value="'+ data.entryform.no_request+'" name="no_solic" {% if not edit or closed  %}disabled{% endif %} />');
+    $('.summaryAnamnesis').html('<label>Anamnesis:</label> <textarea class="form-control" row="2" name="anamnesis" {% if not edit %}disabled{% endif %} >'+ data.entryform.anamnesis+'</textarea>');
+    $('.summaryFixative').html('<label>Fijador:</label>'+ selectFix);
+    $('.summaryEntryformType').html('<label>Tipo de Ingreso:</label>'+ selectEntryformType);
+    
+    $('.summarySpecie').html('<label>Especie:</label>'+selectSpecie  );
+    $('.summaryDevStatus').html('<label>Estadío Desarrollo:</label>'+selectlarvalstage ); 
+    $('.summaryWaterSource').html('<label>Fuente de agua:</label>'+selectwatersource);
+
+    // var tpl_identification = '';
+    var tpl_identification ='<div class="col-sm-12"> <hr><h6 class="form-section mt-2"> Identificación</h6></br> </div>';
+
+    $.each(data.entryform.identifications, function(i, item){
+      var optimum = ""
+      if (!item.is_optimum){
+        optimum = "selected"
+      }
+      var selectOptimum = '<select class="select2 form-control selectOpt" name="optimo" {% if not edit or closed  %}disabled{% endif %} ><option value="1">Si</option><option value="0" '+optimum+'>No</option></select>'
       
-      $('.summarySpecie').html('<label>Especie:</label>'+selectSpecie  );
-      $('.summaryDevStatus').html('<label>Estadío Desarrollo:</label>'+selectlarvalstage ); 
-      $('.summaryWaterSource').html('<label>Fuente de agua:</label>'+selectwatersource);
+      var selectOrgans = '<select class="select2 form-control selectOrgs" name="organs" multiple {% if not edit or closed  %}disabled{% endif %} >';
 
-      // var tpl_identification = '';
-      var tpl_identification ='<div class="col-sm-12"> <hr><h6 class="form-section mt-2"> Identificación</h6></br> </div>';
-
-      $.each(data.entryform.identifications, function(i, item){
-        var optimum = ""
-        if (!item.is_optimum){
-          optimum = "selected"
+      $.each(data.organs, function(j, o){
+        if(item.organs_bv_set.findIndex(x => x.id === o.id) != -1){
+          selectOrgans += '<option value="'+o.id+'" selected>'+o.name+'</option>';
         }
-        var selectOptimum = '<select class="select2 form-control selectOpt" name="optimo" {% if not edit %}disabled{% endif %} ><option value="1">Si</option><option value="0" '+optimum+'>No</option></select>'
-        
-        var selectOrgans = '<select class="select2 form-control selectOrgs" name="organs" multiple {% if not edit %}disabled{% endif %}>';
-        $.each(data.organs, function(j, o){
-          if(item.organs_bv_set.findIndex(x => x.id === o.id) != -1){
-            selectOrgans += '<option value="'+o.id+'" selected>'+o.name+'</option>';
-          }
-          else
-            selectOrgans += '<option value="'+o.id+'">'+o.name+'</option>';
-        });
-        selectOrgans +='</select>';
-        
-        tpl_identification += '<div class="col-md-4"><form id="identification-'+item.id+'" action="#" method="POST">';
-        tpl_identification += '<div class="alert alert-light"><div class="row">';
-        tpl_identification += '<div class="form-group col-md-6"><label>Estanque/Jaula:</label> <input class="form-control" value="'+ item.cage+'"  name="jaula" {% if not edit %}disabled{% endif %} /></div>';
-        tpl_identification += '<div class="form-group col-md-6"><label>Grupo:</label> <input class="form-control" value="'+ item.group+'"  name="grupo" {% if not edit %}disabled{% endif %} /></div>';
-        tpl_identification += '<div class="form-group col-md-6"><label>Peces:</label> <input class="form-control" value="'+ item.no_fish+'" disabled {% if not edit %}disabled{% endif %} /></div>';
-        tpl_identification += '<div class="form-group col-md-6"><label>Contenedores:</label> <input class="form-control" type="number" value="'+ item.no_container+'"  name="contenedores" {% if not edit %}disabled{% endif %} /></div>';
-        tpl_identification += '<div class="form-group col-md-6"><label>Peso:</label> <input class="form-control" type="number" value="'+ item.weight+'"  name="peso" {% if not edit %}disabled{% endif %} /></div>';
-        tpl_identification += '<div class="form-group col-md-6"><label>Óptimo?:</label>'+ selectOptimum+'</div>';
-        tpl_identification += '<div class="form-group col-md-6"><label>Comentarios Extras:</label> <textarea class="form-control" rows="2" name="extras" {% if not edit %}disabled{% endif %} >'+ item.extra_features_detail+' </textarea></div>';
-        tpl_identification += '<div class="form-group col-md-6"><label>Observaciones:</label> <textarea class="form-control" rows="2" name="observation" {% if not edit %}disabled{% endif %} >'+ item.observation+' </textarea></div>';
-        tpl_identification += '<div class="form-group col-md-10"><label>Órganos:</label>'+selectOrgans+'</div>';
-        {% if edit %}
-        tpl_identification += '<div style="padding-top:25px;"><a href="javascript:void(0);" onclick="submitIdentification('+item.id+')" class="btn btn-primary btn-save-identification"> <i class="fa fa-save"></i> </a></div>'
-        {% endif %}
-        tpl_identification += '</div></div>';
-        tpl_identification += '</form></div>';
+        else
+          selectOrgans += '<option value="'+o.id+'">'+o.name+'</option>';
       });
-
-      // tpl_identification += '</div>';
-      $('.summaryIdentification').html(tpl_identification);
-
-      var tpl_exams = '<div class="col-sm-12"><h6 class="form-section mt-2"> Servicios</h6></br>';
-      $.each(data.entryform.analyses, function(i, item){
-        tpl_exams += '<div class="alert alert-light"><b>'+ item.exam__name +'</b> <span class="pull-right">'
-        if(item.patologo__first_name != null)
-          tpl_exams += '<b>Patólogo:</b> '+item.patologo__first_name+' ';
-        if(item.patologo__last_name != null)
-          tpl_exams += item.patologo__last_name;
-        tpl_exams += '</span> <br> <b>Fecha: </b>'+ moment(item.created_at).format("DD/MM/YYYY HH:mm");
-        
-        if (item.service_comments.length > 0) {
-          tpl_exams += '<br> <b>Comentarios:</b><br><br>';
-          $.each(item.service_comments, function(j, item2){
-            tpl_exams += '<p style="margin-left: 5%;"><b>'+item2.done_by+' ('+item2.created_at+'):</b> <br> '+item2.text+'</p>'
-          });
-        }
-        
-
-        tpl_exams += '</div>';
-      });
-
-      tpl_exams += '</div>';
-      $('.summaryExams').html(tpl_exams);
-
-      var tpl_samples = '<div class="col-sm-12"><h6 class="form-section mt-2"> Muestras</h6></br><table class="table table-bordered table-xs">';
-      tpl_samples += '<thead><tr><th width="8% !important;">Muestra</th><th>Identificación</th><th>Análisis</th><th>Órganos</th></tr></thead><tbody>';
-      var patologos = {};
-      $.each(data.patologos, function(i, v){
-        patologos[v.id]=v.first_name+' '+v.last_name;
-      })
+      selectOrgans +='</select>';
       
-      $.each(data.samples, function(i, item){
-        var len = 1;
-        var tpl_exams = ""
-        $.each(item.sample_exams_set, function(j, v){
-          len+=1;
-          tpl_exams += '<tr><td>'+v.exam_name+'</td>';
-          tpl_exams += '<td>'+ Object.keys(v.organ_id).map(function(k){return v.organ_id[k].name}).join(", ") +'</td>';
-        });
-        tpl_samples += '<tr>';
-        tpl_samples += '<td rowspan="'+len+'">'+ item.index +'</td>';
-        tpl_samples += '<td rowspan="'+len+'">'+ item.identification.cage +'-'+item.identification.group+'</td>';
-        tpl_samples += '</tr>';
-        tpl_samples += tpl_exams;
-        
-      });
-
-      tpl_samples += '</tbody></table></div>';
-      $('.summarySamples').html(tpl_samples);
-      if(data.entryform.customer != null)
-        $('#client').val(data.entryform.customer.id);
-     
-      if(data.entryform.entryform_type != null)
-        $('#entryform_type').val(data.entryform.entryform_type.id);
-      
-      if(data.entryform.fixative != null)
-        $('#fixative').val(data.entryform.fixative.id);
-      if(data.entryform.specie != null)
-        $('#specie').val(data.entryform.specie.id);
-      if(data.entryform.watersource != null)
-        $('#watersource').val(data.entryform.watersource.id);
-      if(data.entryform.larvalstage != null)
-        $('#larvalstage').val(data.entryform.larvalstage.id);
-
-      $('.selectOpt').select2({'width':'100%'});
-      $('.selectOrgs').select2({'width':'100%'});
-      
-      $('.date').datetimepicker({
-          locale: 'es',
-          keepOpen: false,
-          format:'DD/MM/YYYY HH:mm'
-        });
+      tpl_identification += '<div class="col-md-4"><form id="identification-'+item.id+'" action="#" method="POST">';
+      tpl_identification += '<div class="alert alert-light"><div class="row">';
+      tpl_identification += '<div class="form-group col-md-6"><label>Estanque/Jaula:</label> <input class="form-control" value="'+ item.cage+'"  name="jaula" {% if not edit or closed  %}disabled{% endif %} /></div>';
+      tpl_identification += '<div class="form-group col-md-6"><label>Grupo:</label> <input class="form-control" value="'+ item.group+'"  name="grupo" {% if not edit or closed  %}disabled{% endif %} /></div>';
+      tpl_identification += '<div class="form-group col-md-6"><label>Peces:</label> <input class="form-control just_increasing" name="no_fish" data-val="'+ item.no_fish+'" value="'+ item.no_fish+'" {% if not edit or closed  %}disabled{% endif %} /></div>';
+      tpl_identification += '<div class="form-group col-md-6"><label>Contenedores:</label> <input class="form-control" type="number" value="'+ item.no_container+'"  name="contenedores" {% if not edit or closed  %}disabled{% endif %} /></div>';
+      tpl_identification += '<div class="form-group col-md-6"><label>Peso:</label> <input class="form-control" type="number" value="'+ item.weight+'"  name="peso" {% if not edit or closed  %}disabled{% endif %} /></div>';
+      tpl_identification += '<div class="form-group col-md-6"><label>Óptimo?:</label>'+ selectOptimum+'</div>';
+      tpl_identification += '<div class="form-group col-md-6"><label>Comentarios Extras:</label> <textarea class="form-control" rows="2" name="extras" {% if not edit or closed  %}disabled{% endif %} >'+ item.extra_features_detail+' </textarea></div>';
+      tpl_identification += '<div class="form-group col-md-6"><label>Observaciones:</label> <textarea class="form-control" rows="2" name="observation" {% if not edit or closed  %}disabled{% endif %} >'+ item.observation+' </textarea></div>';
+      tpl_identification += '<div class="form-group col-md-10"><label>Órganos:</label>'+selectOrgans+'</div>';
+      {% if edit and not closed %}
+        tpl_identification += '<div style="padding-top:25px;"><a href="javascript:void(0);" onclick="submitIdentification('+item.id+')" class="btn btn-primary"> <i class="fa fa-save"></i> </a></div>'
+      {% endif %}
+      tpl_identification += '</div></div>';
+      tpl_identification += '</form></div>';
     });
 
+    // tpl_identification += '</div>';
+    $('.summaryIdentification').html(tpl_identification);
+
+    var tpl_exams = '<div class="col-sm-12"><h6 class="form-section mt-2"> Servicios</h6></br>';
+    $.each(data.entryform.analyses, function(i, item){
+      tpl_exams += '<div class="alert alert-light"><b>'+ item.exam__name +'</b> <span class="pull-right">'
+      if(item.patologo__first_name != null)
+        tpl_exams += '<b>Patólogo:</b> '+item.patologo__first_name+' ';
+      if(item.patologo__last_name != null)
+        tpl_exams += item.patologo__last_name;
+      tpl_exams += '</span> <br> <b>Fecha: </b>'+ moment(item.created_at).format("DD/MM/YYYY HH:mm");
+      
+      if (item.service_comments.length > 0) {
+        tpl_exams += '<br> <b>Comentarios:</b><br><br>';
+        $.each(item.service_comments, function(j, item2){
+          tpl_exams += '<p style="margin-left: 5%;"><b>'+item2.done_by+' ('+item2.created_at+'):</b> <br> '+item2.text+'</p>'
+        });
+      }
+      
+
+      tpl_exams += '</div>';
+    });
+
+    tpl_exams += '</div>';
+    $('.summaryExams').html(tpl_exams);
+
+    var tpl_samples = '<div class="col-sm-12"><h6 class="form-section mt-2"> Muestras</h6></br><table class="table table-bordered table-xs">';
+    tpl_samples += '<thead><tr><th width="8% !important;">Muestra</th><th>Identificación</th><th>Análisis</th><th>Órganos</th></tr></thead><tbody>';
+    var patologos = {};
+    $.each(data.patologos, function(i, v){
+      patologos[v.id]=v.first_name+' '+v.last_name;
+    })
+    
+    $.each(data.samples, function(i, item){
+      var len = 1;
+      var tpl_exams = ""
+      $.each(item.sample_exams_set, function(j, v){
+        len+=1;
+        tpl_exams += '<tr><td>'+v.exam_name+'</td>';
+        tpl_exams += '<td>'+ Object.keys(v.organ_id).map(function(k){return v.organ_id[k].name}).join(", ") +'</td></tr>';
+      });
+      tpl_samples += '<tr id="sample-id-'+item.id+'">';
+      tpl_samples += '<td rowspan="'+len+'"><button type="button" class="btn btn-sm btn-danger round" onclick="deleteSample('+item.id+');">X</button> '+ item.index +'</td>';
+      tpl_samples += '<td rowspan="'+len+'">'+ item.identification.cage +'-'+item.identification.group+'</td>';
+      tpl_samples += '</tr>';
+      tpl_samples += tpl_exams;
+      
+    });
+
+    tpl_samples += '</tbody></table></div>';
+    $('.summarySamples').html(tpl_samples);
+
+    if(data.entryform.customer != null)
+    $('#client').val(data.entryform.customer.id);
+    if(data.entryform.entryform_type != null)
+        $('#entryform_type').val(data.entryform.entryform_type.id);
+    if(data.entryform.fixative != null)
+    $('#fixative').val(data.entryform.fixative.id);
+    if(data.entryform.specie != null)
+    $('#specie').val(data.entryform.specie.id);
+    if(data.entryform.watersource != null)
+    $('#watersource').val(data.entryform.watersource.id);
+    if(data.entryform.larvalstage != null)
+    $('#larvalstage').val(data.entryform.larvalstage.id);
+
+    $('.selectOpt').select2({'width':'100%'});
+    $('.selectOrgs').select2({'width':'100%'});
+    
+    $('.date').datetimepicker({
+        locale: 'es',
+        keepOpen: false,
+        format:'DD/MM/YYYY HH:mm'
+      });
+
+    // $('#datetime_sampled_at').datetimepicker({
+    //     locale: 'es',
+    //     keepOpen: false,
+    //     format:'DD/MM/YYYY HH:mm'
+    //   });
   }
   
   function submitGeneralData(){
@@ -521,19 +536,90 @@
 }
 
   function submitIdentification(id){
-    var data = $('#identification-'+id).serialize();
-    $.ajax({
-      type: "POST",
-      url: '/identification/'+id,
-      data: data,
-      async: false,
-    })
-    .done(function (data) {
-      response = data;
-    })
-    .fail(function (data) {
-      console.log("Fail");
-    })
+    swal({
+        title: "Confirmación",
+        text: "¿Confirma que desea guardar los cambios?",
+        icon: "warning",
+        showCancelButton: true,
+        buttons: {
+        cancel: {
+            text: "Cancelar",
+            value: null,
+            visible: true,
+            className: "btn-warning",
+            closeModal: true,
+        },
+        confirm: {
+            text: "Continuar",
+            value: true,
+            visible: true,
+            className: "",
+            closeModal: true,
+        }
+        }
+    }).then(isConfirm => {
+        if (isConfirm) {
+            var data = $('#identification-'+id).serialize();
+            $.ajax({
+                type: "POST",
+                url: '/identification/'+id,
+                data: data,
+                async: false,
+            })
+            .done(function (data) {
+                response = data;
+                summary_edited = true;
+                toastr.success('Guardado exitosamente!');
+                getSummaryData();
+            })
+            .fail(function (data) {
+                console.log("Fail");
+            })
+        }
+    });
 
   }
+
+  function deleteSample(id){
+
+    swal({
+        title: "Confirmación",
+        text: "Le recordamos que eliminar una muestra puede generar perdida de trabajo realizado si ya se encuentra procesada o tiene servicios asociados. ¿Confirma que desea eliminar?",
+        icon: "warning",
+        showCancelButton: true,
+        buttons: {
+        cancel: {
+            text: "Cancelar",
+            value: null,
+            visible: true,
+            className: "btn-warning",
+            closeModal: true,
+        },
+        confirm: {
+            text: "Continuar",
+            value: true,
+            visible: true,
+            className: "",
+            closeModal: true,
+        }
+        }
+    }).then(isConfirm => {
+        if (isConfirm) {
+            $.ajax({
+                type: "GET",
+                url: '/delete-sample/'+id,
+                async: false,
+            })
+            .done(function (data) {
+                summary_edited = true;
+                toastr.success('La muestra se ha eliminado exitosamente!');
+                getSummaryData();
+            })
+            .fail(function (data) {
+                console.log("Fail");
+            })
+        }
+    });
+  }
+
 </script> {% endblock scripts %}

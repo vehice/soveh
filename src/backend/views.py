@@ -685,7 +685,15 @@ class WORKFLOW(View):
 
         actor = Actor.objects.filter(profile_id=request.user.userprofile.profile_id).first()
         if (form.content_type.name == 'entry form'):
-            permisos =  actor.permission.filter(from_state_id=step_tag.split('_')[1])
+            print ("el step tag es")
+            print (step_tag)
+
+            # Fix patch state id non-correlative from step_3 > id : 5
+            if step_tag == "step_3":
+                state_id = 5
+            else:
+                state_id = step_tag.split('_')[1]
+            permisos =  actor.permission.filter(from_state_id=state_id)
             edit = 1 if permisos.filter(type_permission='w').first() else 0
             route = 'app/workflow_main.html'
 
@@ -1952,10 +1960,10 @@ def step_2_entryform(request):
     exams_to_do = var_post.getlist("analysis")
     analyses_qs = entryform.analysisform_set.all()
     change = False
-    for analysis in analyses_qs:
-        analysis.forms.get().delete()
+    # for analysis in analyses_qs:
+    #     analysis.forms.get().delete()
 
-    analyses_qs.delete()
+    # analyses_qs.delete()
 
 
     for exam in exams_to_do:
@@ -1968,17 +1976,18 @@ def step_2_entryform(request):
         else:
             flow = Flow.objects.get(pk=3)
 
-        analysis_form = AnalysisForm.objects.create(
-            entryform_id=entryform.id,
-            exam=ex,
-            # patologo_id= int(var_post.get("sample[patologos]["+exam+"]"))
-        )
+        
+        if AnalysisForm.objects.filter(entryform_id=entryform.id, exam=ex).count() == 0:
+            analysis_form = AnalysisForm.objects.create(
+                entryform_id=entryform.id,
+                exam=ex,
+            )
 
-        Form.objects.create(
-            content_object=analysis_form,
-            flow=flow,
-            state=flow.step_set.all()[0].state,
-            parent_id=entryform.forms.first().id)
+            Form.objects.create(
+                content_object=analysis_form,
+                flow=flow,
+                state=flow.step_set.all()[0].state,
+                parent_id=entryform.forms.first().id)
 
     sample_id = [
         v for k, v in var_post.items() if k.startswith("sample[id]")
@@ -1993,19 +2002,28 @@ def step_2_entryform(request):
         ]
         sample_organs = []
         bulk_data = []
+        
+        for se in SampleExams.objects.filter(sample=sample):
+            if se.exam_id not in sample_exams:
+                se.delete()
+
         for exam in sample_exams:
             sample_organs = [
                 v for k, v in dict(var_post).items() if k.startswith("sample[organs]["+values+"]["+exam)
             ]
+            
+            for se in SampleExams.objects.filter(sample=sample, exam_id=exam):
+                if se.organ_id not in sample_organs[0]:
+                    se.delete()      
 
             for organ in sample_organs[0]:
-                bulk_data.append(SampleExams(
-                    sample_id = sample.pk,
-                    exam_id = exam,
-                    organ_id= organ
-                ))
+                if SampleExams.objects.filter(sample=sample, exam_id=exam, organ_id=organ).count() == 0:
+                    bulk_data.append(SampleExams(
+                        sample_id = sample.pk,
+                        exam_id = exam,
+                        organ_id= organ
+                    ))
         change = change or checkSampleExams(sample.sampleexams_set.all(), bulk_data)
-        sample.sampleexams_set.all().delete()
         SampleExams.objects.bulk_create(bulk_data)
         sample.save()
     if change:
@@ -2459,6 +2477,21 @@ def save_identification(request, id):
         change = True
     ident.is_optimum = var_post['optimo']
 
+    if ident.no_fish != var_post['no_fish']:
+        change = True
+        current_samples = Sample.objects.filter(identification=ident).order_by('-index')
+        max_index = current_samples.first().index
+        new_counter_index = 0
+        for i in range(current_samples.count(), int(var_post['no_fish'])):
+            sample = Sample.objects.create(
+                entryform=ident.entryform,
+                index=max_index + new_counter_index + 1,
+                identification=ident
+            )
+            new_counter_index += 1
+
+    ident.no_fish = var_post['no_fish']
+
     organs = var_post.getlist('organs')
     orgs = []
     for org in ident.organs_before_validations.all():
@@ -2484,6 +2517,7 @@ def save_identification(request, id):
         ident.organs_before_validations.add(int(org))
     
     ident.save()
+
     if change:
         changeCaseVersion(True, ident.entryform.id, request.user.id)
     return JsonResponse({})
@@ -2715,4 +2749,14 @@ def reopen_form(request, form_id):
     form.form_closed = False
     form.closed_at = None
     form.save()
+    return JsonResponse({'ok':True})
+
+def delete_sample(request, id):
+    sample = Sample.objects.get(pk=id)
+    ident = sample.identification
+    ident.no_fish = ident.no_fish - 1
+    ident.save()
+    sample.delete()
+    changeCaseVersion(True, ident.entryform.id, request.user.id)
+
     return JsonResponse({'ok':True})

@@ -1,5 +1,6 @@
 var data_step_2;
 var patologos_list;
+var previous_data_exists = false;
 
 function init_step_2() {
   var entryform_id = $('#entryform_id').val();
@@ -19,6 +20,9 @@ function init_step_2() {
     $('.newAnalysisBtn').addClass("hidden");
     $('.newAnalysisBtn5').addClass("hidden");
      // fillSummary(data);
+    if (data.entryform.analyses.length > 0){
+      previous_data_exists = true;
+    }
     initialData(data);
     loadData(data);
   })
@@ -67,7 +71,7 @@ function loadSamples(samples){
     addSampleRow(v);
     $.each(v.sample_exams_set, function(j,item){
       $('.delete-'+v.id).hide();
-      var html = addOrgansOptions(item.exam_name, item.service_id, v.id, item.exam_id, v.identification.organs, v.id+"-"+($('#sampleNro-'+v.id)[0].rowSpan + 1));
+      var html = addOrgansOptions(item.exam_name, item.service_id, v.id, item.exam_id, v.identification.organs, v.id+"-"+($('#sampleNro-'+v.id)[0].rowSpan + 1), true);
       $('#sampleNro-'+v.id)[0].rowSpan = $('#sampleNro-'+v.id)[0].rowSpan + 1; 
       $('#sampleIden-'+v.id)[0].rowSpan = $('#sampleIden-'+v.id)[0].rowSpan + 1; 
       $("#sample-"+v.id).after(html);
@@ -110,13 +114,15 @@ function initialData(data) {
 }
 
 function loadData(data){
-  $('#patologo_table tbody').html('');
   // Fill analyses
+
+  if (data.entryform.analyses.length > 0){
+    $('#pre-selected-exams-list').html("");
+    $('#pre-selected-exams').show();
+  }
   $.each(data.entryform.analyses, function(i, item){
-    $('#exam_select option[value="'+item.exam_id+'"]').prop('selected', true);
-    // addPatologoRow({text: item.exam__name, id: item.exam_id});
-    $('#patologos-select-'+item.exam_id).val(item.patologo_id);
-    $('#patologos-select-'+item.exam_id).trigger('change');
+    $('#pre-selected-exams-list').append("<div class='col-md-12'><b>"+$('#exam_select option[value="'+item.exam_id+'"]').text()+"</b></div>");
+    //$('#exam_select option[value="'+item.exam_id+'"]').attr('disabled','disabled');
   });
 
   // Fill exams and organs per samples
@@ -158,7 +164,7 @@ function addExamToSamples(exam){
       $('#sampleIden-'+sampleId)[0].rowSpan = $('#sampleIden-'+sampleId)[0].rowSpan + 1; 
       //show organs options
       avail_organs = getSampleAvailableOrgans(sampleId);
-      var html = addOrgansOptions(exam.text, $(exam.element).data('service'), sampleId, exam.id, avail_organs);
+      var html = addOrgansOptions(exam.text, $(exam.element).data('service'), sampleId, exam.id, avail_organs, false);
       $("#sample-"+sampleId).after(html);
     // }
   }); 
@@ -175,6 +181,7 @@ function addExamToSamples(exam){
 }
 
 function removeExamFromSamples(exam){
+
   $('#samples_table .analis-row').each( function(i){
     if($(this).data('sampleid') == exam.id){
       var sampleIndex = $(this).data('sampleindex');
@@ -232,25 +239,17 @@ function validate_step_2(){
   }
 
   // Validates exam selection
-  if ( $('#exam_select :selected').length <= 0 ) {
-    toastr.error(
-      'Para continuar debes tener seleccionado al menos un análisis.', 
-      'Ups!', 
-      {positionClass: 'toast-top-full-width', containerId: 'toast-bottom-full-width'}
-    );
-    $('#exam_select').focus();
-    return 0;
-  }
-  var services_selected = [];
-  $.each($('#exam_select :selected'), function(i,v){
-    services_selected.push($(v).data('service'));
-  });
+  // if ( $('#exam_select :selected').length <= 0 ) {
+  //   toastr.error(
+  //     'Para continuar debes tener seleccionado al menos un análisis.', 
+  //     'Ups!', 
+  //     {positionClass: 'toast-top-full-width', containerId: 'toast-bottom-full-width'}
+  //   );
+  //   $('#exam_select').focus();
+  //   return 0;
+  // }
 
-  if (services_selected.includes(1) || services_selected.includes(2) || services_selected.includes(3) ){
-    return 3;
-  } else {
-    return 6;
-  }
+  return 1;
 }
 
 
@@ -287,35 +286,82 @@ function addSampleRow(sample) {
   $("#samples_table tbody").append(templateHTML)
 }
 
-function addOrgansOptions(analisis, analisis_type, sampleId, sampleIndex, organs, optionId = null) {
+function addOrgansOptions(analisis, analisis_type, sampleId, sampleIndex, organs, optionId = null, prevData = false) {
   var sampleRowTemplate = document.getElementById("add_analisis").innerHTML;
 
   var templateFn = _.template(sampleRowTemplate);
-  var templateHTML = templateFn({'organs': organs, 'type': analisis_type, 'analisis': analisis, 'sampleId': sampleId, 'sampleIndex': sampleIndex, 'optionId': optionId});
+  var templateHTML = templateFn({'organs': organs, 'type': analisis_type, 'analisis': analisis, 'sampleId': sampleId, 'sampleIndex': sampleIndex, 'optionId': optionId, 'prevData': prevData});
   return templateHTML;
 }
 
-function deleteAnalisis(sampleId, sampleIndex, active){
+function deleteAnalisis(sampleId, sampleIndex, active, prevData){
   if(active)
   {
-    $('#analisis-'+sampleId+'-'+sampleIndex).remove();
-    $('#sampleNro-'+sampleId)[0].rowSpan = $('#sampleNro-'+sampleId)[0].rowSpan - 1; 
-    $('#sampleIden-'+sampleId)[0].rowSpan = $('#sampleIden-'+sampleId)[0].rowSpan - 1; 
-    if($('#sampleIden-'+sampleId)[0].rowSpan == 1)
-      $('.delete-'+sampleId).show();
-    var exist = 0;
-    $('#samples_table .analis-row').each( function(i){
-      if($(this).data('sampleid') == sampleIndex){
-        exist +=1;
+    if (prevData){
+      swal({
+        title: "Confirmación",
+        text: "El servicio que desea eliminar de la muestra ha sido asignado previamente y es posible que ya se encuentre en proceso, por lo que podría estar perdiendo trabajo realizado. ¿Confirma que desea eliminar?",
+        icon: "warning",
+        showCancelButton: true,
+        buttons: {
+          cancel: {
+              text: "Cancelar",
+              value: null,
+              visible: true,
+              className: "btn-warning",
+              closeModal: true,
+          },
+          confirm: {
+              text: "Continuar",
+              value: true,
+              visible: true,
+              className: "",
+              closeModal: true,
+          }
+        }
+      }).then(isConfirm => {
+        if (isConfirm) {
+          $('#analisis-'+sampleId+'-'+sampleIndex).remove();
+          $('#sampleNro-'+sampleId)[0].rowSpan = $('#sampleNro-'+sampleId)[0].rowSpan - 1; 
+          $('#sampleIden-'+sampleId)[0].rowSpan = $('#sampleIden-'+sampleId)[0].rowSpan - 1; 
+          if($('#sampleIden-'+sampleId)[0].rowSpan == 1)
+            $('.delete-'+sampleId).show();
+          var exist = 0;
+          $('#samples_table .analis-row').each( function(i){
+            if($(this).data('sampleid') == sampleIndex){
+              exist +=1;
+            }
+          }); 
+          if(!exist){
+            var old_values = $('#exam_select').val();
+            old_values.splice(old_values.indexOf(sampleIndex), 1);
+            $('#exam_select').val(old_values);
+            $('#exam_select').trigger('change');
+            $('#exam-'+sampleIndex).remove();
+          }
+        }
+      });
+    } else {
+      $('#analisis-'+sampleId+'-'+sampleIndex).remove();
+      $('#sampleNro-'+sampleId)[0].rowSpan = $('#sampleNro-'+sampleId)[0].rowSpan - 1; 
+      $('#sampleIden-'+sampleId)[0].rowSpan = $('#sampleIden-'+sampleId)[0].rowSpan - 1; 
+      if($('#sampleIden-'+sampleId)[0].rowSpan == 1)
+        $('.delete-'+sampleId).show();
+      var exist = 0;
+      $('#samples_table .analis-row').each( function(i){
+        if($(this).data('sampleid') == sampleIndex){
+          exist +=1;
+        }
+      }); 
+      if(!exist){
+        var old_values = $('#exam_select').val();
+        old_values.splice(old_values.indexOf(sampleIndex), 1);
+        $('#exam_select').val(old_values);
+        $('#exam_select').trigger('change');
+        $('#exam-'+sampleIndex).remove();
       }
-    }); 
-    if(!exist){
-      var old_values = $('#exam_select').val();
-      old_values.splice(old_values.indexOf(sampleIndex), 1);
-      $('#exam_select').val(old_values);
-      $('#exam_select').trigger('change');
-      $('#exam-'+sampleIndex).remove();
     }
+    
   }
 }
 
