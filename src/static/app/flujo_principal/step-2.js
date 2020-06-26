@@ -224,10 +224,6 @@ function addExamToSamples(exam){
                 if (item.id == sampleId && _.isEmpty(item.sample_exams_set)){
                     $('.delete-'+sampleId).hide();
                     $('#sampleNro-'+sampleId)[0].rowSpan = $('#sampleNro-'+sampleId)[0].rowSpan + 1; 
-      $('#sampleNro-'+sampleId)[0].rowSpan = $('#sampleNro-'+sampleId)[0].rowSpan + 1; 
-                    $('#sampleNro-'+sampleId)[0].rowSpan = $('#sampleNro-'+sampleId)[0].rowSpan + 1; 
-                    $('#sampleIden-'+sampleId)[0].rowSpan = $('#sampleIden-'+sampleId)[0].rowSpan + 1; 
-      $('#sampleIden-'+sampleId)[0].rowSpan = $('#sampleIden-'+sampleId)[0].rowSpan + 1; 
                     $('#sampleIden-'+sampleId)[0].rowSpan = $('#sampleIden-'+sampleId)[0].rowSpan + 1; 
                     //show organs options
                     avail_organs = getSampleAvailableOrgans(sampleId);
@@ -237,9 +233,6 @@ function addExamToSamples(exam){
             });
         }
     });
-  }); 
-    });
-
 
     $('.organs-select-'+ exam.id).select2();
     $('.organs-select-'+ exam.id).on('select2:select', function(e){
