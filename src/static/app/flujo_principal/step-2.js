@@ -54,6 +54,11 @@ function init_step_2() {
       e.params.args.originalEvent.stopPropagation();
     }
   });
+
+  var elems = $('.switch2');
+    $.each(elems, function (key, value) {
+      new Switchery($(this)[0]);
+    });
 }
 
 function loadExams(exams) {
@@ -67,25 +72,29 @@ function loadExams(exams) {
 function loadSamples(samples){
 
   $("#samples_table tbody").html("");
+  var exams = []
   $.each(samples, function (i, v){
     addSampleRow(v);
     $.each(v.sample_exams_set, function(j,item){
+      exams.push(item.exam_id);
       $('.delete-'+v.id).hide();
       var html = addOrgansOptions(item.exam_name, item.service_id, v.id, item.exam_id, v.identification.organs, v.id+"-"+($('#sampleNro-'+v.id)[0].rowSpan + 1), true);
       $('#sampleNro-'+v.id)[0].rowSpan = $('#sampleNro-'+v.id)[0].rowSpan + 1; 
       $('#sampleIden-'+v.id)[0].rowSpan = $('#sampleIden-'+v.id)[0].rowSpan + 1; 
       $("#sample-"+v.id).after(html);
 
-      $('.organs-select-'+ item.exam_id).select2();
-      $('.organs-select-'+ item.exam_id).on('select2:select', function(e){
-        var values = e.params.data.id;
-        $.each($('.organs-select-'+ item.exam_id), function(i,v){
-          var old_values = $(v).val();
-          old_values.push(values);
-          $(v).val(old_values);
-          $(v).trigger('change');
-        });
-      });
+      // $('.organs-select-'+ item.exam_id).select2();
+      // $('.organs-select-'+ item.exam_id).on('select2:select', function(e){
+      //   var values = e.params.data.id;
+      //   $.each($('.organs-select-'+ item.exam_id), function(i,v){
+      //     var old_values = $(v).val();
+      //     old_values.push(values);
+      //     $(v).val(old_values);
+      //     $(v).trigger('change');
+      //   });
+      // });
+
+      
       var values = [];
       $.each(item.organ_id, function(j,w){
         values.push(w.id);
@@ -95,8 +104,54 @@ function loadSamples(samples){
     });
   });
  
+  $.each($.unique(exams), function(i, item){
+    $('.organs-select-'+ item).select2();
+    $('.organs-select-'+ item).on('select2:select', function(e){
+      var values = e.params.data.id;
+      var target_id = $(e.target).parent().parent()[0].classList[1].split("-")[2];
+      if ( $('#switchery2')[0].checked ){
+        $.each($('.organs-select-'+ item), function(i,v){
+            var old_values = $(v).val();
+            old_values.push(values);
+            $(v).val(old_values);
+            $(v).trigger('change');
+        });
+      } else {
+        var works_on_news = false;
+        $.each(data_step_2.samples, function(i, item2){
+          if (target_id == item2.id && _.isEmpty(item2.sample_exams_set)){
+            works_on_news = true;
+            return 0;
+          }
+        });
 
-  $('.samples_organs').select2();
+        if (works_on_news){
+          $.each(data_step_2.samples, function(i, item2){
+            if ( _.isEmpty(item2.sample_exams_set) == true ){
+              $.each($('.analis-row-'+item2.id+' .organs-select-'+ item), function(i,v){
+                  var old_values = $(v).val();
+                  old_values.push(values);
+                  $(v).val(old_values);
+                  $(v).trigger('change');
+              });
+            }
+          });
+        } else {
+          $.each(data_step_2.samples, function(i, item2){
+            if ( _.isEmpty(item2.sample_exams_set) == false ){
+              $.each($('.analis-row-'+item2.id+' .organs-select-'+ item), function(i,v){
+                  var old_values = $(v).val();
+                  old_values.push(values);
+                  $(v).val(old_values);
+                  $(v).trigger('change');
+              });
+            }
+          });
+        }  
+      }
+    });
+  });
+
   // $('.samples_exams').select2();
 
   // $('.samples_exams').on("select2:unselecting", function (e) {
@@ -151,33 +206,86 @@ function getSampleAvailableOrgans(sid){
 }
 
 function addExamToSamples(exam){
-  $('#samples_table .samples_exams').each( function(i){
-    // if($(this).val() == "" || $(this).val() == null){
-      //show analisis selected
-      // var new_exam = new Option(exam.text, exam.id, true, true);
-      // $(this).append(new_exam).trigger('change');
-      // $(this).val(exam.text);
-      // $(this).data('id', exam.id);
-      var sampleId = $(this).data('index');
-      $('.delete-'+sampleId).hide();
+
+    $('#samples_table .samples_exams').each( function(i){
+
+        if ( $('#switchery')[0].checked ){
+            var sampleId = $(this).data('index');
+            $('.delete-'+sampleId).hide();
+            $('#sampleNro-'+sampleId)[0].rowSpan = $('#sampleNro-'+sampleId)[0].rowSpan + 1; 
+            $('#sampleIden-'+sampleId)[0].rowSpan = $('#sampleIden-'+sampleId)[0].rowSpan + 1; 
+            //show organs options
+            avail_organs = getSampleAvailableOrgans(sampleId);
+            var html = addOrgansOptions(exam.text, $(exam.element).data('service'), sampleId, exam.id, avail_organs, false);
+            $("#sample-"+sampleId).after(html);
+        } else {
+            var sampleId = $(this).data('index');
+            $.each(data_step_2.samples, function(i, item){
+                if (item.id == sampleId && _.isEmpty(item.sample_exams_set)){
+                    $('.delete-'+sampleId).hide();
+                    $('#sampleNro-'+sampleId)[0].rowSpan = $('#sampleNro-'+sampleId)[0].rowSpan + 1; 
       $('#sampleNro-'+sampleId)[0].rowSpan = $('#sampleNro-'+sampleId)[0].rowSpan + 1; 
+                    $('#sampleNro-'+sampleId)[0].rowSpan = $('#sampleNro-'+sampleId)[0].rowSpan + 1; 
+                    $('#sampleIden-'+sampleId)[0].rowSpan = $('#sampleIden-'+sampleId)[0].rowSpan + 1; 
       $('#sampleIden-'+sampleId)[0].rowSpan = $('#sampleIden-'+sampleId)[0].rowSpan + 1; 
-      //show organs options
-      avail_organs = getSampleAvailableOrgans(sampleId);
-      var html = addOrgansOptions(exam.text, $(exam.element).data('service'), sampleId, exam.id, avail_organs, false);
-      $("#sample-"+sampleId).after(html);
-    // }
-  }); 
-  $('.organs-select-'+ exam.id).select2();
-  $('.organs-select-'+ exam.id).on('select2:select', function(e){
-    var values = e.params.data.id;
-    $.each($('.organs-select-'+ exam.id), function(i,v){
-      var old_values = $(v).val();
-      old_values.push(values);
-      $(v).val(old_values);
-      $(v).trigger('change');
+                    $('#sampleIden-'+sampleId)[0].rowSpan = $('#sampleIden-'+sampleId)[0].rowSpan + 1; 
+                    //show organs options
+                    avail_organs = getSampleAvailableOrgans(sampleId);
+                    var html = addOrgansOptions(exam.text, $(exam.element).data('service'), sampleId, exam.id, avail_organs, false);
+                    $("#sample-"+sampleId).after(html);
+                }
+            });
+        }
     });
-  });
+  }); 
+    });
+
+
+    $('.organs-select-'+ exam.id).select2();
+    $('.organs-select-'+ exam.id).on('select2:select', function(e){
+      var values = e.params.data.id;
+      var target_id = $(e.target).parent().parent()[0].classList[1].split("-")[2];
+      if ( $('#switchery2')[0].checked ){
+        $.each($('.organs-select-'+ exam.id), function(i,v){
+            var old_values = $(v).val();
+            old_values.push(values);
+            $(v).val(old_values);
+            $(v).trigger('change');
+        });
+      } else {
+        var works_on_news = false;
+        $.each(data_step_2.samples, function(i, item2){
+          if (target_id == item2.id && _.isEmpty(item2.sample_exams_set)){
+            works_on_news = true;
+            return 0;
+          }
+        });
+
+        if (works_on_news){
+          $.each(data_step_2.samples, function(i, item2){
+            if ( _.isEmpty(item2.sample_exams_set) == true ){
+              $.each($('.analis-row-'+item2.id+' .organs-select-'+ exam.id), function(i,v){
+                  var old_values = $(v).val();
+                  old_values.push(values);
+                  $(v).val(old_values);
+                  $(v).trigger('change');
+              });
+            }
+          });
+        } else {
+          $.each(data_step_2.samples, function(i, item2){
+            if ( _.isEmpty(item2.sample_exams_set) == false ){
+              $.each($('.analis-row-'+item2.id+' .organs-select-'+ exam.id), function(i,v){
+                  var old_values = $(v).val();
+                  old_values.push(values);
+                  $(v).val(old_values);
+                  $(v).trigger('change');
+              });
+            }
+          });
+        }  
+      }
+    });
 }
 
 function removeExamFromSamples(exam){

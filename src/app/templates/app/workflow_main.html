@@ -1285,22 +1285,25 @@ function reloadResponsibleTable() {
     type: "GET",
     url: '/responsible',
   })
-    .done(function (data) {
-      if (data.ok)
-      {
-        var groupTemplate = document.getElementById("responsible_table_template").innerHTML;
-        var templateFn = _.template(groupTemplate);
-        var templateHTML = templateFn(data);
+  .done(function (data) {
+    if (data.ok)
+    {
+      var groupTemplate = document.getElementById("responsible_table_template").innerHTML;
+      var templateFn = _.template(groupTemplate);
+      var templateHTML = templateFn(data);
 
-        $("#responsible_table_div").html(templateHTML);
-        $('#responsible_table').DataTable({
-          "destroy": true,
-          "oLanguage": {
-            "sUrl": "https://cdn.datatables.net/plug-ins/1.10.16/i18n/Spanish.json"
-          }
-        });
-      }
-    });
+      $("#responsible_table_div").html(templateHTML);
+      $('#responsible_table').DataTable({
+        "destroy": true,
+        "oLanguage": {
+          "sUrl": "https://cdn.datatables.net/plug-ins/1.10.16/i18n/Spanish.json"
+        },
+        initComplete: function () {
+          setTimeout(function(){ $('#responsible_table_filter input[type=search]').focus(); }, 500);
+        },
+      });
+    }
+  });
 }
 
 function saveResponsible(e) {
