@@ -663,7 +663,12 @@ $(document).on('change', '.just_increasing', function(){
   }
 });
 
-function getSummaryData(){
+$(document).on('click', '.stepsToStep2', function(e){
+    form.steps("previous");
+    $("#show_summary").modal("hide");
+});
+
+function getSummaryData(edited=false, ident=0){
   var entryform_id = $('#entryform_id').val();
   var url = Urls.entryform_id(entryform_id);
   $.ajax({
@@ -680,6 +685,12 @@ function getSummaryData(){
       $('#btn_save').show();
       $('.btn-save-identification').show();
     }
+    if (edited){
+      if (form.steps("getCurrentIndex") == 2) {
+         $('#ToStep2-'+ident).append("<button type='button' class='btn btn-secondary stepsToStep2'><i class='fa fa-reply'></i> Editar Servicios (Paso 2)</button>");
+      }
+    }
+    
     $("#show_summary").modal("show");
   })
   .fail(function () {
@@ -774,7 +785,7 @@ function fillSummary(data){
     tpl_identification += '<div class="form-group col-md-6"><label>Observaciones:</label> <textarea class="form-control" rows="2" name="observation" {% if not edit or closed  %}disabled{% endif %} >'+ item.observation+' </textarea></div>';
     tpl_identification += '<div class="form-group col-md-10"><label>Órganos:</label>'+selectOrgans+'</div>';
     {% if edit and not closed %}
-      tpl_identification += '<div style="padding-top:25px;"><a href="javascript:void(0);" onclick="submitIdentification('+item.id+')" class="btn btn-primary"> <i class="fa fa-save"></i> </a></div>'
+      tpl_identification += '<div style="padding-top:25px;"><a href="javascript:void(0);" onclick="submitIdentification('+item.id+')" class="btn btn-primary"> <i class="fa fa-save"></i> </a></div> <div class="form-group col-md-12" id="ToStep2-'+item.id+'"></div>'
     {% endif %}
     tpl_identification += '</div></div>';
     tpl_identification += '</form></div>';
@@ -896,7 +907,7 @@ function submitIdentification(id){
                 response = data;
                 summary_edited = true;
                 toastr.success('Guardado exitosamente!');
-                getSummaryData();
+                getSummaryData(true, id);
             })
             .fail(function (data) {
                 console.log("Fail");
