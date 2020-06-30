@@ -91,7 +91,7 @@ class ENTRYFORM(View):
                     entryform=entryform['id']).values())
             
             samples = Sample.objects.filter(
-                    entryform=entryform['id']).order_by('index')
+                    entryform=entryform['id']).order_by('identification_id')
             
             samples_as_dict = []
             for s in samples:
@@ -2479,10 +2479,13 @@ def save_identification(request, id):
 
     if ident.no_fish != var_post['no_fish']:
         change = True
-        current_samples = Sample.objects.filter(identification=ident).order_by('-index')
-        max_index = current_samples.first().index
+        identification_ids = Identification.objects.filter(entryform=ident.entryform).values_list('id', flat=True)
+        current_total_samples = Sample.objects.filter(identification__in=identification_ids).order_by('-index')
+        current_ident_samples = Sample.objects.filter(identification=ident).order_by('-index')
+        new_samples = int(var_post['no_fish']) - current_ident_samples.count()
+        max_index = current_total_samples.first().index
         new_counter_index = 0
-        for i in range(current_samples.count(), int(var_post['no_fish'])):
+        for i in range(len(current_total_samples), len(current_total_samples) + new_samples):
             sample = Sample.objects.create(
                 entryform=ident.entryform,
                 index=max_index + new_counter_index + 1,

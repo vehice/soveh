@@ -117,37 +117,16 @@ function loadSamples(samples){
             $(v).trigger('change');
         });
       } else {
-        var works_on_news = false;
         $.each(data_step_2.samples, function(i, item2){
-          if (target_id == item2.id && _.isEmpty(item2.sample_exams_set)){
-            works_on_news = true;
-            return 0;
+          if (target_id == item2.id){
+            $.each($('.analis-row-'+item2.id+' .organs-select-'+ item), function(i,v){
+                var old_values = $(v).val();
+                old_values.push(values);
+                $(v).val(old_values);
+                $(v).trigger('change');
+            });
           }
-        });
-
-        if (works_on_news){
-          $.each(data_step_2.samples, function(i, item2){
-            if ( _.isEmpty(item2.sample_exams_set) == true ){
-              $.each($('.analis-row-'+item2.id+' .organs-select-'+ item), function(i,v){
-                  var old_values = $(v).val();
-                  old_values.push(values);
-                  $(v).val(old_values);
-                  $(v).trigger('change');
-              });
-            }
-          });
-        } else {
-          $.each(data_step_2.samples, function(i, item2){
-            if ( _.isEmpty(item2.sample_exams_set) == false ){
-              $.each($('.analis-row-'+item2.id+' .organs-select-'+ item), function(i,v){
-                  var old_values = $(v).val();
-                  old_values.push(values);
-                  $(v).val(old_values);
-                  $(v).trigger('change');
-              });
-            }
-          });
-        }  
+        });  
       }
     });
   });
@@ -246,37 +225,16 @@ function addExamToSamples(exam){
             $(v).trigger('change');
         });
       } else {
-        var works_on_news = false;
         $.each(data_step_2.samples, function(i, item2){
-          if (target_id == item2.id && _.isEmpty(item2.sample_exams_set)){
-            works_on_news = true;
-            return 0;
+          if (target_id == item2.id){
+            $.each($('.analis-row-'+item2.id+' .organs-select-'+ exam.id), function(i,v){
+                var old_values = $(v).val();
+                old_values.push(values);
+                $(v).val(old_values);
+                $(v).trigger('change');
+            });
           }
-        });
-
-        if (works_on_news){
-          $.each(data_step_2.samples, function(i, item2){
-            if ( _.isEmpty(item2.sample_exams_set) == true ){
-              $.each($('.analis-row-'+item2.id+' .organs-select-'+ exam.id), function(i,v){
-                  var old_values = $(v).val();
-                  old_values.push(values);
-                  $(v).val(old_values);
-                  $(v).trigger('change');
-              });
-            }
-          });
-        } else {
-          $.each(data_step_2.samples, function(i, item2){
-            if ( _.isEmpty(item2.sample_exams_set) == false ){
-              $.each($('.analis-row-'+item2.id+' .organs-select-'+ exam.id), function(i,v){
-                  var old_values = $(v).val();
-                  old_values.push(values);
-                  $(v).val(old_values);
-                  $(v).trigger('change');
-              });
-            }
-          });
-        }  
+        });  
       }
     });
 }
