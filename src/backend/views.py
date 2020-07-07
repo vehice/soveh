@@ -1271,7 +1271,7 @@ class EMAILTEMPLATE(View):
             formId = var_post.get('formId')
             doc = appv.get_resume_file(request.user, formId, lang)
             subject = "Formulario Recepción de Muestras"
-            from_email = 'no-reply@solmat.cl'
+            from_email = settings.EMAIL_HOST_USER
             to = var_post.get('to').split(',')
             message = var_post.get('body')
             plantilla = var_post.get('plantilla')
@@ -2616,7 +2616,7 @@ def sendEmailNotification(request):
         subject = "Notificación: Acción Requerida Caso " + caso
         to = [e]
         # to = ['wcartaya@dataqu.cl']
-        from_email = 'no-reply@solmat.cl'
+        from_email = settings.EMAIL_HOST_USER
 
         ctx = {
             'name': f+' '+l,
