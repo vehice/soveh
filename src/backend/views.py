@@ -1270,7 +1270,8 @@ class EMAILTEMPLATE(View):
             lang = var_post.get('lang', 'es')
             formId = var_post.get('formId')
             doc = appv.get_resume_file(request.user, formId, lang)
-            subject = "Formulario Recepción de Muestras"
+            center = oc.entryform.center if oc.entryform.center else ""
+            subject = "-Recepción de muestras/"+doc.entryform.no_caso+"/"+center
             from_email = settings.EMAIL_HOST_USER
             to = var_post.get('to').split(',')
             message = var_post.get('body')
