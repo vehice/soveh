@@ -135,8 +135,8 @@
                 <% } %> {% endcomment %}
                 <button type="button" class="btn btn-info" onclick='showServiceCommentsModal(<%= id %>, {{closed}})'>Comentarios</button>
                 <button type="button" class="btn btn-success" onclick='showServiceReportsModal(<%= id %>, <%= service %>, {{closed}})'>Informes</button>
-                <button type="button" class="btn btn-warning" onclick='closeService(<%= form_id %>, <%= id %>);'>Cerrar Servicio</button>
-                <button type="button" class="btn btn-danger" onclick='cancelService(<%= form_id %>);'>Anular Servicio</button>
+                {% if edit %}<button type="button" class="btn btn-warning" onclick='closeService(<%= form_id %>, <%= id %>);'>Cerrar Servicio</button>
+                <button type="button" class="btn btn-danger" onclick='cancelService(<%= form_id %>);'>Anular Servicio</button>{% endif %}
               </div>
             </div>
             <div class="col-sm-4 font-medium-4 text-right">Tinción: <%= exam_stain %></div>
@@ -160,8 +160,9 @@
               <div class="btn-group" role="group" aria-label="Opciones">
                 <button type="button" class="btn btn-info" onclick='showServiceCommentsModal(<%= id %>, {{closed}})'>Comentarios</button>
                 <button type="button" class="btn btn-success" onclick='showServiceReportsModal(<%= id %>, <%= service %>, {{closed}})'>Informes</button>
-                <button type="button" class="btn btn-warning {% if closed %} disabled {% endif %}" onclick='closeService(<%= form_id %>, <%= id %>);'>Cerrar Servicio</button>
-                <button type="button" class="btn btn-danger {% if closed %} disabled {% endif %}" onclick='cancelService(<%= form_id %>);'>Anular Servicio</button>
+                
+                {% if edit %}<button type="button" class="btn btn-warning {% if closed %} disabled {% endif %}" onclick='closeService(<%= form_id %>, <%= id %>);'>Cerrar Servicio</button>
+                <button type="button" class="btn btn-danger {% if closed %} disabled {% endif %}" onclick='cancelService(<%= form_id %>);'>Anular Servicio</button>{% endif %}
               </div>
             </div>
           </div>
@@ -179,7 +180,7 @@
               <div class="btn-group" role="group" aria-label="Opciones">
                 <button type="button" class="btn btn-info" onclick='showServiceCommentsModal(<%= id %>, {{closed}}, true)'>Comentarios</button>
                 <button type="button" class="btn btn-success" onclick='showServiceReportsModal(<%= id %>, <%= service %>, {{closed}}, true)'>Informes</button>
-                <button type="button" class="btn btn-warning" onclick='reopenSerivce(<%= form_id %>)'>Reabrir Servicio</button>
+                {% if edit %}<button type="button" class="btn btn-warning" onclick='reopenSerivce(<%= form_id %>)'>Reabrir Servicio</button>{% endif %}
               </div>
             </div>
             <div class="col-sm-4 font-medium-4 text-right">Tinción: <%= exam_stain %></div>
@@ -201,7 +202,7 @@
               <div class="btn-group" role="group" aria-label="Opciones">
                 <button type="button" class="btn btn-info" onclick='showServiceCommentsModal(<%= id %>, {{closed}}, true)'>Comentarios</button>
                 <button type="button" class="btn btn-success" onclick='showServiceReportsModal(<%= id %>, <%= service %>, {{closed}}, true)'>Informes</button>
-                <button type="button" class="btn btn-warning" {% if closed %} disabled {% endif %} onclick='reopenSerivce(<%= form_id %>)'>Reabrir Servicio</button>
+                {% if edit %}<button type="button" class="btn btn-warning" {% if closed %} disabled {% endif %} onclick='reopenSerivce(<%= form_id %>)'>Reabrir Servicio</button>{% endif %}
               </div>
             </div>
             <div class="col-sm-4 font-medium-4 text-right"></div>

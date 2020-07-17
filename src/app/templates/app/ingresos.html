@@ -455,7 +455,11 @@
         tpl_exams += '<td>'+ Object.keys(v.organ_id).map(function(k){return v.organ_id[k].name}).join(", ") +'</td></tr>';
       });
       tpl_samples += '<tr id="sample-id-'+item.id+'">';
-      tpl_samples += '<td rowspan="'+len+'"><button type="button" class="btn btn-sm btn-danger round" onclick="deleteSample('+item.id+');">X</button> '+ item.index +'</td>';
+      {% if edit and not closed %}
+        tpl_samples += '<td rowspan="'+len+'"><button type="button" class="btn btn-sm btn-danger round" onclick="deleteSample('+item.id+');">X</button> '+ item.index +'</td>';
+      {% else %}
+        tpl_samples += '<td rowspan="'+len+'">'+ item.index +'</td>';
+      {% endif %}
       tpl_samples += '<td rowspan="'+len+'">'+ item.identification.cage +'-'+item.identification.group+'</td>';
       tpl_samples += '</tr>';
       tpl_samples += tpl_exams;
