@@ -88,13 +88,23 @@
             </div>
           </div>
           <div class="col-sm-4 font-medium-4 text-right">Tinción: <%= exam_stain %></div>
-          
         </div>
-        <% if (form_closed) { %>
-          <p class="list-group-item-text">Servicio <%= service_name %> - <b>Cerrado</b></p>
-        <% } else if (cancelled) { %>
-          <p class="list-group-item-text">Servicio <%= service_name %> - <b>Anulado</b></p>
-        <% } %>
+        <div class="row">
+          <% if (form_closed) { %>
+            <div class="col-sm-6">
+              <p class="list-group-item-text">Servicio <%= service_name %> - <b>Cerrado</b></p>
+            </div>
+          <% } else if (cancelled) { %>
+            <div class="col-sm-6">
+              <p class="list-group-item-text">Servicio <%= service_name %> - <b>Anulado</b></p>
+            </div>
+          <% } %>
+          <% if (patologo_name != "") { %>
+            <div class="col-sm-6 text-right">
+              <p class="list-group-item-text">Patólogo: <b><%= patologo_name %></b></p>
+            </div>
+          <% } %>
+        </div>
       </div>
     </div>
   <% } else { %>
@@ -108,14 +118,24 @@
               <button type="button" class="btn btn-success" onclick='showServiceReportsModal(<%= id %>, <%= service %>, {{closed}}, true)'>Informes</button>
             </div>
           </div>
-          <div class="col-sm-4 font-medium-4 text-right"></div>
-          
+          <div class="col-sm-4 font-medium-4 text-right"></div>     
         </div>
-        <% if (form_closed) { %>
-          <p class="list-group-item-text">Servicio <%= service_name %> - <b>Cerrado</b></p>
-        <% } else if (cancelled) { %>
-          <p class="list-group-item-text">Servicio <%= service_name %> - <b>Anulado</b></p>
-        <% } %>
+        <div class="row">
+          <% if (form_closed) { %>
+            <div class="col-sm-6">
+              <p class="list-group-item-text">Servicio <%= service_name %> - <b>Cerrado</b></p>
+            </div>
+          <% } else if (cancelled) { %>
+            <div class="col-sm-6">
+              <p class="list-group-item-text">Servicio <%= service_name %> - <b>Anulado</b></p>
+            </div>
+          <% } %>
+          <% if (patologo_name != "") { %>
+            <div class="col-sm-6 text-right">
+              <p class="list-group-item-text">Patólogo: <b><%= patologo_name %></b></p>
+            </div>
+          <% } %>
+        </div>
       </div>
     </div>
   <% } %>
@@ -148,7 +168,16 @@
               </div>
             </div>
           </div>
-          <p class="list-group-item-text">Servicio <%= service_name %> - <b>En curso</b></p>
+          <div class="row">
+            <div class="col-sm-6">
+              <p class="list-group-item-text">Servicio <%= service_name %> - <b>En curso</b></p>
+            </div>
+            <% if (patologo_name != "") { %>
+              <div class="col-sm-6 text-right">
+                <p class="list-group-item-text">Patólogo: <b><%= patologo_name %></b></p>
+              </div>
+            <% } %>
+          </div>
         </div>
       </div>
     <% } else { %>
@@ -166,7 +195,16 @@
               </div>
             </div>
           </div>
-          <p class="list-group-item-text">Servicio <%= service_name %> - <b>En curso</b></p>
+          <div class="row">
+            <div class="col-sm-6">
+              <p class="list-group-item-text">Servicio <%= service_name %> - <b>En curso</b></p>
+            </div>
+            <% if (patologo_name != "") { %>
+              <div class="col-sm-6 text-right">
+                <p class="list-group-item-text">Patólogo: <b><%= patologo_name %></b></p>
+              </div>
+            <% } %>
+          </div>
         </div>
       </div>
     <% } %>
@@ -186,11 +224,22 @@
             <div class="col-sm-4 font-medium-4 text-right">Tinción: <%= exam_stain %></div>
             
           </div>
-          <% if (form_closed) { %>
-            <p class="list-group-item-text">Servicio <%= service_name %> - <b>Cerrado</b></p>
-          <% } else if (cancelled) { %>
-            <p class="list-group-item-text">Servicio <%= service_name %> - <b>Anulado</b></p>
-          <% } %>
+          <div class="row">
+            <% if (form_closed) { %>
+              <div class="col-sm-6">
+                <p class="list-group-item-text">Servicio <%= service_name %> - <b>Cerrado</b></p>
+              </div>
+            <% } else if (cancelled) { %>
+              <div class="col-sm-6">
+                <p class="list-group-item-text">Servicio <%= service_name %> - <b>Anulado</b></p>
+              </div>
+            <% } %>
+            <% if (patologo_name != "") { %>
+              <div class="col-sm-6 text-right">
+                <p class="list-group-item-text">Patólogo: <b><%= patologo_name %></b></p>
+              </div>
+            <% } %>
+          </div>
         </div>
       </div>
     <% } else { %>
@@ -208,11 +257,22 @@
             <div class="col-sm-4 font-medium-4 text-right"></div>
             
           </div>
-          <% if (form_closed) { %>
-            <p class="list-group-item-text">Servicio <%= service_name %> - <b>Cerrado</b></p>
-          <% } else if (cancelled) { %>
-            <p class="list-group-item-text">Servicio <%= service_name %> - <b>Anulado</b></p>
-          <% } %>
+          <div class="row">
+            <% if (form_closed) { %>
+              <div class="col-sm-6">
+                <p class="list-group-item-text">Servicio <%= service_name %> - <b>Cerrado</b></p>
+              </div>
+            <% } else if (cancelled) { %>
+              <div class="col-sm-6">
+                <p class="list-group-item-text">Servicio <%= service_name %> - <b>Anulado</b></p>
+              </div>
+            <% } %>
+            <% if (patologo_name != "") { %>
+              <div class="col-sm-6 text-right">
+                <p class="list-group-item-text">Patólogo: <b><%= patologo_name %></b></p>
+              </div>
+            <% } %>
+          </div>
         </div>
       </div>
     <% } %>

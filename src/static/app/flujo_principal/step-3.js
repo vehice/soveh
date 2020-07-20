@@ -62,7 +62,6 @@ function loadAnalysisData(data) {
 
 function populateAnalysisData(data) {
   $.each(data.analyses, function (i, item) {
-
     var row = {};
 
     row.form_id = item.form_id;
@@ -79,14 +78,16 @@ function populateAnalysisData(data) {
     row.form_reopened = item.form_reopened;
     // row.histologico = item.exam_type == 1;
     // saltar=saltar && item.exam_type == 2;
-    row.service = item.service
-    row.service_name = item.service_name
+    row.service = item.service;
+    row.service_name = item.service_name;
+    row.patologo_name = item.patologo_name;
     addAnalysisElement(row)
   });
 }
 
 function addAnalysisElement(data) {
   var analysisElementTemplate = document.getElementById("analysis_element5").innerHTML;
+  console.log(data)
 
   var templateFn = _.template(analysisElementTemplate);
   var templateHTML = templateFn(data);

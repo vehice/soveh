@@ -452,7 +452,8 @@ class ANALYSIS(View):
                 'form_reopened': form.form_reopened,
                 'service': exam.service_id,
                 'service_name': exam.service.name,
-                'cancelled': form.cancelled
+                'cancelled': form.cancelled,
+                'patologo_name': analysis.patologo.get_full_name() if analysis.patologo else ""
                 # 'no_caso': analisys.entry_form.no_caso
             })
         
