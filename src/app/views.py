@@ -539,9 +539,21 @@ def show_patologos(request):
     analysis = AnalysisForm.objects.all()
     data = []
     patologos = list(User.objects.filter(userprofile__profile_id__in=[4, 5]).values())
+    editar = up.profile_id in (1,2,3)
 
     for a in analysis:
-        if not a.entryform.forms.first().cancelled:
+        
+        if not a.entryform.forms.first().cancelled and a.exam.pathologists_assignment:
+            upper_date = datetime.datetime.now()
+            
+            if a.entryform.forms.first().form_closed:
+                upper_date = a.entryform.forms.first().closed_at
+
+            lower_date = a.created_at
+
+            samples = Sample.objects.filter(entryform=a.entryform).values_list('id', flat=True)
+            sampleExams = SampleExams.objects.filter(sample__in=samples, exam=a.exam).count()
+            
             parte = a.entryform.get_subflow
             
             if parte == "N/A":
@@ -551,10 +563,20 @@ def show_patologos(request):
             if up.profile.id != 5 or a.patologo_id == request.user.id:
                 data.append({
                     'analisis': a.id,
-                    'patologo': a.patologo_id,
+                    'patologo': a.patologo_id if a.patologo else None,
+                    'patologo_name': a.patologo.first_name +" "+a.patologo.last_name if a.patologo else "No Asignado",
                     'closed': 1 if a.entryform.forms.first().form_closed or a.entryform.forms.first().cancelled else 0,
                     'edit': not a.entryform.forms.first().form_closed and not a.entryform.forms.first().cancelled and up.profile.id == 1,
                     'no_caso': a.entryform.no_caso + parte, 
-                    'exam': a.exam.name
+                    'exam': a.exam.name,
+                    'cliente': a.entryform.customer.name,
+                    'centro': a.entryform.center,
+                    'fecha_ingreso': lower_date.strftime("%d/%m/%Y %H:%M:%S"),
+                    'dias_abierto': (upper_date - lower_date).days,
+                    'nro_muestras': sampleExams,
+                    'entryform': a.entryform.id,
+                    'entryform_form_closed': a.entryform.forms.first().form_closed,
+                    'entryform_cancelled': a.entryform.forms.first().cancelled
                 })
-    return render(request, 'app/patologos.html', {'casos': data, 'patologos': patologos})
+
+    return render(request, 'app/patologos.html', {'casos': data, 'patologos': patologos, 'edit': editar})

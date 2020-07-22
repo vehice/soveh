@@ -49,6 +49,7 @@ class Service(models.Model):
 class Exam(models.Model):
     name = models.CharField(max_length=250, null=True, blank=True, verbose_name="Nombre")
     stain = models.CharField(max_length=250, null=True, blank=True, verbose_name="Tinción")
+    pathologists_assignment = models.BooleanField(default=True, verbose_name="Asignación de patólogo")
     service = models.ForeignKey(Service, null=True, default=1, on_delete=models.SET_NULL, verbose_name="Tipo de Servicio")
 
     def __str__(self):

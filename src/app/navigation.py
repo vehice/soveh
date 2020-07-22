@@ -49,9 +49,9 @@ def default_tree(user):
     ]
     if user.userprofile.profile_id in (1,2,3):
         menu.append({
-            'path': '/patologos',
+            'path': '/derivacion',
             'icon': 'ft-users',
-            'section_name': "Patólogos"
+            'section_name': "Derivación"
         })
     if user.userprofile.profile_id == 1:
         menu.append({
