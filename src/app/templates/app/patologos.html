@@ -70,68 +70,70 @@
             </div>
           </div>
           <div class="col-12">
-            <table id="table-casos" class="table table-xs zero-configuration">
-              <thead>
-                <tr>
-                  <!-- <th>Id</th> -->
-                  <th>Nro Caso</th>
-                  <th>Cliente</th>
-                  <th>Centro</th>
-                  <th>Servicios</th>
-                  <th>Fecha<br>Ingreso</th>
-                  <th>Días<br>Abierto</th>
-                  <th>Nro<br>Muestras</th>
-                  <th>Estado</th>
-                  <th>Patólogos</th>
-                  <th></th>
-                  <th></th>
-                </tr>
-              </thead>
-              <tbody>
-                {% for entryForm in casos %}
+            <div class="table-responsive">
+              <table id="table-casos" class="table table-xs zero-configuration">
+                <thead>
                   <tr>
-                    <td class="first-column"><strong>{{ entryForm.no_caso }}</strong></td>
-                    <td>
-                        {{ entryForm.cliente }}
-                    </td>
-                    <td>
-                        {{ entryForm.centro }}
-                    </td>
-                    <td class="service-{{entryForm.analisis}} {% if not entryForm.patologo %} incomplete {% endif %}">{{ entryForm.exam|default:"" }}</td>
-                    <td>
-                        {{ entryForm.fecha_ingreso }}
-                    </td>
-                    <td>
-                        {{ entryForm.dias_abierto }}
-                    </td>
-                    <td>
-                        {{ entryForm.nro_muestras }}
-                    </td>
-                    <td>
-                      {% if entryForm.closed %}
-                        Finalizado
-                      {% elif entryForm.cancelled %}
-                        Anulado  
-                      {% else %}
-                        En curso
-                      {% endif %}
-                    </td>
-                    <td>
-                      <select class="select2 form-control patologos-select" style="width:100% !important;" data-analisis="{{entryForm.analisis}}" {% if not entryForm.edit  %} disabled {% endif %}>
-                        <option value="">No Asignado</option>
-                        {% for p in patologos %}
-                          <option value="{{p.id}}" {% if p.id == entryForm.patologo %}selected{% endif %}>{{p.first_name}} {{p.last_name}}</option>
-                        {% endfor %}
-                      </select>
-                    </td>
-                    <td>
-                        {{ entryForm.patologo_name }}
-                    </td>
-                    <td><button class="btn btn-primary showSummaryBtn" data-id="{{ entryForm.entryform }}" data-closed="{% if entryForm.entryform_form_closed or entryForm.entryform_cancelled %} 1 {% else %} 0 {% endif %}"><i class="fa fa-list fa-fx"></i></button></td>
+                    <!-- <th>Id</th> -->
+                    <th>Nro Caso</th>
+                    <th>Cliente</th>
+                    <th>Centro</th>
+                    <th>Servicios</th>
+                    <th>Fecha<br>Ingreso</th>
+                    <th>Días<br>Abierto</th>
+                    <th>Nro<br>Muestras</th>
+                    <th>Estado</th>
+                    <th>Patólogos</th>
+                    <th></th>
+                    <th></th>
                   </tr>
-                {% endfor %}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {% for entryForm in casos %}
+                    <tr>
+                      <td class="first-column"><strong>{{ entryForm.no_caso }}</strong></td>
+                      <td>
+                          {{ entryForm.cliente }}
+                      </td>
+                      <td>
+                          {{ entryForm.centro }}
+                      </td>
+                      <td class="service-{{entryForm.analisis}} {% if not entryForm.patologo %} incomplete {% endif %}">{{ entryForm.exam|default:"" }}</td>
+                      <td>
+                          {{ entryForm.fecha_ingreso }}
+                      </td>
+                      <td>
+                          {{ entryForm.dias_abierto }}
+                      </td>
+                      <td>
+                          {{ entryForm.nro_muestras }}
+                      </td>
+                      <td>
+                        {% if entryForm.closed %}
+                          Finalizado
+                        {% elif entryForm.cancelled %}
+                          Anulado  
+                        {% else %}
+                          En curso
+                        {% endif %}
+                      </td>
+                      <td>
+                        <select class="select2 form-control patologos-select" style="width:100% !important;" data-analisis="{{entryForm.analisis}}" {% if not entryForm.edit  %} disabled {% endif %}>
+                          <option value="">No Asignado</option>
+                          {% for p in patologos %}
+                            <option value="{{p.id}}" {% if p.id == entryForm.patologo %}selected{% endif %}>{{p.first_name}} {{p.last_name}}</option>
+                          {% endfor %}
+                        </select>
+                      </td>
+                      <td>
+                          {{ entryForm.patologo_name }}
+                      </td>
+                      <td><button class="btn btn-primary showSummaryBtn" data-id="{{ entryForm.entryform }}" data-closed="{% if entryForm.entryform_form_closed or entryForm.entryform_cancelled %} 1 {% else %} 0 {% endif %}"><i class="fa fa-list fa-fx"></i></button></td>
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       </div>
