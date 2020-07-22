@@ -70,7 +70,7 @@
             </div>
           </div>
           <div class="col-12">
-            <table id="table-casos" class="table table-bordered zero-configuration">
+            <table id="table-casos" class="table table-xs zero-configuration">
               <thead>
                 <tr>
                   <!-- <th>Id</th> -->
@@ -78,13 +78,13 @@
                   <th>Cliente</th>
                   <th>Centro</th>
                   <th>Servicios</th>
-                  <th>Fecha de Ingreso</th>
-                  <th>Días Abierto</th>
-                  <th>Nro de Muestras</th>
+                  <th>Fecha<br>Ingreso</th>
+                  <th>Días<br>Abierto</th>
+                  <th>Nro<br>Muestras</th>
                   <th>Estado</th>
                   <th>Patólogos</th>
                   <th></th>
-                  <th>Opciones</th>
+                  <th></th>
                 </tr>
               </thead>
               <tbody>
@@ -127,7 +127,7 @@
                     <td>
                         {{ entryForm.patologo_name }}
                     </td>
-                    <td><button class="btn btn-primary showSummaryBtn" data-id="{{ entryForm.entryform }}" data-closed="{% if entryForm.entryform_form_closed or entryForm.entryform_cancelled %} 1 {% else %} 0 {% endif %}"><i class="fa fa-list fa-fx"></i> Resumen</button></td>
+                    <td><button class="btn btn-primary showSummaryBtn" data-id="{{ entryForm.entryform }}" data-closed="{% if entryForm.entryform_form_closed or entryForm.entryform_cancelled %} 1 {% else %} 0 {% endif %}"><i class="fa fa-list fa-fx"></i></button></td>
                   </tr>
                 {% endfor %}
               </tbody>

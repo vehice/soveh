@@ -91,7 +91,7 @@ class ENTRYFORM(View):
                     entryform=entryform['id']).values())
             
             samples = Sample.objects.filter(
-                    entryform=entryform['id']).order_by('identification_id')
+                    entryform=entryform['id']).order_by('index', 'identification_id')
             
             samples_as_dict = []
             for s in samples:
@@ -686,9 +686,6 @@ class WORKFLOW(View):
 
         actor = Actor.objects.filter(profile_id=request.user.userprofile.profile_id).first()
         if (form.content_type.name == 'entry form'):
-            print ("el step tag es")
-            print (step_tag)
-
             # Fix patch state id non-correlative from step_3 > id : 5
             if step_tag == "step_3":
                 state_id = 5

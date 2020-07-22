@@ -543,7 +543,7 @@ def show_patologos(request):
 
     for a in analysis:
         
-        if not a.entryform.forms.first().cancelled and a.exam.pathologists_assignment:
+        if not a.entryform.forms.first().cancelled and a.exam.pathologists_assignment and not a.forms.first().cancelled:
             upper_date = datetime.datetime.now()
             
             if a.entryform.forms.first().form_closed:
@@ -571,7 +571,7 @@ def show_patologos(request):
                     'exam': a.exam.name,
                     'cliente': a.entryform.customer.name,
                     'centro': a.entryform.center,
-                    'fecha_ingreso': lower_date.strftime("%d/%m/%Y %H:%M:%S"),
+                    'fecha_ingreso': lower_date.strftime("%d/%m/%Y"),
                     'dias_abierto': (upper_date - lower_date).days,
                     'nro_muestras': sampleExams,
                     'entryform': a.entryform.id,
