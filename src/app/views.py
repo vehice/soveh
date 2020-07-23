@@ -543,7 +543,7 @@ def show_patologos(request):
 
     for a in analysis:
         
-        if not a.entryform.forms.first().cancelled and a.exam.pathologists_assignment and not a.forms.first().cancelled:
+        if not a.entryform.forms.first().cancelled and not a.entryform.forms.first().form_closed and a.exam.pathologists_assignment and not a.forms.first().cancelled:
             upper_date = datetime.datetime.now()
             
             if a.entryform.forms.first().form_closed:
@@ -552,8 +552,26 @@ def show_patologos(request):
             lower_date = a.created_at
 
             samples = Sample.objects.filter(entryform=a.entryform).values_list('id', flat=True)
-            sampleExams = SampleExams.objects.filter(sample__in=samples, exam=a.exam).count()
+            sampleExams_counter = 0
+            sampleExams = SampleExams.objects.filter(sample__in=samples, exam=a.exam)
             
+            organ_types = []
+            for se in sampleExams:
+                if se.organ.organ_type not in organ_types:
+                    organ_types.append(se.organ.organ_type)
+            
+            organ_types = set(organ_types)
+            unit = ""
+            if len(organ_types) > 1:
+                unit = "Multiple"
+            elif len(organ_types) == 1:
+                if list(organ_types)[0] == 1:
+                    unit = "Órgano"
+                else:
+                    unit = sampleExams.first().organ.name
+            else:
+                unit = "Órgano"
+
             parte = a.entryform.get_subflow
             
             if parte == "N/A":
@@ -573,10 +591,11 @@ def show_patologos(request):
                     'centro': a.entryform.center,
                     'fecha_ingreso': lower_date.strftime("%d/%m/%Y"),
                     'dias_abierto': (upper_date - lower_date).days,
-                    'nro_muestras': sampleExams,
+                    'nro_muestras': sampleExams_counter,
                     'entryform': a.entryform.id,
                     'entryform_form_closed': a.entryform.forms.first().form_closed,
-                    'entryform_cancelled': a.entryform.forms.first().cancelled
+                    'entryform_cancelled': a.entryform.forms.first().cancelled,
+                    'unidad': unit
                 })
 
     return render(request, 'app/patologos.html', {'casos': data, 'patologos': patologos, 'edit': editar})
