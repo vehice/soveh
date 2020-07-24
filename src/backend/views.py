@@ -2482,7 +2482,7 @@ def save_identification(request, id):
         current_total_samples = Sample.objects.filter(identification__in=identification_ids).order_by('-index')
         current_ident_samples = Sample.objects.filter(identification=ident).order_by('-index')
         new_samples = int(var_post['no_fish']) - current_ident_samples.count()
-        max_index = current_total_samples.first().index
+        max_index = current_total_samples.first().index if current_total_samples.count() > 0 else 0
         new_counter_index = 0
         for i in range(len(current_total_samples), len(current_total_samples) + new_samples):
             sample = Sample.objects.create(
