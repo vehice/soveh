@@ -84,7 +84,7 @@
             </div>
           {% endif %}
           <form action="#" id="generalData">
-            <h6 class="form-section mt-2">  Información general</h6>
+            <h6 class="form-section mt-2">  <b>Información general</b></h6>
             <div class="row generalInfo">
               <div class="col-sm-4 form-group summaryClient">
               </div>
@@ -110,7 +110,7 @@
               </div>
             </div>
             <hr>
-            <h6 class="form-section mt-2"> Detalle</h6>
+            <h6 class="form-section mt-2"> <b>Detalle</b></h6>
             <div class="row ">
               <div class="col-sm-4 summarySpecie">
               </div>
@@ -762,7 +762,7 @@ function fillSummary(data){
   $('.summaryWaterSource').html('<label>Fuente de agua:</label>'+selectwatersource);
 
   // var tpl_identification = '';
-  var tpl_identification = '<div class="col-sm-12"> <hr><h6 class="form-section mt-2"> Identificación&nbsp;&nbsp;&nbsp;';
+  var tpl_identification = '<div class="col-sm-12"> <hr><h6 class="form-section mt-2"> <b>Identificación</b> &nbsp;&nbsp;&nbsp;';
   {% if edit and not closed %}
     tpl_identification += '<a href="javascript:void(0);" onclick="newIdentification('+data.entryform.id+')" class="btn btn-secondary btn-sm"> <i class="fa fa-plus"></i> Agregar Identificación</a>'
   {% endif %}
@@ -811,7 +811,7 @@ function fillSummary(data){
   // tpl_identification += '</div>';
   $('.summaryIdentification').html(tpl_identification);
 
-  var tpl_exams = '<div class="col-sm-12"><h6 class="form-section mt-2"> Servicios</h6></br>';
+  var tpl_exams = '<div class="col-sm-12"><h6 class="form-section mt-2"> <b>Servicios</b></h6></br>';
   $.each(data.entryform.analyses, function(i, item){
     tpl_exams += '<div class="alert alert-light"><b>'+ item.exam__name +'</b> <span class="pull-right">'
     if(item.patologo__first_name != null)
@@ -834,7 +834,7 @@ function fillSummary(data){
   tpl_exams += '</div>';
   $('.summaryExams').html(tpl_exams);
 
-  var tpl_samples = '<div class="col-sm-12"><h6 class="form-section mt-2"> Muestras</h6></br><table class="table table-bordered table-xs">';
+  var tpl_samples = '<div class="col-sm-12"><h6 class="form-section mt-2"> <b>Muestras </b></h6></br><table class="table table-bordered table-xs">';
   tpl_samples += '<thead><tr><th width="8% !important;">Muestra</th><th>Identificación</th><th>Análisis</th><th>Órganos</th></tr></thead><tbody>';
   var patologos = {};
   $.each(data.patologos, function(i, v){

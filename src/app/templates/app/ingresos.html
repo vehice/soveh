@@ -130,7 +130,7 @@
           </div>
           {% endif %}
           <form action="#" id="generalData">
-            <h6 class="form-section mt-2">  Información general</h6>
+            <h6 class="form-section mt-2">  <b>Información general</b></h6>
             <div class="row generalInfo">
               <div class="col-sm-4 form-group summaryClient">
               </div>
@@ -156,7 +156,7 @@
               </div>
             </div>
             <hr>
-            <h6 class="form-section mt-2"> Detalle</h6>
+            <h6 class="form-section mt-2"> <b>Detalle</b></h6>
             <div class="row ">
               <div class="col-sm-4 summarySpecie">
               </div>
@@ -424,7 +424,7 @@
     // tpl_identification += '</div>';
     $('.summaryIdentification').html(tpl_identification);
 
-    var tpl_exams = '<div class="col-sm-12"><h6 class="form-section mt-2"> Servicios</h6></br>';
+    var tpl_exams = '<div class="col-sm-12"><h6 class="form-section mt-2"> <b>Servicios</b></h6></br>';
     $.each(data.entryform.analyses, function(i, item){
       tpl_exams += '<div class="alert alert-light"><b>'+ item.exam__name +'</b> <span class="pull-right">'
       if(item.patologo__first_name != null)
@@ -447,7 +447,7 @@
     tpl_exams += '</div>';
     $('.summaryExams').html(tpl_exams);
 
-    var tpl_samples = '<div class="col-sm-12"><h6 class="form-section mt-2"> Muestras</h6></br><table class="table table-bordered table-xs">';
+    var tpl_samples = '<div class="col-sm-12"><h6 class="form-section mt-2"> <b>Muestras</b></h6></br><table class="table table-bordered table-xs">';
     tpl_samples += '<thead><tr><th width="8% !important;">Muestra</th><th>Identificación</th><th>Análisis</th><th>Órganos</th></tr></thead><tbody>';
     var patologos = {};
     $.each(data.patologos, function(i, v){
