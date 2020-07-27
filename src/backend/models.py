@@ -222,6 +222,7 @@ class Identification(models.Model):
     temp_id = models.CharField(default="",max_length=250, null=True, blank=True)
     organs = models.ManyToManyField(Organ)
     organs_before_validations = models.ManyToManyField(Organ, related_name='organs_before_validations')
+    removable = models.BooleanField(default=False)
 
     def __str__(self):
         return str(self.pk)

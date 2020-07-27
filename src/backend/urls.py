@@ -147,4 +147,9 @@ urlpatterns = [
         csrf_exempt(views.new_empty_identification),
         name="new_identification"
     ),
+    path(
+        'remove-identification/<int:id>',
+        csrf_exempt(views.remove_identification),
+        name="remove_identification"
+    ),
 ]

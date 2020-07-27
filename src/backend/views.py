@@ -719,7 +719,6 @@ class WORKFLOW(View):
                 'close_allowed': close_allowed
             }
 
-            print (data)
         elif (form.content_type.name == 'analysis form'):
             reopen = False
             analisis = AnalysisForm.objects.get(id=int(object_form_id))
@@ -2523,12 +2522,24 @@ def save_identification(request, id):
     ident.save()
 
     if change:
+        ident.removable = False
+        ident.save()
         changeCaseVersion(True, ident.entryform.id, request.user.id)
     return JsonResponse({})
 
 def new_empty_identification(request, entryform_id):
-    ident = Identification.objects.create(entryform_id=entryform_id, temp_id=''.join(random.choices(string.ascii_uppercase + string.digits, k=11)))
-    return JsonResponse({'id': ident.id}) 
+    try:
+        ident = Identification.objects.create(entryform_id=entryform_id, temp_id=''.join(random.choices(string.ascii_uppercase + string.digits, k=11)), removable=True)
+        return JsonResponse({'ok': 1, 'id': ident.id})
+    except:
+        return JsonResponse({'ok': 0})
+
+def remove_identification(request, id):
+    try: 
+        Identification.objects.get(pk=id).delete()
+        return JsonResponse({'ok': 1})
+    except:
+        return JsonResponse({'ok': 0})
 
 def save_generalData(request, id):
     var_post = request.POST.copy()
@@ -2616,7 +2627,6 @@ def sendEmailNotification(request):
         users=list(User.objects.filter(userprofile__profile_id__in=[1]).values_list('first_name', 'last_name', 'email'))
         if form.content_object.patologo:
             users.append((form.content_object.patologo.first_name, form.content_object.patologo.last_name, form.content_object.patologo.email))
-    print(users)
     for f, l, e in users:
         subject = "Notificación: Acción Requerida Caso " + caso
         to = [e]

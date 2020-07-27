@@ -442,9 +442,13 @@
       tpl_identification += '<div class="form-group col-md-6"><label>Óptimo?:</label>'+ selectOptimum+'</div>';
       tpl_identification += '<div class="form-group col-md-6"><label>Características Extras:</label> <textarea class="form-control" rows="2" name="extras" {% if not edit or closed  %}disabled{% endif %} >'+ item.extra_features_detail+' </textarea></div>';
       tpl_identification += '<div class="form-group col-md-6"><label>Observaciones:</label> <textarea class="form-control" rows="2" name="observation" {% if not edit or closed  %}disabled{% endif %} >'+ item.observation+' </textarea></div>';
-      tpl_identification += '<div class="form-group col-md-10"><label>Órganos:</label>'+selectOrgans+'</div>';
+      tpl_identification += '<div class="form-group col-md-9"><label>Órganos:</label>'+selectOrgans+'</div>';
       {% if edit and not closed %}
-        tpl_identification += '<div style="padding-top:25px;"><a href="javascript:void(0);" onclick="submitIdentification('+item.id+')" class="btn btn-primary"> <i class="fa fa-save"></i> </a></div>'
+        tpl_identification += '<div style="padding-top:25px;"><a href="javascript:void(0);" onclick="submitIdentification('+item.id+')" class="btn btn-primary"> <i class="fa fa-save"></i></a>';
+        if (item.removable){
+          tpl_identification += '<a href="javascript:void(0);" onclick="removeIdentification('+item.id+')" class="btn btn-danger"> <i class="fa fa-trash"></i></a>';
+        }
+        tpl_identification += '</div>';
       {% endif %}
       tpl_identification += '</div></div>';
       tpl_identification += '</form></div>';
@@ -468,7 +472,6 @@
           tpl_exams += '<p style="margin-left: 5%;"><b>'+item2.done_by+' ('+item2.created_at+'):</b> <br> '+item2.text+'</p>'
         });
       }
-      
 
       tpl_exams += '</div>';
     });
@@ -542,13 +545,31 @@
       url: url,
     })
     .done(function (data) {
-      getSummaryData();
+      if (data.ok){
+        getSummaryData();
+      }
     })
     .fail(function () {
       console.log("Fail")
     });
   }
-  
+
+  function removeIdentification(id){
+    var url = Urls.remove_identification(id);
+    $.ajax({
+      type: "GET",
+      url: url,
+    })
+    .done(function (data) {
+      if (data.ok){
+        getSummaryData();
+      }
+    })
+    .fail(function () {
+      console.log("Fail")
+    });
+  }
+
   function submitGeneralData(){
     swal({
         title: "Confirmación",
