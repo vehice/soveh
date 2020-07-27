@@ -17,6 +17,8 @@ from django.core.mail import EmailMultiAlternatives
 from django.template.loader import get_template
 from django.conf import settings
 from django.db import connection
+import random
+import string
 
 # from utils import functions as fn
 
@@ -2523,6 +2525,10 @@ def save_identification(request, id):
     if change:
         changeCaseVersion(True, ident.entryform.id, request.user.id)
     return JsonResponse({})
+
+def new_empty_identification(request, entryform_id):
+    ident = Identification.objects.create(entryform_id=entryform_id, temp_id=''.join(random.choices(string.ascii_uppercase + string.digits, k=11)))
+    return JsonResponse({'id': ident.id}) 
 
 def save_generalData(request, id):
     var_post = request.POST.copy()

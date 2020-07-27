@@ -142,4 +142,9 @@ urlpatterns = [
         csrf_exempt(views.delete_sample),
         name="delete-sample"
     ),
+    path(
+        'new-identification/<int:entryform_id>',
+        csrf_exempt(views.new_empty_identification),
+        name="new_identification"
+    ),
 ]

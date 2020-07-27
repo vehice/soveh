@@ -211,15 +211,15 @@ class EntryForm(models.Model):
 class Identification(models.Model):
     entryform = models.ForeignKey(
         EntryForm, null=True, on_delete=models.SET_NULL)
-    cage = models.CharField(max_length=250, null=True, blank=True)
-    no_fish = models.IntegerField(null=True, blank=True)
-    no_container = models.IntegerField(null=True, blank=True)
-    weight = models.FloatField(null=True, blank=True)
-    extra_features_detail = models.TextField(null=True, blank=True)
+    cage = models.CharField(max_length=250, default="", null=True, blank=True)
+    no_fish = models.IntegerField(default="0", null=True, blank=True)
+    no_container = models.IntegerField(default="0", null=True, blank=True)
+    weight = models.FloatField(default="0", null=True, blank=True)
+    extra_features_detail = models.TextField(default="", null=True, blank=True)
     is_optimum = models.NullBooleanField()
-    observation = models.TextField(null=True, blank=True)
-    group = models.CharField(max_length=250, null=True, blank=True)
-    temp_id = models.CharField(max_length=250, null=True, blank=True)
+    observation = models.TextField(default="", null=True, blank=True)
+    group = models.CharField(default="", max_length=250, null=True, blank=True)
+    temp_id = models.CharField(default="",max_length=250, null=True, blank=True)
     organs = models.ManyToManyField(Organ)
     organs_before_validations = models.ManyToManyField(Organ, related_name='organs_before_validations')
 

@@ -114,7 +114,7 @@
 </div>
 
 <div class="modal fade text-left" id="show_summary" role="dialog" data-backdrop="static" data-keyboard="false">
-  <div class="modal-dialog" role="document" style="min-width:80% !important;">
+  <div class="modal-dialog" role="document" style="min-width:90% !important;">
     <div class="modal-content">
       <div class="modal-header">
         <h3 class="modal-title" id="title">Resumen Caso <span class="NoCasoSummary"></span></h3>
@@ -375,7 +375,11 @@
     $('.summaryWaterSource').html('<label>Fuente de agua:</label>'+selectwatersource);
 
     // var tpl_identification = '';
-    var tpl_identification ='<div class="col-sm-12"> <hr><h6 class="form-section mt-2"> Identificación</h6></br> </div>';
+    var tpl_identification = '<div class="col-sm-12"> <hr><h6 class="form-section mt-2"> Identificación&nbsp;&nbsp;&nbsp;';
+    {% if edit and not closed %}
+      tpl_identification += '<a href="javascript:void(0);" onclick="newIdentification('+data.entryform.id+')" class="btn btn-secondary btn-sm"> <i class="fa fa-plus"></i> Agregar Identificación</a>'
+    {% endif %}
+    tpl_identification += '</h6></div>';
 
     $.each(data.entryform.identifications, function(i, item){
       var optimum = ""
@@ -498,6 +502,20 @@
     //   });
   }
   
+  function newIdentification(entryform_id){
+    var url = Urls.new_identification(entryform_id);
+    $.ajax({
+      type: "GET",
+      url: url,
+    })
+    .done(function (data) {
+      getSummaryData();
+    })
+    .fail(function () {
+      console.log("Fail")
+    });
+  }
+
   function submitGeneralData(){
     swal({
         title: "Confirmación",
