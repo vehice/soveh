@@ -18,6 +18,7 @@ class UserProfile(models.Model):
     signature = models.FileField(upload_to='signatures', blank=True, null=True, verbose_name="Firma Digital")
     confirmation_code = models.CharField(max_length=250, null=True, blank=True)
     profile = models.ForeignKey(Profile, null=True, on_delete=models.SET_NULL, verbose_name="Rol")
+    is_pathologist = models.BooleanField(default=False, verbose_name="¿Es patólogo?")
 
     def __str__(self):
         return self.profile.name

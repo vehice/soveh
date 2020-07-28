@@ -12,6 +12,7 @@ from workflows.models import *
 from django.db import connection
 from django.conf import settings
 
+from django.db.models import Q
 
 import datetime
 import json
@@ -538,7 +539,7 @@ def show_patologos(request):
     up = UserProfile.objects.filter(user=request.user).first()
     analysis = AnalysisForm.objects.all()
     data = []
-    patologos = list(User.objects.filter(userprofile__profile_id__in=[4, 5]).values())
+    patologos = list(User.objects.filter(Q(userprofile__profile_id__in=[4, 5]) | Q(userprofile__is_pathologist=True)).values())
     editar = up.profile_id in (1,2,3)
 
     for a in analysis:
