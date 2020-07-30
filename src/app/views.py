@@ -537,18 +537,18 @@ def notification(request):
 @login_required
 def show_patologos(request):
     up = UserProfile.objects.filter(user=request.user).first()
-    analysis = AnalysisForm.objects.all()
+    analysis = AnalysisForm.objects.all().order_by('-entryform_id')
     data = []
     patologos = list(User.objects.filter(Q(userprofile__profile_id__in=[4, 5]) | Q(userprofile__is_pathologist=True)).values())
     editar = up.profile_id in (1,2,3)
 
     for a in analysis:
         
-        if not a.entryform.forms.first().cancelled and not a.entryform.forms.first().form_closed and a.exam.pathologists_assignment and not a.forms.first().cancelled:
+        if not a.entryform.forms.first().cancelled and a.exam.pathologists_assignment and not a.forms.first().cancelled:
             upper_date = datetime.datetime.now()
             
-            if a.entryform.forms.first().form_closed:
-                upper_date = a.entryform.forms.first().closed_at
+            if a.entryform.forms.first().form_closed or a.forms.first().form_closed:
+                upper_date = a.forms.first().closed_at
 
             lower_date = a.created_at
 
@@ -558,6 +558,7 @@ def show_patologos(request):
             
             organ_types = []
             for se in sampleExams:
+                sampleExams_counter += 1
                 if se.organ.organ_type not in organ_types:
                     organ_types.append(se.organ.organ_type)
             
@@ -584,7 +585,8 @@ def show_patologos(request):
                     'analisis': a.id,
                     'patologo': a.patologo_id if a.patologo else None,
                     'patologo_name': a.patologo.first_name +" "+a.patologo.last_name if a.patologo else "No Asignado",
-                    'closed': 1 if a.entryform.forms.first().form_closed or a.entryform.forms.first().cancelled else 0,
+                    'closed': 1 if a.forms.first().form_closed else 0,
+                    'cancelled': 1 if a.forms.first().cancelled else 0,
                     'edit': not a.entryform.forms.first().form_closed and not a.entryform.forms.first().cancelled and up.profile.id == 1,
                     'no_caso': a.entryform.no_caso + parte, 
                     'exam': a.exam.name,
@@ -596,7 +598,7 @@ def show_patologos(request):
                     'entryform': a.entryform.id,
                     'entryform_form_closed': a.entryform.forms.first().form_closed,
                     'entryform_cancelled': a.entryform.forms.first().cancelled,
-                    'unidad': unit
+                    'unidad': unit,
                 })
 
     return render(request, 'app/patologos.html', {'casos': data, 'patologos': patologos, 'edit': editar})

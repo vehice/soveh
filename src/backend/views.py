@@ -17,6 +17,7 @@ from django.core.mail import EmailMultiAlternatives
 from django.template.loader import get_template
 from django.conf import settings
 from django.db import connection
+from django.core import mail
 import random
 import string
 
@@ -2647,9 +2648,45 @@ def sendEmailNotification(request):
         # msg.send()
     return JsonResponse({})
 
+# def sendEmailDerivacion(request):
+# # form, current_state, next_state):
+#     var_post = request.GET.copy()
+
+#     template = 'app/template_derivacion1.html'
+#     template = 'app/template_derivacion2.html'
+#     template = 'app/template_derivacion3.html'
+        
+#     users=[]
+#     if next_state.id < 10:
+#         users = User.objects.filter(userprofile__profile_id__in=[1,3]).values_list('first_name', 'last_name', 'email')
+#     else:
+#         users=list(User.objects.filter(userprofile__profile_id__in=[1]).values_list('first_name', 'last_name', 'email'))
+#         if form.content_object.patologo:
+#             users.append((form.content_object.patologo.first_name, form.content_object.patologo.last_name, form.content_object.patologo.email))
+#     for f, l, e in users:
+#         subject = "Notificación: Acción Requerida Caso " + caso
+#         to = [e]
+#         # to = ['wcartaya@dataqu.cl']
+#         from_email = settings.EMAIL_HOST_USER
+
+#         ctx = {
+#             'name': f+' '+l,
+#             'nro_caso': caso,
+#             'etapa_last': current_state.name,
+#             'etapa_current': next_state.name,
+#             'url': settings.SITE_URL+'/workflow/'+str(form.id)+'/'+next_state.step.tag,
+#             'exam':exam
+#         }
+#         message = get_template(template).render(context=ctx)
+#         msg = EmailMultiAlternatives(subject,message,from_email,to)
+#         msg.content_subtype="html"
+#         # msg.send()
+#     return JsonResponse({})
+
 def completeForm(request, form_id):
     form = Form.objects.get(pk=form_id)
     form.form_closed = True
+    form.closet_at = datetime.now()
     form.save()
     return JsonResponse({'ok':True})
 
@@ -2657,11 +2694,104 @@ def save_step1(request, form_id):
     valid = step_1_entryform(request)
     return JsonResponse({'ok': valid})
 
-def save_patologo(request, analysis_id, patologo_id= None):
-    analysis = AnalysisForm.objects.get(pk=analysis_id)
-    analysis.patologo_id = patologo_id
-    analysis.save()
-    return JsonResponse({})
+def service_assignment(request):
+    var_post = request.POST.copy()
+    analysis = var_post.get("analysis", None)
+    pathologist = var_post.get("pathologist", None)
+    deadline = var_post.get("deadline", None)
+    comment = var_post.get("comment", None)
+
+    template = 'app/template_assignment.html'
+    from_email = settings.EMAIL_HOST_USER2
+    connection = mail.get_connection(
+        username=settings.EMAIL_HOST_USER2,
+        password=settings.EMAIL_HOST_PASSWORD2,
+    )
+
+    try:
+        if analysis:
+            af = AnalysisForm.objects.get(pk=int(analysis))
+            to = ""
+            message = ""
+            samples = Sample.objects.filter(entryform=af.entryform).values_list('id', flat=True)
+            nro_samples = SampleExams.objects.filter(sample__in=samples, exam=af.exam).count()
+            if not af.patologo and pathologist != "NA":
+                # Asignando patologo por primera vez
+                af.patologo_id = int(pathologist)
+                af.assignment_deadline = datetime.strptime(deadline, '%d/%m/%Y')
+                af.assignment_comment = comment if comment and comment != "" else None
+                af.save()
+                af.refresh_from_db()
+                to = af.patologo.email
+                subject = u"Derivación de Análisis/"+af.entryform.no_caso+u"/"+af.exam.name
+                ctx = {
+                    'msg': u"Informamos derivación de análisis "+af.exam.name+u", correspondiente al caso "+af.entryform.no_caso+u" ("+str(nro_samples)+u" muestras) ingresado el "+af.created_at.strftime('%d/%m/%Y'),
+                    'deadline': af.assignment_deadline.strftime('%d/%m/%Y'),
+                    'comment': af.assignment_comment if af.assignment_comment else "",
+                }
+                message = get_template(template).render(context=ctx)
+                msg = EmailMultiAlternatives(subject ,message, from_email, [to], connection=connection)
+                msg.content_subtype="html"
+                msg.send()
+
+            elif af.patologo and pathologist != "NA":
+                # Reemplazando al patologo anterior
+                prev_patologo = af.patologo
+                af.patologo_id = int(pathologist)
+                af.assignment_deadline = datetime.strptime(deadline, '%d/%m/%Y')
+                af.assignment_comment = comment if comment and comment != "" else None
+                af.save()
+                af.refresh_from_db()
+
+                # Al nuevo
+                to = af.patologo.email
+                subject = u"Derivación de Análisis/"+af.entryform.no_caso+u"/"+af.exam.name
+                ctx = {
+                    'msg': u"Informamos que se ha reasignado a usted el análisis "+af.exam.name+u", correspondiente al caso "+af.entryform.no_caso+u" ("+str(nro_samples)+u" muestras) ingresado el "+af.created_at.strftime('%d/%m/%Y'),
+                    'deadline': af.assignment_deadline.strftime('%d/%m/%Y'),
+                    'comment': af.assignment_comment if af.assignment_comment else "",
+                }
+                message = get_template(template).render(context=ctx)
+                msg = EmailMultiAlternatives(subject ,message, from_email, [to], connection=connection)
+                msg.content_subtype="html"
+                msg.send()
+
+                # Al anterior
+                to = prev_patologo.email
+                subject = u"Reasignación de Análisis/"+af.entryform.no_caso+u"/"+af.exam.name
+                ctx = {
+                    'msg': u"Informamos que el análisis "+af.exam.name+u" que estaba asignado a usted, correspondiente al caso "+af.entryform.no_caso+u", ha sido reasignado.",
+                }
+                message = get_template(template).render(context=ctx)
+                msg = EmailMultiAlternatives(subject ,message, from_email, [to], connection=connection)
+                msg.content_subtype="html"
+                msg.send()
+            elif af.patologo and pathologist == "NA":
+                # Desasignando patologo
+                prev_patologo = af.patologo
+                af.patologo_id = None
+                af.assignment_deadline = None
+                af.assignment_comment = comment if comment and comment != "" else None
+                af.save()
+                af.refresh_from_db()
+                to = prev_patologo.email
+                subject = u"Reasignación de Análisis/"+af.entryform.no_caso+u"/"+af.exam.name
+                ctx = {
+                    'msg': u"Informamos que el análisis "+af.exam.name+u" que estaba asignado a usted, correspondiente al caso "+af.entryform.no_caso+u", ha sido reasignado.",
+                    'comment': af.assignment_comment if af.assignment_comment else "",
+                }
+                message = get_template(template).render(context=ctx)
+                msg = EmailMultiAlternatives(subject ,message, from_email, [to], connection=connection)
+                msg.content_subtype="html"
+                msg.send()
+            else:
+                # Caso no controlado
+                pass
+            return JsonResponse({'ok': 1})
+        else:
+            return JsonResponse({'ok': 0})
+    except:   
+        return JsonResponse({'ok': 0})
 
 def dashboard_analysis(request):
     exam = request.GET.get('exam')

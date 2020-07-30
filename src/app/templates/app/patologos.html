@@ -50,7 +50,8 @@
       <div class="card-content">
         <div class="card-body card-dashboard">
           <div class="col-12 ml-3">
-            <div id="findPatologo" class="form-group"></div>
+            <div id="findPatologo" class="form-group">
+            </div>
             <div id="filterDays" class="form-group">
               <label><b>Filtro por días abierto</b></label><br>
               
@@ -74,7 +75,7 @@
               <table id="table-casos" class="table table-xs zero-configuration">
                 <thead>
                   <tr>
-                    <!-- <th>Id</th> -->
+                    <!0 <th>Id</th> 0>
                     <th>Nro Caso</th>
                     <th>Cliente</th>
                     <th>Centro</th>
@@ -121,8 +122,8 @@
                         {% endif %}
                       </td>
                       <td>
-                        <select class="select2 form-control patologos-select" style="width:100% !important;" data-analisis="{{entryForm.analisis}}" {% if not entryForm.edit  %} disabled {% endif %}>
-                          <option value="">No Asignado</option>
+                        <select class="select2 form-control patologos-select" style="width:100% !important;" data-exam="{{entryForm.exam}}" data-nocase="{{entryForm.no_caso}}" data-analisis="{{entryForm.analisis}}" {% if entryForm.entryform_form_closed or entryForm.closed %} disabled {% endif %}>
+                          <option value="NA">No Asignado</option>
                           {% for p in patologos %}
                             <option value="{{p.id}}" {% if p.id == entryForm.patologo %}selected{% endif %}>{{p.first_name}} {{p.last_name}}</option>
                           {% endfor %}
@@ -212,66 +213,135 @@
   </div>
 </div>
 
+<div class="modal fade text-left" id="assignmentModal" role="dialog" data-backdrop="static" data-keyboard="false">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title" id="title">Derivación <span class="caseAssignment"></span> - <span class="examAssignment"></span></h3>
+      </div>
+      <div class="modal-body">
+        <form id="assignmentForm">
+          <input type="hidden" class="form-control assignment-analysis-id" name="analysis"/>
+          <input type="hidden" class="form-control assignment-pathologist" name="pathologist"/>
+          <div class="form-group">
+            <label>
+              Fecha de plazo:
+            </label>
+            <input type="text" class="form-control assignment-deadline" name="deadline" />
+          </div>
+          <div class="form-group">
+            <label>
+              Comentarios al Patólogo:
+            </label>
+            <textarea row="3" class="form-control assignment-comment" name="comment"> </textarea>
+          </div>
+          <div class="form-group pull-right">
+            <button type="button" class="btn btn-primary" onclick="finishAssignment()">Finalizar</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
 {% endblock content %}
 {% block scripts %}
 <script src="{% url 'js_reverse' %}" type="text/javascript"></script>
 <script language="JavaScript">
 
-  var tabla_casos;
+  var tabla_casos; 
+  var resumenId;
+  var closed;
+  
   $('.patologos-select').select2()
-  $('.patologos-select').on('select2:selecting', function(e){
+  
+  $(document).on('select2:selecting', '.patologos-select', function(e){
     e.preventDefault();
     var selected = e.params.args.data.id
     var name = e.params.args.data.text
     swal({
-          title: "Confirmación",
-          text: "¿Está seguro que desea asignar el patólogo: " + name +"?",
-          icon: "warning",
-          showCancelButton: true,
-          buttons: {
-            cancel: {
-                text: "No, cancelar!",
-                value: null,
-                visible: true,
-                className: "btn-warning",
-                closeModal: true,
-            },
-            confirm: {
-                text: "Sí!",
-                value: true,
-                visible: true,
-                className: "",
-                closeModal: true,
-            }
+        title: "Confirmación",
+        text: "¿Está seguro que desea asignar el patólogo: " + name +"?",
+        icon: "warning",
+        showCancelButton: true,
+        buttons: {
+          cancel: {
+              text: "No, cancelar!",
+              value: null,
+              visible: true,
+              className: "btn-warning",
+              closeModal: true,
+          },
+          confirm: {
+              text: "Sí!",
+              value: true,
+              visible: true,
+              className: "",
+              closeModal: true,
           }
-        }).then(isConfirm => {
-        if (isConfirm) {
-          $(this).val(selected);
-          $(this).trigger('change');
         }
-      });
+      }).then(isConfirm => {
+      if (isConfirm) {
+        $(this).val(selected);
+        $(this).trigger('change');
+      }
+    });
     
   });
-  $('.patologos-select').on('change', function(e){
-    var analisis = $(this).data("analisis");
-    var patologo = $(this).val();
-    var patologo_name = $(this).find('option:selected').text();
-    var td = $('.service-'+analisis)[0];
-    var url = '/analysis/'+analisis+'/patologo/'+patologo; 
-    $.ajax({
-        type: "POST",
-        url: url,
-      })
-      .done(function (data) {
-        $(td).removeClass('incomplete');
-        toastr.success("Patólogo Asignado Correctamente", "");
-        var timer = setTimeout(function() {
-          window.location='/derivacion'
-        }, 2000);
-      })
-      .fail(function (data) {
-        toastr.error("Por favor reportelo.","Ha ocurrido un error!!");
-      })
+  
+  $(document).on('change', '.patologos-select', function(e){
+    var analysis_id = $(this).data("analisis");
+    var no_case = $(this).data("nocase");
+    var analysis_name = $(this).data("exam");
+    var pathologist = $(this).val();
+    var pathologist_name = $(this).find('option:selected').text();
+
+    $('.assignment-comment').val("");
+    if (pathologist == "NA"){
+      $('.assignment-deadline').val("");
+      $('.assignment-deadline').prop("disabled", true);
+    } else {
+      var deadline_date = moment().add(2, 'days').format("DD/MM/YYYY");
+      $('.assignment-deadline').prop("disabled", false);
+    }
+    $('.assignment-deadline').val(deadline_date);
+    $('.assignment-analysis-id').val(analysis_id);
+    $('.assignment-pathologist').val(pathologist);
+    $(".caseAssignment").text(no_case);
+    $(".examAssignment").text(analysis_name);
+    $("#assignmentModal").modal("show");
+    
+    var td = $('.service-'+analysis_id)[0];
+    $(td).removeClass('incomplete');
+    row_index = tabla_casos.row($(td).parent()).index();
+    temp_select = $(this).clone();
+    temp_select.removeClass("select2").removeClass("select2-hidden-accessible");
+    if ( pathologist != "NA" ){
+      if ($('.filterPathologist').find('option[value="'+pathologist_name+'"]').length==0)
+      {
+        $('.filterPathologist').append( '<option value="'+pathologist_name+'">'+pathologist_name+'</option>' );
+      }
+    }
+
+    temp_select.find("option").removeAttr("selected");
+    temp_select.find("option[value="+pathologist+"]").attr('selected','selected');
+
+    $(this).remove();
+    new_row = tabla_casos.row(row_index).data();
+    new_row[9] = temp_select[0].outerHTML;
+    new_row[10] = pathologist_name;
+    tabla_casos.row(row_index).data(new_row).draw();
+    $('.patologos-select').select2();
+  });
+
+  $(document).on('change', '.filterPathologist', function(e){
+    tabla_casos.column(10).search(this.value ? '^'+this.value+'$' : '', true, false ).draw();
+  });
+
+  $('.assignment-deadline').datetimepicker({
+    locale: 'es',
+    keepOpen: false,
+    format: 'DD/MM/YYYY'
   });
 
   $(document).on("change", "#filtro-dias", function(){
@@ -299,9 +369,6 @@
     tabla_casos.draw();
   });
 
-  var resumenId;
-  var closed;
-
   $(document).on('click', '.showSummaryBtn', function(e){
     var entryform_id = $(this).data('id');
     closed = $(this).data('closed');
@@ -326,6 +393,31 @@
     }
   );
 
+  function finishAssignment(){
+    lockScreen(1);
+    
+    var data = $('#assignmentForm').serialize();
+    var url = Urls.service_assignment();
+    $("#assignmentModal").modal("hide");
+
+    $.ajax({
+      type: "POST",
+      url: url,
+      data: data
+    })
+    .done(function (data) {
+      lockScreen(0);
+      if (data.ok){
+        toastr.success("Derivación realizada exitosamente.", "Listo!");
+      } else {
+        toastr.error("No ha sido posible realizar la derivación con éxito, itente nuevamente o contacte un administrador.", "Ups! Problemas.");
+      }
+    })
+    .fail(function (data) {
+      toastr.error("No ha sido posible realizar la derivación con éxito, itente nuevamente o contacte un administrador.", "Ups! Problemas.");
+    });
+  }
+
   function getSummaryData(){
     var entryform_id = resumenId;
     var closed = closed;
@@ -336,7 +428,6 @@
     })
     .done(function (data) {
       fillSummary(data);
-      console.log("closed", closed)
       if(closed == 1){
         $('#btn_save').hide();
         $('.btn-save-identification').hide();
@@ -657,8 +748,8 @@
   $(document).ready(function(){
     tabla_casos = $('#table-casos').DataTable({
       "rowsGroup": [0,1,2],
-      "autoWidth": false,
-      "bPaginate" : false,
+      "autoWidth": true,
+      "bPaginate" : true,
       "order": [[ 0, "desc" ]],
       "columnDefs": [
         {
@@ -674,20 +765,11 @@
         this.api().columns().every( function () {
           if(this[0][0] == 10){
             var column = this;
-            var select = $('<select style="width:30% !important;"><option value="">Todos</option></select>')
-              .appendTo( $('#findPatologo' ))
-              .on( 'change', function () {
-                  var val = $.fn.dataTable.util.escapeRegex(
-                    $(this).val()
-                  );
-                  column
-                    .search( val ? '^'+val+'$' : '', true, false )
-                    .draw();
-              } );
-
+            var select = $('<select style="width:30% !important;" class="filterPathologist"><option value="">Todos</option></select>')
+              .appendTo( $('#findPatologo'));
             select.before('<label><b>Filtro por Patólogos</b></label><br> ');
             column.data().unique().sort().each( function ( d, j ) {
-              if(select.find('option[value="'+d+'"]').length==0)
+              if (select.find('option[value="'+d+'"]').length==0)
               {
                   select.append( '<option value="'+d+'">'+d+'</option>' )
               }
@@ -696,7 +778,6 @@
           }
         })
       }
-      // "searching": false
     });
   })
 
