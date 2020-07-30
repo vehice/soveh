@@ -2707,6 +2707,7 @@ def service_assignment(request):
         username=settings.EMAIL_HOST_USER2,
         password=settings.EMAIL_HOST_PASSWORD2,
     )
+    msg_res = ""
 
     try:
         if analysis:
@@ -2732,7 +2733,11 @@ def service_assignment(request):
                 message = get_template(template).render(context=ctx)
                 msg = EmailMultiAlternatives(subject ,message, from_email, [to], connection=connection)
                 msg.content_subtype="html"
-                msg.send()
+                try:
+                    msg.send()
+                except:
+                    msg_res = "No ha sido posible enviar el correo de notificación" 
+                    pass
 
             elif af.patologo and pathologist != "NA":
                 # Reemplazando al patologo anterior
@@ -2754,7 +2759,11 @@ def service_assignment(request):
                 message = get_template(template).render(context=ctx)
                 msg = EmailMultiAlternatives(subject ,message, from_email, [to], connection=connection)
                 msg.content_subtype="html"
-                msg.send()
+                try:
+                    msg.send()
+                except:
+                    msg_res = "No ha sido posible enviar el correo de notificación" 
+                    pass
 
                 # Al anterior
                 to = prev_patologo.email
@@ -2765,7 +2774,11 @@ def service_assignment(request):
                 message = get_template(template).render(context=ctx)
                 msg = EmailMultiAlternatives(subject ,message, from_email, [to], connection=connection)
                 msg.content_subtype="html"
-                msg.send()
+                try:
+                    msg.send()
+                except:
+                    msg_res = "No ha sido posible enviar el correo de notificación" 
+                    pass
             elif af.patologo and pathologist == "NA":
                 # Desasignando patologo
                 prev_patologo = af.patologo
@@ -2783,15 +2796,21 @@ def service_assignment(request):
                 message = get_template(template).render(context=ctx)
                 msg = EmailMultiAlternatives(subject ,message, from_email, [to], connection=connection)
                 msg.content_subtype="html"
-                msg.send()
+                try:
+                    msg.send()
+                except:
+                    msg_res = "No ha sido posible enviar el correo de notificación" 
+                    pass
             else:
                 # Caso no controlado
                 pass
-            return JsonResponse({'ok': 1})
+            return JsonResponse({'ok': 1, 'msg': msg_res})
         else:
-            return JsonResponse({'ok': 0})
-    except:   
-        return JsonResponse({'ok': 0})
+            msg_res = "Análisis requerido"
+            return JsonResponse({'ok': 0, 'msg': msg_res})
+    except:
+        msg_res = "Problemas al procesar la solicitud de derivación"   
+        return JsonResponse({'ok': 0, 'msg': msg_res})
 
 def dashboard_analysis(request):
     exam = request.GET.get('exam')

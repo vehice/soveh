@@ -407,7 +407,11 @@
     .done(function (data) {
       lockScreen(0);
       if (data.ok){
-        toastr.success("Derivación realizada exitosamente.", "Listo!");
+        if (data.msg != "") {
+          toastr.info("Hemos procesado la derivación pero ha surgido un problema: "+data.msg, "Listo!");
+        } else {
+          toastr.success("Derivación realizada exitosamente.", "Listo!");
+        }
       } else {
         toastr.error("No ha sido posible realizar la derivación con éxito, itente nuevamente o contacte un administrador.", "Ups! Problemas.");
       }
