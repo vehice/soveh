@@ -798,11 +798,12 @@ function fillSummary(data){
     tpl_identification += '<div class="form-group col-md-6"><label>Observaciones:</label> <textarea class="form-control" rows="2" name="observation" {% if not edit or closed  %}disabled{% endif %} >'+ item.observation+' </textarea></div>';
     tpl_identification += '<div class="form-group col-md-9"><label>Órganos:</label>'+selectOrgans+'</div>';
     {% if edit and not closed %}
-      tpl_identification += '<div style="padding-top:25px;"><a href="javascript:void(0);" onclick="submitIdentification('+item.id+')" class="btn btn-primary"> <i class="fa fa-save"></i></a>';
+      tpl_identification += '<div class="form-group col-md-3" style="padding-top:25px;"><a href="javascript:void(0);" onclick="submitIdentification('+item.id+')" class="btn btn-primary"> <i class="fa fa-save"></i> </a>'
+
       if (item.removable){
         tpl_identification += '<a href="javascript:void(0);" onclick="removeIdentification('+item.id+')" class="btn btn-danger"> <i class="fa fa-trash"></i></a>';
       }
-      tpl_identification += '</div>';
+      tpl_identification += '</div><div class="form-group col-md-12" id="ToStep2-'+item.id+'"></div>';
     {% endif %}
     tpl_identification += '</div></div>';
     tpl_identification += '</form></div>';
