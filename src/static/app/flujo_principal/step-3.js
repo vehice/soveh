@@ -504,84 +504,83 @@ function closeService(form_id, analysis_id){
     }
   })
 
-  swal({
-    title: "Confirmación",
-    text: "Antes de continuar le informamos que el servicio tiene la cantidad de "+got_reports+" reportes adjuntos y "+got_comments+" comentarios. ¿Confirma que desea realizar el cierre del servicio?",
-    icon: "warning",
-    showCancelButton: true,
+  bootbox.dialog({
+    title: '<h3>Confirmación de cierre de servicio</h3>',
+    message: "<p>El servicio posee "+got_reports+" reportes adjuntos y "+got_comments+" comentarios. \
+      <p>¿Confirma que desea realizar el cierre del servicio?</p> \
+      <p>Ingrese una fecha de cierre:</p> \
+      <input type='text' class='form-control input-closing-date-bootbox' />",
     buttons: {
       cancel: {
-          text: "No, cancelar!",
-          value: null,
-          visible: true,
-          className: "btn-light",
-          closeModal: true,
+          label: "Cancelar",
+          className: 'btn-danger',
       },
-      confirm: {
-          text: "Sí, confirmo!",
-          value: true,
-          visible: true,
-          className: "btn-primary",
-          closeModal: true,
+      ok: {
+          label: "Confirmar",
+          className: 'btn-info',
+          callback: function(){
+            var closing_date = $('.input-closing-date-bootbox').val();
+            var url = Urls.close_service(form_id, closing_date);
+            $.ajax({
+              type: "POST",
+              url: url,
+            })
+            .done(function (data) {
+              window.location.reload();
+            })
+            .fail(function () {
+              console.log("Fail")
+            });
+          }
       }
-    }
-    }).then(isConfirm => {
-    if (isConfirm) {
-      
-      var url = Urls.close_service(form_id);
-      $.ajax({
-        type: "POST",
-        url: url,
-      })
-      .done(function (data) {
-        window.location.reload();
-      })
-      .fail(function () {
-        console.log("Fail")
-      });
     }
   });
 
+  $('.input-closing-date-bootbox').datetimepicker({
+    locale: 'es',
+    keepOpen: false,
+    format: 'DD-MM-YYYY',
+    defaultDate: moment(),
+  });
 }
 
 function cancelService(form_id){
-
-  swal({
-    title: "Confirmación",
-    text: "¿Confirma que desea anular el servicio?",
-    icon: "warning",
-    showCancelButton: true,
+  bootbox.dialog({
+    title: '<h3>Confirmación de anulación de servicio</h3>',
+    message: "<p>¿Confirma que desea realizar la anulación del servicio?</p> \
+      <p>Ingrese una fecha de anulación:</p> \
+      <input type='text' class='form-control input-cancel-date-bootbox' />",
     buttons: {
       cancel: {
-          text: "No, cancelar!",
-          value: null,
-          visible: true,
-          className: "btn-light",
-          closeModal: true,
+          label: "Cancelar",
+          className: 'btn-danger',
       },
-      confirm: {
-          text: "Sí, confirmo!",
-          value: true,
-          visible: true,
-          className: "btn-primary",
-          closeModal: true,
+      ok: {
+          label: "Confirmar",
+          className: 'btn-info',
+          callback: function(){
+            var cancel_date = $('.input-cancel-date-bootbox').val();
+            var url = Urls.cancel_service(form_id, cancel_date);
+            $.ajax({
+              type: "POST",
+              url: url,
+            })
+            .done(function (data) {
+              window.location.reload();
+            })
+            .fail(function () {
+              console.log("Fail")
+            });
+          }
       }
     }
-    }).then(isConfirm => {
-    if (isConfirm) {
-      
-      var url = Urls.cancel_service(form_id);
-      $.ajax({
-        type: "POST",
-        url: url,
-      })
-      .done(function (data) {
-        window.location.reload();
-      })
-      .fail(function () {
-        console.log("Fail")
-      });
-    }
+  });
+
+  $('.input-cancel-date-bootbox').datetimepicker({
+    locale: 'es',
+    keepOpen: false,
+    format: 'DD-MM-YYYY',
+    defaultDate: moment(),
   });
 
 }

@@ -250,6 +250,8 @@ class AnalysisForm(models.Model):
     external_reports = models.ManyToManyField(ExternalReport)
     assignment_deadline = models.DateTimeField(default=None, blank=True, null=True)
     assignment_comment = models.TextField(default="", blank=True, null=True)
+    manual_closing_date = models.DateTimeField(default=None, blank=True, null=True)
+    manual_cancelled_date = models.DateTimeField(default=None, blank=True, null=True)
 
 class Sample(models.Model):
     entryform = models.ForeignKey(

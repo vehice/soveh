@@ -2648,41 +2648,6 @@ def sendEmailNotification(request):
         # msg.send()
     return JsonResponse({})
 
-# def sendEmailDerivacion(request):
-# # form, current_state, next_state):
-#     var_post = request.GET.copy()
-
-#     template = 'app/template_derivacion1.html'
-#     template = 'app/template_derivacion2.html'
-#     template = 'app/template_derivacion3.html'
-        
-#     users=[]
-#     if next_state.id < 10:
-#         users = User.objects.filter(userprofile__profile_id__in=[1,3]).values_list('first_name', 'last_name', 'email')
-#     else:
-#         users=list(User.objects.filter(userprofile__profile_id__in=[1]).values_list('first_name', 'last_name', 'email'))
-#         if form.content_object.patologo:
-#             users.append((form.content_object.patologo.first_name, form.content_object.patologo.last_name, form.content_object.patologo.email))
-#     for f, l, e in users:
-#         subject = "Notificación: Acción Requerida Caso " + caso
-#         to = [e]
-#         # to = ['wcartaya@dataqu.cl']
-#         from_email = settings.EMAIL_HOST_USER
-
-#         ctx = {
-#             'name': f+' '+l,
-#             'nro_caso': caso,
-#             'etapa_last': current_state.name,
-#             'etapa_current': next_state.name,
-#             'url': settings.SITE_URL+'/workflow/'+str(form.id)+'/'+next_state.step.tag,
-#             'exam':exam
-#         }
-#         message = get_template(template).render(context=ctx)
-#         msg = EmailMultiAlternatives(subject,message,from_email,to)
-#         msg.content_subtype="html"
-#         # msg.send()
-#     return JsonResponse({})
-
 def completeForm(request, form_id):
     form = Form.objects.get(pk=form_id)
     form.form_closed = True
@@ -2894,18 +2859,28 @@ def dashboard_reports(request):
 
     return JsonResponse({'data': data})
 
-def close_service(request, form_id):
+def close_service(request, form_id, closing_date):
     form = Form.objects.get(pk=form_id)
     form.form_closed = True
     form.closed_at = datetime.now()
     form.save()
+    try:
+        form.content_object.manual_closing_date = datetime.strptime(closing_date, '%d-%m-%Y')
+        form.content_object.save()
+    except Exception as e:
+        pass
     return JsonResponse({'ok':True})
 
-def cancel_service(request, form_id):
+def cancel_service(request, form_id, cancel_date):
     form = Form.objects.get(pk=form_id)
     form.cancelled = True
     form.cancelled_at = datetime.now()
     form.save()
+    try:
+        form.content_object.manual_cancelled_date = datetime.strptime(cancel_date, '%d-%m-%Y')
+        form.content_object.save()
+    except Exception as e:
+        pass
     return JsonResponse({'ok':True})
 
 def reopen_form(request, form_id):

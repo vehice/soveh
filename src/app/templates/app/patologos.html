@@ -50,22 +50,36 @@
       <div class="card-content">
         <div class="card-body card-dashboard">
           <div class="col-12 ml-3">
-            <div id="findPatologo" class="form-group">
-            </div>
-            <div id="filterDays" class="form-group">
-              <label><b>Filtro por días abierto</b></label><br>
-              
-              <div class="row">
-                <div class="col-2">
-                  <select style="width:100% !important;" class="form-control" id="filtro-dias">
-                    <option value="0">Sin filtro</option>
-                    <option value="1">Mayor a </option>
-                    <option value="2">Menor a </option>
-                    <option value="3">Entre </option>
+            <div class="row">
+              <div class="col-4">
+                <div class="form-group">
+                  <label><b>Filtro de Casos</b></label><br>
+                  <select style="width:100% !important;" class="form-control" id="mostar-casos-cerrados">
+                    <option value="0" {% if all == "0" %} selected {% endif %}>No mostrar casos cerrados</option>
+                    <option value="1" {% if all == "1" %} selected {% endif %}>Mostrar casos cerrados</option>
                   </select>
                 </div>
+              </div>
+              <div class="col-4">
+                <div id="findPatologo" class="form-group">
+                </div>
+              </div>
+              <div class="col-12">
+              <div id="filterDays" class="form-group">
+                <label><b>Filtro por días abierto</b></label><br>
+                
+                <div class="row">
+                  <div class="col-2">
+                    <select style="width:100% !important;" class="form-control" id="filtro-dias">
+                      <option value="0">Sin filtro</option>
+                      <option value="1">Mayor a </option>
+                      <option value="2">Menor a </option>
+                      <option value="3">Entre </option>
+                    </select>
+                  </div>
 
-                <div class="col-10" id="filtro-dias-slot">
+                  <div class="col-10" id="filtro-dias-slot">
+                  </div>
                 </div>
               </div>
             </div>
@@ -251,9 +265,22 @@
   var tabla_casos; 
   var resumenId;
   var closed;
+  var feriados;
+  $.getJSON('https://apis.digital.gob.cl/fl/feriados', function(data) {
+    feriados = data;
+  })
   
   $('.patologos-select').select2()
   
+  $(document).on('change', '#mostar-casos-cerrados', function(e){
+    if ($(this).val() == 0){
+      window.location.href = '/derivacion/0';
+    } else {
+      window.location.href = '/derivacion/1';
+    }
+  });
+
+
   $(document).on('select2:selecting', '.patologos-select', function(e){
     e.preventDefault();
     var selected = e.params.args.data.id
@@ -288,6 +315,23 @@
     
   });
   
+  function isWeekend(date){
+    if (date.isoWeekday() == 6 || date.isoWeekday() == 7){
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  function isHoliday(date){
+    aux = feriados.filter( i =>  i.fecha == date.format("YYYY-MM-DD"));
+    if (aux.length > 0){
+      return true;
+    } else{
+      return false;
+    }
+  }
+
   $(document).on('change', '.patologos-select', function(e){
     var analysis_id = $(this).data("analisis");
     var no_case = $(this).data("nocase");
@@ -300,7 +344,17 @@
       $('.assignment-deadline').val("");
       $('.assignment-deadline').prop("disabled", true);
     } else {
-      var deadline_date = moment().add(2, 'days').format("DD/MM/YYYY");
+      var days_counter = 2;
+      
+      while(isWeekend(moment().add(days_counter, 'days'))){
+        days_counter += 1;
+      }
+
+      while(isHoliday(moment().add(days_counter, 'days'))){
+        days_counter += 1;
+      }
+
+      var deadline_date = moment().add(days_counter, 'days').format("DD/MM/YYYY");
       $('.assignment-deadline').prop("disabled", false);
     }
     $('.assignment-deadline').val(deadline_date);
@@ -329,7 +383,8 @@
     new_row = tabla_casos.row(row_index).data();
     new_row[9] = temp_select[0].outerHTML;
     new_row[10] = pathologist_name;
-    tabla_casos.row(row_index).data(new_row).draw();
+    current_page = tabla_casos.page.info();
+    tabla_casos.row(row_index).data(new_row).page(current_page.page).draw('page');
     $('.patologos-select').select2();
   });
 
@@ -768,7 +823,7 @@
         this.api().columns().every( function () {
           if(this[0][0] == 10){
             var column = this;
-            var select = $('<select style="width:30% !important;" class="filterPathologist"><option value="">Todos</option></select>')
+            var select = $('<select style="width:100% !important;" class="filterPathologist"><option value="">Todos</option></select>')
               .appendTo( $('#findPatologo'));
             select.before('<label><b>Filtro por Patólogos</b></label><br> ');
             column.data().unique().sort().each( function ( d, j ) {
