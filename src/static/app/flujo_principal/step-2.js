@@ -78,7 +78,7 @@ function loadSamples(samples){
     $.each(v.sample_exams_set, function(j,item){
       exams.push(item.exam_id);
       $('.delete-'+v.id).hide();
-      var html = addOrgansOptions(item.exam_name, item.service_id, v.id, item.exam_id, v.identification.organs, v.id+"-"+($('#sampleNro-'+v.id)[0].rowSpan + 1), true);
+      var html = addOrgansOptions(item.exam_name, item.service_id, v.id, item.exam_id, v.identification.organs, v.id+"-"+($('#sampleNro-'+v.id)[0].rowSpan + 1), true, item.is_closed);
       $('#sampleNro-'+v.id)[0].rowSpan = $('#sampleNro-'+v.id)[0].rowSpan + 1; 
       $('#sampleIden-'+v.id)[0].rowSpan = $('#sampleIden-'+v.id)[0].rowSpan + 1; 
       $("#sample-"+v.id).after(html);
@@ -345,11 +345,11 @@ function addSampleRow(sample) {
   $("#samples_table tbody").append(templateHTML)
 }
 
-function addOrgansOptions(analisis, analisis_type, sampleId, sampleIndex, organs, optionId = null, prevData = false) {
+function addOrgansOptions(analisis, analisis_type, sampleId, sampleIndex, organs, optionId = null, prevData = false, is_closed = false) {
   var sampleRowTemplate = document.getElementById("add_analisis").innerHTML;
 
   var templateFn = _.template(sampleRowTemplate);
-  var templateHTML = templateFn({'organs': organs, 'type': analisis_type, 'analisis': analisis, 'sampleId': sampleId, 'sampleIndex': sampleIndex, 'optionId': optionId, 'prevData': prevData});
+  var templateHTML = templateFn({'organs': organs, 'type': analisis_type, 'analisis': analisis, 'sampleId': sampleId, 'sampleIndex': sampleIndex, 'optionId': optionId, 'prevData': prevData, 'is_closed': is_closed});
   return templateHTML;
 }
 

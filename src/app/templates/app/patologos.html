@@ -613,6 +613,8 @@
       if(item.patologo__last_name != null)
         tpl_exams += item.patologo__last_name;
       tpl_exams += '</span> <br> <b>Fecha: </b>'+ moment(item.created_at).format("DD/MM/YYYY HH:mm");
+      tpl_exams += '</span> <br> <b>Estado: </b>'+ item.status;
+
       
       if (item.service_comments.length > 0) {
         tpl_exams += '<br> <b>Comentarios:</b><br><br>';

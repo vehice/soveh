@@ -440,7 +440,6 @@ var steps = $("#workflow_form").steps({
           } 
           else if (currentIndex == 1) {
             var resp = validate_step_2();
-            console.log(resp);
             if (!resp) {
               lockScreen(0);
               return false
@@ -811,7 +810,6 @@ function fillSummary(data){
 
   // tpl_identification += '</div>';
   $('.summaryIdentification').html(tpl_identification);
-
   var tpl_exams = '<div class="col-sm-12"><h6 class="form-section mt-2"> <b>Servicios</b></h6></br>';
   $.each(data.entryform.analyses, function(i, item){
     tpl_exams += '<div class="alert alert-light"><b>'+ item.exam__name +'</b> <span class="pull-right">'
@@ -820,7 +818,10 @@ function fillSummary(data){
     if(item.patologo__last_name != null)
       tpl_exams += item.patologo__last_name;
     tpl_exams += '</span> <br> <b>Fecha: </b>'+ moment(item.created_at).format("DD/MM/YYYY HH:mm");
+    tpl_exams += '</span> <br> <b>Estado: </b>'+ item.status;
+
     
+
     if (item.service_comments.length > 0) {
       tpl_exams += '<br> <b>Comentarios:</b><br><br>';
       $.each(item.service_comments, function(j, item2){
@@ -1196,7 +1197,6 @@ function showAttachedFilesModal(id, closed){
     url: url,
   })
   .done(function (data) {
-    console.log(data)
     if (data.files.length > 0) {
       if (!closed) {
         $.each(data.files, function(index, value){

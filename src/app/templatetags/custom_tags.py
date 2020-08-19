@@ -1,5 +1,6 @@
 from django.template import Library
 from app.navigation import default_tree
+from django.conf import settings
 register = Library()
 
 @register.filter(name='join_diagnostic')
@@ -12,3 +13,7 @@ def join_diagnostic(value):
 @register.filter(name='navigations')
 def navigations(user):
     return default_tree(user)
+
+@register.simple_tag
+def settings_var(name):
+    return getattr(settings, name, "")

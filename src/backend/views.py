@@ -103,33 +103,37 @@ class ENTRYFORM(View):
                 sampleexams = s.sampleexams_set.all()
                 sampleExa = {}
                 for sE in sampleexams:
-                    try:
-                        sampleExa[sE.exam_id]['organ_id'].append({
-                            'name':sE.organ.name,
-                            'id':sE.organ.id})
-                    except:
-                        sampleExa[sE.exam_id]={
-                            'exam_id': sE.exam_id,
-                            'exam_name': sE.exam.name,
-                            'exam_type': sE.exam.service_id,
-                            'sample_id': sE.sample_id,
-                            'organ_id': [{
-                            'name':sE.organ.name,
-                            'id':sE.organ.id}]
-                        }
-                    if sE.exam.service_id in [1,2,3]:
-                        if sE.organ in s.identification.organs_before_validations.all():
-                            try:
-                                organs.index(model_to_dict(sE.organ))
-                            except:
-                                organs.append(model_to_dict(sE.organ))
-                        else:
-                            for org in s.identification.organs_before_validations.all():
-                                if org.organ_type == 2:
-                                    try:
-                                        organs.index(model_to_dict(org))
-                                    except:
-                                        organs.append(model_to_dict(org))
+                    a_form = entryform_object.analysisform_set.filter(exam_id=sE.exam_id).first().forms.get()
+                    if not a_form.cancelled:
+                        try:
+                            sampleExa[sE.exam_id]['organ_id'].append({
+                                'name':sE.organ.name,
+                                'id':sE.organ.id})
+                        except:
+                            sampleExa[sE.exam_id]={
+                                'exam_id': sE.exam_id,
+                                'exam_name': sE.exam.name,
+                                'exam_type': sE.exam.service_id,
+                                'sample_id': sE.sample_id,
+                                'organ_id': [{
+                                    'name':sE.organ.name,
+                                    'id':sE.organ.id
+                                }],
+                                'is_closed': a_form.form_closed
+                            }
+                        if sE.exam.service_id in [1,2,3]:
+                            if sE.organ in s.identification.organs_before_validations.all():
+                                try:
+                                    organs.index(model_to_dict(sE.organ))
+                                except:
+                                    organs.append(model_to_dict(sE.organ))
+                            else:
+                                for org in s.identification.organs_before_validations.all():
+                                    if org.organ_type == 2:
+                                        try:
+                                            organs.index(model_to_dict(org))
+                                        except:
+                                            organs.append(model_to_dict(org))
                 cassettes = Cassette.objects.filter(samples__in=[s])
                 s_dict['organs_set'] = organs
                 s_dict['sample_exams_set'] = sampleExa
@@ -163,6 +167,15 @@ class ENTRYFORM(View):
             
             entryform["analyses"] = []
             for analysis in entryform_object.analysisform_set.all():
+                status = ""
+                analysis_form = analysis.forms.get()
+                if analysis_form.cancelled:
+                    status = "Anulado"
+                elif analysis_form.form_closed:
+                    status = "Cerrado"
+                else:
+                    status = "En Curso"
+                
                 aux = {
                     'id': analysis.id,
                     'created_at' : analysis.created_at,
@@ -172,8 +185,9 @@ class ENTRYFORM(View):
                     'exam__name' : analysis.exam.name,
                     'patologo_id' : analysis.patologo_id,
                     'patologo__first_name' : analysis.patologo.first_name if analysis.patologo else None,
-                    'patologo__last_name' : analysis.patologo.first_name if analysis.patologo else None,
-                    'service_comments': []
+                    'patologo__last_name' : analysis.patologo.last_name if analysis.patologo else None,
+                    'service_comments': [],
+                    'status': status
                 }
 
                 for cmm in analysis.service_comments.all():
@@ -479,38 +493,44 @@ class ANALYSIS(View):
             sampleexams = s.sampleexams_set.all()
             sampleExa = {}
             for sE in sampleexams:
-                if sE.exam.service_id in [1,2,3]:
-                    if sE.organ in s.identification.organs_before_validations.all():
-                        try:
-                            organs.index(model_to_dict(sE.organ))
-                        except:
-                            organs.append(model_to_dict(sE.organ))
-                    else:
-                        for org in s.identification.organs_before_validations.all():
-                            if org.organ_type == 2:
-                                try:
-                                    organs.index(model_to_dict(org))
-                                except:
-                                    organs.append(model_to_dict(org))
+                a_form = entryform_object.analysisform_set.filter(exam_id=sE.exam_id).first().forms.get()
+                if not a_form.cancelled:
+                    if sE.exam.service_id in [1,2,3]:
+                        if sE.organ in s.identification.organs_before_validations.all():
+                            try:
+                                organs.index(model_to_dict(sE.organ))
+                            except:
+                                organs.append(model_to_dict(sE.organ))
+                        else:
+                            for org in s.identification.organs_before_validations.all():
+                                if org.organ_type == 2:
+                                    try:
+                                        organs.index(model_to_dict(org))
+                                    except:
+                                        organs.append(model_to_dict(org))
             organs_set = organs
             # exams_set = s.exams.all().values()
             sampleexams = s.sampleexams_set.all()
             sampleExa = {}
             for sE in sampleexams:
-                try:
-                    sampleExa[sE.exam_id]['organ_id'].append({
-                            'name':sE.organ.name,
-                            'id':sE.organ.id})
-                except:
-                    sampleExa[sE.exam_id]={
-                        'exam_id': sE.exam_id,
-                        'exam_name': sE.exam.name,
-                        'exam_type': sE.exam.service_id,
-                        'sample_id': sE.sample_id,
-                        'organ_id': [{
-                            'name':sE.organ.name,
-                            'id':sE.organ.id}]
-                    }
+                a_form = entryform_object.analysisform_set.filter(exam_id=sE.exam_id).first().forms.get()
+                if not a_form.cancelled:
+                    try:
+                        sampleExa[sE.exam_id]['organ_id'].append({
+                                'name':sE.organ.name,
+                                'id':sE.organ.id})
+                    except:
+                        sampleExa[sE.exam_id]={
+                            'exam_id': sE.exam_id,
+                            'exam_name': sE.exam.name,
+                            'exam_type': sE.exam.service_id,
+                            'sample_id': sE.sample_id,
+                            'organ_id': [{
+                                'name':sE.organ.name,
+                                'id':sE.organ.id
+                            }],
+                            'is_closed': a_form.form_closed
+                        }
                 # organs.append(model_to_dict(sE.organ))
             s_dict['sample_exams_set'] = sampleExa
             # cassettes_set = Cassette.objects.filter(sample=s).values()

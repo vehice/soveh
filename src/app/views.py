@@ -366,25 +366,26 @@ def template_resumen_report(request, id, userId):
         sampleexams = s.sampleexams_set.all()
         sampleExa = {}
         for sE in sampleexams:
-            try:
-                sampleExa[sE.exam_id]['organ_id'].append({
-                    'name':sE.organ.name,
-                    'id':sE.organ.id})
-            except:
-                sampleExa[sE.exam_id]={
-                    'exam_id': sE.exam_id,
-                    'exam_name': sE.exam.name,
-                    'exam_type': sE.exam.service_id,
-                    'sample_id': sE.sample_id,
-                    'organ_id': [{
-                    'name':sE.organ.name,
-                    'id':sE.organ.id}]
-                }
-            if sE.exam.service_id == 1:
+            if not entryform_object.analysisform_set.filter(exam_id=sE.exam_id).first().forms.get().cancelled:
                 try:
-                    organs.index(model_to_dict(sE.organ))
+                    sampleExa[sE.exam_id]['organ_id'].append({
+                        'name':sE.organ.name,
+                        'id':sE.organ.id})
                 except:
-                    organs.append(model_to_dict(sE.organ))
+                    sampleExa[sE.exam_id]={
+                        'exam_id': sE.exam_id,
+                        'exam_name': sE.exam.name,
+                        'exam_type': sE.exam.service_id,
+                        'sample_id': sE.sample_id,
+                        'organ_id': [{
+                        'name':sE.organ.name,
+                        'id':sE.organ.id}]
+                    }
+                if sE.exam.service_id == 1:
+                    try:
+                        organs.index(model_to_dict(sE.organ))
+                    except:
+                        organs.append(model_to_dict(sE.organ))
         s_dict['organs_set'] = organs
         s_dict['sample_exams_set'] = sampleExa
         s_dict['identification'] = model_to_dict(s.identification, exclude=["organs", 'organs_before_validations'])
