@@ -656,14 +656,6 @@ $(document).on('click', '.showSummaryBtn', function(e){
   getSummaryData();
 });
 
-$(document).on('click', '.newAnalysisBtn', function(e){
-    $("#new_analysis").modal("show");
-});
-
-$(document).on('click', '.newAnalysisBtn5', function(e){
-    $("#new_analysis5").modal("show");
-});
-
 $(document).on('change', '.just_increasing', function(){
   var original_value = $(this).data('val');
   if ( $(this).val() < original_value) {

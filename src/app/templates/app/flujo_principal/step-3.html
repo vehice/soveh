@@ -12,67 +12,6 @@
   </div>
 </fieldset>
 
-<div class="modal fade text-left" id="new_analysis5" role="dialog" data-backdrop="static" data-keyboard="false">
-  <div class="modal-dialog modal-lg" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h3 class="modal-title" id="title">Nuevo Análisis <span class="NoCasoSummary"></span></h3>
-      </div>
-      <div class="modal-body">
-        <fieldset>
-          <div id="modal_{{ step_tab }}">
-            <input type="hidden" name="step_id" value="{{step_id}}">
-            <input type="hidden" name="step_tag" value="step_4_new">
-            <input type="hidden" name="form_id" value="{{form_id}}" >
-            <input type="hidden" name="entryform_id" value="{{entryform_id}}" >
-            <h4 class="form-section">
-              <i class="ft-search"></i> Servicios
-            </h4>
-            <div class="row">
-              <div class="col-sm-12">
-                <p><label for="exam">Seleccione los análisis:</label></p>
-                <div class="input-group">
-                  <select class="select2" id="exam_new_select5" name="analysis" multiple="multiple" style="width:100%;">
-                  </select>
-                </div>
-              </div>
-              <div class="col-sm-12 mt-3">
-                <table class="table table-bordered table-condensed" id="patologo_table_5" style="font-size:13px;">
-                  <thead>
-                    <tr>
-                      <th style="width:40%">Análisis</th>
-                      <th style="width:60%">Patólogo</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                  </tbody>
-                </table>
-              </div>
-              <div class="col-sm-12 mt-3">
-                <table class="table table-bordered table-condensed" id="samples_new_table5" style="font-size:13px;">
-                  <thead>
-                    <tr>
-                      <th style="width:5%">Nº Muestra</th>
-                      <th style="width:15%">Identificación</th>
-                      <th style="width:37%">Análisis</th>
-                      <th style="width:37%">Órganos</th>
-                      <th style="width:6%">Acciones</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                  </tbody>
-                </table>
-              </div>
-            </div>
-            
-          </div>
-        </fieldset>
-        <a class="btn btn-primary" href="javascript:void(0);" onclick="submitNewAnalysis5();"> Guardar </a>
-      </div>
-    </div>
-  </div>
-</div>
-
 <script id="analysis_element5" type="text/x-lodash-template">
 
 {% if closed %}
