@@ -454,14 +454,18 @@ var steps = $("#workflow_form").steps({
         {
           previous_step = true;
           var disform = $("#step_" + newIndex + " :input").find(':disabled').prop('disabled', false);
+          var disform2 = $('.organs-select').prop('disabled', false);
           form_data = $("#step_" + newIndex + " :input").serialize();
           disform.prop('disabled', true);
+          disform2.prop('disabled', true);
         } 
         else {
           previous_step = false;
           var disform = $("#step_" + currentIndex + " :input").find(':disabled').prop('disabled', false);
+          var disform2 = $('.organs-select').prop('disabled', false);
           form_data = $("#step_" + currentIndex + " :input").serialize();
-          disform.attr('disabled', true);
+          disform.prop('disabled', true);
+          disform2.prop('disabled', true);
         }
 
         var url = Urls.workflow();
