@@ -366,7 +366,15 @@ def template_resumen_report(request, id, userId):
         sampleexams = s.sampleexams_set.all()
         sampleExa = {}
         for sE in sampleexams:
-            if not entryform_object.analysisform_set.filter(exam_id=sE.exam_id).first().forms.get().cancelled:
+            try:
+                a_form = entryform_object.analysisform_set.filter(exam_id=sE.exam_id).first().forms.get()
+                is_cancelled = a_form.cancelled
+                is_closed = a_form.form_closed
+            except:
+                is_cancelled = False
+                is_closed = False
+            
+            if not is_cancelled:
                 try:
                     sampleExa[sE.exam_id]['organ_id'].append({
                         'name':sE.organ.name,
