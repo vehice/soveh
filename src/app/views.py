@@ -554,24 +554,42 @@ def show_patologos(request, all):
     selected_analysis = []
 
     for a in analysis:
+        entryform_form = a.entryform.forms.first()
+        analysisform_form = a.forms.first()
+
         if int(all):
-            if not a.entryform.forms.first().cancelled and a.exam.pathologists_assignment and not a.forms.first().cancelled:
-                selected_analysis.append(a)   
+            if not entryform_form.cancelled and a.exam.pathologists_assignment and not analysisform_form.cancelled:
+                selected_analysis.append({'analysis': a, 'entryform_form': entryform_form, 'analysisform_form': analysisform_form})   
         else:
-            if not a.entryform.forms.first().cancelled and a.exam.pathologists_assignment and not a.forms.first().cancelled and not a.entryform.forms.first().form_closed:
-                selected_analysis.append(a)
+            if not entryform_form.cancelled and a.exam.pathologists_assignment and not analysisform_form.cancelled and not entryform_form.form_closed:
+                selected_analysis.append({'analysis': a, 'entryform_form': entryform_form, 'analysisform_form': analysisform_form})  
 
     for a in selected_analysis:
-        upper_date = datetime.datetime.now()
-        
-        if a.entryform.forms.first().form_closed or a.forms.first().form_closed:
-            upper_date = a.forms.first().closed_at
+        days_open = 0
+        days_late = 0
+        if not a['analysisform_form'].form_closed:
+            # Analisis en curso
 
-        lower_date = a.created_at
+            current_date = datetime.datetime.now()
+            if a['analysis'].assignment_deadline:
+                if current_date > a['analysis'].assignment_deadline:
+                    days_late = (current_date - a['analysis'].assignment_deadline).days
 
-        samples = Sample.objects.filter(entryform=a.entryform).values_list('id', flat=True)
+            days_open = (current_date - a['analysis'].created_at).days
+        else:
+            # Analisis cerrado
+            if a['analysis'].assignment_deadline and a['analysis'].pre_report_end_date:
+                if a['analysis'].pre_report_end_date > a['analysis'].assignment_deadline:
+                    days_late = (a['analysis'].pre_report_end_date - a['analysis'].assignment_deadline).days
+
+            if a['analysis'].manual_closing_date:
+                days_open = (a['analysis'].manual_closing_date - a['analysis'].created_at).days
+            else:
+                days_open = (a['analysisform_form'].closed_at - a['analysis'].created_at).days
+                
+        samples = Sample.objects.filter(entryform=a['analysis'].entryform).values_list('id', flat=True)
         sampleExams_counter = 0
-        sampleExams = SampleExams.objects.filter(sample__in=samples, exam=a.exam).select_related("organ")
+        sampleExams = SampleExams.objects.filter(sample__in=samples, exam=a['analysis'].exam).select_related("organ")
         
         organ_types = []
         for se in sampleExams:
@@ -591,31 +609,35 @@ def show_patologos(request, all):
         else:
             unit = "Órgano"
 
-        parte = a.entryform.get_subflow
+        parte = a['analysis'].entryform.get_subflow
         
         if parte == "N/A":
             parte = ''
         else:
             parte = ' (Parte ' + parte + ')'
-        if up.profile.id != 5 or a.patologo_id == request.user.id:
+
+        if up.profile.id != 5 or a['analysis'].patologo_id == request.user.id:
             data.append({
-                'analisis': a.id,
-                'patologo': a.patologo_id if a.patologo else None,
-                'patologo_name': a.patologo.first_name +" "+a.patologo.last_name if a.patologo else "No Asignado",
-                'closed': 1 if a.forms.first().form_closed else 0,
-                'cancelled': 1 if a.forms.first().cancelled else 0,
-                'edit': not a.entryform.forms.first().form_closed and not a.entryform.forms.first().cancelled and up.profile.id == 1,
-                'no_caso': a.entryform.no_caso + parte, 
-                'exam': a.exam.name,
-                'cliente': a.entryform.customer.name,
-                'centro': a.entryform.center,
-                'fecha_ingreso': lower_date.strftime("%d/%m/%Y"),
-                'dias_abierto': (upper_date - lower_date).days,
+                'analisis': a['analysis'].id,
+                'patologo': a['analysis'].patologo_id if a['analysis'].patologo else None,
+                'patologo_name': a['analysis'].patologo.first_name +" "+a['analysis'].patologo.last_name if a['analysis'].patologo else "No Asignado",
+                'closed': 1 if a['analysisform_form'].form_closed else 0,
+                'cancelled': 1 if a['analysisform_form'].cancelled else 0,
+                'edit': not a['entryform_form'].form_closed and not a['analysisform_form'].cancelled and up.profile.id == 1,
+                'no_caso': a['analysis'].entryform.no_caso + parte, 
+                'exam': a['analysis'].exam.name,
+                'cliente': a['analysis'].entryform.customer.name,
+                'centro': a['analysis'].entryform.center,
+                'fecha_ingreso': a['analysis'].created_at.strftime("%d/%m/%Y"),
+                'dias_abierto': days_open,
                 'nro_muestras': sampleExams_counter,
-                'entryform': a.entryform.id,
-                'entryform_form_closed': a.entryform.forms.first().form_closed,
-                'entryform_cancelled': a.entryform.forms.first().cancelled,
+                'entryform': a['analysis'].entryform.id,
+                'entryform_form_closed': a['entryform_form'].form_closed,
+                'entryform_cancelled': a['entryform_form'].cancelled,
                 'unidad': unit,
+                'fecha_derivacion': a['analysis'].assignment_done_at.strftime("%d/%m/%Y") if a['analysis'].assignment_done_at else "",
+                'fecha_plazo': a['analysis'].assignment_deadline.strftime("%d/%m/%Y") if a['analysis'].assignment_deadline else "",
+                'dias_atraso': days_late,
             })
 
     return render(request, 'app/patologos.html', {'casos': data, 'patologos': patologos, 'edit': editar, 'all': all})

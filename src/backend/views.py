@@ -2652,6 +2652,7 @@ def service_assignment(request):
                 af.patologo_id = int(pathologist)
                 af.assignment_deadline = datetime.strptime(deadline, '%d/%m/%Y')
                 af.assignment_comment = comment if comment and comment != "" else None
+                af.assignment_done_at = datetime.now()
                 af.save()
                 af.refresh_from_db()
                 to = af.patologo.email
@@ -2676,6 +2677,7 @@ def service_assignment(request):
                 af.patologo_id = int(pathologist)
                 af.assignment_deadline = datetime.strptime(deadline, '%d/%m/%Y')
                 af.assignment_comment = comment if comment and comment != "" else None
+                af.assignment_done_at = datetime.now()
                 af.save()
                 af.refresh_from_db()
 
@@ -2716,6 +2718,7 @@ def service_assignment(request):
                 af.patologo_id = None
                 af.assignment_deadline = None
                 af.assignment_comment = comment if comment and comment != "" else None
+                af.assignment_done_at = None
                 af.save()
                 af.refresh_from_db()
                 to = prev_patologo.email

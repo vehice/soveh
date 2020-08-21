@@ -248,10 +248,16 @@ class AnalysisForm(models.Model):
     patologo = models.ForeignKey(User, null=True, on_delete=models.SET_NULL)
     service_comments = models.ManyToManyField(ServiceComment)
     external_reports = models.ManyToManyField(ExternalReport)
+    assignment_done_at = models.DateTimeField(default=None, blank=True, null=True)
     assignment_deadline = models.DateTimeField(default=None, blank=True, null=True)
     assignment_comment = models.TextField(default="", blank=True, null=True)
     manual_closing_date = models.DateTimeField(default=None, blank=True, null=True)
     manual_cancelled_date = models.DateTimeField(default=None, blank=True, null=True)
+    pre_report_started = models.BooleanField(default=False)
+    pre_report_start_date = models.DateTimeField(default=None, blank=True, null=True)
+    pre_report_ended = models.BooleanField(default=False)
+    pre_report_end_date = models.DateTimeField(default=None, blank=True, null=True)
+
 
 class Sample(models.Model):
     entryform = models.ForeignKey(

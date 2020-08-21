@@ -16,6 +16,10 @@
     color: red !important;
     font-weight: bolder;
   }
+
+  .dt-body-center{
+    text-align: center;
+  }
 </style>
 
 {% endblock stylesheets %}
@@ -49,7 +53,7 @@
       </div>
       <div class="card-content">
         <div class="card-body card-dashboard">
-          <div class="col-12 ml-3">
+          <div class="col-12">
             <div class="row">
               <div class="col-4">
                 <div class="form-group">
@@ -84,9 +88,9 @@
               </div>
             </div>
           </div>
-          <div class="col-12">
-            <div class="table-responsive">
-              <table id="table-casos" class="table table-xs zero-configuration">
+          <div class="col-12 m-n p-n">
+            <div class="table-responsive m-n p-n">
+              <table id="table-casos" class="table table-striped table-bordered compact dataTable" width="100%">
                 <thead>
                   <tr>
                     <th>Nro Caso</th>
@@ -95,6 +99,9 @@
                     <th>Servicios</th>
                     <th>Fecha<br>Ingreso</th>
                     <th>Días<br>Abierto</th>
+                    <th>Fecha<br>Derivación</th>
+                    <th>Fecha<br>Plazo</th>
+                    <th>Días Atraso</th>
                     <th>Nro<br>Muestras</th>
                     <th>Unidad</th>
                     <th>Estado</th>
@@ -121,10 +128,20 @@
                           {{ entryForm.dias_abierto }}
                       </td>
                       <td>
+                          {{ entryForm.fecha_derivacion }}
+                      </td>
+                      <td>
+                          {{ entryForm.fecha_plazo }}
+                      </td>
+                      <td>
+                          {{ entryForm.dias_atraso }}
+                      </td>
+                      <td>
                           {{ entryForm.nro_muestras }}
                       </td>
                       <td>
-                        {{ entryForm.unidad }}
+                          {{ entryForm.unidad }}
+                      </td>
                       <td>
                         {% if entryForm.closed %}
                           Finalizado
@@ -236,6 +253,7 @@
         <form id="assignmentForm">
           <input type="hidden" class="form-control assignment-analysis-id" name="analysis"/>
           <input type="hidden" class="form-control assignment-pathologist" name="pathologist"/>
+          <input type="hidden" class="form-control assignment-pathologist-name"/>
           <div class="form-group">
             <label>
               Fecha de plazo:
@@ -360,36 +378,14 @@
     $('.assignment-deadline').val(deadline_date);
     $('.assignment-analysis-id').val(analysis_id);
     $('.assignment-pathologist').val(pathologist);
+    $('.assignment-pathologist-name').val(pathologist_name);
     $(".caseAssignment").text(no_case);
     $(".examAssignment").text(analysis_name);
     $("#assignmentModal").modal("show");
-    
-    var td = $('.service-'+analysis_id)[0];
-    $(td).removeClass('incomplete');
-    row_index = tabla_casos.row($(td).parent()).index();
-    temp_select = $(this).clone();
-    temp_select.removeClass("select2").removeClass("select2-hidden-accessible");
-    if ( pathologist != "NA" ){
-      if ($('.filterPathologist').find('option[value="'+pathologist_name+'"]').length==0)
-      {
-        $('.filterPathologist').append( '<option value="'+pathologist_name+'">'+pathologist_name+'</option>' );
-      }
-    }
-
-    temp_select.find("option").removeAttr("selected");
-    temp_select.find("option[value="+pathologist+"]").attr('selected','selected');
-
-    $(this).remove();
-    new_row = tabla_casos.row(row_index).data();
-    new_row[9] = temp_select[0].outerHTML;
-    new_row[10] = pathologist_name;
-    current_page = tabla_casos.page.info();
-    tabla_casos.row(row_index).data(new_row).page(current_page.page).draw('page');
-    $('.patologos-select').select2();
   });
 
   $(document).on('change', '.filterPathologist', function(e){
-    tabla_casos.column(10).search(this.value ? '^'+this.value+'$' : '', true, false ).draw();
+    tabla_casos.column(13).search(this.value ? '^'+this.value+'$' : '', true, false ).draw();
   });
 
   $('.assignment-deadline').datetimepicker({
@@ -452,6 +448,12 @@
     
     var data = $('#assignmentForm').serialize();
     var url = Urls.service_assignment();
+    var analysis_id = $('.assignment-analysis-id').val();
+    var td = $('.service-'+analysis_id)[0];
+    var row_index = tabla_casos.row($(td).parent()).index();
+    var deadline = $('.assignment-deadline').val();
+    var path_name = $('.assignment-pathologist-name').val();
+
     $("#assignmentModal").modal("hide");
 
     $.ajax({
@@ -465,6 +467,10 @@
         if (data.msg != "") {
           toastr.info("Hemos procesado la derivación pero ha surgido un problema: "+data.msg, "Listo!");
         } else {
+          $(td).removeClass('incomplete');
+          tabla_casos.cell({row:row_index, column:6}).data(moment().format("DD/MM/YYYY"));
+          tabla_casos.cell({row:row_index, column:7}).data(deadline);
+          tabla_casos.cell({row:row_index, column:13}).data(path_name);
           toastr.success("Derivación realizada exitosamente.", "Listo!");
         }
       } else {
@@ -813,17 +819,18 @@
       "order": [[ 0, "desc" ]],
       "columnDefs": [
         {
-          "targets": [0, 1, 2, 3, 4, 5 ,6 , 7, 8, 9],
-          "orderable": false
+          "targets": [0, 1, 2, 3, 4, 5 ,6 , 7, 8, 9, 10, 11, 12, 13, 14],
+          "orderable": false,
+          "className": "dt-body-center"
         },
         {
-          "targets": [ 10],
-          "visible": false
+          "targets": [ 13],
+          "visible": false,
         }
       ],
       initComplete: function () {
         this.api().columns().every( function () {
-          if(this[0][0] == 10){
+          if(this[0][0] == 13){
             var column = this;
             var select = $('<select style="width:100% !important;" class="filterPathologist"><option value="">Todos</option></select>')
               .appendTo( $('#findPatologo'));
