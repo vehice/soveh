@@ -174,14 +174,8 @@ class ENTRYFORM(View):
             
             entryform["analyses"] = []
             for analysis in entryform_object.analysisform_set.all():
-                status = ""
                 analysis_form = analysis.forms.get()
-                if analysis_form.cancelled:
-                    status = "Anulado"
-                elif analysis_form.form_closed:
-                    status = "Cerrado"
-                else:
-                    status = "En Curso"
+
                 
                 aux = {
                     'id': analysis.id,
@@ -194,7 +188,7 @@ class ENTRYFORM(View):
                     'patologo__first_name' : analysis.patologo.first_name if analysis.patologo else None,
                     'patologo__last_name' : analysis.patologo.last_name if analysis.patologo else None,
                     'service_comments': [],
-                    'status': status
+                    'status': analysis.status
                 }
 
                 for cmm in analysis.service_comments.all():
@@ -467,6 +461,7 @@ class ANALYSIS(View):
                 'exam_name': exam.name,
                 'exam_stain': exam.stain,
                 'exam_type': exam.service_id,
+                'exam_pathologists_assignment': exam.pathologists_assignment,
                 'slices': slices,
                 'current_step_tag': current_step_tag,
                 'current_step': current_step,
@@ -477,8 +472,11 @@ class ANALYSIS(View):
                 'service': exam.service_id,
                 'service_name': exam.service.name,
                 'cancelled': form.cancelled,
-                'patologo_name': analysis.patologo.get_full_name() if analysis.patologo else ""
-                # 'no_caso': analisys.entry_form.no_caso
+                'patologo_name': analysis.patologo.get_full_name() if analysis.patologo else "",
+                'patologo_id': analysis.patologo.id if analysis.patologo else "",
+                'pre_report_started': analysis.pre_report_started,
+                'pre_report_ended': analysis.pre_report_ended,
+                'status': analysis.status
             })
         
         
@@ -2678,6 +2676,10 @@ def service_assignment(request):
                 af.assignment_deadline = datetime.strptime(deadline, '%d/%m/%Y')
                 af.assignment_comment = comment if comment and comment != "" else None
                 af.assignment_done_at = datetime.now()
+                af.pre_report_started = False
+                af.pre_report_started_at = None
+                af.pre_report_ended = False
+                af.pre_report_ended_at = None
                 af.save()
                 af.refresh_from_db()
 
@@ -2871,3 +2873,28 @@ def delete_sample(request, id):
     changeCaseVersion(True, ident.entryform.id, request.user.id)
 
     return JsonResponse({'ok':True})
+
+def init_pre_report(request, analysis_id):
+    try:
+        analysis = AnalysisForm.objects.get(pk=analysis_id)
+        analysis.pre_report_started = True
+        analysis.pre_report_started_at = datetime.now()
+        analysis.save()
+        return JsonResponse({'ok':True})
+    except Exception as e:
+        return JsonResponse({'ok':False, 'msg':str(e)})
+
+def end_pre_report(request, analysis_id, end_date):
+    try:
+        analysis = AnalysisForm.objects.get(pk=analysis_id)
+        analysis.pre_report_ended = True
+        analysis.save()
+        try:
+            analysis.pre_report_ended_at = datetime.strptime(end_date, '%d-%m-%Y')
+            analysis.save()
+        except Exception as e:
+            analysis.pre_report_ended_at = datetime.now()
+            analysis.save()
+        return JsonResponse({'ok':True})
+    except Exception as e:
+        return JsonResponse({'ok':False, 'msg':str(e)})

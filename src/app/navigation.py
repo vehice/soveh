@@ -47,7 +47,7 @@ def default_tree(user):
         },
 
     ]
-    if user.userprofile.profile_id in (1,2,3):
+    if user.userprofile.profile_id in (1,2,3,4,5):
         menu.append({
             'path': '/derivacion/0',
             'icon': 'ft-users',

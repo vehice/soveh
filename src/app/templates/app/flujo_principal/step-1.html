@@ -121,28 +121,20 @@
         <div class="form-group">
           <label for="date3">Especie :</label>
           <select class="select2 form-control" id="specie_select" name="specie" {% if not edit %}disabled{% endif %}>
-            <option value="">S/I</option>
           </select>
         </div>
       </div>
       <div class="col-sm-6">
         <div class="form-group">
           <label for="phoneNumber3">Estadío Desarrollo :</label>
-          <select class="select2 form-control" id="larvalstage_select" name="larvalstage"
-            {% if not edit %}disabled{% endif %}>
-            <option value="">S/I</option>
+          <select class="select2 form-control" id="larvalstage_select" name="larvalstage" {% if not edit %}disabled{% endif %}>
           </select>
         </div>
       </div>
       <div class="col-sm-6">
         <div class="form-group">
           <label for="date3">Fuente Agua :</label>
-          <select class="select2 form-control" id="watersource_select" name="watersource"
-            {% if not edit %}disabled{% endif %}>
-            <option value="">S/I</option>
-            {% for waterSource in waterSource_list %}
-            <option value="{{waterSource.id}}">{{waterSource}}</option>
-            {% endfor %}
+          <select class="select2 form-control" id="watersource_select" name="watersource" {% if not edit %}disabled{% endif %}>
           </select>
         </div>
       </div>

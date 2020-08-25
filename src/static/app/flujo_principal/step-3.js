@@ -34,6 +34,9 @@ function populateAnalysisData(data) {
     row.id = item.id;
     row.exam_name = item.exam_name;
     row.exam_stain = item.exam_stain;
+    row.exam_pathologists_assignment = item.exam_pathologists_assignment;
+    row.pre_report_started = item.pre_report_started;
+    row.pre_report_ended = item.pre_report_ended;
     row.no_slice = item.slices.length;
     row.current_step = item.current_step;
     row.total_step = item.total_step;
@@ -47,6 +50,8 @@ function populateAnalysisData(data) {
     row.service = item.service;
     row.service_name = item.service_name;
     row.patologo_name = item.patologo_name;
+    row.patologo_id = item.patologo_id;
+    row.status = item.status;
     addAnalysisElement(row)
   });
 }
@@ -253,7 +258,7 @@ function saveServiceComment(){
 
 }
 
-function closeService(form_id, analysis_id){
+function closeService(form_id, analysis_id, can_close=true){
 
   var got_reports = 0;
   var got_comments = 0;
@@ -283,44 +288,54 @@ function closeService(form_id, analysis_id){
     }
   })
 
-  bootbox.dialog({
-    title: '<h3>Confirmación de cierre de servicio</h3>',
-    message: "<p>El servicio posee "+got_reports+" reportes adjuntos y "+got_comments+" comentarios. \
-      <p>¿Confirma que desea realizar el cierre del servicio?</p> \
-      <p>Ingrese una fecha de cierre:</p> \
-      <input type='text' class='form-control input-closing-date-bootbox' />",
-    buttons: {
-      cancel: {
-          label: "Cancelar",
-          className: 'btn-danger',
-      },
-      ok: {
-          label: "Confirmar",
-          className: 'btn-info',
-          callback: function(){
-            var closing_date = $('.input-closing-date-bootbox').val();
-            var url = Urls.close_service(form_id, closing_date);
-            $.ajax({
-              type: "POST",
-              url: url,
-            })
-            .done(function (data) {
-              window.location.reload();
-            })
-            .fail(function () {
-              console.log("Fail")
-            });
-          }
+  if (can_close){
+    bootbox.dialog({
+      title: '<h3>Confirmación de cierre de servicio</h3>',
+      message: "<p>El servicio posee "+got_reports+" reportes adjuntos y "+got_comments+" comentarios. \
+        <p>¿Confirma que desea realizar el cierre del servicio?</p> \
+        <p>Ingrese una fecha de cierre:</p> \
+        <input type='text' class='form-control input-closing-date-bootbox' />",
+      buttons: {
+        cancel: {
+            label: "Cancelar",
+            className: 'btn-danger',
+        },
+        ok: {
+            label: "Confirmar",
+            className: 'btn-info',
+            callback: function(){
+              var closing_date = $('.input-closing-date-bootbox').val();
+              var url = Urls.close_service(form_id, closing_date);
+              $.ajax({
+                type: "POST",
+                url: url,
+              })
+              .done(function (data) {
+                window.location.reload();
+              })
+              .fail(function () {
+                console.log("Fail")
+              });
+            }
+        }
       }
-    }
-  });
+    });
 
-  $('.input-closing-date-bootbox').datetimepicker({
-    locale: 'es',
-    keepOpen: false,
-    format: 'DD-MM-YYYY',
-    defaultDate: moment(),
-  });
+    $('.input-closing-date-bootbox').datetimepicker({
+      locale: 'es',
+      keepOpen: false,
+      format: 'DD-MM-YYYY',
+      defaultDate: moment(),
+    });
+  } else {
+    swal({
+      title: "Información",
+      text: "Lo sentimos, aún no es posible cerrar el servicio ya que no ha iniciado la lectura ó finalizado el pre-informe.",
+      icon: "error",
+      showCancelButton: true,
+    });
+  }
+  
 }
 
 function cancelService(form_id){
@@ -404,4 +419,75 @@ function reopenSerivce(form_id){
     }
   });
 
+}
+
+function initPreReport(analysis_id){
+  bootbox.dialog({
+    title: '<h3>Confirmación</h3>',
+    message: "<p>¿Confirma que desea iniciar la lectura?</p>",
+    buttons: {
+      cancel: {
+          label: "Cancelar",
+          className: 'btn-danger',
+      },
+      ok: {
+          label: "Confirmar",
+          className: 'btn-info',
+          callback: function(){
+            var url = Urls.init_pre_report(analysis_id);
+            $.ajax({
+              type: "POST",
+              url: url,
+            })
+            .done(function (data) {
+              window.location.reload();
+            })
+            .fail(function () {
+              console.log("Fail")
+            });
+          }
+      }
+    }
+  });
+}
+
+function endPreReport(analysis_id){
+  bootbox.dialog({
+    title: '<h3>Confirmación</h3>',
+    message: "<p>¿Confirma que desea terminar el pre-informe?</p> \
+      <p>Ingrese la fecha de termino:</p> \
+      <p></p><input type='text' class='form-control input-end-pre-report-date-bootbox' /> </p>\
+      <p>Recuerda que al confirmar estás notificando que el informe se encuentra disponible en la bandeja de correos del Gerente Técnico desde la fecha y hora indicada.</p>",
+    buttons: {
+      cancel: {
+          label: "Cancelar",
+          className: 'btn-danger',
+      },
+      ok: {
+          label: "Confirmar",
+          className: 'btn-info',
+          callback: function(){
+            var end_date = $('.input-end-pre-report-date-bootbox').val();
+            var url = Urls.end_pre_report(analysis_id, end_date);
+            $.ajax({
+              type: "POST",
+              url: url,
+            })
+            .done(function (data) {
+              window.location.reload();
+            })
+            .fail(function () {
+              console.log("Fail")
+            });
+          }
+      }
+    }
+  });
+
+  $('.input-end-pre-report-date-bootbox').datetimepicker({
+    locale: 'es',
+    keepOpen: false,
+    format: 'DD-MM-YYYY',
+    defaultDate: moment(),
+  });
 }

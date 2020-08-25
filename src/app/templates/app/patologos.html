@@ -53,7 +53,7 @@
       </div>
       <div class="card-content">
         <div class="card-body card-dashboard">
-          <div class="col-12">
+          <div class="col-12 ml-1 pl-1">
             <div class="row">
               <div class="col-4">
                 <div class="form-group">
@@ -69,26 +69,27 @@
                 </div>
               </div>
               <div class="col-12">
-              <div id="filterDays" class="form-group">
-                <label><b>Filtro por días abierto</b></label><br>
-                
-                <div class="row">
-                  <div class="col-2">
-                    <select style="width:100% !important;" class="form-control" id="filtro-dias">
-                      <option value="0">Sin filtro</option>
-                      <option value="1">Mayor a </option>
-                      <option value="2">Menor a </option>
-                      <option value="3">Entre </option>
-                    </select>
-                  </div>
+                <div id="filterDays" class="form-group">
+                  <label><b>Filtro por días abierto</b></label><br>
+                  
+                  <div class="row">
+                    <div class="col-2">
+                      <select style="width:100% !important;" class="form-control" id="filtro-dias">
+                        <option value="0">Sin filtro</option>
+                        <option value="1">Mayor a </option>
+                        <option value="2">Menor a </option>
+                        <option value="3">Entre </option>
+                      </select>
+                    </div>
 
-                  <div class="col-10" id="filtro-dias-slot">
+                    <div class="col-10" id="filtro-dias-slot">
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
           </div>
-          <div class="col-12 m-n p-n">
+          <div class="col-12 ml-0 pl-0">
             <div class="table-responsive m-n p-n">
               <table id="table-casos" class="table table-striped table-bordered compact dataTable" width="100%">
                 <thead>
@@ -143,16 +144,10 @@
                           {{ entryForm.unidad }}
                       </td>
                       <td>
-                        {% if entryForm.closed %}
-                          Finalizado
-                        {% elif entryForm.cancelled %}
-                          Anulado  
-                        {% else %}
-                          En curso
-                        {% endif %}
+                          {{ entryForm.estado }}
                       </td>
                       <td>
-                        <select class="select2 form-control patologos-select" style="width:100% !important;" data-exam="{{entryForm.exam}}" data-nocase="{{entryForm.no_caso}}" data-analisis="{{entryForm.analisis}}" {% if entryForm.entryform_form_closed or entryForm.closed %} disabled {% endif %}>
+                        <select class="select2 form-control patologos-select" style="width:100% !important;" data-exam="{{entryForm.exam}}" data-nocase="{{entryForm.no_caso}}" data-analisis="{{entryForm.analisis}}" {% if not edit %} disabled {% endif %}>
                           <option value="NA">No Asignado</option>
                           {% for p in patologos %}
                             <option value="{{p.id}}" {% if p.id == entryForm.patologo %}selected{% endif %}>{{p.first_name}} {{p.last_name}}</option>

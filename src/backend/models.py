@@ -254,10 +254,23 @@ class AnalysisForm(models.Model):
     manual_closing_date = models.DateTimeField(default=None, blank=True, null=True)
     manual_cancelled_date = models.DateTimeField(default=None, blank=True, null=True)
     pre_report_started = models.BooleanField(default=False)
-    pre_report_start_date = models.DateTimeField(default=None, blank=True, null=True)
+    pre_report_started_at = models.DateTimeField(default=None, blank=True, null=True)
     pre_report_ended = models.BooleanField(default=False)
-    pre_report_end_date = models.DateTimeField(default=None, blank=True, null=True)
+    pre_report_ended_at = models.DateTimeField(default=None, blank=True, null=True)
 
+    @property
+    def status(self):
+        if self.forms.get().form_closed:
+            status = "Finalizado"
+        elif self.forms.get().cancelled:
+            status = "Anulado"
+        elif self.exam.pathologists_assignment and self.pre_report_started and not self.pre_report_ended:
+            status = "Lectura Iniciada"
+        elif self.exam.pathologists_assignment and self.pre_report_started and self.pre_report_ended:
+            status = "Pre-Informe Terminado"
+        else:
+            status = "En Curso"
+        return status
 
 class Sample(models.Model):
     entryform = models.ForeignKey(

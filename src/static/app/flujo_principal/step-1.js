@@ -201,7 +201,6 @@ function init_step_1() {
           $('#entryform_type_select').val(entryform.entryform_type_id).trigger('change');
         }
         $('#fixtative_select').val(entryform.fixative_id).trigger('change');
-        $('#specie_select').val(entryform.specie_id).trigger('change');
 
         $('#observation').val(entryform.observation);
         $('#order_number_input').val(entryform.no_order);
@@ -210,9 +209,22 @@ function init_step_1() {
         $('#company_input').val(entryform.company);
         $('#center_input').val(entryform.center);
         $('#responsible_input').val(entryform.responsible);
-        $('#larvalstage_select').val(entryform.larvalstage_id).trigger('change');;
-        $('#watersource_select').val(entryform.watersource_id).trigger('change');;
 
+        if (entryform.larvalstage_id) {
+          $('#larvalstage_select').val(entryform.larvalstage_id).trigger('change');
+        } else {
+          $('#larvalstage_select option:contains("S/I")').attr("selected", "selected").trigger('change');
+        }
+        if (entryform.watersource_id) {
+          $('#watersource_select').val(entryform.watersource_id).trigger('change');
+        } else {
+          $('#watersource_select option:contains("S/I")').attr("selected", "selected").trigger('change');
+        }
+        if (entryform.specie_id){
+          $('#specie_select').val(entryform.specie_id).trigger('change');
+        } else {
+          $('#specie_select option:contains("S/I")').attr("selected", "selected").trigger('change');
+        }
         if (entryform.created_at)
         {
           $('[name="created_at"]').val(moment(entryform.created_at).format("DD/MM/YYYY HH:mm") || "");

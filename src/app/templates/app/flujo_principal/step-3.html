@@ -29,15 +29,9 @@
           <div class="col-sm-4 font-medium-4 text-right">Tinción: <%= exam_stain %></div>
         </div>
         <div class="row">
-          <% if (form_closed) { %>
-            <div class="col-sm-6">
-              <p class="list-group-item-text">Servicio <%= service_name %> - <b>Cerrado</b></p>
-            </div>
-          <% } else if (cancelled) { %>
-            <div class="col-sm-6">
-              <p class="list-group-item-text">Servicio <%= service_name %> - <b>Anulado</b></p>
-            </div>
-          <% } %>
+          <div class="col-sm-6">
+            <p class="list-group-item-text">Servicio <%= service_name %> - <b><%= status %></b></p>
+          </div>
           <% if (patologo_name != "") { %>
             <div class="col-sm-6 text-right">
               <p class="list-group-item-text">Patólogo: <b><%= patologo_name %></b></p>
@@ -60,15 +54,9 @@
           <div class="col-sm-4 font-medium-4 text-right"></div>     
         </div>
         <div class="row">
-          <% if (form_closed) { %>
-            <div class="col-sm-6">
-              <p class="list-group-item-text">Servicio <%= service_name %> - <b>Cerrado</b></p>
-            </div>
-          <% } else if (cancelled) { %>
-            <div class="col-sm-6">
-              <p class="list-group-item-text">Servicio <%= service_name %> - <b>Anulado</b></p>
-            </div>
-          <% } %>
+          <div class="col-sm-6">
+            <p class="list-group-item-text">Servicio <%= service_name %> - <b><%= status %></b></p>
+          </div>
           <% if (patologo_name != "") { %>
             <div class="col-sm-6 text-right">
               <p class="list-group-item-text">Patólogo: <b><%= patologo_name %></b></p>
@@ -87,15 +75,38 @@
             <div class="col-sm-4 font-medium-4 text-left"><%= exam_name %></div>
             <div class="col-sm-4 font-medium-4 text-center">
               <div class="btn-group" role="group" aria-label="Opciones">
+                
                 {% comment %} <% if (form_reopened)  { %> 
                   <a class="btn btn-secondary" href="/workflow/<%= form_id %>"><i class="fa fa-arrow-right"></i> Ir al análisis </a>
                 <% } else { %>
                   <a class="btn btn-secondary" href="/workflow/<%= form_id %>"><i class="fa fa-arrow-right"></i> Ir al análisis </a>
                 <% } %> {% endcomment %}
+
                 <button type="button" class="btn btn-info" onclick='showServiceCommentsModal(<%= id %>, {{closed}})'>Comentarios</button>
                 <button type="button" class="btn btn-success" onclick='showServiceReportsModal(<%= id %>, <%= service %>, {{closed}})'>Informes</button>
-                {% if edit %}<button type="button" class="btn btn-warning" onclick='closeService(<%= form_id %>, <%= id %>);'>Cerrar Servicio</button>
-                <button type="button" class="btn btn-danger" onclick='cancelService(<%= form_id %>);'>Anular Servicio</button>{% endif %}
+                {% if edit %}
+                
+                  <% if (!exam_pathologists_assignment ) { %>
+                    <button type="button" class="btn btn-warning" onclick='closeService(<%= form_id %>, <%= id %>, true);'>Cerrar Servicio</button>
+                  <% } else if (exam_pathologists_assignment && !pre_report_started || !pre_report_ended) { %>
+                    <button type="button" class="btn btn-warning" onclick='closeService(<%= form_id %>, <%= id %>, false);'>Cerrar Servicio</button>
+                  <% } else { %>
+                    <button type="button" class="btn btn-warning" onclick='closeService(<%= form_id %>, <%= id %>, true);'>Cerrar Servicio</button>
+                  <% } %>
+
+                  <button type="button" class="btn btn-danger" onclick='cancelService(<%= form_id %>);'>Anular Servicio</button>
+
+                {% endif %}
+
+                <% if (exam_pathologists_assignment) { %>
+                  <% if (patologo_id == {{request.user.pk}} || {{edit}}) { %>
+                    <% if (!pre_report_started)  { %>
+                      <button type="button" class="btn btn-blue" onclick='initPreReport(<%= id %>);'>Iniciar Lectura</button>
+                    <% } else if (pre_report_started && !pre_report_ended) { %>
+                      <button type="button" class="btn btn-blue" onclick='endPreReport(<%= id %>);'>Terminar Pre-Informe</button>
+                    <% } %>
+                  <% } %>
+                <% } %>
               </div>
             </div>
             <div class="col-sm-4 font-medium-4 text-right">Tinción: <%= exam_stain %></div>
@@ -109,7 +120,7 @@
           </div>
           <div class="row">
             <div class="col-sm-6">
-              <p class="list-group-item-text">Servicio <%= service_name %> - <b>En curso</b></p>
+              <p class="list-group-item-text">Servicio <%= service_name %> - <b><%= status %></b></p>
             </div>
             <% if (patologo_name != "") { %>
               <div class="col-sm-6 text-right">
@@ -129,14 +140,35 @@
                 <button type="button" class="btn btn-info" onclick='showServiceCommentsModal(<%= id %>, {{closed}})'>Comentarios</button>
                 <button type="button" class="btn btn-success" onclick='showServiceReportsModal(<%= id %>, <%= service %>, {{closed}})'>Informes</button>
                 
-                {% if edit %}<button type="button" class="btn btn-warning {% if closed %} disabled {% endif %}" onclick='closeService(<%= form_id %>, <%= id %>);'>Cerrar Servicio</button>
-                <button type="button" class="btn btn-danger {% if closed %} disabled {% endif %}" onclick='cancelService(<%= form_id %>);'>Anular Servicio</button>{% endif %}
+                {% if edit %}
+                
+                  <% if (!exam_pathologists_assignment ) { %>
+                    <button type="button" class="btn btn-warning" onclick='closeService(<%= form_id %>, <%= id %>, true);'>Cerrar Servicio</button>
+                  <% } else if (exam_pathologists_assignment && !pre_report_started || !pre_report_ended) { %>
+                    <button type="button" class="btn btn-warning" onclick='closeService(<%= form_id %>, <%= id %>, false);'>Cerrar Servicio</button>
+                  <% } else { %>
+                    <button type="button" class="btn btn-warning" onclick='closeService(<%= form_id %>, <%= id %>, true);'>Cerrar Servicio</button>
+                  <% } %>
+
+                  <button type="button" class="btn btn-danger" onclick='cancelService(<%= form_id %>);'>Anular Servicio</button>
+
+                {% endif %}
+
+                <% if (exam_pathologists_assignment) { %>
+                  <% if (patologo_id == {{request.user.pk}} || {{edit}}) { %>
+                    <% if (!pre_report_started)  { %>
+                      <button type="button" class="btn btn-blue" onclick='initPreReport(<%= id %>);'>Iniciar Lectura</button>
+                    <% } else if (pre_report_started && !pre_report_ended) { %>
+                      <button type="button" class="btn btn-blue" onclick='endPreReport(<%= id %>);'>Terminar Pre-Informe</button>
+                    <% } %>
+                  <% } %>
+                <% } %>
               </div>
             </div>
           </div>
           <div class="row">
             <div class="col-sm-6">
-              <p class="list-group-item-text">Servicio <%= service_name %> - <b>En curso</b></p>
+              <p class="list-group-item-text">Servicio <%= service_name %> - <b><%= status %></b></p>
             </div>
             <% if (patologo_name != "") { %>
               <div class="col-sm-6 text-right">
@@ -157,22 +189,21 @@
               <div class="btn-group" role="group" aria-label="Opciones">
                 <button type="button" class="btn btn-info" onclick='showServiceCommentsModal(<%= id %>, {{closed}}, true)'>Comentarios</button>
                 <button type="button" class="btn btn-success" onclick='showServiceReportsModal(<%= id %>, <%= service %>, {{closed}}, true)'>Informes</button>
-                {% if edit %}<button type="button" class="btn btn-warning" onclick='reopenSerivce(<%= form_id %>)'>Reabrir Servicio</button>{% endif %}
+                
+                {% if edit %}
+                
+                <button type="button" class="btn btn-warning" onclick='reopenSerivce(<%= form_id %>)'>Reabrir Servicio</button>
+                
+                {% endif %}
               </div>
             </div>
             <div class="col-sm-4 font-medium-4 text-right">Tinción: <%= exam_stain %></div>
             
           </div>
           <div class="row">
-            <% if (form_closed) { %>
-              <div class="col-sm-6">
-                <p class="list-group-item-text">Servicio <%= service_name %> - <b>Cerrado</b></p>
-              </div>
-            <% } else if (cancelled) { %>
-              <div class="col-sm-6">
-                <p class="list-group-item-text">Servicio <%= service_name %> - <b>Anulado</b></p>
-              </div>
-            <% } %>
+            <div class="col-sm-6">
+              <p class="list-group-item-text">Servicio <%= service_name %> - <b><%= status %></b></p>
+            </div>
             <% if (patologo_name != "") { %>
               <div class="col-sm-6 text-right">
                 <p class="list-group-item-text">Patólogo: <b><%= patologo_name %></b></p>
@@ -190,22 +221,19 @@
               <div class="btn-group" role="group" aria-label="Opciones">
                 <button type="button" class="btn btn-info" onclick='showServiceCommentsModal(<%= id %>, {{closed}}, true)'>Comentarios</button>
                 <button type="button" class="btn btn-success" onclick='showServiceReportsModal(<%= id %>, <%= service %>, {{closed}}, true)'>Informes</button>
-                {% if edit %}<button type="button" class="btn btn-warning" {% if closed %} disabled {% endif %} onclick='reopenSerivce(<%= form_id %>)'>Reabrir Servicio</button>{% endif %}
+                
+                {% if edit %}
+                  <button type="button" class="btn btn-warning" onclick='reopenSerivce(<%= form_id %>)'>Reabrir Servicio</button>
+                {% endif %}
               </div>
             </div>
             <div class="col-sm-4 font-medium-4 text-right"></div>
             
           </div>
           <div class="row">
-            <% if (form_closed) { %>
-              <div class="col-sm-6">
-                <p class="list-group-item-text">Servicio <%= service_name %> - <b>Cerrado</b></p>
-              </div>
-            <% } else if (cancelled) { %>
-              <div class="col-sm-6">
-                <p class="list-group-item-text">Servicio <%= service_name %> - <b>Anulado</b></p>
-              </div>
-            <% } %>
+            <div class="col-sm-6">
+              <p class="list-group-item-text">Servicio <%= service_name %> - <b><%= status %></b></p>
+            </div>
             <% if (patologo_name != "") { %>
               <div class="col-sm-6 text-right">
                 <p class="list-group-item-text">Patólogo: <b><%= patologo_name %></b></p>

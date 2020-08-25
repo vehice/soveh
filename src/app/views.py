@@ -546,7 +546,13 @@ def notification(request):
 @login_required
 def show_patologos(request, all):
     up = UserProfile.objects.filter(user=request.user).first()
-    analysis = AnalysisForm.objects.all().select_related("entryform", "exam").order_by('-entryform_id')
+    if request.user.is_superuser or up.profile_id in (1,2,3):
+        analysis = AnalysisForm.objects.all().select_related("entryform", "exam").order_by('-entryform_id')
+    elif up.profile_id in (4,5):
+        analysis = AnalysisForm.objects.filter(patologo=request.user).select_related("entryform", "exam").order_by('-entryform_id')
+    else:
+        analysis = AnalysisForm.objects.all().select_related("entryform", "exam").order_by('-entryform_id')
+
     data = []
     patologos = list(User.objects.filter(Q(userprofile__profile_id__in=[4, 5]) | Q(userprofile__is_pathologist=True)).values())
     editar = up.profile_id in (1,2,3)
@@ -578,9 +584,9 @@ def show_patologos(request, all):
             days_open = (current_date - a['analysis'].created_at).days
         else:
             # Analisis cerrado
-            if a['analysis'].assignment_deadline and a['analysis'].pre_report_end_date:
-                if a['analysis'].pre_report_end_date > a['analysis'].assignment_deadline:
-                    days_late = (a['analysis'].pre_report_end_date - a['analysis'].assignment_deadline).days
+            if a['analysis'].assignment_deadline and a['analysis'].pre_report_ended_at:
+                if a['analysis'].pre_report_ended_at > a['analysis'].assignment_deadline:
+                    days_late = (a['analysis'].pre_report_ended_at - a['analysis'].assignment_deadline).days
 
             if a['analysis'].manual_closing_date:
                 days_open = (a['analysis'].manual_closing_date - a['analysis'].created_at).days
@@ -616,28 +622,28 @@ def show_patologos(request, all):
         else:
             parte = ' (Parte ' + parte + ')'
 
-        if up.profile.id != 5 or a['analysis'].patologo_id == request.user.id:
-            data.append({
-                'analisis': a['analysis'].id,
-                'patologo': a['analysis'].patologo_id if a['analysis'].patologo else None,
-                'patologo_name': a['analysis'].patologo.first_name +" "+a['analysis'].patologo.last_name if a['analysis'].patologo else "No Asignado",
-                'closed': 1 if a['analysisform_form'].form_closed else 0,
-                'cancelled': 1 if a['analysisform_form'].cancelled else 0,
-                'edit': not a['entryform_form'].form_closed and not a['analysisform_form'].cancelled and up.profile.id == 1,
-                'no_caso': a['analysis'].entryform.no_caso + parte, 
-                'exam': a['analysis'].exam.name,
-                'cliente': a['analysis'].entryform.customer.name,
-                'centro': a['analysis'].entryform.center,
-                'fecha_ingreso': a['analysis'].created_at.strftime("%d/%m/%Y"),
-                'dias_abierto': days_open,
-                'nro_muestras': sampleExams_counter,
-                'entryform': a['analysis'].entryform.id,
-                'entryform_form_closed': a['entryform_form'].form_closed,
-                'entryform_cancelled': a['entryform_form'].cancelled,
-                'unidad': unit,
-                'fecha_derivacion': a['analysis'].assignment_done_at.strftime("%d/%m/%Y") if a['analysis'].assignment_done_at else "",
-                'fecha_plazo': a['analysis'].assignment_deadline.strftime("%d/%m/%Y") if a['analysis'].assignment_deadline else "",
-                'dias_atraso': days_late,
-            })
+        data.append({
+            'analisis': a['analysis'].id,
+            'patologo': a['analysis'].patologo_id if a['analysis'].patologo else None,
+            'patologo_name': a['analysis'].patologo.first_name +" "+a['analysis'].patologo.last_name if a['analysis'].patologo else "No Asignado",
+            'closed': 1 if a['analysisform_form'].form_closed else 0,
+            'cancelled': 1 if a['analysisform_form'].cancelled else 0,
+            'edit': not a['entryform_form'].form_closed and not a['analysisform_form']. form_closed and up.profile.id == 1,
+            'no_caso': a['analysis'].entryform.no_caso + parte, 
+            'exam': a['analysis'].exam.name,
+            'cliente': a['analysis'].entryform.customer.name,
+            'centro': a['analysis'].entryform.center,
+            'fecha_ingreso': a['analysis'].created_at.strftime("%d/%m/%Y"),
+            'dias_abierto': days_open,
+            'nro_muestras': sampleExams_counter,
+            'entryform': a['analysis'].entryform.id,
+            'entryform_form_closed': a['entryform_form'].form_closed,
+            'entryform_cancelled': a['entryform_form'].cancelled,
+            'unidad': unit,
+            'fecha_derivacion': a['analysis'].assignment_done_at.strftime("%d/%m/%Y") if a['analysis'].assignment_done_at else "",
+            'fecha_plazo': a['analysis'].assignment_deadline.strftime("%d/%m/%Y") if a['analysis'].assignment_deadline else "",
+            'dias_atraso': days_late,
+            'estado': a['analysis'].status
+        })
 
     return render(request, 'app/patologos.html', {'casos': data, 'patologos': patologos, 'edit': editar, 'all': all})

@@ -150,4 +150,8 @@ urlpatterns = [
         csrf_exempt(views.remove_identification),
         name="remove_identification"
     ),
+
+    path('end-pre-report/<int:analysis_id>/<str:end_date>', csrf_exempt(views.end_pre_report), name='end_pre_report'),
+    path('init-pre-report/<int:analysis_id>', csrf_exempt(views.init_pre_report), name='init_pre_report'),
+
 ]
