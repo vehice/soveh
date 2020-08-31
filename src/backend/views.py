@@ -2898,7 +2898,7 @@ def end_pre_report(request, analysis_id, end_date):
         analysis.pre_report_ended = True
         analysis.save()
         try:
-            analysis.pre_report_ended_at = datetime.strptime(end_date, '%d-%m-%Y')
+            analysis.pre_report_ended_at = datetime.strptime(end_date, '%d-%m-%Y %H:%M')
             analysis.save()
         except Exception as e:
             analysis.pre_report_ended_at = datetime.now()

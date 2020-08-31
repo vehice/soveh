@@ -19,14 +19,14 @@
     <div href="/workflow/<%= form_id %>" class="list-group-item bg-teal bg-lighten-4 mb-2">
       <div class="media-body">
         <div class="row">
-          <div class="col-sm-4 font-medium-4 text-left"><%= exam_name %></div>
-          <div class="col-sm-4 font-medium-4 text-center">
+          <div class="col-sm-6 font-medium-4 text-left"><%= exam_name %></div>
+          <div class="col-sm-6 font-medium-4 text-right">Tinción: <%= exam_stain %></div>
+          <div class="col-sm-12 font-medium-4 text-center">
             <div class="btn-group" role="group" aria-label="Opciones">
               <button type="button" class="btn btn-info" onclick='showServiceCommentsModal(<%= id %>, {{closed}}, true)'>Comentarios</button>
               <button type="button" class="btn btn-success" onclick='showServiceReportsModal(<%= id %>, <%= service %>, {{closed}}, true)'>Informes</button>
             </div>
           </div>
-          <div class="col-sm-4 font-medium-4 text-right">Tinción: <%= exam_stain %></div>
         </div>
         <div class="row">
           <div class="col-sm-6">
@@ -44,14 +44,14 @@
     <div href="/workflow/<%= form_id %>" class="list-group-item bg-teal bg-lighten-4 mb-2">
       <div class="media-body">
         <div class="row">
-          <div class="col-sm-4 font-medium-4 text-left"><%= exam_name %></div>
-          <div class="col-sm-4 font-medium-4 text-center">
+          <div class="col-sm-6 font-medium-4 text-left"><%= exam_name %></div>
+          <div class="col-sm-6 font-medium-4 text-right"></div>
+          <div class="col-sm-12 font-medium-4 text-center">
             <div class="btn-group" role="group" aria-label="Opciones">
               <button type="button" class="btn btn-info" onclick='showServiceCommentsModal(<%= id %>, {{closed}}, true)'>Comentarios</button>
               <button type="button" class="btn btn-success" onclick='showServiceReportsModal(<%= id %>, <%= service %>, {{closed}}, true)'>Informes</button>
             </div>
-          </div>
-          <div class="col-sm-4 font-medium-4 text-right"></div>     
+          </div>     
         </div>
         <div class="row">
           <div class="col-sm-6">
@@ -72,8 +72,9 @@
       <div class="list-group-item bg-teal bg-lighten-4 mb-2">
         <div class="media-body">
           <div class="row">
-            <div class="col-sm-4 font-medium-4 text-left"><%= exam_name %></div>
-            <div class="col-sm-4 font-medium-4 text-center">
+            <div class="col-sm-6 font-medium-4 text-left"><%= exam_name %></div>
+            <div class="col-sm-6 font-medium-4 text-right">Tinción: <%= exam_stain %></div>
+            <div class="col-sm-12 font-medium-4 text-center">
               <div class="btn-group" role="group" aria-label="Opciones">
                 
                 {% comment %} <% if (form_reopened)  { %> 
@@ -98,7 +99,7 @@
 
                 {% endif %}
 
-                <% if (exam_pathologists_assignment) { %>
+                <% if (exam_pathologists_assignment && patologo_id != "" && patologo_id != null) { %>
                   <% if (patologo_id == {{request.user.pk}} || {{edit}}) { %>
                     <% if (!pre_report_started)  { %>
                       <button type="button" class="btn btn-blue" onclick='initPreReport(<%= id %>);'>Iniciar Lectura</button>
@@ -109,8 +110,6 @@
                 <% } %>
               </div>
             </div>
-            <div class="col-sm-4 font-medium-4 text-right">Tinción: <%= exam_stain %></div>
-
             <p class="list-group-item-text"></p>
             <div class='col-sm-8 offset-md-2 mt-1'>
               <div class="progress" style="height: 22px;"> 
@@ -134,8 +133,8 @@
       <div class="list-group-item bg-teal bg-lighten-4 mb-2">
         <div class="media-body">
           <div class="row">
-            <div class="col-sm-4 font-medium-4 text-left"><%= exam_name %></div>
-            <div class="col-sm-4 font-medium-4 text-center">
+            <div class="col-sm-12 font-medium-4 text-left"><%= exam_name %></div>
+            <div class="col-sm-12 font-medium-4 text-center">
               <div class="btn-group" role="group" aria-label="Opciones">
                 <button type="button" class="btn btn-info" onclick='showServiceCommentsModal(<%= id %>, {{closed}})'>Comentarios</button>
                 <button type="button" class="btn btn-success" onclick='showServiceReportsModal(<%= id %>, <%= service %>, {{closed}})'>Informes</button>
@@ -154,7 +153,7 @@
 
                 {% endif %}
 
-                <% if (exam_pathologists_assignment) { %>
+                <% if (exam_pathologists_assignment && patologo_id != "" && patologo_id != null) { %>
                   <% if (patologo_id == {{request.user.pk}} || {{edit}}) { %>
                     <% if (!pre_report_started)  { %>
                       <button type="button" class="btn btn-blue" onclick='initPreReport(<%= id %>);'>Iniciar Lectura</button>
@@ -184,8 +183,9 @@
       <div href="/workflow/<%= form_id %>" class="list-group-item bg-teal bg-lighten-4 mb-2">
         <div class="media-body">
           <div class="row">
-            <div class="col-sm-4 font-medium-4 text-left"><%= exam_name %></div>
-            <div class="col-sm-4 font-medium-4 text-center">
+            <div class="col-sm-6 font-medium-4 text-left"><%= exam_name %></div>
+            <div class="col-sm-6 font-medium-4 text-right">Tinción: <%= exam_stain %></div>
+            <div class="col-sm-12 font-medium-4 text-center">
               <div class="btn-group" role="group" aria-label="Opciones">
                 <button type="button" class="btn btn-info" onclick='showServiceCommentsModal(<%= id %>, {{closed}}, true)'>Comentarios</button>
                 <button type="button" class="btn btn-success" onclick='showServiceReportsModal(<%= id %>, <%= service %>, {{closed}}, true)'>Informes</button>
@@ -197,8 +197,6 @@
                 {% endif %}
               </div>
             </div>
-            <div class="col-sm-4 font-medium-4 text-right">Tinción: <%= exam_stain %></div>
-            
           </div>
           <div class="row">
             <div class="col-sm-6">
@@ -216,8 +214,9 @@
       <div href="/workflow/<%= form_id %>" class="list-group-item bg-teal bg-lighten-4 mb-2">
         <div class="media-body">
           <div class="row">
-            <div class="col-sm-4 font-medium-4 text-left"><%= exam_name %></div>
-            <div class="col-sm-4 font-medium-4 text-center">
+            <div class="col-sm-6 font-medium-4 text-left"><%= exam_name %></div>
+            <div class="col-sm-6 font-medium-4 text-right"></div>
+            <div class="col-sm-12 font-medium-4 text-center">
               <div class="btn-group" role="group" aria-label="Opciones">
                 <button type="button" class="btn btn-info" onclick='showServiceCommentsModal(<%= id %>, {{closed}}, true)'>Comentarios</button>
                 <button type="button" class="btn btn-success" onclick='showServiceReportsModal(<%= id %>, <%= service %>, {{closed}}, true)'>Informes</button>
@@ -227,8 +226,6 @@
                 {% endif %}
               </div>
             </div>
-            <div class="col-sm-4 font-medium-4 text-right"></div>
-            
           </div>
           <div class="row">
             <div class="col-sm-6">

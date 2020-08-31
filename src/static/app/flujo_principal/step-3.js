@@ -352,7 +352,7 @@ function closeService(form_id, analysis_id, can_close=true){
   } else {
     swal({
       title: "Información",
-      text: "Lo sentimos, aún no es posible cerrar el servicio ya que no ha iniciado la lectura ó finalizado el pre-informe.",
+      text: "Lo sentimos, aún no es posible cerrar el servicio ya que no ha iniciado la lectura o finalizado el pre-informe.",
       icon: "error",
       showCancelButton: true,
     });
@@ -509,7 +509,7 @@ function endPreReport(analysis_id){
   $('.input-end-pre-report-date-bootbox').datetimepicker({
     locale: 'es',
     keepOpen: false,
-    format: 'DD-MM-YYYY',
+    format: 'DD-MM-YYYY HH:mm',
     defaultDate: moment(),
   });
 }
