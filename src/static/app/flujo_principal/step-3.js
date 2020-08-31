@@ -294,7 +294,10 @@ function closeService(form_id, analysis_id, can_close=true){
       message: "<p>El servicio posee "+got_reports+" reportes adjuntos y "+got_comments+" comentarios. \
         <p>¿Confirma que desea realizar el cierre del servicio?</p> \
         <p>Ingrese una fecha de cierre:</p> \
-        <input type='text' class='form-control input-closing-date-bootbox' />",
+        <p><input type='text' required class='form-control input-closing-date-bootbox' /> </p>\
+        <p>Ingrese el código del informe:</p> \
+        <p><input type='text' required class='form-control input-report-code-bootbox' /></p> \
+        <div class='alert alert-danger hidden alert-closing-service' role='alert'></div>",
       buttons: {
         cancel: {
             label: "Cancelar",
@@ -304,18 +307,37 @@ function closeService(form_id, analysis_id, can_close=true){
             label: "Confirmar",
             className: 'btn-info',
             callback: function(){
+              $('.alert-closing-service').html("");
+              $('.alert-closing-service').addClass("hidden");
               var closing_date = $('.input-closing-date-bootbox').val();
-              var url = Urls.close_service(form_id, closing_date);
-              $.ajax({
-                type: "POST",
-                url: url,
-              })
-              .done(function (data) {
-                window.location.reload();
-              })
-              .fail(function () {
-                console.log("Fail")
-              });
+              var report_code = $('.input-report-code-bootbox').val();
+              var err = false;
+              if (closing_date == ""){
+                $('.alert-closing-service').append("<p>Ingrese la fecha de cierre para continuar</p>");
+                $('.alert-closing-service').removeClass("hidden");  
+                err = true;          
+              }
+              if (report_code == "") {
+                $('.alert-closing-service').append("<p>Ingrese el código del informe para continuar</p>");
+                $('.alert-closing-service').removeClass("hidden");
+                err = true;
+              }
+              if (!err) {
+                var url = Urls.close_service(form_id, closing_date);
+                $.ajax({
+                  type: "POST",
+                  url: url,
+                  data: {'report-code': report_code},
+                })
+                .done(function (data) {
+                  window.location.reload();
+                })
+                .fail(function () {
+                  console.log("Fail")
+                });
+              } else {
+                return false;
+              }
             }
         }
       }

@@ -2831,12 +2831,14 @@ def dashboard_reports(request):
     return JsonResponse({'data': data})
 
 def close_service(request, form_id, closing_date):
+    var_post = request.POST.copy()
     form = Form.objects.get(pk=form_id)
     form.form_closed = True
     form.closed_at = datetime.now()
     form.save()
     try:
         form.content_object.manual_closing_date = datetime.strptime(closing_date, '%d-%m-%Y')
+        form.content_object.report_code = var_post.get('report-code')
         form.content_object.save()
     except Exception as e:
         pass
@@ -2862,6 +2864,12 @@ def reopen_form(request, form_id):
     form.form_closed = False
     form.closed_at = None
     form.save()
+    try:
+        form.content_object.manual_closing_date = None
+        form.content_object.report_code = None
+        form.content_object.save()
+    except Exception as e:
+        pass
     return JsonResponse({'ok':True})
 
 def delete_sample(request, id):

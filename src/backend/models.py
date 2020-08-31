@@ -257,6 +257,7 @@ class AnalysisForm(models.Model):
     pre_report_started_at = models.DateTimeField(default=None, blank=True, null=True)
     pre_report_ended = models.BooleanField(default=False)
     pre_report_ended_at = models.DateTimeField(default=None, blank=True, null=True)
+    report_code = models.CharField(max_length=250, null=True, blank=True)
 
     @property
     def status(self):
@@ -287,6 +288,7 @@ class Sample(models.Model):
 class SampleExams(models.Model):
     sample = models.ForeignKey(Sample, null=True, on_delete=models.CASCADE)
     exam = models.ForeignKey(Exam, null=True, on_delete=models.CASCADE)
+    # analysis = models.ForeignKey(AnalysisForm, null=True, on_delete=models.CASCADE)
     organ = models.ForeignKey(Organ, null=True, on_delete=models.CASCADE)
 
     def __str__(self):

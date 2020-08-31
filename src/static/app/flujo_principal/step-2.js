@@ -55,10 +55,11 @@ function init_step_2() {
     }
   });
 
+  $('.switchery').remove();
   var elems = $('.switch2');
-    $.each(elems, function (key, value) {
-      new Switchery($(this)[0]);
-    });
+  $.each(elems, function (key, value) {
+    new Switchery($(this)[0]);
+  });
 }
 
 function loadExams(exams) {
@@ -109,6 +110,7 @@ function loadSamples(samples){
     $('.organs-select-'+ item).on('select2:select', function(e){
       var values = e.params.data.id;
       var target_id = $(e.target).parent().parent()[0].classList[1].split("-")[2];
+      
       if ( $('#switchery2')[0].checked ){
         $.each($('.organs-select-'+ item), function(i,v){
             var old_values = $(v).val();
@@ -187,27 +189,36 @@ function getSampleAvailableOrgans(sid){
 function addExamToSamples(exam){
 
     $('#samples_table .samples_exams').each( function(i){
-
+      
         if ( $('#switchery')[0].checked ){
+            // add exam to all but duplicated
             var sampleId = $(this).data('index');
-            $('.delete-'+sampleId).hide();
-            $('#sampleNro-'+sampleId)[0].rowSpan = $('#sampleNro-'+sampleId)[0].rowSpan + 1; 
-            $('#sampleIden-'+sampleId)[0].rowSpan = $('#sampleIden-'+sampleId)[0].rowSpan + 1; 
-            //show organs options
-            avail_organs = getSampleAvailableOrgans(sampleId);
-            var html = addOrgansOptions(exam.text, $(exam.element).data('service'), sampleId, exam.id, avail_organs, false);
-            $("#sample-"+sampleId).after(html);
+            $.each(data_step_2.samples, function(i, item){
+                // add exam to empty samples
+                if ( item.id == sampleId && !item.sample_exams_set.hasOwnProperty(exam.id) ){
+                    $('.delete-'+sampleId).hide();
+                    $('#sampleNro-'+sampleId)[0].rowSpan = $('#sampleNro-'+sampleId)[0].rowSpan + 1; 
+                    $('#sampleIden-'+sampleId)[0].rowSpan = $('#sampleIden-'+sampleId)[0].rowSpan + 1; 
+                    // show organs options
+                    avail_organs = getSampleAvailableOrgans(sampleId);
+                    var html = addOrgansOptions(exam.text, $(exam.element).data('service'), sampleId, exam.id, avail_organs, false);
+                    $("#sample-"+sampleId).after(html);
+                    return false;
+                }
+            });
         } else {
             var sampleId = $(this).data('index');
             $.each(data_step_2.samples, function(i, item){
+                // add exam to empty samples
                 if (item.id == sampleId && _.isEmpty(item.sample_exams_set)){
                     $('.delete-'+sampleId).hide();
                     $('#sampleNro-'+sampleId)[0].rowSpan = $('#sampleNro-'+sampleId)[0].rowSpan + 1; 
                     $('#sampleIden-'+sampleId)[0].rowSpan = $('#sampleIden-'+sampleId)[0].rowSpan + 1; 
-                    //show organs options
+                    // show organs options
                     avail_organs = getSampleAvailableOrgans(sampleId);
                     var html = addOrgansOptions(exam.text, $(exam.element).data('service'), sampleId, exam.id, avail_organs, false);
                     $("#sample-"+sampleId).after(html);
+                    return false;
                 }
             });
         }
@@ -243,12 +254,16 @@ function removeExamFromSamples(exam){
 
   $('#samples_table .analis-row').each( function(i){
     if($(this).data('sampleid') == exam.id){
-      var sampleIndex = $(this).data('sampleindex');
-      $('#sampleNro-'+sampleIndex)[0].rowSpan = $('#sampleNro-'+sampleIndex)[0].rowSpan - 1; 
-      $('#sampleIden-'+sampleIndex)[0].rowSpan = $('#sampleIden-'+sampleIndex)[0].rowSpan - 1; 
-      $(this).remove();
-      if($('#sampleIden-'+sampleIndex)[0].rowSpan == 1)
-        $('.delete-'+sampleIndex).show();
+      console.log("prevdata", $(this).data('prevdata') );
+      if ( !$(this).data('prevdata') ) {
+        var sampleIndex = $(this).data('sampleindex');
+        $('#sampleNro-'+sampleIndex)[0].rowSpan = $('#sampleNro-'+sampleIndex)[0].rowSpan - 1; 
+        $('#sampleIden-'+sampleIndex)[0].rowSpan = $('#sampleIden-'+sampleIndex)[0].rowSpan - 1; 
+        $(this).remove();
+        if ( $('#sampleIden-'+sampleIndex)[0].rowSpan == 1 ) {
+          $('.delete-'+sampleIndex).show();
+        }
+      }
     }
   }); 
 }
