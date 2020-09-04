@@ -1211,7 +1211,7 @@ class EMAILTEMPLATE(View):
     def get(self, request, id=None):
         if id:
             template = EmailTemplate.objects.get(pk=id)
-            data = model_to_dict(template)
+            data = model_to_dict(template, exclude=['cc'])
             return JsonResponse({'ok': True, 'template': data})
         else:
             var_get = request.GET.copy()
@@ -1223,7 +1223,7 @@ class EMAILTEMPLATE(View):
             templates = EmailTemplate.objects.all()
             data = []
             for r in templates:
-                data.append(model_to_dict(r))
+                data.append(model_to_dict(r, exclude=['cc']))
 
             return JsonResponse({'ok': True, 'templates': data, 'email': email})
 
@@ -1240,8 +1240,14 @@ class EMAILTEMPLATE(View):
             to = var_post.get('to').split(',')
             message = var_post.get('body')
             plantilla = var_post.get('plantilla')
-
-            msg = EmailMultiAlternatives(subject, message, from_email, to)
+            # template = EmailTemplate.objects.
+            # print ("esta es mi plantilla", plantilla)
+            bcc = []
+            if plantilla:
+                emailtemplate = EmailTemplate.objects.get(pk=plantilla)
+                for cc in emailtemplate.cc.all():
+                    bcc.append(cc.email)
+            msg = EmailMultiAlternatives(subject, message, from_email, to, bcc=bcc )
             files = EmailTemplateAttachment.objects.filter(template=plantilla)
             for f in files:
                 msg.attach_file(f.template_file.path)

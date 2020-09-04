@@ -374,9 +374,16 @@ class Responsible(models.Model):
         verbose_name = "Responsable"
         verbose_name_plural = "Responsables"
 
+class EmailCcTo(models.Model):
+    email = models.CharField(max_length=250, verbose_name="Correo Electrónico")
+
+    def __str__(self):
+        return str(self.email)
+
 class EmailTemplate(models.Model):
     name = models.CharField(max_length=250, null=True, blank=True, verbose_name="Nombre")
     body = models.TextField(max_length=1000, null=True, blank=True, verbose_name="Mensaje")
+    cc = models.ManyToManyField(EmailCcTo, verbose_name="Copia para", blank=True)
     
     class Meta:
         verbose_name = "Email"

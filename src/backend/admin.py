@@ -31,6 +31,8 @@ admin.site.register(Organ)
 
 admin.site.register(Responsible)
 
+admin.site.register(EmailCcTo)
+
 class CustomEmailAttachment(admin.TabularInline):
     model = EmailTemplateAttachment
 
@@ -40,7 +42,7 @@ class CustomEmail(admin.ModelAdmin):
         models.TextField: {'widget': Textarea(attrs={'rows':3, 'cols':50})},
         models.CharField: {'widget': TextInput()},
     }
-    inlines = [CustomEmailAttachment]
+    inlines = [CustomEmailAttachment,]
 
 admin.site.register(EmailTemplate, CustomEmail)
 
