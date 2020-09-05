@@ -381,7 +381,7 @@ class EmailCcTo(models.Model):
         return str(self.email)
 
     class Meta:
-        verbose_name = "Destinatario copia para Plantilla"
+        verbose_name = "Destinatario copia para Plantilla Email"
         verbose_name_plural = "Destinatarios copia para Plantilla Email"
 
 class EmailTemplate(models.Model):
