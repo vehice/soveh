@@ -380,6 +380,10 @@ class EmailCcTo(models.Model):
     def __str__(self):
         return str(self.email)
 
+    class Meta:
+        verbose_name = "Destinatario copia para Plantilla"
+        verbose_name_plural = "Destinatarios copia para Plantilla Email"
+
 class EmailTemplate(models.Model):
     name = models.CharField(max_length=250, null=True, blank=True, verbose_name="Nombre")
     body = models.TextField(max_length=1000, null=True, blank=True, verbose_name="Mensaje")
