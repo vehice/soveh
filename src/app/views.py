@@ -406,7 +406,7 @@ def template_resumen_report(request, id, userId):
         entryform["identifications"].append(ident_json)              
 
     entryform["analyses"] = list(
-        entryform_object.analysisform_set.all().values('id', 'created_at', 'comments', 'entryform_id', 'exam_id', 'exam__name', 'patologo_id', 'patologo__first_name', 'patologo__last_name'))
+        entryform_object.analysisform_set.filter(exam__isnull=False).values('id', 'created_at', 'comments', 'entryform_id', 'exam_id', 'exam__name', 'patologo_id', 'patologo__first_name', 'patologo__last_name'))
     entryform["cassettes"] = list(
         entryform_object.cassette_set.all().values())
     entryform["customer"] = model_to_dict(entryform_object.customer) if entryform_object.customer else None
@@ -547,11 +547,11 @@ def notification(request):
 def show_patologos(request, all):
     up = UserProfile.objects.filter(user=request.user).first()
     if request.user.is_superuser or up.profile_id in (1,2,3):
-        analysis = AnalysisForm.objects.all().select_related("entryform", "exam").order_by('-entryform_id')
+        analysis = AnalysisForm.objects.filter(exam__isnull=False).select_related("entryform", "exam").order_by('-entryform_id')
     elif up.profile_id in (4,5):
-        analysis = AnalysisForm.objects.filter(patologo=request.user).select_related("entryform", "exam").order_by('-entryform_id')
+        analysis = AnalysisForm.objects.filter(patologo=request.user, exam__isnull=False).select_related("entryform", "exam").order_by('-entryform_id')
     else:
-        analysis = AnalysisForm.objects.all().select_related("entryform", "exam").order_by('-entryform_id')
+        analysis = AnalysisForm.objects.filter(exam__isnull=False).select_related("entryform", "exam").order_by('-entryform_id')
 
     data = []
     patologos = list(User.objects.filter(Q(userprofile__profile_id__in=[4, 5]) | Q(userprofile__is_pathologist=True)).values())

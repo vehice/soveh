@@ -173,10 +173,9 @@ class ENTRYFORM(View):
             #     entryform_object.analysisform_set.all().values('id', 'created_at', 'comments', 'entryform_id', 'exam_id', 'exam__name', 'patologo_id', 'patologo__first_name', 'patologo__last_name'))
             
             entryform["analyses"] = []
-            for analysis in entryform_object.analysisform_set.all():
+            for analysis in entryform_object.analysisform_set.filter(exam__isnull=False):
                 analysis_form = analysis.forms.get()
 
-                
                 aux = {
                     'id': analysis.id,
                     'created_at' : analysis.created_at,
@@ -425,7 +424,7 @@ class CASSETTE(View):
 
 class ANALYSIS(View):
     def get(self, request, entry_form=None):
-        analyses_qs = AnalysisForm.objects.filter(entryform=entry_form)
+        analyses_qs = AnalysisForm.objects.filter(entryform=entry_form, exam__isnull=False)
         analyses = []
 
         for analysis in analyses_qs:
