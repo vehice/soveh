@@ -150,9 +150,11 @@
               </div>
               <div class="col-sm-4 form-group summaryFixative">
               </div>
-              <div class="col-sm-8 form-group summaryAnamnesis">
+              <div class="col-sm-12 form-group summaryAnamnesis">
               </div>
               <div class="col-sm-4 form-group summaryEntryformType">
+              </div>
+              <div class="col-sm-4 form-group summaryResearchType">
               </div>
             </div>
             <hr>
@@ -345,6 +347,12 @@
     });
     selectEntryformType +='</select>';
 
+    var selectResearchType = '<select class="select2 form-control selectOpt" id="research_type" name="research_type" {% if not edit or closed  %}disabled{% endif %} >';
+    $.each(data.research_types_list, function(j, o){
+        selectResearchType += '<option value="'+o.id+'">'+o.code+' '+o.name+'</option>';
+    });
+    selectResearchType +='</select>';
+
     var selectSpecie = '<select class="select2 form-control selectOpt" id="specie" name="specie">';
     $.each(data.species_list, function(j, o){
         selectSpecie += '<option value="'+o.id+'">'+o.name+'</option>';
@@ -375,6 +383,7 @@
     $('.summaryAnamnesis').html('<label>Anamnesis:</label> <textarea class="form-control" row="2" name="anamnesis" {% if not edit %}disabled{% endif %} >'+ data.entryform.anamnesis+'</textarea>');
     $('.summaryFixative').html('<label>Fijador:</label>'+ selectFix);
     $('.summaryEntryformType').html('<label>Tipo de Ingreso:</label>'+ selectEntryformType);
+    $('.summaryResearchType').html('<label>Tipo de Estudio:</label>'+ selectResearchType);
     
     $('.summarySpecie').html('<label>Especie:</label>'+selectSpecie  );
     $('.summaryDevStatus').html('<label>Estadío Desarrollo:</label>'+selectlarvalstage ); 
@@ -486,18 +495,32 @@
     tpl_samples += '</tbody></table></div>';
     $('.summarySamples').html(tpl_samples);
 
-    if(data.entryform.customer != null)
-    $('#client').val(data.entryform.customer.id);
-    if(data.entryform.entryform_type != null)
-        $('#entryform_type').val(data.entryform.entryform_type.id);
-    if(data.entryform.fixative != null)
-    $('#fixative').val(data.entryform.fixative.id);
-    if(data.entryform.specie != null)
-    $('#specie').val(data.entryform.specie.id);
-    if(data.entryform.watersource != null)
-    $('#watersource').val(data.entryform.watersource.id);
-    if(data.entryform.larvalstage != null)
-    $('#larvalstage').val(data.entryform.larvalstage.id);
+    if (data.entryform.customer != null) {
+      $('#client').val(data.entryform.customer.id);
+    }
+    if (data.entryform.entryform_type != null) {
+      $('#entryform_type').val(data.entryform.entryform_type.id);
+      if (data.entryform.entryform_type.id == 2){
+        $('.summaryResearchType').show();
+      } else {
+        $('.summaryResearchType').hide();
+      }
+    }
+    if (data.entryform.research_type != null) {
+      $('#research_type').val(data.entryform.research_type.id);
+    }
+    if (data.entryform.fixative != null) {
+      $('#fixative').val(data.entryform.fixative.id);
+    }
+    if (data.entryform.specie != null) {
+      $('#specie').val(data.entryform.specie.id);
+    }
+    if (data.entryform.watersource != null) {
+      $('#watersource').val(data.entryform.watersource.id);
+    }
+    if (data.entryform.larvalstage != null) {
+      $('#larvalstage').val(data.entryform.larvalstage.id);
+    }
 
     $('.selectOpt').select2({'width':'100%'});
     $('.selectOrgs').select2({'width':'100%'});
@@ -679,5 +702,13 @@
         }
     });
   }
+
+  $(document).on('change', '#entryform_type', function() {
+    if ( $(this).val() == 2 ) {
+      $('.summaryResearchType').show();
+    } else {
+      $('.summaryResearchType').hide();
+    }
+  });
 
 </script> {% endblock scripts %}

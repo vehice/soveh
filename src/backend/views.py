@@ -207,6 +207,7 @@ class ENTRYFORM(View):
             entryform["entryform_type"] = model_to_dict(entryform_object.entryform_type) if entryform_object.entryform_type else None
             entryform["watersource"] = model_to_dict(entryform_object.watersource) if entryform_object.watersource else None
             entryform["specie"] = model_to_dict(entryform_object.specie) if entryform_object.specie else None
+            entryform["research_type"] = model_to_dict(entryform_object.research_type) if entryform_object.research_type else None
 
             exams_set = list(Exam.objects.all().values())
             organs_set = list(Organ.objects.all().values())
@@ -218,6 +219,7 @@ class ENTRYFORM(View):
             customers_list = list(Customer.objects.all().values())
             patologos = list(User.objects.filter(userprofile__profile_id__in=[4, 5]).values())
             entryform_types = list(EntryForm_Type.objects.all().values())
+            researches = list(Research.objects.filter(status=True).values())
 
             data = {
                 'entryform': entryform,
@@ -231,7 +233,8 @@ class ENTRYFORM(View):
                 'waterSources_list': waterSources_list,
                 'customers_list': customers_list,
                 'patologos': patologos,
-                'entryform_types_list': entryform_types
+                'entryform_types_list': entryform_types,
+                'research_types_list': researches
             }
         else:
             species = list(Specie.objects.all().values())
@@ -242,6 +245,7 @@ class ENTRYFORM(View):
             organs = list(Organ.objects.all().values())
             customers = list(Customer.objects.all().values())
             entryform_types = list(EntryForm_Type.objects.all().values())
+            researches = list(Research.objects.filter(status=True).values())
 
             data = {
                 'species': species,
@@ -251,7 +255,8 @@ class ENTRYFORM(View):
                 'exams': exams,
                 'organs': organs,
                 'customers': customers,
-                'entryform_types': entryform_types
+                'entryform_types': entryform_types,
+                'research_types': researches
             }
         # print (data)
         return JsonResponse(data)
@@ -1578,6 +1583,14 @@ def step_1_entryform(request):
     if str(entryform.entryform_type_id) != var_post.get('entryform_type') and (entryform.entryform_type_id == None and var_post.get('entryform_type') != ''):
         change = True
     entryform.entryform_type_id = var_post.get('entryform_type')
+
+    # If entryform type is research
+    if var_post.get('entryform_type') == "2":
+        if str(entryform.research_type_id) != var_post.get('research_type') and (entryform.research_type_id == None and var_post.get('research_type') != ''):
+            change = True
+        entryform.research_type_id = var_post.get('research_type')
+    else:
+        entryform.research_type_id = None
     
     if str(entryform.no_order) != var_post.get('no_order') and (entryform.no_order == None and var_post.get('no_order') != ''):
         change = True
@@ -2535,6 +2548,14 @@ def save_generalData(request, id):
     if entry.entryform_type_id != int(var_post['entryform_type']):
         change = True
     entry.entryform_type_id = int(var_post['entryform_type'])
+
+    # If entryform type is research
+    if var_post.get('entryform_type') == "2":
+        if str(entry.research_type_id) != var_post.get('research_type') and (entry.research_type_id == None and var_post.get('research_type') != ''):
+            change = True
+        entry.research_type_id = var_post.get('research_type')
+    else:
+        entry.research_type_id = None
 
     if entry.company != var_post['company']:
         change = True

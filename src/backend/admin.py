@@ -33,6 +33,8 @@ admin.site.register(Responsible)
 
 admin.site.register(EmailCcTo)
 
+admin.site.register(Research)
+
 class CustomEmailAttachment(admin.TabularInline):
     model = EmailTemplateAttachment
 

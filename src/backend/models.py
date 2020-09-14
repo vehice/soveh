@@ -46,6 +46,19 @@ class Service(models.Model):
         verbose_name = "Servicio"
         verbose_name_plural = "Servicios"
 
+class Research(models.Model):
+    code = models.CharField(max_length=250, null=True, blank=True, verbose_name="Código")
+    name = models.CharField(max_length=250, null=True, blank=True, verbose_name="Nombre")
+    description = models.TextField(null=True, blank=True, verbose_name="Descripción")
+    status = models.BooleanField(default=False, verbose_name="¿Activo?")
+
+    def __str__(self):
+        return self.code + ' ' + self.name
+
+    class Meta:
+        verbose_name = "Estudio"
+        verbose_name_plural = "Estudios"
+
 class Exam(models.Model):
     name = models.CharField(max_length=250, null=True, blank=True, verbose_name="Nombre")
     stain = models.CharField(max_length=250, null=True, blank=True, verbose_name="Tinción")
@@ -186,6 +199,11 @@ class EntryForm(models.Model):
     anamnesis = models.TextField(null=True, blank=True)
     entryform_type = models.ForeignKey(
         EntryForm_Type,
+        null=True,
+        on_delete=models.SET_NULL,
+    )
+    research_type = models.ForeignKey(
+        Research,
         null=True,
         on_delete=models.SET_NULL,
     )
@@ -375,14 +393,14 @@ class Responsible(models.Model):
         verbose_name_plural = "Responsables"
 
 class EmailCcTo(models.Model):
-    email = models.CharField(max_length=250, verbose_name="Correo Electrónico")
+    email = models.CharField(max_length=250, null=True, blank=True, verbose_name="Correo Electrónico")
 
     def __str__(self):
         return str(self.email)
 
     class Meta:
-        verbose_name = "Destinatario copia para Plantilla Email"
-        verbose_name_plural = "Destinatarios copia para Plantilla Email"
+        verbose_name = "Destinatario copiado en Plantilla Email"
+        verbose_name_plural = "Destinatarios copiados en Plantilla Email"
 
 class EmailTemplate(models.Model):
     name = models.CharField(max_length=250, null=True, blank=True, verbose_name="Nombre")
@@ -390,8 +408,8 @@ class EmailTemplate(models.Model):
     cc = models.ManyToManyField(EmailCcTo, verbose_name="Copia para", blank=True)
     
     class Meta:
-        verbose_name = "Email"
-        verbose_name_plural = "Emails"
+        verbose_name = "Plantilla Email"
+        verbose_name_plural = "Plantillas Emails"
 
 class EmailTemplateAttachment(models.Model):
     template = models.ForeignKey(

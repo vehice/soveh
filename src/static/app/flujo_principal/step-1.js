@@ -1,11 +1,13 @@
 // Data Template
 var organs;
 var questionReceptionCondition;
+var researches_json = {};
 function addIdentificador(temp_id = null) {
   $("#select_if_divide_flow").val(0);
   $("#select_if_divide_flow").trigger('change');
-  if (temp_id == null)
+  if (temp_id == null) {
     temp_id = Math.random().toString(36).replace('0.', '');
+  }
   addIdentificationTemplate({
     temp_id: temp_id,
     organs: organs
@@ -194,11 +196,15 @@ function init_step_1() {
       .done(function (data) {
         $('#identification_group_list').html('');
         var entryform = data.entryform;
+        console.log("entryform", entryform)
         if (entryform.customer_id) {
           $('#customer_select').val(entryform.customer_id).trigger('change');
         }
         if (entryform.entryform_type_id) {
           $('#entryform_type_select').val(entryform.entryform_type_id).trigger('change');
+          if (entryform.research_type_id) {
+            $('#research_select').val(entryform.research_type_id).trigger('change');
+          }
         }
         $('#fixtative_select').val(entryform.fixative_id).trigger('change');
 
@@ -312,6 +318,7 @@ function init_step_1() {
     loadLarvalStages(data.larvalStages)
     loadWaterSources(data.waterSources)
     loadEntryFormType(data.entryform_types)
+    loadResearches(data.research_types)
     // loadExams(data.exams)
     // loadOrgans(data.organs)
     // loadQuestions(data.questionReceptionCondition)
@@ -351,37 +358,51 @@ function init_step_1() {
       placeholder: "Porfavor seleccione un cliente"
     }).on("select2:select", function (e) {
       formChanged = true;
-    });;
+    });
 
     $('#fixtative_select').select2({
       placeholder: "Porfavor seleccione un fijador"
     }).on("select2:select", function (e) {
       formChanged = true;
-    });;
+    });
 
     $('#specie_select').select2({
       placeholder: "Porfavor seleccione una especie"
     }).on("select2:select", function (e) {
       formChanged = true;
-    });;
+    });
 
     $('#larvalstage_select').select2({
       placeholder: "Porfavor seleccione un estadio desarrollo"
     }).on("select2:select", function (e) {
       formChanged = true;
-    });;
+    });
 
     $('#watersource_select').select2({
       placeholder: "Porfavor seleccione una fuente de agua"
     }).on("select2:select", function (e) {
       formChanged = true;
-    });;
+    });
 
     $('#entryform_type_select').select2({
       placeholder: "Porfavor seleccione un tipo de ingreso"
     }).on("select2:select", function (e) {
       formChanged = true;
-    });;
+    });
+
+    $('#researches_select').select2({
+      placeholder: "Porfavor seleccione un tipo de estudio"
+    }).on("select2:select", function (e) {
+      formChanged = true;
+    });
+
+    $(document).on('change', '#entryform_type_select', function() {
+      if ( $(this).val() == 2 ) {
+        $('.researches_container').removeClass("hidden");
+      } else {
+        $('.researches_container').addClass("hidden");
+      }
+    });
   }
 
 }
@@ -658,6 +679,16 @@ function loadEntryFormType(entryform_types) {
   });
 }
 
+function loadResearches(researches) {
+  $.each(researches, function (i, item) {
+    $('#researches_select').append($('<option>', {
+      value: item.id,
+      text: item.code + " " + item.name
+    }));
+    researches_json[item.id] = item.description;
+  });
+}
+
 function loadSpecies(species) {
   $.each(species, function (i, item) {
     $('#specie_select').append($('<option>', {
@@ -711,3 +742,8 @@ function loadQuestions(questionReceptionCondition) {
     addQuestionReceptionTemplate(data);
   });
 }
+
+$(document).on('click', '.showResearchPopover', function () {
+  var id = $("#researches_select").val();
+  swal(researches_json[id]);
+});
