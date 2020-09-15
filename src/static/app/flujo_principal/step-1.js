@@ -442,8 +442,20 @@ function validate_step_1() {
       'Ups!',
       {positionClass: 'toast-top-full-width', containerId: 'toast-bottom-full-width'}
     );
-    $('input[name="identification[no_fish]"]').focus();
+    $('input[name="identification[no_fish]"]').focus({preventScroll:false});
     return false;
+  }
+
+  if ( $("#entryform_type_select").val() == 2 ) {
+    if ( $("#researches_select").val() == "" ) {
+      toastr.error(
+        'Para continuar debes seleccionar el tipo de estudio.',
+        'Ups!',
+        {positionClass: 'toast-top-full-width', containerId: 'toast-bottom-full-width'}
+      );
+      $("#researches_select").focus({preventScroll:false});
+      return false;
+    }
   }
 
   var orgas = $('.identification_organs');
