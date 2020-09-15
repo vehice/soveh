@@ -747,23 +747,23 @@
           e.preventDefault();
         }
         else{
-          if( $body.hasClass('menu-collapsed') && $body.data('menu') != 'vertical-menu-modern'){
-            e.preventDefault();
-          }
-          else{
-            if ($listItem.has('ul')) {
-              if ($listItem.is('.open')) {
-                $listItem.trigger('close.app.menu');
-              } else {
-                $listItem.trigger('open.app.menu');
-              }
+          // if( $body.hasClass('menu-collapsed') && $body.data('menu') != 'vertical-menu-modern'){
+          //   e.preventDefault();
+          // }
+          // else{
+          if ($listItem.has('ul')) {
+            if ($listItem.is('.open')) {
+              $listItem.trigger('close.app.menu');
             } else {
-              if (!$listItem.is('.active')) {
-                $listItem.siblings('.active').trigger('deactive.app.menu');
-                $listItem.trigger('active.app.menu');
-              }
+              $listItem.trigger('open.app.menu');
+            }
+          } else {
+            if (!$listItem.is('.active')) {
+              $listItem.siblings('.active').trigger('deactive.app.menu');
+              $listItem.trigger('active.app.menu');
             }
           }
+          // }
         }
 
         e.stopPropagation();
