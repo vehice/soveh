@@ -23,9 +23,8 @@ def home(request):
     dates = EntryForm.objects.all().values_list('created_at', flat = True).order_by('-created_at').distinct()
     years = []
     for d in dates:
-        if d and not d.year in years: 
+        if d and not d.year in years:
             years.append(d.year)
-    
     cursor1=connection.cursor()
     data1 = cursor1.execute(
     """
@@ -58,7 +57,6 @@ def show_users(request):
         }
         usuarios.append(aux)
     return render(request, 'app/users.html', {'user_list': usuarios})
-
 
 @login_required
 def show_clientes(request):
@@ -214,7 +212,6 @@ def get_resume_file(user, formId, lang):
     for n, l in RESUME_DOCUMENT_LANG:
         if l == lang:
             lang_option = n
-    
     last_doc = DocumentCaseResume.objects.filter(
         entryform=entryForm,
     ).order_by('-created_at').first()
@@ -249,14 +246,11 @@ def get_resume_file(user, formId, lang):
                 case_version=last_case_version,
                 version=last_doc.version
             ).first()
-            
             if temp_doc:
                 doc_final = temp_doc
             else:
                 file_base_name = "Resumen_"+str(entryForm.no_caso)+"_"+lang.upper()+"_v"+str(last_doc.version)+"_"+str(int(datetime.datetime.now().timestamp()))+".pdf"
-
                 file_name = "Resumen_"+str(entryForm.no_caso)+"_"+lang.upper()+"_v"+str(last_doc.version)+".pdf"
-                
                 doc_final = DocumentCaseResume.objects.create(
                     entryform=entryForm,
                     filename=file_name,
@@ -267,7 +261,6 @@ def get_resume_file(user, formId, lang):
                     generated_by=user
                 )
                 make_pdf_file2(entryForm.pk, "/template-resumen-report/", file_base_name, user.pk)
-                
     else:
         # Creo el primer documento del caso
         file_base_name = "Resumen_"+str(entryForm.no_caso)+"_"+lang.upper()+"_v1_"+str(int(datetime.datetime.now().timestamp()))+".pdf"
@@ -295,7 +288,7 @@ def get_resume_file(user, formId, lang):
 
 
     return doc_final
-    
+
 def download_resumen_report(request, id):
 
     var_get = request.GET.copy()
@@ -528,7 +521,6 @@ def preview_report(request, id):
 
         data[key] = list(zip(*matrix))
         # print (data)
-        
     return render(request, 'app/preview_report.html', {'report': reports, 'form_id': form.pk, 'form_parent_id': form.parent.id, 'reports2': data})
 
 # @login_required
@@ -540,7 +532,6 @@ def notification(request):
         'etapa_current': 'next_state',
         'url': 'settings.SITE_URL++str(form.id)++next_state.step.tag'
     }
-        
     return render(request, 'app/notification.html', ctx)
 
 @login_required
@@ -578,7 +569,9 @@ def show_patologos(request, all):
 
             current_date = datetime.datetime.now()
             if a['analysis'].assignment_deadline:
-                if current_date > a['analysis'].assignment_deadline:
+                if a['analysis'].pre_report_started and a['analysis'].pre_report_ended:
+                    days_late = (a['analysis'].pre_report_ended_at - a['analysis'].assignment_deadline).days
+                elif current_date > a['analysis'].assignment_deadline:
                     days_late = (current_date - a['analysis'].assignment_deadline).days
 
             days_open = (current_date - a['analysis'].created_at).days
@@ -592,17 +585,14 @@ def show_patologos(request, all):
                 days_open = (a['analysis'].manual_closing_date - a['analysis'].created_at).days
             else:
                 days_open = (a['analysisform_form'].closed_at - a['analysis'].created_at).days
-                
         samples = Sample.objects.filter(entryform=a['analysis'].entryform).values_list('id', flat=True)
         sampleExams_counter = 0
         sampleExams = SampleExams.objects.filter(sample__in=samples, exam=a['analysis'].exam).select_related("organ")
-        
         organ_types = []
         for se in sampleExams:
             sampleExams_counter += 1
             if se.organ.organ_type not in organ_types:
                 organ_types.append(se.organ.organ_type)
-        
         organ_types = set(organ_types)
         unit = ""
         if len(organ_types) > 1:
@@ -616,7 +606,6 @@ def show_patologos(request, all):
             unit = "Órgano"
 
         parte = a['analysis'].entryform.get_subflow
-        
         if parte == "N/A":
             parte = ''
         else:
