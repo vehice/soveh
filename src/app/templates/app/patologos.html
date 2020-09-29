@@ -397,34 +397,8 @@
     e.preventDefault();
     var selected = e.params.args.data.id
     var name = e.params.args.data.text
-    swal({
-        title: "Confirmación",
-        text: "¿Está seguro que desea asignar el patólogo: " + name +"?",
-        icon: "warning",
-        showCancelButton: true,
-        buttons: {
-          cancel: {
-              text: "No, cancelar!",
-              value: null,
-              visible: true,
-              className: "btn-warning",
-              closeModal: true,
-          },
-          confirm: {
-              text: "Sí!",
-              value: true,
-              visible: true,
-              className: "",
-              closeModal: true,
-          }
-        }
-      }).then(isConfirm => {
-      if (isConfirm) {
-        $(this).val(selected);
-        $(this).trigger('change');
-      }
-    });
-    
+    $(this).val(selected);
+    $(this).trigger('change');    
   });
   
   function isWeekend(date){
