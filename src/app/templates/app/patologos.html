@@ -206,7 +206,7 @@
                           {{ entryForm.patologo_name }}
                       </td>
                       <td>
-                        <div class="btn-group" role="group">
+                        <div class="btn-group optionGroups-{{entryForm.analisis}}" data-entryform="{{ entryForm.entryform }}" role="group">
                           <button class="btn btn-primary showSummaryBtn" data-id="{{ entryForm.entryform }}" data-closed="{% if entryForm.entryform_form_closed or entryForm.entryform_cancelled %} 1 {% else %} 0 {% endif %}" data-toggle="tooltip" data-placement="top" title="Resúmen del Caso"><i class="fa fa-list-alt fa-fx"></i></button>
                           {% if request.user.is_superuser and entryForm.patologo %}
                             <button class="btn btn-info showScoreBtn" data-id="{{ entryForm.entryform }}" data-toggle="tooltip" data-placement="top" title="Notas"><i class="fa fa-check-square-o fa-fx"></i></button>
@@ -677,6 +677,10 @@
         if (data.msg != "") {
           toastr.info("Hemos procesado la derivación pero ha surgido un problema: "+data.msg, "Listo!");
         } else {
+          {% if request.user.is_superuser %}
+            var entryform_id = $('.optionGroups-'+analysis_id).data("entryform");
+            $('.optionGroups-'+analysis_id).append('<button class="btn btn-info showScoreBtn" data-id="'+entryform_id+'" data-toggle="tooltip" data-placement="top" title="Notas"><i class="fa fa-check-square-o fa-fx"></i></button>');
+          {% endif %}
           $('*[data-analisis="'+analysis_id+'"]').val(pathologist_value).trigger("change");
           $(td).removeClass('incomplete');
           tabla_casos.cell({row:row_index, column:6}).data(moment().format("DD/MM/YYYY"));
@@ -883,32 +887,32 @@
     $('.summarySamples').html(tpl_samples);
 
     if (data.entryform.customer != null) {
-    $('#client').val(data.entryform.customer.id);
-  }
-  
-  if (data.entryform.entryform_type != null) {
-    $('#entryform_type').val(data.entryform.entryform_type.id);
-    if (data.entryform.entryform_type.id == 2){
-      $('.summaryResearchType').show();
-    } else {
-      $('.summaryResearchType').hide();
+      $('#client').val(data.entryform.customer.id);
     }
-  }
-  if (data.entryform.research_type != null) {
-    $('#research_type').val(data.entryform.research_type.id);
-  }
-  if (data.entryform.fixative != null) {
-    $('#fixative').val(data.entryform.fixative.id);
-  }
-  if (data.entryform.specie != null) {
-    $('#specie').val(data.entryform.specie.id);
-  }
-  if (data.entryform.watersource != null) {
-    $('#watersource').val(data.entryform.watersource.id);
-  }
-  if (data.entryform.larvalstage != null) {
-    $('#larvalstage').val(data.entryform.larvalstage.id);
-  }
+  
+    if (data.entryform.entryform_type != null) {
+      $('#entryform_type').val(data.entryform.entryform_type.id);
+      if (data.entryform.entryform_type.id == 2){
+        $('.summaryResearchType').show();
+      } else {
+        $('.summaryResearchType').hide();
+      }
+    }
+    if (data.entryform.research_type != null) {
+      $('#research_type').val(data.entryform.research_type.id);
+    }
+    if (data.entryform.fixative != null) {
+      $('#fixative').val(data.entryform.fixative.id);
+    }
+    if (data.entryform.specie != null) {
+      $('#specie').val(data.entryform.specie.id);
+    }
+    if (data.entryform.watersource != null) {
+      $('#watersource').val(data.entryform.watersource.id);
+    }
+    if (data.entryform.larvalstage != null) {
+      $('#larvalstage').val(data.entryform.larvalstage.id);
+    }
 
     $('.selectOpt').select2({'width':'100%'});
     $('.selectOrgs').select2({'width':'100%'});
