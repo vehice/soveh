@@ -208,8 +208,8 @@
                       <td>
                         <div class="btn-group" role="group">
                           <button class="btn btn-primary showSummaryBtn" data-id="{{ entryForm.entryform }}" data-closed="{% if entryForm.entryform_form_closed or entryForm.entryform_cancelled %} 1 {% else %} 0 {% endif %}" data-toggle="tooltip" data-placement="top" title="Resúmen del Caso"><i class="fa fa-list-alt fa-fx"></i></button>
-                          {% if request.user.is_superuser %}
-                          <button class="btn btn-info showScoreBtn" data-id="{{ entryForm.entryform }}" data-toggle="tooltip" data-placement="top" title="Notas"><i class="fa fa-check-square-o fa-fx"></i></button>
+                          {% if request.user.is_superuser and entryForm.patologo %}
+                            <button class="btn btn-info showScoreBtn" data-id="{{ entryForm.entryform }}" data-toggle="tooltip" data-placement="top" title="Notas"><i class="fa fa-check-square-o fa-fx"></i></button>
                           {% endif %}
                       </td>
                     </tr>
@@ -357,6 +357,7 @@
             <textarea row="3" class="form-control assignment-comment" name="comment"> </textarea>
           </div>
           <div class="form-group pull-right">
+            <button type="button" class="btn btn-danger" data-dismiss="modal">Cancelar</button>
             <button type="button" class="btn btn-primary" onclick="finishAssignment()">Finalizar</button>
           </div>
         </form>
@@ -397,33 +398,11 @@
     e.preventDefault();
     var selected = e.params.args.data.id
     var name = e.params.args.data.text
-    $(this).val(selected);
-    $(this).trigger('change');    
-  });
-  
-  function isWeekend(date){
-    if (date.isoWeekday() == 6 || date.isoWeekday() == 7){
-      return true;
-    } else {
-      return false;
-    }
-  }
-
-  function isHoliday(date){
-    aux = feriados.filter( i =>  i.fecha == date.format("YYYY-MM-DD"));
-    if (aux.length > 0){
-      return true;
-    } else{
-      return false;
-    }
-  }
-
-  $(document).on('change', '.patologos-select', function(e){
     var analysis_id = $(this).data("analisis");
     var no_case = $(this).data("nocase");
     var analysis_name = $(this).data("exam");
-    var pathologist = $(this).val();
-    var pathologist_name = $(this).find('option:selected').text();
+    var pathologist = selected;
+    var pathologist_name = name;
 
     $('.assignment-comment').val("");
     if (pathologist == "NA"){
@@ -451,6 +430,23 @@
     $(".examAssignment").text(analysis_name);
     $("#assignmentModal").modal("show");
   });
+  
+  function isWeekend(date){
+    if (date.isoWeekday() == 6 || date.isoWeekday() == 7){
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  function isHoliday(date){
+    aux = feriados.filter( i =>  i.fecha == date.format("YYYY-MM-DD"));
+    if (aux.length > 0){
+      return true;
+    } else{
+      return false;
+    }
+  }
 
   $(document).on('change', '.filterPathologist', function(e){
     tabla_casos.column(15).search(this.value ? '^'+this.value+'$' : '', true, false ).draw();
@@ -471,10 +467,10 @@
       var temp = '<div class="row"> <div class="col-sm-12"> <input type="number" class="form-control  input-dias1" placeholder="días" /> </div> </div>';
       $('#filtro-dias-slot').html(temp);
     } else if ($(this).val() == 2){
-      var temp = '<div class="row"> <div class="col-sm-12"> <input type="number" class="form-control  input-dias2" placeholder="ídas" /> </div> </div>';
+      var temp = '<div class="row"> <div class="col-sm-12"> <input type="number" class="form-control  input-dias2" placeholder="días" /> </div> </div>';
       $('#filtro-dias-slot').html(temp); 
     } else if ($(this).val() == 3){
-      var temp = '<div class="row"> <div class="col-sm-5"> <input type="number" class="form-control input-dias1" placeholder="días" /> </div> <div class="col-sm-2 mt-1 text-center"><span>Y</span> </div><div class="col-sm-5"> <input type="number" class="form-control  input-dias2" placeholder="dias" /> </div></div>';
+      var temp = '<div class="row"> <div class="col-sm-5"> <input type="number" class="form-control input-dias1" placeholder="días" /> </div> <div class="col-sm-2 mt-1 text-center"><span>Y</span> </div><div class="col-sm-5"> <input type="number" class="form-control  input-dias2" placeholder="días" /> </div></div>';
       $('#filtro-dias-slot').html(temp);
     }
   });
@@ -485,13 +481,13 @@
     $('#filtro-notas-diag-slot').html("");
     
     if ($(this).val() == 1){
-      var temp = '<div class="row"> <div class="col-sm-12"> <input type="number" class="form-control  input-notas-d-1" placeholder="días" /> </div> </div>';
+      var temp = '<div class="row"> <div class="col-sm-12"> <input type="number" class="form-control  input-notas-d-1" placeholder="nota" /> </div> </div>';
       $('#filtro-notas-diag-slot').html(temp);
     } else if ($(this).val() == 2){
-      var temp = '<div class="row"> <div class="col-sm-12"> <input type="number" class="form-control  input-notas-d-2" placeholder="ídas" /> </div> </div>';
+      var temp = '<div class="row"> <div class="col-sm-12"> <input type="number" class="form-control  input-notas-d-2" placeholder="nota" /> </div> </div>';
       $('#filtro-notas-diag-slot').html(temp); 
     } else if ($(this).val() == 3){
-      var temp = '<div class="row"> <div class="col-sm-5"> <input type="number" class="form-control input-notas-d-1" placeholder="días" /> </div> <div class="col-sm-2 mt-1 text-center"><span>Y</span> </div><div class="col-sm-5"> <input type="number" class="form-control  input-notas-d-2" placeholder="dias" /> </div></div>';
+      var temp = '<div class="row"> <div class="col-sm-5"> <input type="number" class="form-control input-notas-d-1" placeholder="nota" /> </div> <div class="col-sm-2 mt-1 text-center"><span>Y</span> </div><div class="col-sm-5"> <input type="number" class="form-control  input-notas-d-2" placeholder="nota" /> </div></div>';
       $('#filtro-notas-diag-slot').html(temp);
     }
   });
@@ -502,13 +498,13 @@
     $('#filtro-notas-report-slot').html("");
     
     if ($(this).val() == 1){
-      var temp = '<div class="row"> <div class="col-sm-12"> <input type="number" class="form-control  input-notas-r-1" placeholder="días" /> </div> </div>';
+      var temp = '<div class="row"> <div class="col-sm-12"> <input type="number" class="form-control  input-notas-r-1" placeholder="nota" /> </div> </div>';
       $('#filtro-notas-report-slot').html(temp);
     } else if ($(this).val() == 2){
-      var temp = '<div class="row"> <div class="col-sm-12"> <input type="number" class="form-control  input-notas-r-2" placeholder="ídas" /> </div> </div>';
+      var temp = '<div class="row"> <div class="col-sm-12"> <input type="number" class="form-control  input-notas-r-2" placeholder="nota" /> </div> </div>';
       $('#filtro-notas-report-slot').html(temp); 
     } else if ($(this).val() == 3){
-      var temp = '<div class="row"> <div class="col-sm-5"> <input type="number" class="form-control input-notas-r-1" placeholder="días" /> </div> <div class="col-sm-2 mt-1 text-center"><span>Y</span> </div><div class="col-sm-5"> <input type="number" class="form-control  input-notas-r-2" placeholder="dias" /> </div></div>';
+      var temp = '<div class="row"> <div class="col-sm-5"> <input type="number" class="form-control input-notas-r-1" placeholder="nota" /> </div> <div class="col-sm-2 mt-1 text-center"><span>Y</span> </div><div class="col-sm-5"> <input type="number" class="form-control  input-notas-r-2" placeholder="nota" /> </div></div>';
       $('#filtro-notas-report-slot').html(temp);
     }
   });
@@ -619,7 +615,11 @@
     function( settings, data, dataIndex ) {
       var min = parseFloat( $('.input-notas-d-1').val(), 10 );
       var max = parseFloat( $('.input-notas-d-2').val(), 10 );
-      var days = parseFloat( data[12] ) || 0;
+      try {
+        var days = parseFloat( data[12] );
+      } catch {
+        return false;
+      }
 
       if ( ( isNaN( min ) && isNaN( max ) ) ||
             ( isNaN( min ) && days <= max ) ||
@@ -636,7 +636,11 @@
     function( settings, data, dataIndex ) {
       var min = parseFloat( $('.input-notas-r-1').val(), 10 );
       var max = parseFloat( $('.input-notas-r-2').val(), 10 );
-      var days = parseFloat( data[13] ) || 0;
+      try {
+        var days = parseFloat( data[13] );
+      } catch {
+        return false;
+      }
 
       if ( ( isNaN( min ) && isNaN( max ) ) ||
             ( isNaN( min ) && days <= max ) ||
@@ -659,7 +663,7 @@
     var row_index = tabla_casos.row($(td).parent()).index();
     var deadline = $('.assignment-deadline').val();
     var path_name = $('.assignment-pathologist-name').val();
-
+    var pathologist_value = $('.assignment-pathologist').val();
     $("#assignmentModal").modal("hide");
 
     $.ajax({
@@ -673,6 +677,7 @@
         if (data.msg != "") {
           toastr.info("Hemos procesado la derivación pero ha surgido un problema: "+data.msg, "Listo!");
         } else {
+          $('*[data-analisis="'+analysis_id+'"]').val(pathologist_value).trigger("change");
           $(td).removeClass('incomplete');
           tabla_casos.cell({row:row_index, column:6}).data(moment().format("DD/MM/YYYY"));
           tabla_casos.cell({row:row_index, column:7}).data(deadline);
