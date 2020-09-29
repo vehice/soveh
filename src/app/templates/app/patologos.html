@@ -1069,6 +1069,7 @@
   });
 
   $(document).ready(function(){
+    lockScreen(1);
     tabla_casos = $('#table-casos').DataTable({
       "rowsGroup": [0,1,2],
       "bPaginate" : true,
@@ -1092,6 +1093,7 @@
         },
       ],
       initComplete: function () {
+        lockScreen(0);
         this.api().columns().every( function () {
           if(this[0][0] == 15){
             var column = this;
