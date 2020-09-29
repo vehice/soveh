@@ -19,7 +19,10 @@
 
   .dt-body-center{
     text-align: center;
+    padding:6px !important;
+    margin:6px !important;
   }
+
 </style>
 
 {% endblock stylesheets %}
@@ -55,16 +58,16 @@
         <div class="card-body card-dashboard">
           <div class="col-12 ml-1 pl-1">
             <div class="row">
-              <div class="col-4">
+              <div class="col-3">
                 <div class="form-group">
                   <label><b>Filtro de Casos</b></label><br>
-                  <select style="width:100% !important;" class="form-control" id="mostar-casos-cerrados">
+                  <select style="width:100% !important;" class="form-control " id="mostar-casos-cerrados">
                     <option value="0" {% if all == "0" %} selected {% endif %}>No mostrar casos cerrados</option>
                     <option value="1" {% if all == "1" %} selected {% endif %}>Mostrar casos cerrados</option>
                   </select>
                 </div>
               </div>
-              <div class="col-4">
+              <div class="col-3">
                 <div id="findPatologo" class="form-group">
                 </div>
               </div>
@@ -74,7 +77,7 @@
                   
                   <div class="row">
                     <div class="col-2">
-                      <select style="width:100% !important;" class="form-control" id="filtro-dias">
+                      <select style="width:100% !important;" class="form-control " id="filtro-dias">
                         <option value="0">Sin filtro</option>
                         <option value="1">Mayor a </option>
                         <option value="2">Menor a </option>
@@ -91,10 +94,10 @@
           </div>
           <div class="col-12 ml-0 pl-0">
             <div class="table-responsive m-n p-n">
-              <table id="table-casos" class="table table-striped table-bordered compact dataTable" width="100%">
+              <table id="table-casos" class="table table-striped table-bordered compact dataTable" width="100%" style="font-size:12px !important;">
                 <thead>
                   <tr>
-                    <th>Nro Caso</th>
+                    <th>Nro<br>Caso</th>
                     <th>Cliente</th>
                     <th>Centro</th>
                     <th>Servicios</th>
@@ -102,10 +105,12 @@
                     <th>Días<br>Abierto</th>
                     <th>Fecha<br>Derivación</th>
                     <th>Fecha<br>Plazo</th>
-                    <th>Días Atraso</th>
+                    <th>Días<br>Atraso</th>
                     <th>Nro<br>Muestras</th>
                     <th>Unidad</th>
                     <th>Estado</th>
+                    <th>N.<br>Diag.</th>
+                    <th>N.<br>Inf.</th>
                     <th>Patólogos</th>
                     <th></th>
                     <th></th>
@@ -147,6 +152,12 @@
                           {{ entryForm.estado }}
                       </td>
                       <td>
+                          {{ entryForm.nota_diagnostico|default:"" }}
+                      </td>
+                      <td>
+                          {{ entryForm.nota_informe|default:"" }}
+                      </td>
+                      <td>
                         <select class="select2 form-control patologos-select" style="width:100% !important;" data-exam="{{entryForm.exam}}" data-nocase="{{entryForm.no_caso}}" data-analisis="{{entryForm.analisis}}" {% if not edit %} disabled {% endif %}>
                           <option value="NA">No Asignado</option>
                           {% for p in patologos %}
@@ -157,7 +168,11 @@
                       <td>
                           {{ entryForm.patologo_name }}
                       </td>
-                      <td><button class="btn btn-primary showSummaryBtn" data-id="{{ entryForm.entryform }}" data-closed="{% if entryForm.entryform_form_closed or entryForm.entryform_cancelled %} 1 {% else %} 0 {% endif %}"><i class="fa fa-list fa-fx"></i></button></td>
+                      <td>
+                        <div class="btn-group" role="group">
+                          <button class="btn btn-primary showSummaryBtn" data-id="{{ entryForm.entryform }}" data-closed="{% if entryForm.entryform_form_closed or entryForm.entryform_cancelled %} 1 {% else %} 0 {% endif %}" data-toggle="tooltip" data-placement="top" title="Resúmen del Caso"><i class="fa fa-list-alt fa-fx"></i></button>
+                          <button class="btn btn-info showScoreBtn" data-id="{{ entryForm.entryform }}" data-toggle="tooltip" data-placement="top" title="Notas"><i class="fa fa-check-square-o fa-fx"></i></button>
+                      </td>
                     </tr>
                   {% endfor %}
                 </tbody>
@@ -240,6 +255,45 @@
   </div>
 </div>
 
+<div class="modal fade text-left" id="score_modal" role="dialog" data-backdrop="static" data-keyboard="false">
+  <div class="modal-dialog" style="max-width:20% !important;" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title">Notas</h3>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="score_entryform_id" />
+        <input type="hidden" id="score_index" />
+        <form id="score_form" class="form form-horizontal">
+          <div class="form-group row">
+            <label class="col-md-7 label-control">
+              Nota de diagnóstico:
+            </label>
+            <div class="col-md-5">
+              <input type="text" class="form-control" id="score_diagnostic" min="0" name="score_diagnostic" />
+            </div>
+          </div>
+          <div class="form-group row">
+            <label class="col-md-7 label-control">
+              Nota de informe:
+            </label>
+            <div class="col-md-5">
+              <input type="text" class="form-control" id="score_report" min="0" name="score_report" />
+            </div>
+          </div>
+          <p><small>Recuerda que el separador decimal es el punto (.)</small></p>
+          <div class="form-group pull-right">
+            <button type="button" class="btn btn-primary saveScores">Guardar</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div class="modal fade text-left" id="assignmentModal" role="dialog" data-backdrop="static" data-keyboard="false">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
@@ -283,6 +337,10 @@
   var feriados;
   $.getJSON('https://apis.digital.gob.cl/fl/feriados', function(data) {
     feriados = data;
+  })
+
+  $(function () {
+    $('[data-toggle="tooltip"]').tooltip()
   })
   
   $('.patologos-select').select2()
@@ -382,7 +440,7 @@
   });
 
   $(document).on('change', '.filterPathologist', function(e){
-    tabla_casos.column(13).search(this.value ? '^'+this.value+'$' : '', true, false ).draw();
+    tabla_casos.column(15).search(this.value ? '^'+this.value+'$' : '', true, false ).draw();
   });
 
   $('.assignment-deadline').datetimepicker({
@@ -397,13 +455,13 @@
     $('#filtro-dias-slot').html("");
     
     if ($(this).val() == 1){
-      var temp = '<div class="row"> <div class="col-sm-1"> <input type="number" class="form-control input-dias1" placeholder="días" /> </div> </div>';
+      var temp = '<div class="row"> <div class="col-sm-1"> <input type="number" class="form-control  input-dias1" placeholder="días" /> </div> </div>';
       $('#filtro-dias-slot').html(temp);
     } else if ($(this).val() == 2){
-      var temp = '<div class="row"> <div class="col-sm-1"> <input type="number" class="form-control input-dias2" placeholder="días" /> </div> </div>';
+      var temp = '<div class="row"> <div class="col-sm-1"> <input type="number" class="form-control  input-dias2" placeholder="días" /> </div> </div>';
       $('#filtro-dias-slot').html(temp); 
     } else if ($(this).val() == 3){
-      var temp = '<div class="row"> <div class="col-sm-2"> <input type="number" class="form-control input-dias1" placeholder="días" /> </div> <span class="pt-1">Y</span> <div class="col-sm-2"> <input type="number" class="form-control input-dias2" placeholder="dias" /> </div></div>';
+      var temp = '<div class="row"> <div class="col-sm-2"> <input type="number" class="form-control  input-dias1" placeholder="días" /> </div> <span class="pt-1">Y</span> <div class="col-sm-2"> <input type="number" class="form-control  input-dias2" placeholder="dias" /> </div></div>';
       $('#filtro-dias-slot').html(temp);
     }
   });
@@ -421,6 +479,60 @@
     closed = $(this).data('closed');
     resumenId = entryform_id;
     getSummaryData();
+  });
+
+  $(document).on("keyup change", "#score_report", function(){
+    $(this).val($(this).val().replace(',', '.').replace(/[^0-9\.]/g,''));
+  });
+
+  $(document).on("keyup change", "#score_diagnostic", function(){
+    $(this).val($(this).val().replace(',', '.').replace(/[^0-9\.]/g,''));
+  });
+
+  $(document).on('click', '.showScoreBtn', function(e){
+    var entryform_id = $(this).data('id');
+    $('#score_entryform_id').val(entryform_id);
+    $('#score_index').val(tabla_casos.row($(this).parent().parent().parent()).index());
+    $('#score_diagnostic').val("");
+    $('#score_report').val("");
+    var url = Urls.entryform_id(entryform_id);
+    $.ajax({
+      type: "GET",
+      url: url,
+    })
+    .done(function (data) {
+      if (data.entryform.score_diagnostic) {
+        $('#score_diagnostic').val(data.entryform.score_diagnostic.toString().replace(",", "."));
+      }
+      if (data.entryform.score_report) {
+        $('#score_report').val(data.entryform.score_report.toString().replace(",", "."));
+      }
+    })
+    .fail(function () {
+      console.log("Fail")
+    });
+    $("#score_modal").modal("show");
+  });
+
+  $(document).on('click', '.saveScores', function(e){
+    var id = $('#score_entryform_id').val();
+    var data = $('#score_form').serialize();
+    var row_index = parseInt($('#score_index').val());
+    $.ajax({
+        type: "POST",
+        url: '/save-scores/'+id,
+        data: data,
+        async: false,
+    })
+    .done(function (data) {
+        tabla_casos.cell({row:row_index, column:12}).data(data.score_diagnostic.toString().replace(",", "."));
+        tabla_casos.cell({row:row_index, column:13}).data(data.score_report.toString().replace(",", "."));
+        toastr.success("Notas guardadas exitosamente.", "Listo!");
+        $("#score_modal").modal("hide");
+    })
+    .fail(function (data) {
+        console.log("Fail");
+    })
   });
 
   $.fn.dataTable.ext.search.push(
@@ -467,7 +579,7 @@
           $(td).removeClass('incomplete');
           tabla_casos.cell({row:row_index, column:6}).data(moment().format("DD/MM/YYYY"));
           tabla_casos.cell({row:row_index, column:7}).data(deadline);
-          tabla_casos.cell({row:row_index, column:13}).data(path_name);
+          tabla_casos.cell({row:row_index, column:15}).data(path_name);
           toastr.success("Derivación realizada exitosamente.", "Listo!");
         }
       } else {
@@ -671,6 +783,7 @@
     if (data.entryform.customer != null) {
     $('#client').val(data.entryform.customer.id);
   }
+  
   if (data.entryform.entryform_type != null) {
     $('#entryform_type').val(data.entryform.entryform_type.id);
     if (data.entryform.entryform_type.id == 2){
@@ -699,10 +812,10 @@
     $('.selectOrgs').select2({'width':'100%'});
     
     $('.date').datetimepicker({
-        locale: 'es',
-        keepOpen: false,
-        format:'DD/MM/YYYY HH:mm'
-      });
+      locale: 'es',
+      keepOpen: false,
+      format:'DD/MM/YYYY HH:mm'
+    });
 
     // $('#datetime_sampled_at').datetimepicker({
     //     locale: 'es',
@@ -852,25 +965,31 @@
   $(document).ready(function(){
     tabla_casos = $('#table-casos').DataTable({
       "rowsGroup": [0,1,2],
-      "autoWidth": true,
       "bPaginate" : true,
       "order": [[ 0, "desc" ]],
+      "orderable": false,
+      "targets": 'no-sort',
+      "bSort": false,
       "columnDefs": [
         {
-          "targets": [0, 1, 2, 3, 4, 5 ,6 , 7, 8, 9, 10, 11, 12, 13, 14],
+          "targets": [0, 1, 2, 3, 4, 5 ,6 , 7, 8, 9, 10, 11, 12, 13, 14, 15, 16],
           "orderable": false,
-          "className": "dt-body-center"
+          "className": "dt-body-center",
         },
         {
-          "targets": [ 13],
+          "targets": [ 15],
           "visible": false,
-        }
+        },
+         {
+          "targets": [ 0],
+          "className": "dt-wd-1",
+        },
       ],
       initComplete: function () {
         this.api().columns().every( function () {
-          if(this[0][0] == 13){
+          if(this[0][0] == 15){
             var column = this;
-            var select = $('<select style="width:100% !important;" class="filterPathologist"><option value="">Todos</option></select>')
+            var select = $('<select style="width:100% !important;" class="filterPathologist form-control "><option value="">Todos</option></select>')
               .appendTo( $('#findPatologo'));
             select.before('<label><b>Filtro por Patólogos</b></label><br> ');
             column.data().unique().sort().each( function ( d, j ) {

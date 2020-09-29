@@ -208,6 +208,9 @@ class EntryForm(models.Model):
         on_delete=models.SET_NULL,
     )
     attached_files = models.ManyToManyField(CaseFile)
+    score_diagnostic = models.FloatField(default=None, null=True, blank=True)
+    score_report = models.FloatField(default=None, null=True, blank=True)
+    
 
     def __str__(self):
         return str(self.pk)

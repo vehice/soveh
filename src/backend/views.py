@@ -2932,3 +2932,14 @@ def end_pre_report(request, analysis_id, end_date):
         return JsonResponse({'ok':True})
     except Exception as e:
         return JsonResponse({'ok':False, 'msg':str(e)})
+
+def save_scores(request, id):
+    var_post = request.POST.copy()
+    try:
+        form = EntryForm.objects.get(pk=id)
+        form.score_diagnostic = var_post.get("score_diagnostic", None)
+        form.score_report = var_post.get("score_report", None)
+        form.save()
+        return JsonResponse({'ok':True, 'score_diagnostic':form.score_diagnostic, 'score_report': form.score_report})
+    except Exception as e:
+        return JsonResponse({'ok':False})
