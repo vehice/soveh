@@ -71,12 +71,13 @@
                 <div id="findPatologo" class="form-group">
                 </div>
               </div>
-              <div class="col-12">
+              <div class="col-6">
+              </div>
+              <div class="col-3">
                 <div id="filterDays" class="form-group">
                   <label><b>Filtro por días abierto</b></label><br>
-                  
                   <div class="row">
-                    <div class="col-2">
+                    <div class="col-12">
                       <select style="width:100% !important;" class="form-control " id="filtro-dias">
                         <option value="0">Sin filtro</option>
                         <option value="1">Mayor a </option>
@@ -85,7 +86,43 @@
                       </select>
                     </div>
 
-                    <div class="col-10" id="filtro-dias-slot">
+                    <div class="col-12 mt-1" id="filtro-dias-slot">
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-3">
+                <div id="filterDiagScore" class="form-group">
+                  <label><b>Filtro por notas de diagnóstico</b></label><br>
+                  <div class="row">
+                    <div class="col-12">
+                      <select style="width:100% !important;" class="form-control " id="filtro-notas-diag">
+                        <option value="0">Sin filtro</option>
+                        <option value="1">Mayor a </option>
+                        <option value="2">Menor a </option>
+                        <option value="3">Entre </option>
+                      </select>
+                    </div>
+
+                    <div class="col-12 mt-1" id="filtro-notas-diag-slot">
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-3">
+                <div id="filterReportScore" class="form-group">
+                  <label><b>Filtro por notas de informe</b></label><br>
+                  <div class="row">
+                    <div class="col-12">
+                      <select style="width:100% !important;" class="form-control " id="filtro-notas-report">
+                        <option value="0">Sin filtro</option>
+                        <option value="1">Mayor a </option>
+                        <option value="2">Menor a </option>
+                        <option value="3">Entre </option>
+                      </select>
+                    </div>
+
+                    <div class="col-12 mt-1" id="filtro-notas-report-slot">
                     </div>
                   </div>
                 </div>
@@ -171,7 +208,9 @@
                       <td>
                         <div class="btn-group" role="group">
                           <button class="btn btn-primary showSummaryBtn" data-id="{{ entryForm.entryform }}" data-closed="{% if entryForm.entryform_form_closed or entryForm.entryform_cancelled %} 1 {% else %} 0 {% endif %}" data-toggle="tooltip" data-placement="top" title="Resúmen del Caso"><i class="fa fa-list-alt fa-fx"></i></button>
+                          {% if request.user.is_superuser %}
                           <button class="btn btn-info showScoreBtn" data-id="{{ entryForm.entryform }}" data-toggle="tooltip" data-placement="top" title="Notas"><i class="fa fa-check-square-o fa-fx"></i></button>
+                          {% endif %}
                       </td>
                     </tr>
                   {% endfor %}
@@ -455,14 +494,48 @@
     $('#filtro-dias-slot').html("");
     
     if ($(this).val() == 1){
-      var temp = '<div class="row"> <div class="col-sm-1"> <input type="number" class="form-control  input-dias1" placeholder="días" /> </div> </div>';
+      var temp = '<div class="row"> <div class="col-sm-12"> <input type="number" class="form-control  input-dias1" placeholder="días" /> </div> </div>';
       $('#filtro-dias-slot').html(temp);
     } else if ($(this).val() == 2){
-      var temp = '<div class="row"> <div class="col-sm-1"> <input type="number" class="form-control  input-dias2" placeholder="días" /> </div> </div>';
+      var temp = '<div class="row"> <div class="col-sm-12"> <input type="number" class="form-control  input-dias2" placeholder="ídas" /> </div> </div>';
       $('#filtro-dias-slot').html(temp); 
     } else if ($(this).val() == 3){
-      var temp = '<div class="row"> <div class="col-sm-2"> <input type="number" class="form-control  input-dias1" placeholder="días" /> </div> <span class="pt-1">Y</span> <div class="col-sm-2"> <input type="number" class="form-control  input-dias2" placeholder="dias" /> </div></div>';
+      var temp = '<div class="row"> <div class="col-sm-5"> <input type="number" class="form-control input-dias1" placeholder="días" /> </div> <div class="col-sm-2 mt-1 text-center"><span>Y</span> </div><div class="col-sm-5"> <input type="number" class="form-control  input-dias2" placeholder="dias" /> </div></div>';
       $('#filtro-dias-slot').html(temp);
+    }
+  });
+
+  $(document).on("change", "#filtro-notas-diag", function(){
+    $('.input-notas-d-1').val("").trigger("change");
+    $('.input-notas-d-2').val("").trigger("change");
+    $('#filtro-notas-diag-slot').html("");
+    
+    if ($(this).val() == 1){
+      var temp = '<div class="row"> <div class="col-sm-12"> <input type="number" class="form-control  input-notas-d-1" placeholder="días" /> </div> </div>';
+      $('#filtro-notas-diag-slot').html(temp);
+    } else if ($(this).val() == 2){
+      var temp = '<div class="row"> <div class="col-sm-12"> <input type="number" class="form-control  input-notas-d-2" placeholder="ídas" /> </div> </div>';
+      $('#filtro-notas-diag-slot').html(temp); 
+    } else if ($(this).val() == 3){
+      var temp = '<div class="row"> <div class="col-sm-5"> <input type="number" class="form-control input-notas-d-1" placeholder="días" /> </div> <div class="col-sm-2 mt-1 text-center"><span>Y</span> </div><div class="col-sm-5"> <input type="number" class="form-control  input-notas-d-2" placeholder="dias" /> </div></div>';
+      $('#filtro-notas-diag-slot').html(temp);
+    }
+  });
+
+  $(document).on("change", "#filtro-notas-report", function(){
+    $('.input-notas-r-1').val("").trigger("change");
+    $('.input-notas-r-2').val("").trigger("change");
+    $('#filtro-notas-report-slot').html("");
+    
+    if ($(this).val() == 1){
+      var temp = '<div class="row"> <div class="col-sm-12"> <input type="number" class="form-control  input-notas-r-1" placeholder="días" /> </div> </div>';
+      $('#filtro-notas-report-slot').html(temp);
+    } else if ($(this).val() == 2){
+      var temp = '<div class="row"> <div class="col-sm-12"> <input type="number" class="form-control  input-notas-r-2" placeholder="ídas" /> </div> </div>';
+      $('#filtro-notas-report-slot').html(temp); 
+    } else if ($(this).val() == 3){
+      var temp = '<div class="row"> <div class="col-sm-5"> <input type="number" class="form-control input-notas-r-1" placeholder="días" /> </div> <div class="col-sm-2 mt-1 text-center"><span>Y</span> </div><div class="col-sm-5"> <input type="number" class="form-control  input-notas-r-2" placeholder="dias" /> </div></div>';
+      $('#filtro-notas-report-slot').html(temp);
     }
   });
 
@@ -471,6 +544,22 @@
   });
 
   $(document).on("keyup change", ".input-dias2", function(){
+    tabla_casos.draw();
+  });
+
+  $(document).on("keyup change", ".input-notas-d-1", function(){
+    tabla_casos.draw();
+  });
+
+  $(document).on("keyup change", ".input-notas-d-2", function(){
+    tabla_casos.draw();
+  });
+
+  $(document).on("keyup change", ".input-notas-r-1", function(){
+    tabla_casos.draw();
+  });
+
+  $(document).on("keyup change", ".input-notas-r-2", function(){
     tabla_casos.draw();
   });
 
@@ -540,6 +629,40 @@
       var min = parseInt( $('.input-dias1').val(), 10 );
       var max = parseInt( $('.input-dias2').val(), 10 );
       var days = parseFloat( data[5] ) || 0;
+
+      if ( ( isNaN( min ) && isNaN( max ) ) ||
+            ( isNaN( min ) && days <= max ) ||
+            ( min <= days && isNaN( max ) ) ||
+            ( min <= days && days <= max ) )
+      {
+          return true;
+      }
+      return false;
+    }
+  );
+
+  $.fn.dataTable.ext.search.push(
+    function( settings, data, dataIndex ) {
+      var min = parseFloat( $('.input-notas-d-1').val(), 10 );
+      var max = parseFloat( $('.input-notas-d-2').val(), 10 );
+      var days = parseFloat( data[12] ) || 0;
+
+      if ( ( isNaN( min ) && isNaN( max ) ) ||
+            ( isNaN( min ) && days <= max ) ||
+            ( min <= days && isNaN( max ) ) ||
+            ( min <= days && days <= max ) )
+      {
+          return true;
+      }
+      return false;
+    }
+  );
+
+  $.fn.dataTable.ext.search.push(
+    function( settings, data, dataIndex ) {
+      var min = parseFloat( $('.input-notas-r-1').val(), 10 );
+      var max = parseFloat( $('.input-notas-r-2').val(), 10 );
+      var days = parseFloat( data[13] ) || 0;
 
       if ( ( isNaN( min ) && isNaN( max ) ) ||
             ( isNaN( min ) && days <= max ) ||
