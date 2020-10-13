@@ -24,11 +24,14 @@ SECRET_KEY = 'hx6zbkv$$72fhqt^$n8=j_#wocxb@qo30q^qhd$1zx)9=4(hf7'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+SITE_URL = 'http://127.0.0.1:5000'
+
+ALLOWED_HOSTS = ['*']
 
 # Application definition
 
 INSTALLED_APPS = [
+    'jet',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -37,15 +40,16 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django_js_reverse',
     'django_extensions',
-    # 'debug_toolbar',
+    #'debug_toolbar',
     'accounts',
     'workflows',
     'backend',
     'app',
+    'avatar',
 ]
 
 MIDDLEWARE = [
-    # 'debug_toolbar.middleware.DebugToolbarMiddleware',
+    #'debug_toolbar.middleware.DebugToolbarMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -75,7 +79,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'vehice.wsgi.application'
+# WSGI_APPLICATION = 'vehice.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/1.11/ref/settings/#databases
@@ -83,9 +87,9 @@ WSGI_APPLICATION = 'vehice.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'mysql.connector.django',
-        'NAME': 'vehice_dev',
+        'NAME': 'vehice_190820',
         'USER': 'root',
-        'PASSWORD': '123123123',
+        'PASSWORD': '1q2w3e4r5t',
         'HOST': 'localhost',
         'PORT': '',
     }
@@ -116,7 +120,7 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/1.11/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'es-CL'
 
 TIME_ZONE = 'America/Santiago'
 
@@ -124,7 +128,9 @@ USE_I18N = True
 
 USE_L10N = True
 
-USE_TZ = True
+USE_TZ = False
+
+TZ_INFO = False
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.11/howto/static-files/
@@ -140,3 +146,30 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'public', 'media')
 MEDIA_URL = '/media/'
 
 INTERNAL_IPS = '127.0.0.1'
+
+JET_SIDE_MENU_COMPACT = True
+
+JET_SIDE_MENU_ITEMS = [
+    {'label': ('General'), 'items': [
+        {'name': 'auth.user'},
+        {'name': 'backend.customer'},
+        {'name': 'backend.exam'},
+        {'name': 'backend.fixative'},
+        {'name': 'backend.organ'},
+        {'name': 'backend.pathology'},
+        {'name': 'backend.diagnostic'},
+        {'name': 'backend.organlocation'},
+        {'name': 'backend.emailtemplate'},
+        {'name': 'backend.research'},
+    ]},
+]
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.office365.com'
+EMAIL_USE_TLS = True
+EMAIL_PORT = 587
+EMAIL_HOST_USER = 'no-reply@dataqu.cl'
+EMAIL_HOST_PASSWORD = 'n8JM4hjX6w53HZk6oqe0'
+
+EMAIL_HOST_USER2 = 'no-reply@dataqu.cl'
+EMAIL_HOST_PASSWORD2 = 'n8JM4hjX6w53HZk6oqe0'
