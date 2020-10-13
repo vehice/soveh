@@ -60,8 +60,9 @@
               <tr>
                 <!-- <th>Id</th> -->
                 <th>Nro Caso</th>
-                <th>Subflujo</th>
                 <th>Cliente</th>
+                <th>Centro</th>
+                <th>Solicitud</th>
                 <th>Fecha Inicio</th>
                 <th>Etapa en curso</th>
                 <th>Opciones</th>
@@ -72,14 +73,9 @@
                   <tr id="form-{{ entryForm.id }}">
                     <!-- <td>{{ entryForm.content_object.id }}</td> -->
                     <td><strong>{{ entryForm.content_object.no_caso }}</strong></td>
-                    <td>
-                      {% if entryForm.content_object.get_subflow != "N/A" %}
-                        Parte {{ entryForm.content_object.get_subflow }}
-                      {% else %}
-                        {{ entryForm.content_object.get_subflow }}
-                      {% endif %}
-                    </td>
                     <td>{{ entryForm.content_object.customer|default:"" }}</td>
+                    <td>{{ entryForm.content_object.center|default:"" }}</td>
+                    <td>{{ entryForm.content_object.no_request|default:"" }}</td>
                     <td>{{ entryForm.content_object.created_at|date:"d/m/Y" }}</td>
                     <td>
                       {% if entryForm.form_closed %}
