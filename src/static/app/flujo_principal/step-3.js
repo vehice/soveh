@@ -1,3 +1,5 @@
+var researches;
+
 function init_step_3(active = true) {
   var entryform_id = $('#entryform_id').val();
   var url = Urls.analysis_entryform_id(entryform_id);
@@ -14,6 +16,8 @@ function init_step_3(active = true) {
       $('.showAttachedFilesBtn').removeClass("hidden");
       saltar=true;
       loadAnalysisData(data);
+      researches = data.research_types_list;
+      //loadResearches(data.research_types_list)
     })
     .fail(function () {
       console.log("Fail")
@@ -24,6 +28,24 @@ function loadAnalysisData(data) {
   $("#analysis_group").empty();
 
   populateAnalysisData(data);
+}
+
+function loadResearches() {
+  $('#service_researches').html('<select multiple="multiple" size="10" id="researches_select"></select>');
+  
+  $.each(researches, function (i, item) {
+    $('#researches_select').append($('<option>', {
+      value: item.id,
+      text: item.code + " " + item.name
+    }));
+  });
+  $('#researches_select').bootstrapDualListbox({
+    nonSelectedListLabel: 'No seleccionados',
+    selectedListLabel: 'Asociados al servicio',
+    infoText: 'Mostrando todos {0}',
+    infoTextEmpty: 'Lista vacía',
+    filterTextClear: 'Mostrar todos'
+  });
 }
 
 function populateAnalysisData(data) {
@@ -64,9 +86,9 @@ function addAnalysisElement(data) {
   $("#analysis_group").append(templateHTML)
 }
 
-function showServiceCommentsModal(form_id){
-  $('#service_comments_modal').modal('show');
-}
+// function showServiceCommentsModal(form_id){
+//   $('#service_comments_modal').modal('show');
+// }
 
 function deleteExternalReport(analysis_id, id){
   var url = Urls.service_reports_id(analysis_id, id);
@@ -90,11 +112,26 @@ function deleteServiceComment(analysis_id, id){
     url: url,
   })
   .done(function (data) {
-    toastr.success('', 'Comentaario eliminado exitosamente.');
+    toastr.success('', 'Comentario eliminado exitosamente.');
     $('#sc-'+id).remove();
   })
   .fail(function () {
-    toastr.error('', 'No ha sido posible eliminar el informe. Intente nuevamente.');
+    toastr.error('', 'No ha sido posible eliminar el comentario. Intente nuevamente.');
+  });
+}
+
+function deleteServiceResearch(analysis_id, id){
+  var url = Urls.service_researches_id(analysis_id, id);
+  $.ajax({
+    type: "DELETE",
+    url: url,
+  })
+  .done(function (data) {
+    toastr.success('', 'Estudio eliminado exitosamente.');
+    $('#rc-'+id).remove();
+  })
+  .fail(function () {
+    toastr.error('', 'No ha sido posible eliminar el estudio. Intente nuevamente.');
   });
 }
 
@@ -238,6 +275,42 @@ function showServiceCommentsModal(id, case_closed, form_closed=false){
   $('#service_comments_modal').modal('show');
 }
 
+function showServiceResearchesModal(id, case_closed, form_closed=false){
+  $('#researches_modal_save_button').prop("disabled", false);
+  var temp = '';
+  var url = Urls.service_researches(id);
+  $.ajax({
+    type: "GET",
+    url: url,
+  })
+  .done(function (data) {
+    if (form_closed || case_closed){
+      $('#researches_modal_save_button').prop("disabled", true);
+      $('#service_researches').html('');
+      if (data.researches.length == 0) {
+        $('#service_researches').append("<p><h3 class='text-danger'>No hay estudios asociados al servicio.</h3></p>");
+      } else {
+        $.each(data.researches, function(index, item){
+          $('#service_researches').append("<p><h4>"+item.code+" "+item.name+": "+item.description+"</h4></p>");
+        });
+      }
+      
+    } else {
+      loadResearches();
+      $('#researches_select').data('id', id);
+      $.each(data.researches, function(index, item){
+        $('#researches_select option[value="'+item.id+'"]').prop("selected", true);
+      });
+      $('#researches_select').bootstrapDualListbox('refresh');
+    }
+    
+  })
+  .fail(function () {
+    console.log("Fail")
+  });
+  $('#service_researches_modal').modal('show');
+}
+
 function saveServiceComment(){
   var id = $('#input_service_comment').data('id');
   var text = $('#input_service_comment').val();
@@ -256,6 +329,26 @@ function saveServiceComment(){
     console.log("Fail")
   });
 
+}
+
+function saveServiceResearch(){
+  var id = $('#researches_select').data('id');
+  var url = Urls.service_researches(id);
+  $.ajax({
+    type: "POST",
+    url: url,
+    data: {'researches': $('#researches_select').val()}
+  })
+  .done(function (data) {
+    if (data.ok){
+      toastr.success('Listo', 'Estudios guardados exitosamente.');
+    } else {
+      toastr.error('Lo sentimos', 'Error al guardar estudios.');
+    }
+  })
+  .fail(function () {
+    console.log("Fail")
+  });
 }
 
 function closeService(form_id, analysis_id, can_close=true){

@@ -123,6 +123,16 @@ urlpatterns = [
         name='service_comments_id',
     ),
     path(
+        'service_researches/<int:analysis_id>',
+        csrf_exempt(views.SERVICE_RESEARCHES.as_view()),
+        name='service_researches',
+    ),
+    path(
+        'service_researches/<int:analysis_id>/<int:id>',
+        csrf_exempt(views.SERVICE_RESEARCHES.as_view()),
+        name='service_researches_id',
+    ),
+    path(
         'case_files/<int:entryform_id>',
         csrf_exempt(views.CASE_FILES.as_view()),
         name='case_files',

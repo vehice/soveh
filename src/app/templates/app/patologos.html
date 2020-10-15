@@ -266,8 +266,6 @@
               </div>
               <div class="col-sm-4 form-group summaryEntryformType">
               </div>
-              <div class="col-sm-4 form-group summaryResearchType">
-              </div>
             </div>
             <hr>
             <h6 class="form-section mt-2"> <b>Detalle</b></h6>
@@ -741,12 +739,6 @@
     });
     selectEntryformType +='</select>';
 
-    var selectResearchType = '<select class="select2 form-control selectOpt" id="research_type" name="research_type" {% if not edit or closed  %}disabled{% endif %} ><option value="" selected>Seleccionar tipo de estudio</option>';
-    $.each(data.research_types_list, function(j, o){
-        selectResearchType += '<option value="'+o.id+'">'+o.code+' '+o.name+'</option>';
-    });
-    selectResearchType +='</select>';
-
     var selectSpecie = '<select class="select2 form-control selectOpt" id="specie" name="specie" {% if not edit or closed  %}disabled{% endif %} >';
     $.each(data.species_list, function(j, o){
         selectSpecie += '<option value="'+o.id+'">'+o.name+'</option>';
@@ -777,7 +769,6 @@
     $('.summaryAnamnesis').html('<label>Anamnesis:</label> <textarea class="form-control" row="2" name="anamnesis" {% if not edit %}disabled{% endif %} >'+ data.entryform.anamnesis+'</textarea>');
     $('.summaryFixative').html('<label>Fijador:</label>'+ selectFix);
     $('.summaryEntryformType').html('<label>Tipo de Ingreso:</label>'+ selectEntryformType);
-    $('.summaryResearchType').html('<label>Tipo de Estudio:</label>'+ selectResearchType);    
     $('.summarySpecie').html('<label>Especie:</label>'+selectSpecie  );
     $('.summaryDevStatus').html('<label>Estadío Desarrollo:</label>'+selectlarvalstage ); 
     $('.summaryWaterSource').html('<label>Fuente de agua:</label>'+selectwatersource);
@@ -892,14 +883,6 @@
   
     if (data.entryform.entryform_type != null) {
       $('#entryform_type').val(data.entryform.entryform_type.id);
-      if (data.entryform.entryform_type.id == 2){
-        $('.summaryResearchType').show();
-      } else {
-        $('.summaryResearchType').hide();
-      }
-    }
-    if (data.entryform.research_type != null) {
-      $('#research_type').val(data.entryform.research_type.id);
     }
     if (data.entryform.fixative != null) {
       $('#fixative').val(data.entryform.fixative.id);
@@ -963,18 +946,6 @@
   }
 
   function submitGeneralData(){
-    if ( $("#entryform_type").val() == 2 ) {
-      if ( $("#research_type").val() == "" ) {
-        toastr.error(
-          'Para guardar debes seleccionar el tipo de estudio.',
-          'Ups!',
-          {positionClass: 'toast-top-full-width', containerId: 'toast-bottom-full-width'}
-        );
-        $("#research_type").focus({preventScroll:false});
-        return false;
-      }
-    }
-
     swal({
       title: "Confirmación",
       text: "¿Está seguro que desea guardar los cambios?",
@@ -1058,15 +1029,6 @@
       }
     });
   }
-
-  
-  $(document).on('change', '#entryform_type', function() {
-    if ( $(this).val() == 2 ) {
-      $('.summaryResearchType').show();
-    } else {
-      $('.summaryResearchType').hide();
-    }
-  });
 
   $(document).ready(function(){
     lockScreen(1);

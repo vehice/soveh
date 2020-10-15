@@ -207,7 +207,6 @@ class ENTRYFORM(View):
             entryform["entryform_type"] = model_to_dict(entryform_object.entryform_type) if entryform_object.entryform_type else None
             entryform["watersource"] = model_to_dict(entryform_object.watersource) if entryform_object.watersource else None
             entryform["specie"] = model_to_dict(entryform_object.specie) if entryform_object.specie else None
-            entryform["research_type"] = model_to_dict(entryform_object.research_type) if entryform_object.research_type else None
 
             exams_set = list(Exam.objects.all().values())
             organs_set = list(Organ.objects.all().values())
@@ -256,7 +255,7 @@ class ENTRYFORM(View):
                 'organs': organs,
                 'customers': customers,
                 'entryform_types': entryform_types,
-                'research_types': researches
+                'research_types_list': researches
             }
         # print (data)
         return JsonResponse(data)
@@ -515,6 +514,8 @@ class ANALYSIS(View):
         customers_list = list(Customer.objects.all().values())
         patologos = list(User.objects.filter(userprofile__profile_id__in=[4, 5]).values())
         entryform_types = list(EntryForm_Type.objects.all().values())
+        researches = list(Research.objects.filter(status=True).values())
+
 
         data = {
             'analyses': analyses,
@@ -527,7 +528,8 @@ class ANALYSIS(View):
             'waterSources_list': waterSources_list,
             'customers_list': customers_list,
             'patologos': patologos,
-            'entryform_types_list': entryform_types
+            'entryform_types_list': entryform_types,
+            'research_types_list': researches
         }
         
         return JsonResponse(data)
@@ -1210,6 +1212,50 @@ class SERVICE_COMMENTS(View):
             return JsonResponse({'ok': True})
         except:
             return JsonResponse({'ok': False})
+
+class SERVICE_RESEARCHES(View):
+    http_method_names = ['get', 'post', 'delete']
+    
+    def get(self, request, analysis_id):
+        af = AnalysisForm.objects.get(pk=analysis_id)
+
+        data = []
+        for rs in af.researches.all():
+            response = {
+                'id': rs.id,
+                'code': rs.code,
+                'name': rs.name,
+                'description': rs.description,
+                'status': rs.status
+            }
+            data.append(response)
+
+        return JsonResponse({'ok': True, 'researches': data})
+
+    def post(self, request, analysis_id):
+        try:
+            if analysis_id:
+                af = AnalysisForm.objects.get(pk=analysis_id)
+                var_post = request.POST.copy()
+                researches = var_post.getlist('researches[]')
+                af.researches.clear()
+                for r in researches:
+                    af.researches.add(Research.objects.get(pk=r))
+                return JsonResponse({'ok': True})
+
+            else:
+                return JsonResponse({'ok': False})
+        except:
+             return JsonResponse({'ok': False})
+    
+    def delete(self, request, analysis_id, id):
+        try:
+            rs = Research.objects.get(pk=id)
+            af = AnalysisForm.objects.get(pk=analysis_id)
+            af.researches.remove(rs)
+            return JsonResponse({'ok': True})
+        except:
+            return JsonResponse({'ok': False})
    
 class EMAILTEMPLATE(View):
     def get(self, request, id=None):
@@ -1583,14 +1629,6 @@ def step_1_entryform(request):
     if str(entryform.entryform_type_id) != var_post.get('entryform_type') and (entryform.entryform_type_id == None and var_post.get('entryform_type') != ''):
         change = True
     entryform.entryform_type_id = var_post.get('entryform_type')
-
-    # If entryform type is research
-    if var_post.get('entryform_type') == "2":
-        if str(entryform.research_type_id) != var_post.get('research_type') and (entryform.research_type_id == None and var_post.get('research_type') != ''):
-            change = True
-        entryform.research_type_id = var_post.get('research_type')
-    else:
-        entryform.research_type_id = None
     
     if str(entryform.no_order) != var_post.get('no_order') and (entryform.no_order == None and var_post.get('no_order') != ''):
         change = True
@@ -2549,14 +2587,6 @@ def save_generalData(request, id):
         change = True
     entry.entryform_type_id = int(var_post['entryform_type'])
 
-    # If entryform type is research
-    if var_post.get('entryform_type') == "2":
-        if str(entry.research_type_id) != var_post.get('research_type') and (entry.research_type_id == None and var_post.get('research_type') != ''):
-            change = True
-        entry.research_type_id = var_post.get('research_type')
-    else:
-        entry.research_type_id = None
-
     if entry.company != var_post['company']:
         change = True
     entry.company = var_post['company']
@@ -2877,6 +2907,7 @@ def cancel_service(request, form_id, cancel_date):
     form.save()
     try:
         form.content_object.manual_cancelled_date = datetime.strptime(cancel_date, '%d-%m-%Y')
+        form.content_object.researches.clear()
         form.content_object.save()
     except Exception as e:
         pass

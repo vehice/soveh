@@ -202,11 +202,6 @@ class EntryForm(models.Model):
         null=True,
         on_delete=models.SET_NULL,
     )
-    research_type = models.ForeignKey(
-        Research,
-        null=True,
-        on_delete=models.SET_NULL,
-    )
     attached_files = models.ManyToManyField(CaseFile)
     score_diagnostic = models.FloatField(default=None, null=True, blank=True)
     score_report = models.FloatField(default=None, null=True, blank=True)
@@ -279,6 +274,7 @@ class AnalysisForm(models.Model):
     pre_report_ended = models.BooleanField(default=False)
     pre_report_ended_at = models.DateTimeField(default=None, blank=True, null=True)
     report_code = models.CharField(max_length=250, null=True, blank=True)
+    researches = models.ManyToManyField(Research)
 
     @property
     def status(self):

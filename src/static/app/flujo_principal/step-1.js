@@ -196,15 +196,11 @@ function init_step_1() {
       .done(function (data) {
         $('#identification_group_list').html('');
         var entryform = data.entryform;
-        console.log("entryform", entryform)
         if (entryform.customer_id) {
           $('#customer_select').val(entryform.customer_id).trigger('change');
         }
         if (entryform.entryform_type_id) {
           $('#entryform_type_select').val(entryform.entryform_type_id).trigger('change');
-          if (entryform.research_type_id) {
-            $('#research_select').val(entryform.research_type_id).trigger('change');
-          }
         }
         $('#fixtative_select').val(entryform.fixative_id).trigger('change');
 
@@ -318,7 +314,6 @@ function init_step_1() {
     loadLarvalStages(data.larvalStages)
     loadWaterSources(data.waterSources)
     loadEntryFormType(data.entryform_types)
-    loadResearches(data.research_types)
     // loadExams(data.exams)
     // loadOrgans(data.organs)
     // loadQuestions(data.questionReceptionCondition)
@@ -389,20 +384,6 @@ function init_step_1() {
     }).on("select2:select", function (e) {
       formChanged = true;
     });
-
-    $('#researches_select').select2({
-      placeholder: "Porfavor seleccione un tipo de estudio"
-    }).on("select2:select", function (e) {
-      formChanged = true;
-    });
-
-    $(document).on('change', '#entryform_type_select', function() {
-      if ( $(this).val() == 2 ) {
-        $('.researches_container').removeClass("hidden");
-      } else {
-        $('.researches_container').addClass("hidden");
-      }
-    });
   }
 
 }
@@ -444,18 +425,6 @@ function validate_step_1() {
     );
     $('input[name="identification[no_fish]"]').focus({preventScroll:false});
     return false;
-  }
-
-  if ( $("#entryform_type_select").val() == 2 ) {
-    if ( $("#researches_select").val() == "" ) {
-      toastr.error(
-        'Para continuar debes seleccionar el tipo de estudio.',
-        'Ups!',
-        {positionClass: 'toast-top-full-width', containerId: 'toast-bottom-full-width'}
-      );
-      $("#researches_select").focus({preventScroll:false});
-      return false;
-    }
   }
 
   var orgas = $('.identification_organs');
@@ -688,16 +657,6 @@ function loadEntryFormType(entryform_types) {
       value: item.id,
       text: item.name
     }));
-  });
-}
-
-function loadResearches(researches) {
-  $.each(researches, function (i, item) {
-    $('#researches_select').append($('<option>', {
-      value: item.id,
-      text: item.code + " " + item.name
-    }));
-    researches_json[item.id] = item.description;
   });
 }
 

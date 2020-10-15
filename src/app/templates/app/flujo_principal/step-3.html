@@ -24,6 +24,7 @@
           <div class="col-sm-12 font-medium-4 text-center">
             <div class="btn-group" role="group" aria-label="Opciones">
               <button type="button" class="btn btn-info" onclick='showServiceCommentsModal(<%= id %>, {{closed}}, true)'>Comentarios</button>
+              <button type="button" class="btn btn-purple" onclick='showServiceResearchesModal(<%= id %>, {{closed}}, true)'>Estudios</button>
               <button type="button" class="btn btn-success" onclick='showServiceReportsModal(<%= id %>, <%= service %>, {{closed}}, true)'>Informes</button>
             </div>
           </div>
@@ -49,6 +50,7 @@
           <div class="col-sm-12 font-medium-4 text-center">
             <div class="btn-group" role="group" aria-label="Opciones">
               <button type="button" class="btn btn-info" onclick='showServiceCommentsModal(<%= id %>, {{closed}}, true)'>Comentarios</button>
+              <button type="button" class="btn btn-purple" onclick='showServiceResearchesModal(<%= id %>, {{closed}}, true)'>Estudios</button>
               <button type="button" class="btn btn-success" onclick='showServiceReportsModal(<%= id %>, <%= service %>, {{closed}}, true)'>Informes</button>
             </div>
           </div>     
@@ -84,6 +86,7 @@
                 <% } %> {% endcomment %}
 
                 <button type="button" class="btn btn-info" onclick='showServiceCommentsModal(<%= id %>, {{closed}})'>Comentarios</button>
+                <button type="button" class="btn btn-purple" onclick='showServiceResearchesModal(<%= id %>, {{closed}})'>Estudios</button>
                 <button type="button" class="btn btn-success" onclick='showServiceReportsModal(<%= id %>, <%= service %>, {{closed}})'>Informes</button>
                 {% if edit %}
                 
@@ -137,6 +140,7 @@
             <div class="col-sm-12 font-medium-4 text-center">
               <div class="btn-group" role="group" aria-label="Opciones">
                 <button type="button" class="btn btn-info" onclick='showServiceCommentsModal(<%= id %>, {{closed}})'>Comentarios</button>
+                <button type="button" class="btn btn-purple" onclick='showServiceResearchesModal(<%= id %>, {{closed}})'>Estudios</button>
                 <button type="button" class="btn btn-success" onclick='showServiceReportsModal(<%= id %>, <%= service %>, {{closed}})'>Informes</button>
                 
                 {% if edit %}
@@ -188,6 +192,7 @@
             <div class="col-sm-12 font-medium-4 text-center">
               <div class="btn-group" role="group" aria-label="Opciones">
                 <button type="button" class="btn btn-info" onclick='showServiceCommentsModal(<%= id %>, {{closed}}, true)'>Comentarios</button>
+                <button type="button" class="btn btn-purple" onclick='showServiceResearchesModal(<%= id %>, {{closed}}, true)'>Estudios</button>
                 <button type="button" class="btn btn-success" onclick='showServiceReportsModal(<%= id %>, <%= service %>, {{closed}}, true)'>Informes</button>
                 
                 {% if edit %}
@@ -219,6 +224,7 @@
             <div class="col-sm-12 font-medium-4 text-center">
               <div class="btn-group" role="group" aria-label="Opciones">
                 <button type="button" class="btn btn-info" onclick='showServiceCommentsModal(<%= id %>, {{closed}}, true)'>Comentarios</button>
+                <button type="button" class="btn btn-purple" onclick='showServiceResearchesModal(<%= id %>, {{closed}}, true)'>Estudios</button>
                 <button type="button" class="btn btn-success" onclick='showServiceReportsModal(<%= id %>, <%= service %>, {{closed}}, true)'>Informes</button>
                 
                 {% if edit %}
