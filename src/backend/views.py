@@ -176,6 +176,15 @@ class ENTRYFORM(View):
             for analysis in entryform_object.analysisform_set.filter(exam__isnull=False):
                 analysis_form = analysis.forms.get()
 
+                samples = Sample.objects.filter(entryform=analysis.entryform).values_list('id', flat=True)
+                sampleExams = SampleExams.objects.filter(sample__in=samples, exam=analysis.exam)
+                organs_count = samples_count = len(sampleExams)
+                if analysis.exam.pricing_unit == 1:
+                    samples_count = organs_count
+                else:
+                    sampleExams = SampleExams.objects.filter(sample__in=samples, exam=analysis.exam).values_list('sample_id', flat=True)
+                    samples_count = len(list(set(sampleExams)))
+
                 aux = {
                     'id': analysis.id,
                     'created_at' : analysis.created_at,
@@ -187,7 +196,9 @@ class ENTRYFORM(View):
                     'patologo__first_name' : analysis.patologo.first_name if analysis.patologo else None,
                     'patologo__last_name' : analysis.patologo.last_name if analysis.patologo else None,
                     'service_comments': [],
-                    'status': analysis.status
+                    'status': analysis.status,
+                    'samples_count': samples_count,
+                    'organs_count': organs_count
                 }
 
                 for cmm in analysis.service_comments.all():

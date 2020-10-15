@@ -624,7 +624,7 @@ def show_patologos(request, all):
             'centro': a['analysis'].entryform.center,
             'fecha_ingreso': a['analysis'].created_at.strftime("%d/%m/%Y"),
             'dias_abierto': days_open,
-            'nro_muestras': sampleExams_counter,
+            'nro_organos': sampleExams_counter,
             'entryform': a['analysis'].entryform.id,
             'entryform_form_closed': a['entryform_form'].form_closed,
             'entryform_cancelled': a['entryform_form'].cancelled,

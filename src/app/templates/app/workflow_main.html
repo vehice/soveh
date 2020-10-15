@@ -845,6 +845,8 @@ function fillSummary(data){
       tpl_exams += item.patologo__last_name;
     tpl_exams += '</span> <br> <b>Fecha: </b>'+ moment(item.created_at).format("DD/MM/YYYY HH:mm");
     tpl_exams += '</span> <br> <b>Estado: </b>'+ item.status;
+    tpl_exams += '</span> <br> <b>Nro Muestras: </b>'+ item.samples_count;
+    tpl_exams += '</span> <br> <b>Nro Órganos: </b>'+ item.organs_count;
 
     
 
@@ -863,7 +865,7 @@ function fillSummary(data){
   $('.summaryExams').html(tpl_exams);
 
   var tpl_samples = '<div class="col-sm-12"><h6 class="form-section mt-2"> <b>Muestras </b></h6></br><table class="table table-bordered table-xs">';
-  tpl_samples += '<thead><tr><th width="8% !important;">Muestra</th><th>Identificación</th><th>Análisis</th><th>Órganos</th></tr></thead><tbody>';
+  tpl_samples += '<thead><tr><th>Pez</th><th>Identificación</th><th>Análisis</th><th>Órganos</th></tr></thead><tbody>';
   var patologos = {};
   $.each(data.patologos, function(i, v){
     patologos[v.id]=v.first_name+' '+v.last_name;

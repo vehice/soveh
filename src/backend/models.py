@@ -59,11 +59,18 @@ class Research(models.Model):
         verbose_name = "Estudio"
         verbose_name_plural = "Estudios"
 
+PRICING_UNIT = (
+    (1, "Por órgano"),
+    (2, "Por pez")
+)
+
 class Exam(models.Model):
     name = models.CharField(max_length=250, null=True, blank=True, verbose_name="Nombre")
     stain = models.CharField(max_length=250, null=True, blank=True, verbose_name="Tinción")
     pathologists_assignment = models.BooleanField(default=True, verbose_name="Asignación de patólogo")
+    pricing_unit = models.IntegerField(default=1, choices=PRICING_UNIT, verbose_name="Unidad de cobro")
     service = models.ForeignKey(Service, null=True, default=1, on_delete=models.SET_NULL, verbose_name="Tipo de Servicio")
+    
 
     def __str__(self):
         return self.name

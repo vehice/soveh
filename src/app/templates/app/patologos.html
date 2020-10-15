@@ -143,7 +143,7 @@
                     <th>Fecha<br>Derivación</th>
                     <th>Fecha<br>Plazo</th>
                     <th>Días<br>Atraso</th>
-                    <th>Nro<br>Muestras</th>
+                    <th>Nro<br>Órganos</th>
                     <th>Unidad</th>
                     <th>Estado</th>
                     <th>N.<br>Diag.</th>
@@ -180,7 +180,7 @@
                           {{ entryForm.dias_atraso }}
                       </td>
                       <td>
-                          {{ entryForm.nro_muestras }}
+                          {{ entryForm.nro_organos }}
                       </td>
                       <td>
                           {{ entryForm.unidad }}
@@ -677,7 +677,12 @@
         } else {
           {% if request.user.is_superuser %}
             var entryform_id = $('.optionGroups-'+analysis_id).data("entryform");
-            $('.optionGroups-'+analysis_id).append('<button class="btn btn-info showScoreBtn" data-id="'+entryform_id+'" data-toggle="tooltip" data-placement="top" title="Notas"><i class="fa fa-check-square-o fa-fx"></i></button>');
+            if (pathologist_value == 'NA'){
+              $('.optionGroups-'+analysis_id+' .showScoreBtn').remove();
+            } else {
+              $('.optionGroups-'+analysis_id+' .showScoreBtn').remove();
+              $('.optionGroups-'+analysis_id).append('<button class="btn btn-info showScoreBtn" data-id="'+entryform_id+'" data-toggle="tooltip" data-placement="top" title="Notas"><i class="fa fa-check-square-o fa-fx"></i></button>');
+            }
           {% endif %}
           $('*[data-analisis="'+analysis_id+'"]').val(pathologist_value).trigger("change");
           $(td).removeClass('incomplete');
@@ -832,6 +837,8 @@
         tpl_exams += item.patologo__last_name;
       tpl_exams += '</span> <br> <b>Fecha: </b>'+ moment(item.created_at).format("DD/MM/YYYY HH:mm");
       tpl_exams += '</span> <br> <b>Estado: </b>'+ item.status;
+      tpl_exams += '</span> <br> <b>Nro Muestras: </b>'+ item.samples_count;
+      tpl_exams += '</span> <br> <b>Nro Órganos: </b>'+ item.organs_count;
 
       
       if (item.service_comments.length > 0) {
@@ -848,7 +855,7 @@
     $('.summaryExams').html(tpl_exams);
 
     var tpl_samples = '<div class="col-sm-12"><h6 class="form-section mt-2"> <b>Muestras</b></h6></br><table class="table table-bordered table-xs">';
-    tpl_samples += '<thead><tr><th width="8% !important;">Muestra</th><th>Identificación</th><th>Análisis</th><th>Órganos</th></tr></thead><tbody>';
+    tpl_samples += '<thead><tr><th>Pez</th><th>Identificación</th><th>Análisis</th><th>Órganos</th></tr></thead><tbody>';
     var patologos = {};
     $.each(data.patologos, function(i, v){
       patologos[v.id]=v.first_name+' '+v.last_name;
