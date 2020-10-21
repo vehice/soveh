@@ -86,7 +86,10 @@ ORGAN_TYPE = (
 )
 
 class Organ(models.Model):
-    name = models.CharField(max_length=250, null=True, blank=True, verbose_name="Nombre")
+    name = models.CharField(max_length=250, null=True, blank=True, verbose_name="Nombre (ESP)")
+    abbreviation = models.CharField(max_length=250, null=True, blank=True, verbose_name="Abreviatura (ESP)")
+    name_en = models.CharField(max_length=250, null=True, blank=True, verbose_name="Nombre (EN)")
+    abbreviation_en = models.CharField(max_length=250, null=True, blank=True, verbose_name="Abreviatura (EN)")
     organ_type = models.IntegerField(default=1, choices=ORGAN_TYPE, verbose_name="Tipo")
 
     def __str__(self):

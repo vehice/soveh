@@ -185,7 +185,6 @@ def make_pdf_file2(id, url, filename, userId):
 
     # print (file_path)
     urlsitio = settings.SITE_URL + url + str(id) + '/' + str(userId)
-    print (urlsitio)
     pdfkit.from_url(urlsitio, file_path, options=options)
 
 @login_required
@@ -370,7 +369,7 @@ def template_resumen_report(request, id, userId):
             if not is_cancelled:
                 try:
                     sampleExa[sE.exam_id]['organ_id'].append({
-                        'name':sE.organ.name,
+                        'name':sE.organ.name if doc.lang == 1 else sE.organ.name_en,
                         'id':sE.organ.id})
                 except:
                     sampleExa[sE.exam_id]={
@@ -379,7 +378,7 @@ def template_resumen_report(request, id, userId):
                         'exam_type': sE.exam.service_id,
                         'sample_id': sE.sample_id,
                         'organ_id': [{
-                        'name':sE.organ.name,
+                        'name':sE.organ.name if doc.lang == 1 else sE.organ.name_en,
                         'id':sE.organ.id}]
                     }
                 if sE.exam.service_id == 1:
