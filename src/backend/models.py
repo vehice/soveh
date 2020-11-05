@@ -285,6 +285,8 @@ class AnalysisForm(models.Model):
     pre_report_ended_at = models.DateTimeField(default=None, blank=True, null=True)
     report_code = models.CharField(max_length=250, null=True, blank=True)
     researches = models.ManyToManyField(Research)
+    score_diagnostic = models.FloatField(default=None, null=True, blank=True)
+    score_report = models.FloatField(default=None, null=True, blank=True)
 
     @property
     def status(self):

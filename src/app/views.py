@@ -632,8 +632,8 @@ def show_patologos(request, all):
             'fecha_plazo': a['analysis'].assignment_deadline.strftime("%d/%m/%Y") if a['analysis'].assignment_deadline else "",
             'dias_atraso': days_late,
             'estado': a['analysis'].status,
-            'nota_diagnostico': str(a['analysis'].entryform.score_diagnostic).replace(",", ".") if a['analysis'].entryform.score_diagnostic else "",
-            'nota_informe': str(a['analysis'].entryform.score_report).replace(",", ".") if a['analysis'].entryform.score_report else "",
+            'nota_diagnostico': str(a['analysis'].score_diagnostic).replace(",", ".") if a['analysis'].score_diagnostic else "",
+            'nota_informe': str(a['analysis'].score_report).replace(",", ".") if a['analysis'].score_report else "",
         })
 
     return render(request, 'app/patologos.html', {'casos': data, 'patologos': patologos, 'edit': editar, 'all': all})

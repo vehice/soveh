@@ -164,5 +164,6 @@ urlpatterns = [
     path('end-pre-report/<int:analysis_id>/<str:end_date>', csrf_exempt(views.end_pre_report), name='end_pre_report'),
     path('init-pre-report/<int:analysis_id>', csrf_exempt(views.init_pre_report), name='init_pre_report'),
     path('save-scores/<int:id>', csrf_exempt(views.save_scores), name='save_scores'),
+    path('get-scores/<int:id>', csrf_exempt(views.get_scores), name='get_scores'),
 
 ]

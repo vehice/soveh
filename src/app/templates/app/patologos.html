@@ -209,7 +209,7 @@
                         <div class="btn-group optionGroups-{{entryForm.analisis}}" data-entryform="{{ entryForm.entryform }}" role="group">
                           <button class="btn btn-primary showSummaryBtn" data-id="{{ entryForm.entryform }}" data-closed="{% if entryForm.entryform_form_closed or entryForm.entryform_cancelled %} 1 {% else %} 0 {% endif %}" data-toggle="tooltip" data-placement="top" title="Resúmen del Caso"><i class="fa fa-list-alt fa-fx"></i></button>
                           {% if request.user.is_superuser and entryForm.patologo %}
-                            <button class="btn btn-info showScoreBtn" data-id="{{ entryForm.entryform }}" data-toggle="tooltip" data-placement="top" title="Notas"><i class="fa fa-check-square-o fa-fx"></i></button>
+                            <button class="btn btn-info showScoreBtn" data-id="{{ entryForm.analisis }}" data-toggle="tooltip" data-placement="top" title="Notas"><i class="fa fa-check-square-o fa-fx"></i></button>
                           {% endif %}
                       </td>
                     </tr>
@@ -302,7 +302,7 @@
         </button>
       </div>
       <div class="modal-body">
-        <input type="hidden" id="score_entryform_id" />
+        <input type="hidden" id="score_service_id" />
         <input type="hidden" id="score_index" />
         <form id="score_form" class="form form-horizontal">
           <div class="form-group row">
@@ -547,22 +547,22 @@
   });
 
   $(document).on('click', '.showScoreBtn', function(e){
-    var entryform_id = $(this).data('id');
-    $('#score_entryform_id').val(entryform_id);
+    var service_id = $(this).data('id');
+    $('#score_service_id').val(service_id);
     $('#score_index').val(tabla_casos.row($(this).parent().parent().parent()).index());
     $('#score_diagnostic').val("");
     $('#score_report').val("");
-    var url = Urls.entryform_id(entryform_id);
+    var url = Urls.get_scores(service_id);
     $.ajax({
       type: "GET",
       url: url,
     })
     .done(function (data) {
-      if (data.entryform.score_diagnostic) {
-        $('#score_diagnostic').val(data.entryform.score_diagnostic.toString().replace(",", "."));
+      if (data.score_diagnostic) {
+        $('#score_diagnostic').val(data.score_diagnostic.toString().replace(",", "."));
       }
-      if (data.entryform.score_report) {
-        $('#score_report').val(data.entryform.score_report.toString().replace(",", "."));
+      if (data.score_report) {
+        $('#score_report').val(data.score_report.toString().replace(",", "."));
       }
     })
     .fail(function () {
@@ -572,7 +572,7 @@
   });
 
   $(document).on('click', '.saveScores', function(e){
-    var id = $('#score_entryform_id').val();
+    var id = $('#score_service_id').val();
     var data = $('#score_form').serialize();
     var row_index = parseInt($('#score_index').val());
     $.ajax({
@@ -676,12 +676,11 @@
           toastr.info("Hemos procesado la derivación pero ha surgido un problema: "+data.msg, "Listo!");
         } else {
           {% if request.user.is_superuser %}
-            var entryform_id = $('.optionGroups-'+analysis_id).data("entryform");
             if (pathologist_value == 'NA'){
               $('.optionGroups-'+analysis_id+' .showScoreBtn').remove();
             } else {
               $('.optionGroups-'+analysis_id+' .showScoreBtn').remove();
-              $('.optionGroups-'+analysis_id).append('<button class="btn btn-info showScoreBtn" data-id="'+entryform_id+'" data-toggle="tooltip" data-placement="top" title="Notas"><i class="fa fa-check-square-o fa-fx"></i></button>');
+              $('.optionGroups-'+analysis_id).append('<button class="btn btn-info showScoreBtn" data-id="'+analysis_id+'" data-toggle="tooltip" data-placement="top" title="Notas"><i class="fa fa-check-square-o fa-fx"></i></button>');
             }
           {% endif %}
           $('*[data-analisis="'+analysis_id+'"]').val(pathologist_value).trigger("change");
