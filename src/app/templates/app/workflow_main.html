@@ -163,7 +163,8 @@
                 <input class="form-control" name="name" placeholder="Nombre*" required/>
               </div>
               <div class="col-sm-3 form-group">
-                <input class="form-control" name="email" placeholder="Correo Electrónico*" required/>
+                <input class="form-control" name="email" placeholder="Correos Electrónicos*" required/>
+                <p>* Puede ingresar multiples direcciones separadas por punto y coma (;)</p>
               </div>
               <div class="col-sm-2 form-group">
                 <input class="form-control" name="phone" placeholder="Teléfono" />
@@ -1173,7 +1174,12 @@ function shareAction(email, download, lang){
       {
         $('#email_modal').modal('show');
         $('#email_to').tagsinput();
-        $('#email_to').tagsinput('add', data.email);
+        
+        $.each(data.email.split(";"), function(index, elem){
+          if (elem != "") {
+            $('#email_to').tagsinput('add', elem);
+          }
+        });
         $('#lang').val(lang);
         $('#formId').val({{form.id}});
         let template = '<option value="0">Sin Plantilla</option>';

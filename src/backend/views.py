@@ -1116,11 +1116,14 @@ class RESPONSIBLE(View):
             if id:
                 responsible.id = id
             responsible.name = var_post.get('name', None)
-            responsible.email = var_post.get('email', None)
+            email_str = var_post.get('email', None)
             responsible.phone = var_post.get('phone', None)
             responsible.job = var_post.get('job', None)
             responsible.active = var_post.get('active', True)
+            if email_str:
+                responsible.email = email_str.strip().replace(" ", "")
             responsible.save()
+
             return JsonResponse({'ok': True})
         except Exception as e:
              return JsonResponse({'ok': False})
