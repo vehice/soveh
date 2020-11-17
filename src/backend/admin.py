@@ -1,12 +1,9 @@
 from django.contrib import admin
 from backend.models import *
-# from .models import Specie, WaterSource, Fixative, Exam, Customer, LarvalStage, EntryForm, Organ, Slice, \
-# Diagnostic, DiagnosticDistribution, DiagnosticIntensity, Pathology, OrganLocation, Responsible, EmailTemplate, EmailTemplateAttachment
 from django.forms import Textarea, TextInput 
-# admin.site.register(Customer)
 
 class CustomExam(admin.ModelAdmin):
-    list_display = ('name', 'stain', 'service')
+    list_display = ('name', 'service')
     # readonly_fields  = ('get_service_desc',)
 
     def get_service_desc(self, obj):
@@ -34,6 +31,11 @@ admin.site.register(Responsible)
 admin.site.register(EmailCcTo)
 
 admin.site.register(Research)
+
+class CustomStain(admin.ModelAdmin):
+    list_display = ('name', 'abbreviation', 'description')
+
+admin.site.register(Stain, CustomStain)
 
 class CustomEmailAttachment(admin.TabularInline):
     model = EmailTemplateAttachment

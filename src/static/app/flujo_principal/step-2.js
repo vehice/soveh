@@ -71,42 +71,47 @@ function loadExams(exams) {
 }
 
 function loadSamples(samples){
-
   $("#samples_table tbody").html("");
-  var exams = []
-  $.each(samples, function (i, v){
+  var exams = [];
+  $.each(samples, function(i, v){
     addSampleRow(v);
     $.each(v.sample_exams_set, function(j,item){
       exams.push(item.exam_id);
       $('.delete-'+v.id).hide();
-      var html = addOrgansOptions(item.exam_name, item.service_id, v.id, item.exam_id, v.identification.organs, v.id+"-"+($('#sampleNro-'+v.id)[0].rowSpan + 1), true, item.is_closed);
+      var html = addServiceRow(
+        item.exam_name, 
+        item.service_id, 
+        v.id, 
+        item.exam_id, 
+        data_step_2.stains,
+        v.identification.organs,
+        v.id+"-"+($('#sampleNro-'+v.id)[0].rowSpan + 1), 
+        true,
+        item.is_closed
+      );
       $('#sampleNro-'+v.id)[0].rowSpan = $('#sampleNro-'+v.id)[0].rowSpan + 1; 
       $('#sampleIden-'+v.id)[0].rowSpan = $('#sampleIden-'+v.id)[0].rowSpan + 1; 
       $("#sample-"+v.id).after(html);
-
-      // $('.organs-select-'+ item.exam_id).select2();
-      // $('.organs-select-'+ item.exam_id).on('select2:select', function(e){
-      //   var values = e.params.data.id;
-      //   $.each($('.organs-select-'+ item.exam_id), function(i,v){
-      //     var old_values = $(v).val();
-      //     old_values.push(values);
-      //     $(v).val(old_values);
-      //     $(v).trigger('change');
-      //   });
-      // });
-
       
       var values = [];
       $.each(item.organ_id, function(j,w){
         values.push(w.id);
       });
-      $('#'+v.id+"-"+$('#sampleNro-'+v.id)[0].rowSpan).val(values);
-      $('#'+v.id+"-"+$('#sampleNro-'+v.id)[0].rowSpan).trigger('change');
+      $('#organs-'+v.id+"-"+$('#sampleNro-'+v.id)[0].rowSpan).val(values).trigger('change');
+
+      if (item.sample_exam_stain_id){
+        $('#stain-'+v.id+"-"+$('#sampleNro-'+v.id)[0].rowSpan).val(item.sample_exam_stain_id).trigger("change");
+      } else {
+        $('#stain-'+v.id+"-"+$('#sampleNro-'+v.id)[0].rowSpan).val(item.exam_stain_id).trigger("change");
+      }
+
     });
   });
  
   $.each($.unique(exams), function(i, item){
     $('.organs-select-'+ item).select2();
+    $('.stain-select-'+ item).select2();
+    
     $('.organs-select-'+ item).on('select2:select', function(e){
       var values = e.params.data.id;
       var target_id = $(e.target).parent().parent()[0].classList[1].split("-")[2];
@@ -131,6 +136,27 @@ function loadSamples(samples){
         });  
       }
     });
+
+    $('.stain-select-'+ item).on('select2:select', function(e){
+      var values = e.params.data.id;
+      var target_id = $(e.target).parent().parent()[0].classList[1].split("-")[2];
+      
+      if ( $('#switchery3')[0].checked ){
+        $.each($('.stain-select-'+ item), function(i,v){
+            $(v).val(values);
+            $(v).trigger('change');
+        });
+      } else {
+        $.each(data_step_2.samples, function(i, item2){
+          if (target_id == item2.id){
+            $.each($('.analis-row-'+item2.id+' .stain-select-'+ item), function(i,v){
+                $(v).val(values);
+                $(v).trigger('change');
+            });
+          }
+        });  
+      }
+    });
   });
 
   // $('.samples_exams').select2();
@@ -143,6 +169,7 @@ function loadSamples(samples){
   
 }
 
+// Load prev samples and exams
 function initialData(data) {
   patologos_list = data.patologos;
   loadSamples(data.samples);
@@ -187,13 +214,14 @@ function getSampleAvailableOrgans(sid){
 }
 
 function addExamToSamples(exam){
-
+    var exam_object = data_step_2.exams.find(x => x.id == exam.id);
     $('#samples_table .samples_exams').each( function(i){
       
         if ( $('#switchery')[0].checked ){
             // add exam to all but duplicated
             var sampleId = $(this).data('index');
             $.each(data_step_2.samples, function(i, item){
+
                 // add exam to empty samples
                 if ( item.id == sampleId && !item.sample_exams_set.hasOwnProperty(exam.id) ){
                     $('.delete-'+sampleId).hide();
@@ -201,8 +229,21 @@ function addExamToSamples(exam){
                     $('#sampleIden-'+sampleId)[0].rowSpan = $('#sampleIden-'+sampleId)[0].rowSpan + 1; 
                     // show organs options
                     avail_organs = getSampleAvailableOrgans(sampleId);
-                    var html = addOrgansOptions(exam.text, $(exam.element).data('service'), sampleId, exam.id, avail_organs, false);
+                    var html = addServiceRow(
+                      exam.text, 
+                      $(exam.element).data('service'), 
+                      sampleId, 
+                      exam.id, 
+                      data_step_2.stains,
+                      avail_organs,
+                      sampleId+"-"+($('#sampleNro-'+sampleId)[0].rowSpan),  
+                      false
+                    );
                     $("#sample-"+sampleId).after(html);
+
+                    if (exam_object.stain_id){
+                      $('#stain-'+sampleId+"-"+$('#sampleNro-'+sampleId)[0].rowSpan ).val(exam_object.stain_id).trigger("change");
+                    }
                     return false;
                 }
             });
@@ -216,15 +257,32 @@ function addExamToSamples(exam){
                     $('#sampleIden-'+sampleId)[0].rowSpan = $('#sampleIden-'+sampleId)[0].rowSpan + 1; 
                     // show organs options
                     avail_organs = getSampleAvailableOrgans(sampleId);
-                    var html = addOrgansOptions(exam.text, $(exam.element).data('service'), sampleId, exam.id, avail_organs, false);
+                    var html = addServiceRow(
+                      exam.text, 
+                      $(exam.element).data('service'), 
+                      sampleId, 
+                      exam.id,
+                      data_step_2.stains, 
+                      avail_organs,
+                      sampleId+"-"+($('#sampleNro-'+sampleId)[0].rowSpan), 
+                      false
+                    ); 
                     $("#sample-"+sampleId).after(html);
+
+                    if (exam_object.stain_id){
+                      $('#stain-'+sampleId+"-"+$('#sampleNro-'+sampleId)[0].rowSpan).val(exam_object.stain_id).trigger("change");
+                    }
                     return false;
                 }
             });
         }
+
+
     });
 
     $('.organs-select-'+ exam.id).select2();
+    $('.stain-select-'+ exam.id).select2();
+    
     $('.organs-select-'+ exam.id).on('select2:select', function(e){
       var values = e.params.data.id;
       var target_id = $(e.target).parent().parent()[0].classList[1].split("-")[2];
@@ -242,6 +300,27 @@ function addExamToSamples(exam){
                 var old_values = $(v).val();
                 old_values.push(values);
                 $(v).val(old_values);
+                $(v).trigger('change');
+            });
+          }
+        });  
+      }
+    });
+
+    $('.stain-select-'+ exam.id).on('select2:select', function(e){
+      var values = e.params.data.id;
+      var target_id = $(e.target).parent().parent()[0].classList[1].split("-")[2];
+      
+      if ( $('#switchery3')[0].checked ){
+        $.each($('.stain-select-'+ exam.id), function(i,v){
+            $(v).val(values);
+            $(v).trigger('change');
+        });
+      } else {
+        $.each(data_step_2.samples, function(i, item2){
+          if (target_id == item2.id){
+            $.each($('.analis-row-'+item2.id+' .stain-select-'+ exam.id), function(i,v){
+                $(v).val(values);
                 $(v).trigger('change');
             });
           }
@@ -360,11 +439,11 @@ function addSampleRow(sample) {
   $("#samples_table tbody").append(templateHTML)
 }
 
-function addOrgansOptions(analisis, analisis_type, sampleId, sampleIndex, organs, optionId = null, prevData = false, is_closed = false) {
+function addServiceRow(analisis, analisis_type, sampleId, sampleIndex, stains, organs, optionId = null, prevData = false, is_closed = false) {
   var sampleRowTemplate = document.getElementById("add_analisis").innerHTML;
 
   var templateFn = _.template(sampleRowTemplate);
-  var templateHTML = templateFn({'organs': organs, 'type': analisis_type, 'analisis': analisis, 'sampleId': sampleId, 'sampleIndex': sampleIndex, 'optionId': optionId, 'prevData': prevData, 'is_closed': is_closed});
+  var templateHTML = templateFn({'organs': organs, 'stains':stains, 'type': analisis_type, 'analisis': analisis, 'sampleId': sampleId, 'sampleIndex': sampleIndex, 'optionId': optionId, 'prevData': prevData, 'is_closed': is_closed});
   return templateHTML;
 }
 

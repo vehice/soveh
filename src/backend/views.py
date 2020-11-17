@@ -121,6 +121,8 @@ class ENTRYFORM(View):
                                 'exam_id': sE.exam_id,
                                 'exam_name': sE.exam.name,
                                 'exam_type': sE.exam.service_id,
+                                'exam_stain_id': sE.exam.stain_id,
+                                'sample_exam_stain_id': sE.stain_id,
                                 'sample_id': sE.sample_id,
                                 'organ_id': [{
                                     'name':sE.organ.name,
@@ -192,13 +194,14 @@ class ENTRYFORM(View):
                     'entryform_id' : analysis.entryform_id,
                     'exam_id' : analysis.exam_id,
                     'exam__name' : analysis.exam.name,
+                    'exam__stain_id': analysis.exam.stain.id,
                     'patologo_id' : analysis.patologo_id,
                     'patologo__first_name' : analysis.patologo.first_name if analysis.patologo else None,
                     'patologo__last_name' : analysis.patologo.last_name if analysis.patologo else None,
                     'service_comments': [],
                     'status': analysis.status,
                     'samples_count': samples_count,
-                    'organs_count': organs_count
+                    'organs_count': organs_count,
                 }
 
                 for cmm in analysis.service_comments.all():
@@ -230,13 +233,15 @@ class ENTRYFORM(View):
             patologos = list(User.objects.filter(userprofile__profile_id__in=[4, 5]).values())
             entryform_types = list(EntryForm_Type.objects.all().values())
             researches = list(Research.objects.filter(status=True).values())
-
+            stains_list = list(Stain.objects.values())
+            
             data = {
                 'entryform': entryform,
                 'identifications': identifications,
                 'samples': samples_as_dict,
                 'exams': exams_set,
                 'organs': organs_set,
+                'stains': stains_list,
                 'species_list': species_list,
                 'larvalStages_list': larvalStages_list,
                 'fixtatives_list': fixtatives_list,
@@ -256,6 +261,7 @@ class ENTRYFORM(View):
             customers = list(Customer.objects.all().values())
             entryform_types = list(EntryForm_Type.objects.all().values())
             researches = list(Research.objects.filter(status=True).values())
+            stains_list = list(Stain.objects.values())
 
             data = {
                 'species': species,
@@ -264,6 +270,7 @@ class ENTRYFORM(View):
                 'waterSources': waterSources,
                 'exams': exams,
                 'organs': organs,
+                'stains': stains_list,
                 'customers': customers,
                 'entryform_types': entryform_types,
                 'research_types_list': researches
@@ -441,8 +448,15 @@ class ANALYSIS(View):
     def get(self, request, entry_form=None):
         analyses_qs = AnalysisForm.objects.filter(entryform=entry_form, exam__isnull=False)
         analyses = []
-
+        
+        samples = Sample.objects.filter(entryform=entry_form)
+        
         for analysis in analyses_qs:
+            stains = []
+            for s in samples:
+                stains.extend(list(set(s.sampleexams_set.filter(exam=analysis.exam, stain__isnull=False).values_list('stain__abbreviation', flat=True))))
+                
+            
             if request.user.userprofile.profile_id == 5:
                 if analysis.patologo_id != request.user.id:
                     continue
@@ -468,12 +482,14 @@ class ANALYSIS(View):
             slices = []
             for slice_new in slices_qs:
                 slices.append({'name': slice_new.slice_name})
+                
+            
 
             analyses.append({
                 'form_id': form_id,
                 'id': analysis.id,
                 'exam_name': exam.name,
-                'exam_stain': exam.stain,
+                'exam_stain': ", ".join(list(set(stains))),
                 'exam_type': exam.service_id,
                 'exam_pathologists_assignment': exam.pathologists_assignment,
                 'slices': slices,
@@ -2016,6 +2032,7 @@ def step_2_entryform(request):
             analysis_form = AnalysisForm.objects.create(
                 entryform_id=entryform.id,
                 exam=ex,
+                stain=ex.stain
             )
 
             Form.objects.create(
@@ -2047,16 +2064,24 @@ def step_2_entryform(request):
                 v for k, v in dict(var_post).items() if k.startswith("sample[organs]["+values+"]["+exam)
             ]
             
+            sample_stain = [
+                v for k, v in dict(var_post).items() if k.startswith("sample[stain]["+values+"]["+exam)
+            ]
+            
             for se in SampleExams.objects.filter(sample=sample, exam_id=exam):
                 if se.organ_id not in sample_organs[0]:
-                    se.delete()      
+                    se.delete()
+                else:
+                    se.stain_id = sample_stain[0][0] 
+                    se.save()
 
             for organ in sample_organs[0]:
                 if SampleExams.objects.filter(sample=sample, exam_id=exam, organ_id=organ).count() == 0:
                     bulk_data.append(SampleExams(
                         sample_id = sample.pk,
                         exam_id = exam,
-                        organ_id= organ
+                        organ_id= organ,
+                        stain_id = sample_stain[0][0]
                     ))
         change = change or checkSampleExams(sample.sampleexams_set.all(), bulk_data)
         SampleExams.objects.bulk_create(bulk_data)
@@ -2239,6 +2264,7 @@ def step_new_analysis(request):
             analysis_form = AnalysisForm.objects.create(
                 entryform_id=entryform.id,
                 exam=ex,
+                stain=ex.stain
             )
 
             Form.objects.create(
@@ -2327,6 +2353,7 @@ def step_new_analysis2(request):
             analysis_form = AnalysisForm.objects.create(
                 entryform_id=entryform.id,
                 exam=ex,
+                stain=ex.stain
             )
             new_analysisform[exam] = analysis_form.pk
 

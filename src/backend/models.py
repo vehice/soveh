@@ -64,9 +64,22 @@ PRICING_UNIT = (
     (2, "Por pez")
 )
 
+class Stain(models.Model):
+    name = models.CharField(max_length=250, null=True, blank=True, verbose_name="Nombre")
+    abbreviation = models.CharField(max_length=250, null=True, blank=True, verbose_name="Abreviación")
+    description = models.TextField(null=True, blank=True, verbose_name="Descripción")
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        verbose_name = "Tinción"
+        verbose_name_plural = "Tinciones"
+
 class Exam(models.Model):
     name = models.CharField(max_length=250, null=True, blank=True, verbose_name="Nombre")
-    stain = models.CharField(max_length=250, null=True, blank=True, verbose_name="Tinción")
+    stain = models.ForeignKey(Stain, null=True, on_delete=models.SET_NULL, verbose_name="Tinción")
+    # stain = models.CharField(max_length=250, null=True, blank=True, verbose_name="Tinción")
     pathologists_assignment = models.BooleanField(default=True, verbose_name="Asignación de patólogo")
     pricing_unit = models.IntegerField(default=1, choices=PRICING_UNIT, verbose_name="Unidad de cobro")
     service = models.ForeignKey(Service, null=True, default=1, on_delete=models.SET_NULL, verbose_name="Tipo de Servicio")
@@ -213,8 +226,8 @@ class EntryForm(models.Model):
         on_delete=models.SET_NULL,
     )
     attached_files = models.ManyToManyField(CaseFile)
-    score_diagnostic = models.FloatField(default=None, null=True, blank=True)
-    score_report = models.FloatField(default=None, null=True, blank=True)
+    # score_diagnostic = models.FloatField(default=None, null=True, blank=True)
+    # score_report = models.FloatField(default=None, null=True, blank=True)
     
 
     def __str__(self):
@@ -263,6 +276,7 @@ class ExternalReport(models.Model):
     loaded_by = models.ForeignKey(User, null=True, on_delete=models.SET_NULL)
     created_at = models.DateTimeField(auto_now_add=True)
 
+# Service
 class AnalysisForm(models.Model):
     entryform = models.ForeignKey(
         EntryForm, null=True, on_delete=models.SET_NULL)
@@ -319,6 +333,8 @@ class SampleExams(models.Model):
     exam = models.ForeignKey(Exam, null=True, on_delete=models.CASCADE)
     # analysis = models.ForeignKey(AnalysisForm, null=True, on_delete=models.CASCADE)
     organ = models.ForeignKey(Organ, null=True, on_delete=models.CASCADE)
+    stain = models.ForeignKey(Stain, null=True, on_delete=models.SET_NULL, verbose_name="Tinción")
+
 
     def __str__(self):
         return str(self.sample)
