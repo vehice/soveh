@@ -3,7 +3,7 @@ from backend.models import *
 from django.forms import Textarea, TextInput 
 
 class CustomExam(admin.ModelAdmin):
-    list_display = ('name', 'service')
+    list_display = ('name', 'service', 'stain')
     # readonly_fields  = ('get_service_desc',)
 
     def get_service_desc(self, obj):
