@@ -194,7 +194,7 @@ class ENTRYFORM(View):
                     'entryform_id' : analysis.entryform_id,
                     'exam_id' : analysis.exam_id,
                     'exam__name' : analysis.exam.name,
-                    'exam__stain_id': analysis.exam.stain.id,
+                    'exam__stain_id': analysis.exam.stain.id if analysis.exam.stain else None,
                     'patologo_id' : analysis.patologo_id,
                     'patologo__first_name' : analysis.patologo.first_name if analysis.patologo else None,
                     'patologo__last_name' : analysis.patologo.last_name if analysis.patologo else None,
@@ -2072,7 +2072,7 @@ def step_2_entryform(request):
                 if se.organ_id not in sample_organs[0]:
                     se.delete()
                 else:
-                    se.stain_id = sample_stain[0][0] 
+                    se.stain_id = sample_stain[0][0] if sample_stain else None
                     se.save()
 
             for organ in sample_organs[0]:
@@ -2081,7 +2081,7 @@ def step_2_entryform(request):
                         sample_id = sample.pk,
                         exam_id = exam,
                         organ_id= organ,
-                        stain_id = sample_stain[0][0]
+                        stain_id = sample_stain[0][0] if sample_stain else None
                     ))
         change = change or checkSampleExams(sample.sampleexams_set.all(), bulk_data)
         SampleExams.objects.bulk_create(bulk_data)
