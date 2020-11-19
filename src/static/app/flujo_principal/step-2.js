@@ -105,32 +105,30 @@ function loadSamples(samples){
     });
   });
  
-  $.each($.unique(exams), function(i, item){
-    $('.organs-select-'+ item).select2();
-    $('.organs-select-'+ item).on('select2:select', function(e){
-      var values = e.params.data.id;
-      var target_id = $(e.target).parent().parent()[0].classList[1].split("-")[2];
-      
-      if ( $('#switchery2')[0].checked ){
-        $.each($('.organs-select-'+ item), function(i,v){
-            var old_values = $(v).val();
-            old_values.push(values);
-            $(v).val(old_values);
-            $(v).trigger('change');
-        });
-      } else {
-        $.each(data_step_2.samples, function(i, item2){
-          if (target_id == item2.id){
-            $.each($('.analis-row-'+item2.id+' .organs-select-'+ item), function(i,v){
-                var old_values = $(v).val();
-                old_values.push(values);
-                $(v).val(old_values);
-                $(v).trigger('change');
-            });
-          }
-        });  
-      }
-    });
+  $('.organs-select').select2();
+  $('.organs-select').on('select2:select', function(e){
+    var values = e.params.data.id;
+    var target_id = $(e.target).parent().parent()[0].classList[1].split("-")[2];
+    
+    if ( $('#switchery2')[0].checked ){
+      $.each($('.organs-select'), function(i,v){
+          var old_values = $(v).val();
+          old_values.push(values);
+          $(v).val(old_values);
+          $(v).trigger('change');
+      });
+    } else {
+      $.each(data_step_2.samples, function(i, item2){
+        if (target_id == item2.id){
+          $.each($('.analis-row-'+item2.id+' .organs-select'), function(i,v){
+              var old_values = $(v).val();
+              old_values.push(values);
+              $(v).val(old_values);
+              $(v).trigger('change');
+          });
+        }
+      });  
+    }
   });
 
   // $('.samples_exams').select2();
