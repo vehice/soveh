@@ -109,9 +109,10 @@ function loadSamples(samples){
   $('.organs-select').on('select2:select', function(e){
     var values = e.params.data.id;
     var target_id = $(e.target).parent().parent()[0].classList[1].split("-")[2];
+    var exam_id = $(e.target).parent().parent().data('sampleid');
     
     if ( $('#switchery2')[0].checked ){
-      $.each($('.organs-select'), function(i,v){
+      $.each($('.organs-select-'+exam_id), function(i,v){
           var old_values = $(v).val();
           old_values.push(values);
           $(v).val(old_values);
@@ -226,6 +227,7 @@ function addExamToSamples(exam){
     $('.organs-select-'+ exam.id).on('select2:select', function(e){
       var values = e.params.data.id;
       var target_id = $(e.target).parent().parent()[0].classList[1].split("-")[2];
+      
       if ( $('#switchery2')[0].checked ){
         $.each($('.organs-select-'+ exam.id), function(i,v){
             var old_values = $(v).val();
