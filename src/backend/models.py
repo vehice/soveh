@@ -301,6 +301,8 @@ class AnalysisForm(models.Model):
     researches = models.ManyToManyField(Research)
     score_diagnostic = models.FloatField(default=None, null=True, blank=True)
     score_report = models.FloatField(default=None, null=True, blank=True)
+    stain = models.ForeignKey(Stain, null=True, on_delete=models.SET_NULL, verbose_name="Tinción")
+
 
     @property
     def status(self):
