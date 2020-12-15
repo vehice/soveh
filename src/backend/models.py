@@ -70,7 +70,7 @@ class Stain(models.Model):
     description = models.TextField(null=True, blank=True, verbose_name="Descripción")
 
     def __str__(self):
-        return self.name
+        return self.abbreviation
 
     class Meta:
         verbose_name = "Tinción"
