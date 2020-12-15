@@ -5,11 +5,11 @@ from django.forms import Textarea, TextInput
 class CustomExam(admin.ModelAdmin):
     list_display = ('name', 'service', 'stain')
     # readonly_fields  = ('get_service_desc',)
-
-    def get_service_desc(self, obj):
-        return obj.service.description
-
-    # get_service_desc.short_description = 'Descripción del Servicio'
+    def get_form(self, request, obj=None, **kwargs):
+        form = super(CustomExam, self).get_form(request, obj, **kwargs)
+        field = form.base_fields["stain"]
+        field.widget.can_delete_related = False
+        return form
 
 admin.site.register(Exam, CustomExam)
 
