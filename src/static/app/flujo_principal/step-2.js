@@ -108,55 +108,105 @@ function loadSamples(samples){
     });
   });
  
-  $.each($.unique(exams), function(i, item){
-    $('.organs-select-'+ item).select2();
-    $('.stain-select-'+ item).select2();
+  // $.each($.unique(exams), function(i, item){
+  //   $('.organs-select-'+ item).select2();
+  //   $('.stain-select-'+ item).select2();
     
-    $('.organs-select-'+ item).on('select2:select', function(e){
-      var values = e.params.data.id;
-      var target_id = $(e.target).parent().parent()[0].classList[1].split("-")[2];
+    // $('.organs-select-'+ item).on('select2:select', function(e){
+    //   var values = e.params.data.id;
+    //   var target_id = $(e.target).parent().parent()[0].classList[1].split("-")[2];
       
-      if ( $('#switchery2')[0].checked ){
-        $.each($('.organs-select-'+ item), function(i,v){
-            var old_values = $(v).val();
-            old_values.push(values);
-            $(v).val(old_values);
-            $(v).trigger('change');
-        });
-      } else {
-        $.each(data_step_2.samples, function(i, item2){
-          if (target_id == item2.id){
-            $.each($('.analis-row-'+item2.id+' .organs-select-'+ item), function(i,v){
-                var old_values = $(v).val();
-                old_values.push(values);
-                $(v).val(old_values);
-                $(v).trigger('change');
-            });
-          }
-        });  
-      }
-    });
+    //   if ( $('#switchery2')[0].checked ){
+    //     $.each($('.organs-select-'+ item), function(i,v){
+    //         var old_values = $(v).val();
+    //         old_values.push(values);
+    //         $(v).val(old_values);
+    //         $(v).trigger('change');
+    //     });
+    //   } else {
+    //     $.each(data_step_2.samples, function(i, item2){
+    //       if (target_id == item2.id){
+    //         $.each($('.analis-row-'+item2.id+' .organs-select-'+ item), function(i,v){
+    //             var old_values = $(v).val();
+    //             old_values.push(values);
+    //             $(v).val(old_values);
+    //             $(v).trigger('change');
+    //         });
+    //       }
+    //     });  
+    //   }
+    // });
 
-    $('.stain-select-'+ item).on('select2:select', function(e){
-      var values = e.params.data.id;
-      var target_id = $(e.target).parent().parent()[0].classList[1].split("-")[2];
+    // $('.stain-select-'+ item).on('select2:select', function(e){
+    //   var values = e.params.data.id;
+    //   var target_id = $(e.target).parent().parent()[0].classList[1].split("-")[2];
       
-      if ( $('#switchery3')[0].checked ){
-        $.each($('.stain-select-'+ item), function(i,v){
-            $(v).val(values);
-            $(v).trigger('change');
-        });
-      } else {
-        $.each(data_step_2.samples, function(i, item2){
-          if (target_id == item2.id){
-            $.each($('.analis-row-'+item2.id+' .stain-select-'+ item), function(i,v){
-                $(v).val(values);
-                $(v).trigger('change');
-            });
-          }
-        });  
-      }
-    });
+    //   if ( $('#switchery3')[0].checked ){
+    //     $.each($('.stain-select-'+ item), function(i,v){
+    //         $(v).val(values);
+    //         $(v).trigger('change');
+    //     });
+    //   } else {
+    //     $.each(data_step_2.samples, function(i, item2){
+    //       if (target_id == item2.id){
+    //         $.each($('.analis-row-'+item2.id+' .stain-select-'+ item), function(i,v){
+    //             $(v).val(values);
+    //             $(v).trigger('change');
+    //         });
+    //       }
+    //     });  
+    //   }
+    // });
+
+
+  $('.organs-select').select2();
+  $('.stain-select').select2();
+  $('.organs-select').on('select2:select', function(e){
+    var values = e.params.data.id;
+    var target_id = $(e.target).parent().parent()[0].classList[1].split("-")[2];
+    var exam_id = $(e.target).parent().parent().data('sampleid');
+    
+    if ( $('#switchery2')[0].checked ){
+      $.each($('.organs-select-'+exam_id), function(i,v){
+          var old_values = $(v).val();
+          old_values.push(values);
+          $(v).val(old_values);
+          $(v).trigger('change');
+      });
+    } else {
+      $.each(data_step_2.samples, function(i, item2){
+        if (target_id == item2.id){
+          $.each($('.analis-row-'+item2.id+' .organs-select'), function(i,v){
+              var old_values = $(v).val();
+              old_values.push(values);
+              $(v).val(old_values);
+              $(v).trigger('change');
+          });
+        }
+      });  
+    }
+  });
+
+  $('.stain-select').on('select2:select', function(e){
+    var values = e.params.data.id;
+    var target_id = $(e.target).parent().parent()[0].classList[1].split("-")[2];
+    var exam_id = $(e.target).parent().parent().data('sampleid');
+
+    if ( $('#switchery3')[0].checked ){
+      $.each($('.stain-select-'+ exam_id), function(i,v){
+          $(v).val(values);
+          $(v).trigger('change');
+      });
+    } else {
+      $.each(data_step_2.samples, function(i, item2){
+        if (target_id == item2.id){
+          $.each($('.analis-row-'+item2.id+' .stain-select-'+ item), function(i,v){
+              $(v).val(values);
+              $(v).trigger('change');
+          });
+        }
+      });  
+    }
   });
 
   // $('.samples_exams').select2();
@@ -286,6 +336,7 @@ function addExamToSamples(exam){
     $('.organs-select-'+ exam.id).on('select2:select', function(e){
       var values = e.params.data.id;
       var target_id = $(e.target).parent().parent()[0].classList[1].split("-")[2];
+      
       if ( $('#switchery2')[0].checked ){
         $.each($('.organs-select-'+ exam.id), function(i,v){
             var old_values = $(v).val();
