@@ -249,16 +249,12 @@
               <p>
                 <span class="t3">{{key}}: </span>
                 <span class="t3_n">
-                  {% for l in value %}
+                  {% for k, v in value.items %}
                     {% if forloop.last %}
-                      {% for k, v in l.items %}
-                        {{k|title}} ({{v}})
-                      {% endfor %}
-                    {% else %}
-                      {% for k, v in l.items %}
-                        {{k|title}} ({{v}}),
-                      {% endfor %}
-                    {% endif %} 
+                      {{k|title}} ({{v|join:" - "}})
+                    {% else %} 
+                      {{k|title}} ({{v|join:" - "}}),
+                    {% endif %}  
                   {% endfor %}
                 </span>
               </p>

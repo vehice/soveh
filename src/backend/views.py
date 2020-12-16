@@ -179,18 +179,19 @@ class ENTRYFORM(View):
                 analysis_form = analysis.forms.get()
 
                 samples = Sample.objects.filter(entryform=analysis.entryform).values_list('id', flat=True)
-                sampleExams = SampleExams.objects.filter(sample__in=samples, exam=analysis.exam)
+                sampleExams = SampleExams.objects.filter(sample__in=samples, exam=analysis.exam, stain=analysis.stain)
                 organs_count = samples_count = len(sampleExams)
                 if analysis.exam.pricing_unit == 1:
                     samples_count = organs_count
                 else:
-                    sampleExams = SampleExams.objects.filter(sample__in=samples, exam=analysis.exam).values_list('sample_id', flat=True)
+                    sampleExams = SampleExams.objects.filter(sample__in=samples, exam=analysis.exam, stain=analysis.stain).values_list('sample_id', flat=True)
                     samples_count = len(list(set(sampleExams)))
 
                 aux = {
                     'id': analysis.id,
                     'created_at' : analysis.created_at,
                     'comments' : analysis.comments,
+                    'stain': analysis.stain.abbreviation.upper() if analysis.stain.abbreviation else "N/A",
                     'entryform_id' : analysis.entryform_id,
                     'exam_id' : analysis.exam_id,
                     'exam__name' : analysis.exam.name,
@@ -452,9 +453,9 @@ class ANALYSIS(View):
         samples = Sample.objects.filter(entryform=entry_form)
         
         for analysis in analyses_qs:
-            stains = []
-            for s in samples:
-                stains.extend(list(set(s.sampleexams_set.filter(exam=analysis.exam, stain__isnull=False).values_list('stain__abbreviation', flat=True))))
+            # stains = []
+            # for s in samples:
+            #     stains.extend(list(set(s.sampleexams_set.filter(exam=analysis.exam, stain__isnull=False).values_list('stain__abbreviation', flat=True))))
                 
             
             if request.user.userprofile.profile_id == 5:
@@ -489,7 +490,7 @@ class ANALYSIS(View):
                 'form_id': form_id,
                 'id': analysis.id,
                 'exam_name': exam.name,
-                'exam_stain': ", ".join(list(set(stains))),
+                'exam_stain': analysis.stain.abbreviation.upper() if analysis.stain.abbreviation else "N/A",
                 'exam_type': exam.service_id,
                 'exam_pathologists_assignment': exam.pathologists_assignment,
                 'slices': slices,
@@ -2017,29 +2018,31 @@ def step_2_entryform(request):
     # analyses_qs.delete()
 
 
-    for exam in exams_to_do:
-        ex = Exam.objects.get(pk=exam)
 
-        if ex.service_id in [1,3,4]:
-            flow = Flow.objects.get(pk=2)
-        elif ex.service_id == 5:
-            continue;
-        else:
-            flow = Flow.objects.get(pk=3)
+    exam_stains = {}
+    # for exam in exams_to_do:
+    #     ex = Exam.objects.get(pk=exam)
+
+    #     if ex.service_id in [1,3,4]:
+    #         flow = Flow.objects.get(pk=2)
+    #     elif ex.service_id == 5:
+    #         continue;
+    #     else:
+    #         flow = Flow.objects.get(pk=3)
 
         
-        if AnalysisForm.objects.filter(entryform_id=entryform.id, exam=ex).count() == 0:
-            analysis_form = AnalysisForm.objects.create(
-                entryform_id=entryform.id,
-                exam=ex,
-                stain=ex.stain
-            )
+        # if AnalysisForm.objects.filter(entryform_id=entryform.id, exam=ex).count() == 0:
+        #     analysis_form = AnalysisForm.objects.create(
+        #         entryform_id=entryform.id,
+        #         exam=ex,
+        #         stain=ex.stain
+        #     )
 
-            Form.objects.create(
-                content_object=analysis_form,
-                flow=flow,
-                state=flow.step_set.all()[0].state,
-                parent_id=entryform.forms.first().id)
+        #     Form.objects.create(
+        #         content_object=analysis_form,
+        #         flow=flow,
+        #         state=flow.step_set.all()[0].state,
+        #         parent_id=entryform.forms.first().id)
 
     sample_id = [
         v for k, v in var_post.items() if k.startswith("sample[id]")
@@ -2060,6 +2063,7 @@ def step_2_entryform(request):
                 se.delete()
 
         for exam in sample_exams:
+            
             sample_organs = [
                 v for k, v in dict(var_post).items() if k.startswith("sample[organs]["+values+"]["+exam)
             ]
@@ -2067,6 +2071,12 @@ def step_2_entryform(request):
             sample_stain = [
                 v for k, v in dict(var_post).items() if k.startswith("sample[stain]["+values+"]["+exam)
             ]
+            
+            # Saving Services or AnalysisForm based on exam and stains
+            if exam in exam_stains:
+                exam_stains[exam].append(sample_stain[0][0])
+            else:
+                exam_stains[exam] = [sample_stain[0][0]]
             
             for se in SampleExams.objects.filter(sample=sample, exam_id=exam):
                 if se.organ_id not in sample_organs[0]:
@@ -2086,6 +2096,36 @@ def step_2_entryform(request):
         change = change or checkSampleExams(sample.sampleexams_set.all(), bulk_data)
         SampleExams.objects.bulk_create(bulk_data)
         sample.save()
+        
+    services = []
+    for key, value in exam_stains.items():
+        for item in value:
+            services.append((key, item))
+            
+    for a, b in services:
+        ex = Exam.objects.get(pk=a)
+
+        if ex.service_id in [1,3,4]:
+            flow = Flow.objects.get(pk=2)
+        elif ex.service_id == 5:
+            continue;
+        else:
+            flow = Flow.objects.get(pk=3)
+
+        
+        if AnalysisForm.objects.filter(entryform_id=entryform.id, exam=ex, stain_id=b).count() == 0:
+            analysis_form = AnalysisForm.objects.create(
+                entryform_id=entryform.id,
+                exam=ex,
+                stain_id=b
+            )
+
+            Form.objects.create(
+                content_object=analysis_form,
+                flow=flow,
+                state=flow.step_set.all()[0].state,
+                parent_id=entryform.forms.first().id)
+    
     if change:
         changeCaseVersion(True,entryform.id, request.user.id)
     return True

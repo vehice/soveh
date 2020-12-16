@@ -357,9 +357,11 @@ def template_resumen_report(request, id, userId):
         organs = []
         sampleexams = s.sampleexams_set.all()
         sampleExa = {}
+        
         for sE in sampleexams:
+            analysis_form = entryform_object.analysisform_set.filter(exam_id=sE.exam_id).first()
             try:
-                a_form = entryform_object.analysisform_set.filter(exam_id=sE.exam_id).first().forms.get()
+                a_form = analysis_form.forms.get()
                 is_cancelled = a_form.cancelled
                 is_closed = a_form.form_closed
             except:
@@ -376,6 +378,7 @@ def template_resumen_report(request, id, userId):
                         'exam_id': sE.exam_id,
                         'exam_name': sE.exam.name,
                         'exam_type': sE.exam.service_id,
+                        'stain': sE.stain.abbreviation.upper() if sE.stain.abbreviation else "N/A",
                         'sample_id': sE.sample_id,
                         'organ_id': [{
                         'name':sE.organ.name if doc.lang == 1 else sE.organ.name_en if sE.organ.name_en else sE.organ.name,
@@ -413,27 +416,48 @@ def template_resumen_report(request, id, userId):
         servicios = {}
         for item2 in samples_as_dict:
             if item2['identification']['id'] == item['id']:
-                for key, value in item2['sample_exams_set'].items():
+                
+                for key, value in item2['sample_exams_set'].items():                    
                     if value['exam_name'] in servicios:
-                        for aux in value['organ_id']:
-                            servicios[value['exam_name']].append(aux['name'])
+                        if value['stain'] in servicios[value['exam_name']]:
+                            for aux in value['organ_id']:    
+                                servicios[value['exam_name']][value['stain']].append(aux['name'])
+                        else:
+                            servicios[value['exam_name']][value['stain']] = []
+                            for aux in value['organ_id']:
+                                servicios[value['exam_name']][value['stain']].append(aux['name'])
                     else:
-                        servicios[value['exam_name']] = []
+                        servicios[value['exam_name']] = {value['stain']: []}
+                        
                         for aux in value['organ_id']:
-                            servicios[value['exam_name']].append(aux['name'])
-
+                            servicios[value['exam_name']][value['stain']].append(aux['name'])
+                            
         serv = {}
         for key, value in servicios.items():
-            organs = {}
-            for k in value:
-                if k in organs:
-                    organs[k] += 1
-                else:
-                    organs[k] = 1
-            if key in serv:
-                serv[key].append(organs)
-            else:
-                serv[key] = [organs]
+            stains = {}
+            for key2, value2 in value.items():
+                
+                organs = {}
+                for k in value2:
+                    if k in organs:
+                        organs[k] += 1
+                    else:
+                        organs[k] = 1
+                
+                stains[key2] = organs
+                    
+            new_key = key + " ("
+            organs_amount_by_stain = {}
+            for stain in value.keys():
+                for org, cant in stains[stain].items():
+                    if org in organs_amount_by_stain:
+                        organs_amount_by_stain[org].append(cant)
+                    else:
+                        organs_amount_by_stain[org] = [cant]
+                
+                new_key += stain + " - "   
+                
+            serv[new_key[:-3]+")"] = organs_amount_by_stain    
         
         item['servicios'] = serv
                 
@@ -586,7 +610,7 @@ def show_patologos(request, all):
                 days_open = (a['analysisform_form'].closed_at - a['analysis'].created_at).days
         samples = Sample.objects.filter(entryform=a['analysis'].entryform).values_list('id', flat=True)
         sampleExams_counter = 0
-        sampleExams = SampleExams.objects.filter(sample__in=samples, exam=a['analysis'].exam).select_related("organ")
+        sampleExams = SampleExams.objects.filter(sample__in=samples, exam=a['analysis'].exam, stain=a['analysis'].stain).select_related("organ")
         organ_types = []
         for se in sampleExams:
             sampleExams_counter += 1

@@ -829,7 +829,7 @@
 
     var tpl_exams = '<div class="col-sm-12"><h6 class="form-section mt-2"> <b>Servicios</b></h6></br>';
     $.each(data.entryform.analyses, function(i, item){
-      tpl_exams += '<div class="alert alert-light"><b>'+ item.exam__name +'</b> <span class="pull-right">'
+      tpl_exams += '<div class="alert alert-light"><b>'+ item.exam__name +' (Tinción: '+item.stain+')</b> <span class="pull-right">'
       if(item.patologo__first_name != null)
         tpl_exams += '<b>Patólogo:</b> '+item.patologo__first_name+' ';
       if(item.patologo__last_name != null)
