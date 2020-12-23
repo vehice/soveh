@@ -123,6 +123,7 @@ class ENTRYFORM(View):
                                 'exam_type': sE.exam.service_id,
                                 'exam_stain_id': sE.exam.stain_id,
                                 'sample_exam_stain_id': sE.stain_id,
+                                'sample_stain_abbr': sE.stain.abbreviation.upper() if sE.stain else "N/A",
                                 'sample_id': sE.sample_id,
                                 'organ_id': [{
                                     'name':sE.organ.name,

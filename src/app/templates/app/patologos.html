@@ -854,7 +854,7 @@
     $('.summaryExams').html(tpl_exams);
 
     var tpl_samples = '<div class="col-sm-12"><h6 class="form-section mt-2"> <b>Muestras</b></h6></br><table class="table table-bordered table-xs">';
-    tpl_samples += '<thead><tr><th>Pez</th><th>Identificación</th><th>Análisis</th><th>Órganos</th></tr></thead><tbody>';
+    tpl_samples += '<thead><tr><th>Pez</th><th>Identificación</th><th>Análisis</th><th>Tinción</th><th>Órganos</th></tr></thead><tbody>';
     var patologos = {};
     $.each(data.patologos, function(i, v){
       patologos[v.id]=v.first_name+' '+v.last_name;
@@ -866,6 +866,7 @@
       $.each(item.sample_exams_set, function(j, v){
         len+=1;
         tpl_exams += '<tr><td>'+v.exam_name+'</td>';
+        tpl_exams += '<td>'+v.sample_stain_abbr+'</td>';
         tpl_exams += '<td>'+ Object.keys(v.organ_id).map(function(k){return v.organ_id[k].name}).join(", ") +'</td></tr>';
       });
       tpl_samples += '<tr id="sample-id-'+item.id+'">';
