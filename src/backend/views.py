@@ -192,7 +192,7 @@ class ENTRYFORM(View):
                     'id': analysis.id,
                     'created_at' : analysis.created_at,
                     'comments' : analysis.comments,
-                    'stain': analysis.stain.abbreviation.upper() if analysis.stain.abbreviation else "N/A",
+                    'stain': analysis.stain.abbreviation.upper() if analysis.stain else "N/A",
                     'entryform_id' : analysis.entryform_id,
                     'exam_id' : analysis.exam_id,
                     'exam__name' : analysis.exam.name,
