@@ -491,7 +491,7 @@ class ANALYSIS(View):
                 'form_id': form_id,
                 'id': analysis.id,
                 'exam_name': exam.name,
-                'exam_stain': analysis.stain.abbreviation.upper() if analysis.stain.abbreviation else "N/A",
+                'exam_stain': analysis.stain.abbreviation.upper() if analysis.stain else "N/A",
                 'exam_type': exam.service_id,
                 'exam_pathologists_assignment': exam.pathologists_assignment,
                 'slices': slices,
