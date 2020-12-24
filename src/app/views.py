@@ -378,7 +378,7 @@ def template_resumen_report(request, id, userId):
                         'exam_id': sE.exam_id,
                         'exam_name': sE.exam.name,
                         'exam_type': sE.exam.service_id,
-                        'stain': sE.stain.abbreviation.upper() if sE.stain.abbreviation else "N/A",
+                        'stain': sE.stain.abbreviation.upper() if sE.stain else "N/A",
                         'sample_id': sE.sample_id,
                         'organ_id': [{
                         'name':sE.organ.name if doc.lang == 1 else sE.organ.name_en if sE.organ.name_en else sE.organ.name,
