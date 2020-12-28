@@ -2098,10 +2098,14 @@ def step_2_entryform(request):
         SampleExams.objects.bulk_create(bulk_data)
         sample.save()
         
+    AnalysisForm.objects.filter(entryform_id=entryform.id).exclude(exam_id__in=exam_stains.keys()).delete()
+
     services = []
     for key, value in exam_stains.items():
+        AnalysisForm.objects.filter(entryform_id=entryform.id, exam_id=key).exclude(stain_id__in=value).delete()        
         for item in value:
             services.append((key, item))
+            
             
     for a, b in services:
         ex = Exam.objects.get(pk=a)
