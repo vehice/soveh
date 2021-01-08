@@ -4,11 +4,25 @@
     <input type="hidden" id="step_tag" name="step_tag" value="{{step_tag}}">
     <input type="hidden" id="form_id" name="form_id" value="{{form_id}}" >
     <input type="hidden" id="entryform_id" name="entryform_id" value="{{entryform_id}}" >
-    <h4 class="form-section">
+    {% comment %} <h4 class="form-section">
       <i class="ft-user"></i> Análisis
-    </h4>
-    <div id="analysis_group" class="list-group">
+    </h4> {% endcomment %}
+    <ul class="nav nav-tabs nav-underline mt-2" role="tablist">
+      <li class="nav-item">
+        <a class="nav-link" id="analysis-tab1" data-toggle="tab" href="#analysis_group1" aria-controls="analysis_group1" role="tab" aria-selected="true"><h3 style="color:black;"><i class="fa fa-check"></i> ANÁLISIS ACTIVOS</h3></a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" id="analysis-tab2" data-toggle="tab" href="#analysis_group2" aria-controls="analysis_group2" role="tab" aria-selected="false"><h3 style="color:black;"><i class="fa fa-close"></i> ANÁLISIS ANULADOS</h3></a>
+      </li>
+    </ul>
+    <div class="tab-content px-1 pt-1">
+      <div class="tab-pane" id="analysis_group1" aria-labelledby="analysis-tab1" role="tabpanel">
+      </div>
+      <div class="tab-pane" id="analysis_group2" aria-labelledby="analysis-tab2" role="tabpanel">
+      </div>
     </div>
+    {% comment %} <div id="analysis_group" class="list-group">
+    </div> {% endcomment %}
   </div>
 </fieldset>
 
@@ -16,12 +30,12 @@
 
 {% if closed %}
   <% if ( _.includes([1,2], service))  { %> 
-    <div href="/workflow/<%= form_id %>" class="list-group-item bg-teal bg-lighten-4 mb-2">
+    <div href="/workflow/<%= form_id %>" class="list-group-item <% if (samples_count > 0) { %> <% if (samples_count > 0) { %> bg-teal <% } else {%> bg-danger <% } %> <% } else {%> bg-danger <% } %> bg-lighten-4 mb-2">
       <div class="media-body">
         <div class="row">
           <div class="col-sm-6 font-medium-4 text-left"><%= exam_name %></div>
           <div class="col-sm-6 font-medium-4 text-right">Tinción: <%= exam_stain %></div>
-          <div class="col-sm-12 font-medium-4 text-center">
+          <div class="col-sm-12 font-medium-4 text-center mt-1">
             <div class="btn-group" role="group" aria-label="Opciones">
               <button type="button" class="btn btn-info" onclick='showServiceCommentsModal(<%= id %>, {{closed}}, true)'>Comentarios</button>
               <button type="button" class="btn btn-purple" onclick='showServiceResearchesModal(<%= id %>, {{closed}}, true)'>Estudios</button>
@@ -30,11 +44,11 @@
           </div>
         </div>
         <div class="row">
-          <div class="col-sm-6">
+          <div class="col-sm-8 mt-1">
             <p class="list-group-item-text">Servicio <%= service_name %> - <b><%= status %></b></p>
           </div>
           <% if (patologo_name != "") { %>
-            <div class="col-sm-6 text-right">
+            <div class="col-sm-4 text-right">
               <p class="list-group-item-text">Patólogo: <b><%= patologo_name %></b></p>
             </div>
           <% } %>
@@ -42,12 +56,12 @@
       </div>
     </div>
   <% } else { %>
-    <div href="/workflow/<%= form_id %>" class="list-group-item bg-teal bg-lighten-4 mb-2">
+    <div href="/workflow/<%= form_id %>" class="list-group-item <% if (samples_count > 0) { %> bg-teal <% } else {%> bg-danger <% } %> bg-lighten-4 mb-2">
       <div class="media-body">
         <div class="row">
           <div class="col-sm-6 font-medium-4 text-left"><%= exam_name %></div>
           <div class="col-sm-6 font-medium-4 text-right"></div>
-          <div class="col-sm-12 font-medium-4 text-center">
+          <div class="col-sm-12 font-medium-4 text-center mt-1">
             <div class="btn-group" role="group" aria-label="Opciones">
               <button type="button" class="btn btn-info" onclick='showServiceCommentsModal(<%= id %>, {{closed}}, true)'>Comentarios</button>
               <button type="button" class="btn btn-purple" onclick='showServiceResearchesModal(<%= id %>, {{closed}}, true)'>Estudios</button>
@@ -56,11 +70,11 @@
           </div>     
         </div>
         <div class="row">
-          <div class="col-sm-6">
+          <div class="col-sm-8 mt-1">
             <p class="list-group-item-text">Servicio <%= service_name %> - <b><%= status %></b></p>
           </div>
           <% if (patologo_name != "") { %>
-            <div class="col-sm-6 text-right">
+            <div class="col-sm-4 text-right">
               <p class="list-group-item-text">Patólogo: <b><%= patologo_name %></b></p>
             </div>
           <% } %>
@@ -71,12 +85,12 @@
 {% else %}
   <% if (!form_closed && !cancelled)  { %> 
     <% if ( _.includes([1,2], service)) { %>
-      <div class="list-group-item bg-teal bg-lighten-4 mb-2">
+      <div class="list-group-item <% if (samples_count > 0) { %> bg-teal <% } else {%> bg-danger <% } %> bg-lighten-4 mb-2">
         <div class="media-body">
           <div class="row">
             <div class="col-sm-6 font-medium-4 text-left"><%= exam_name %></div>
             <div class="col-sm-6 font-medium-4 text-right">Tinción: <%= exam_stain %></div>
-            <div class="col-sm-12 font-medium-4 text-center">
+            <div class="col-sm-12 font-medium-4 text-center mt-1">
               <div class="btn-group" role="group" aria-label="Opciones">
                 
                 {% comment %} <% if (form_reopened)  { %> 
@@ -121,11 +135,11 @@
             </div>
           </div>
           <div class="row">
-            <div class="col-sm-6">
+            <div class="col-sm-8 mt-1">
               <p class="list-group-item-text">Servicio <%= service_name %> - <b><%= status %></b></p>
             </div>
             <% if (patologo_name != "") { %>
-              <div class="col-sm-6 text-right">
+              <div class="col-sm-4 text-right">
                 <p class="list-group-item-text">Patólogo: <b><%= patologo_name %></b></p>
               </div>
             <% } %>
@@ -133,11 +147,11 @@
         </div>
       </div>
     <% } else { %>
-      <div class="list-group-item bg-teal bg-lighten-4 mb-2">
+      <div class="list-group-item <% if (samples_count > 0) { %> bg-teal <% } else {%> bg-danger <% } %> bg-lighten-4 mb-2">
         <div class="media-body">
           <div class="row">
             <div class="col-sm-12 font-medium-4 text-left"><%= exam_name %></div>
-            <div class="col-sm-12 font-medium-4 text-center">
+            <div class="col-sm-12 font-medium-4 text-center mt-1">
               <div class="btn-group" role="group" aria-label="Opciones">
                 <button type="button" class="btn btn-info" onclick='showServiceCommentsModal(<%= id %>, {{closed}})'>Comentarios</button>
                 <button type="button" class="btn btn-purple" onclick='showServiceResearchesModal(<%= id %>, {{closed}})'>Estudios</button>
@@ -170,11 +184,11 @@
             </div>
           </div>
           <div class="row">
-            <div class="col-sm-6">
+            <div class="col-sm-8 mt-1">
               <p class="list-group-item-text">Servicio <%= service_name %> - <b><%= status %></b></p>
             </div>
             <% if (patologo_name != "") { %>
-              <div class="col-sm-6 text-right">
+              <div class="col-sm-4 text-right">
                 <p class="list-group-item-text">Patólogo: <b><%= patologo_name %></b></p>
               </div>
             <% } %>
@@ -184,12 +198,12 @@
     <% } %>
   <% } else { %>
     <% if ( _.includes([1,2], service))  { %> 
-      <div href="/workflow/<%= form_id %>" class="list-group-item bg-teal bg-lighten-4 mb-2">
+      <div href="/workflow/<%= form_id %>" class="list-group-item <% if (samples_count > 0) { %> bg-teal <% } else {%> bg-danger <% } %> bg-lighten-4 mb-2">
         <div class="media-body">
           <div class="row">
             <div class="col-sm-6 font-medium-4 text-left"><%= exam_name %></div>
             <div class="col-sm-6 font-medium-4 text-right">Tinción: <%= exam_stain %></div>
-            <div class="col-sm-12 font-medium-4 text-center">
+            <div class="col-sm-12 font-medium-4 text-center mt-1">
               <div class="btn-group" role="group" aria-label="Opciones">
                 <button type="button" class="btn btn-info" onclick='showServiceCommentsModal(<%= id %>, {{closed}}, true)'>Comentarios</button>
                 <button type="button" class="btn btn-purple" onclick='showServiceResearchesModal(<%= id %>, {{closed}}, true)'>Estudios</button>
@@ -204,11 +218,11 @@
             </div>
           </div>
           <div class="row">
-            <div class="col-sm-6">
-              <p class="list-group-item-text">Servicio <%= service_name %> - <b><%= status %></b></p>
+            <div class="col-sm-8 mt-1">
+              <p class="list-group-item-text">Servicio <%= service_name %> - <b><%= status %></b> <% if (cancelled_by) {%> por <b> <%= cancelled_by %> <% } %></b> el <b><%= cancelled_at %> </b></p>
             </div>
             <% if (patologo_name != "") { %>
-              <div class="col-sm-6 text-right">
+              <div class="col-sm-4 text-right">
                 <p class="list-group-item-text">Patólogo: <b><%= patologo_name %></b></p>
               </div>
             <% } %>
@@ -216,12 +230,12 @@
         </div>
       </div>
     <% } else { %>
-      <div href="/workflow/<%= form_id %>" class="list-group-item bg-teal bg-lighten-4 mb-2">
+      <div href="/workflow/<%= form_id %>" class="list-group-item <% if (samples_count > 0) { %> bg-teal <% } else {%> bg-danger <% } %> bg-lighten-4 mb-2">
         <div class="media-body">
           <div class="row">
             <div class="col-sm-6 font-medium-4 text-left"><%= exam_name %></div>
             <div class="col-sm-6 font-medium-4 text-right"></div>
-            <div class="col-sm-12 font-medium-4 text-center">
+            <div class="col-sm-12 font-medium-4 text-center mt-1">
               <div class="btn-group" role="group" aria-label="Opciones">
                 <button type="button" class="btn btn-info" onclick='showServiceCommentsModal(<%= id %>, {{closed}}, true)'>Comentarios</button>
                 <button type="button" class="btn btn-purple" onclick='showServiceResearchesModal(<%= id %>, {{closed}}, true)'>Estudios</button>
@@ -234,11 +248,11 @@
             </div>
           </div>
           <div class="row">
-            <div class="col-sm-6">
-              <p class="list-group-item-text">Servicio <%= service_name %> - <b><%= status %></b></p>
+            <div class="col-sm-8 mt-1">
+              <p class="list-group-item-text">Servicio <%= service_name %> - <b><%= status %></b> <% if (cancelled_by) {%> por <b> <%= cancelled_by %> <% } %></b> el <b><%= cancelled_at %> </b></p>
             </div>
             <% if (patologo_name != "") { %>
-              <div class="col-sm-6 text-right">
+              <div class="col-sm-4 text-right">
                 <p class="list-group-item-text">Patólogo: <b><%= patologo_name %></b></p>
               </div>
             <% } %>

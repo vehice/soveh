@@ -451,8 +451,8 @@ class ANALYSIS(View):
         analyses_qs = AnalysisForm.objects.filter(entryform=entry_form, exam__isnull=False)
         analyses = []
         
-        samples = Sample.objects.filter(entryform=entry_form)
-        
+        # samples = Sample.objects.filter(entryform=entry_form)
+        analysis_with_zero_sample = []
         for analysis in analyses_qs:
             # stains = []
             # for s in samples:
@@ -479,13 +479,23 @@ class ANALYSIS(View):
                 percentage_step = 0
             else:
                 percentage_step = (int(current_step) / int(total_step)) * 100
+                
+            samples = Sample.objects.filter(entryform=analysis.entryform).values_list('id', flat=True)
+            sampleExams = SampleExams.objects.filter(sample__in=samples, exam=exam, stain=analysis.stain)
+            organs_count = samples_count = len(sampleExams)
+            if analysis.exam.pricing_unit == 1:
+                samples_count = organs_count
+            else:
+                sampleExams = SampleExams.objects.filter(sample__in=samples, exam=analysis.exam, stain=analysis.stain).values_list('sample_id', flat=True)
+                samples_count = len(list(set(sampleExams)))
 
             slices_qs = analysis.slice_set.all()
             slices = []
             for slice_new in slices_qs:
                 slices.append({'name': slice_new.slice_name})
-                
             
+            if not form.cancelled and not form.form_closed:
+                analysis_with_zero_sample.append(False if samples_count > 0 else True)
 
             analyses.append({
                 'form_id': form_id,
@@ -508,7 +518,10 @@ class ANALYSIS(View):
                 'patologo_id': analysis.patologo.id if analysis.patologo else "",
                 'pre_report_started': analysis.pre_report_started,
                 'pre_report_ended': analysis.pre_report_ended,
-                'status': analysis.status
+                'status': analysis.status,
+                'cancelled_by': analysis.manual_cancelled_by.get_full_name() if form.cancelled else "",
+                'cancelled_at': analysis.manual_cancelled_date.strftime('%d/%m/%Y') if form.cancelled else "", 
+                'samples_count': samples_count,
             })
         
         
@@ -558,7 +571,8 @@ class ANALYSIS(View):
             'customers_list': customers_list,
             'patologos': patologos,
             'entryform_types_list': entryform_types,
-            'research_types_list': researches
+            'research_types_list': researches,
+            'analysis_with_zero_sample': 1 if True in analysis_with_zero_sample else 0
         }
         
         return JsonResponse(data)
@@ -2013,37 +2027,8 @@ def step_2_entryform(request):
     exams_to_do = var_post.getlist("analysis")
     analyses_qs = entryform.analysisform_set.all()
     change = False
-    # for analysis in analyses_qs:
-    #     analysis.forms.get().delete()
-
-    # analyses_qs.delete()
-
-
-
+    
     exam_stains = {}
-    # for exam in exams_to_do:
-    #     ex = Exam.objects.get(pk=exam)
-
-    #     if ex.service_id in [1,3,4]:
-    #         flow = Flow.objects.get(pk=2)
-    #     elif ex.service_id == 5:
-    #         continue;
-    #     else:
-    #         flow = Flow.objects.get(pk=3)
-
-        
-        # if AnalysisForm.objects.filter(entryform_id=entryform.id, exam=ex).count() == 0:
-        #     analysis_form = AnalysisForm.objects.create(
-        #         entryform_id=entryform.id,
-        #         exam=ex,
-        #         stain=ex.stain
-        #     )
-
-        #     Form.objects.create(
-        #         content_object=analysis_form,
-        #         flow=flow,
-        #         state=flow.step_set.all()[0].state,
-        #         parent_id=entryform.forms.first().id)
 
     sample_id = [
         v for k, v in var_post.items() if k.startswith("sample[id]")
@@ -2117,8 +2102,8 @@ def step_2_entryform(request):
         else:
             flow = Flow.objects.get(pk=3)
 
-        
-        if AnalysisForm.objects.filter(entryform_id=entryform.id, exam=ex, stain_id=b).count() == 0:
+        AFS = AnalysisForm.objects.filter(entryform_id=entryform.id, exam=ex, stain_id=b)
+        if AFS.count() == 0:
             analysis_form = AnalysisForm.objects.create(
                 entryform_id=entryform.id,
                 exam=ex,
@@ -2130,7 +2115,21 @@ def step_2_entryform(request):
                 flow=flow,
                 state=flow.step_set.all()[0].state,
                 parent_id=entryform.forms.first().id)
-    
+        else:
+            AFS_list = list(AFS)
+            for AF in AFS_list[1:]:
+                AF.delete()
+                
+            sampleExams = SampleExams.objects.filter(sample__in=sample_id, exam=AFS_list[0].exam, stain=AFS_list[0].stain)
+
+            af_form = AFS_list[0].forms.get()
+            if af_form.cancelled and sampleExams.count() > 0:
+                af_form.cancelled = False
+                af_form.cancelled_at = None
+                af_form.save()
+                AFS_list[0].manual_cancelled_date = None
+                AFS_list[0].manual_cancelled_by = None
+                AFS_list[0].save()
     if change:
         changeCaseVersion(True,entryform.id, request.user.id)
     return True
@@ -2986,13 +2985,20 @@ def close_service(request, form_id, closing_date):
         pass
     return JsonResponse({'ok':True})
 
-def cancel_service(request, form_id, cancel_date):
+def cancel_service(request, form_id):
+    var_post = request.POST.copy()
     form = Form.objects.get(pk=form_id)
     form.cancelled = True
     form.cancelled_at = datetime.now()
     form.save()
     try:
-        form.content_object.manual_cancelled_date = datetime.strptime(cancel_date, '%d-%m-%Y')
+        form.content_object.manual_cancelled_date = datetime.strptime(var_post.get('date'), '%d-%m-%Y')
+        form.content_object.manual_cancelled_by = request.user
+        service_comment = ServiceComment.objects.create(
+            text = "[Comentario de Anulación]: "+var_post.get('comment'),
+            done_by = request.user
+        )
+        form.content_object.service_comments.add(service_comment)
         form.content_object.researches.clear()
         form.content_object.save()
     except Exception as e:

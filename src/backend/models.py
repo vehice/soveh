@@ -293,6 +293,7 @@ class AnalysisForm(models.Model):
     assignment_comment = models.TextField(default="", blank=True, null=True)
     manual_closing_date = models.DateTimeField(default=None, blank=True, null=True)
     manual_cancelled_date = models.DateTimeField(default=None, blank=True, null=True)
+    manual_cancelled_by = models.ForeignKey(User, null=True, on_delete=models.SET_NULL, related_name="cancelled_by")
     pre_report_started = models.BooleanField(default=False)
     pre_report_started_at = models.DateTimeField(default=None, blank=True, null=True)
     pre_report_ended = models.BooleanField(default=False)

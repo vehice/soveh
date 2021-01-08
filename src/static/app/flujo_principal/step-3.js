@@ -17,6 +17,7 @@ function init_step_3(active = true) {
       saltar=true;
       loadAnalysisData(data);
       researches = data.research_types_list;
+      
       //loadResearches(data.research_types_list)
     })
     .fail(function () {
@@ -28,6 +29,20 @@ function loadAnalysisData(data) {
   $("#analysis_group").empty();
 
   populateAnalysisData(data);
+
+  if (data.analysis_with_zero_sample) {
+    alertEmptyAnalysis();
+  }
+
+}
+
+function alertEmptyAnalysis(){
+  swal({
+    title: "Información",
+    text: "Hay servicios ingresados que no poseen muestras asociadas (en rojo), por lo cual recomendamos anular.",
+    icon: "warning",
+    showCancelButton: false,
+  });
 }
 
 function loadResearches() {
@@ -49,6 +64,9 @@ function loadResearches() {
 }
 
 function populateAnalysisData(data) {
+  $("#analysis_group1").html("");
+  $("#analysis_group2").html("");
+
   $.each(data.analyses, function (i, item) {
     var row = {};
 
@@ -74,8 +92,21 @@ function populateAnalysisData(data) {
     row.patologo_name = item.patologo_name;
     row.patologo_id = item.patologo_id;
     row.status = item.status;
-    addAnalysisElement(row)
+    row.cancelled_by = item.cancelled_by;
+    row.cancelled_at = item.cancelled_at;
+    row.samples_count = item.samples_count;
+    
+    if (!row.cancelled){
+      addAnalysisElement(row)
+    } else {
+      addAnalysisElementCancelled(row)
+    }
+    
+    $('#analysis-tab1').trigger("click");
+
   });
+
+
 }
 
 function addAnalysisElement(data) {
@@ -83,7 +114,15 @@ function addAnalysisElement(data) {
   var templateFn = _.template(analysisElementTemplate);
   var templateHTML = templateFn(data);
 
-  $("#analysis_group").append(templateHTML)
+  $("#analysis_group1").append(templateHTML)
+}
+
+function addAnalysisElementCancelled(data) {
+  var analysisElementTemplate = document.getElementById("analysis_element5").innerHTML;
+  var templateFn = _.template(analysisElementTemplate);
+  var templateHTML = templateFn(data);
+
+  $("#analysis_group2").append(templateHTML)
 }
 
 // function showServiceCommentsModal(form_id){
@@ -458,7 +497,9 @@ function cancelService(form_id){
     title: '<h3>Confirmación de anulación de servicio</h3>',
     message: "<p>¿Confirma que desea realizar la anulación del servicio?</p> \
       <p>Ingrese una fecha de anulación:</p> \
-      <input type='text' class='form-control input-cancel-date-bootbox' />",
+      <input type='text' class='form-control input-cancel-date-bootbox' /> \
+      <br><p>Comentario:</p> \
+      <textarea row='3' required class='form-control input-cancel-comment-bootbox'></textarea>",
     buttons: {
       cancel: {
           label: "Cancelar",
@@ -469,10 +510,17 @@ function cancelService(form_id){
           className: 'btn-info',
           callback: function(){
             var cancel_date = $('.input-cancel-date-bootbox').val();
-            var url = Urls.cancel_service(form_id, cancel_date);
+            var comment = $('.input-cancel-comment-bootbox').val();
+
+            if (!cancel_date || !comment ){
+              toastr.error('Complete la información solicitada.', 'No ha sido posible continuar con la anulación');
+              return false;
+            }
+            var url = Urls.cancel_service(form_id);
             $.ajax({
               type: "POST",
               url: url,
+              data: {'date': cancel_date, 'comment': comment }
             })
             .done(function (data) {
               window.location.reload();
