@@ -89,16 +89,16 @@
                       </td>
                       <td>{{ entryForm.exam|default:"" }}</td>
                       <td>
-                          {{ entryForm.fecha_ingreso }}
+                          {{ entryForm.fecha_ingreso|default:"--" }}
                       </td>
                       <td>
-                          {{ entryForm.fecha_muestreo }}
+                          {{ entryForm.fecha_muestreo|default:"--" }}
                       </td>
                       <td>
-                          {{ entryForm.f_m_year }}
+                          {{ entryForm.f_m_year|default:"--" }}
                       </td>
                       <td>
-                          {{ entryForm.f_m_month }}
+                          {{ entryForm.f_m_month|default:"--" }}
                       </td>
                       <td>
                           {{ entryForm.estado }}
@@ -178,10 +178,10 @@
                           {{ entryForm.fecha_muestreo }}
                       </td>
                       <td>
-                          {{ entryForm.f_m_year }}
+                          {{ entryForm.f_m_year|default:"--" }}
                       </td>
                       <td>
-                          {{ entryForm.f_m_month }}
+                          {{ entryForm.f_m_month|default:"--" }}
                       </td>
                       <td>
                           {{ entryForm.estado }}
@@ -761,10 +761,16 @@
       row_data.push(the_td.html());
     });
 
-    var fm_year = row_data[4].split("/")[2];
-    var fm_month = row_data[4].split("/")[1];
-    row_data.insert(5, fm_year);
-    row_data.insert(6, fm_month);
+    if (row_data[4].trim() != "--"){
+      var fm_year = row_data[4].split("/")[2];
+      var fm_month = row_data[4].split("/")[1];
+      row_data.insert(5, fm_year);
+      row_data.insert(6, fm_month);
+    } else {
+      row_data.insert(5, "--");
+      row_data.insert(6, "--");
+    }
+    
     tabla_casos.row(tr).remove().draw();
     tabla_casos2.row.add(row_data).draw();
   });
@@ -793,10 +799,15 @@
       row_data.push(the_td.html());
     });
 
-    var fm_year = row_data[4].split("/")[2];
-    var fm_month = row_data[4].split("/")[1];
-    row_data.insert(5, fm_year);
-    row_data.insert(6, fm_month);
+    if (row_data[4].trim() != "--"){
+      var fm_year = row_data[4].split("/")[2];
+      var fm_month = row_data[4].split("/")[1];
+      row_data.insert(5, fm_year);
+      row_data.insert(6, fm_month);
+    } else {
+      row_data.insert(5, "--");
+      row_data.insert(6, "--");
+    }
 
     tabla_casos2.row(tr).remove().draw();
     tabla_casos.row.add(row_data).draw();
