@@ -1406,6 +1406,108 @@ class CASE_FILES(View):
         except:
             return JsonResponse({'ok': False})
 
+class RESEARCH(View):
+    http_method_names = ['get', 'post', 'delete']
+    
+    def get(self, request, id):
+        research = Research.objects.get(pk=id)
+        # data = []
+        # for r in responsibles:
+        #     data.append(model_to_dict(r))
+        
+        up = UserProfile.objects.filter(user=request.user).first()
+        
+        research_analysis = research.services.all()
+
+        analysis = AnalysisForm.objects.filter(exam__isnull=False, entryform__customer__in=research.clients.all()).exclude(id__in=research_analysis).select_related("entryform", "exam").order_by('-entryform_id')
+
+        data1 = []
+        data2 = []
+
+        available_analysis = []
+
+        for a in analysis:
+            entryform_form = a.entryform.forms.first()
+            analysisform_form = a.forms.first()
+
+            if not entryform_form.cancelled and not analysisform_form.cancelled:
+                available_analysis.append({'analysis': a, 'entryform_form': entryform_form, 'analysisform_form': analysisform_form})  
+
+        for a in available_analysis:
+            parte = a['analysis'].entryform.get_subflow
+           
+            if parte == "N/A":
+                parte = ''
+            else:
+                parte = ' (Parte ' + parte + ')'
+           
+            data1.append({
+                'analisis': a['analysis'].id,
+                'no_caso': a['analysis'].entryform.no_caso + parte, 
+                'exam': a['analysis'].exam.name,
+                'cliente': a['analysis'].entryform.customer.name,
+                'fecha_ingreso': a['analysis'].created_at.strftime("%d/%m/%Y"),
+                'fecha_muestreo': a['analysis'].entryform.sampled_at.strftime("%d/%m/%Y") if a['analysis'].entryform.sampled_at else "",
+                'f_m_year': a['analysis'].entryform.sampled_at.strftime("%Y") if a['analysis'].entryform.sampled_at else "",
+                'f_m_month': a['analysis'].entryform.sampled_at.strftime("%m") if a['analysis'].entryform.sampled_at else "",
+                'entryform': a['analysis'].entryform.id,
+                'estado': a['analysis'].status,
+            })
+            
+        for a in research_analysis:
+            parte = a.entryform.get_subflow
+            if parte == "N/A":
+                parte = ''
+            else:
+                parte = ' (Parte ' + parte + ')'
+            data2.append({
+                'analisis': a.id,
+                'no_caso': a.entryform.no_caso + parte, 
+                'exam': a.exam.name,
+                'cliente': a.entryform.customer.name,
+                'fecha_ingreso': a.created_at.strftime("%d/%m/%Y"),
+                'fecha_muestreo': a.entryform.sampled_at.strftime("%d/%m/%Y") if a.entryform.sampled_at else "",
+                'f_m_year': a.entryform.sampled_at.strftime("%Y") if a.entryform.sampled_at else "",
+                'f_m_month': a.entryform.sampled_at.strftime("%m") if a.entryform.sampled_at else "",
+                'entryform': a.entryform.id,
+                'estado': a.status,
+            })
+
+        return render(request, 'app/research.html', {
+            'research': research,
+            'edit': 1,
+            'casos1': data1,
+            'casos2': data2,
+            'analysis_selected': [RA.id for RA in research_analysis],
+            # 'form': form,
+            # 'form_id': form_id,
+            # 'entryform_id': entryform_id,
+            #'edit': 1,
+            # 'closed': 0
+        })
+
+    def post(self, request, id):
+        try:
+            var_post = request.POST.copy()
+            print (var_post)
+            research = Research.objects.get(pk=id)
+            analisis = var_post.getlist('analisis[]', [])
+            research.services.clear()
+            for af in AnalysisForm.objects.filter(id__in=analisis):
+                research.services.add(af)
+            research.save()
+
+            return JsonResponse({'ok': True})
+        except Exception as e:
+             return JsonResponse({'ok': False})
+    
+    def delete(self, request, id):
+        responsible = Responsible.objects.get(pk=id)
+        responsible.active = False
+        responsible.save()
+
+        return JsonResponse({'ok': True})
+    
 def organs_by_slice(request, slice_id=None, sample_id=None):
     if slice_id and sample_id:
         slice_obj = Slice.objects.get(
@@ -1636,7 +1738,6 @@ def process_analysisform(request):
     method(request)
 
     return True
-
 
 # Steps Function for entry forms
 def step_1_entryform(request):
@@ -2282,7 +2383,6 @@ def changeCaseVersion(allow_new, form_id, user_id):
             generated_by_id = user_id
         )
     
-
 def step_new_analysis(request):
     var_post = request.POST.copy()
     entryform = EntryForm.objects.get(pk=var_post.get('entryform_id'))
@@ -2471,7 +2571,6 @@ def step_1_analysisform(request):
 
         slice_new.save()
 
-
 def step_2_analysisform(request):
     var_post = request.POST.copy()
 
@@ -2498,7 +2597,6 @@ def step_2_analysisform(request):
         slice_new.box_id = None
         slice_new.save()
 
-
 def step_3_analysisform(request):
     var_post = request.POST.copy()
 
@@ -2516,7 +2614,6 @@ def step_3_analysisform(request):
         slice_new.box_id = values[1]
         slice_new.report_set.all().delete()
         slice_new.save()
-
 
 def step_4_analysisform(request):
     print("Step 4 Analysis Form")
@@ -3072,4 +3169,26 @@ def get_scores(request, id):
         form = AnalysisForm.objects.get(pk=id)
         return JsonResponse({'ok':True, 'score_diagnostic':form.score_diagnostic, 'score_report': form.score_report})
     except Exception as e:
+        return JsonResponse({'ok':False})
+    
+def get_research_metadata(request, id):
+    try:
+        r = Research.objects.get(pk=id)
+        r_json = model_to_dict(r)
+        r_json['init_date'] = r_json['init_date'].strftime('%d/%m/%Y %H:%M')
+        r_json['clients'] = [client.id for client in r_json['clients']]
+        
+        r_json['client_services'] = {}
+        for serv in r_json['services']:
+            if serv.entryform.customer_id in r_json['client_services']:
+                r_json['client_services'][serv.entryform.customer_id].append(serv.id)
+            else:
+                r_json['client_services'][serv.entryform.customer_id] = [serv.id]
+        
+        r_json['services'] = [serv.id for serv in r_json['services']]
+        r_json['status'] = 1 if r_json['status'] else 0
+        
+        return JsonResponse({'ok':True, 'research': r_json})
+    except Exception as e:
+        print (e)
         return JsonResponse({'ok':False})

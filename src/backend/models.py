@@ -46,11 +46,28 @@ class Service(models.Model):
         verbose_name = "Servicio"
         verbose_name_plural = "Servicios"
 
+RESEARCH_TYPE_OPTIONS = [
+    (1, "Estudio Vehice"),
+    (2, "Seguimiento de rutina")
+]
+
 class Research(models.Model):
     code = models.CharField(max_length=250, null=True, blank=True, verbose_name="Código")
     name = models.CharField(max_length=250, null=True, blank=True, verbose_name="Nombre")
     description = models.TextField(null=True, blank=True, verbose_name="Descripción")
+    type = models.IntegerField(default=1, choices=RESEARCH_TYPE_OPTIONS, verbose_name="Tipo")
+    init_date = models.DateTimeField(null=True, blank=True)
+    clients = models.ManyToManyField('Customer', verbose_name="Clientes")
+    services = models.ManyToManyField('AnalysisForm', verbose_name="Servicios Asociados")
     status = models.BooleanField(default=False, verbose_name="¿Activo?")
+    
+    # Copy of user full name to avoid empty data if user is removed
+    external_responsible = models.CharField(max_length=250, null=True, blank=True, verbose_name="Responsable Externo")
+    internal_responsible = models.ForeignKey(
+        User, 
+        null=True, 
+        on_delete=models.PROTECT, 
+        verbose_name="Responsable Interno")
 
     def __str__(self):
         return self.code + ' ' + self.name

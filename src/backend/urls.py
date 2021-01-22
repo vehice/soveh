@@ -165,5 +165,6 @@ urlpatterns = [
     path('init-pre-report/<int:analysis_id>', csrf_exempt(views.init_pre_report), name='init_pre_report'),
     path('save-scores/<int:id>', csrf_exempt(views.save_scores), name='save_scores'),
     path('get-scores/<int:id>', csrf_exempt(views.get_scores), name='get_scores'),
-
+    path('research/<int:id>', csrf_exempt(views.RESEARCH.as_view()), name='research'),
+    path('get-research/<int:id>', csrf_exempt(views.get_research_metadata), name='get_research'),
 ]

@@ -45,6 +45,11 @@ def default_tree(user):
             'icon': 'ft-clipboard',
             'section_name': "Ingreso de Casos",
         },
+        {
+            'path': '/estudios',
+            'icon': 'ft-book',
+            'section_name': "Estudios",
+        },
 
     ]
     if user.userprofile.profile_id in (1,2,3,4,5):

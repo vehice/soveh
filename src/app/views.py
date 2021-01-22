@@ -86,6 +86,19 @@ def show_ingresos(request):
 
     return render(request, 'app/ingresos.html', {'entryForm_list': form, 'edit': editar, 'eliminar': eliminar })
 
+@login_required
+def show_estudios(request):
+    up = UserProfile.objects.filter(user=request.user).first()
+    editar = 1
+    eliminar = editar and request.user.is_superuser
+    estudios = Research.objects.all()
+    clients_available = Customer.objects.all()
+    users_available = User.objects.all()
+
+    form = Form.objects.filter(content_type__model='entryform').order_by('-object_id')
+
+    return render(request, 'app/estudios.html', {'research_list': estudios, 'can_edit': editar, 'can_delete': eliminar, 'clients_available': clients_available, 'users_available': users_available })
+
 
 @login_required
 def show_ingresos_by_id(request, form_id):
@@ -114,6 +127,72 @@ def new_ingreso(request):
         content_object=entryform, flow=flow, state=flow.step_set.first().state)
     return redirect('/workflow/'+str(form.id))
 
+@login_required
+def new_research(request):
+    var_post = request.POST.copy()
+    clients = var_post.getlist('clients', [])
+    id = var_post.get('id', None)
+    name = var_post.get('name')
+    init_date = var_post.get('init_date')
+    external_responsible = var_post.get('external_responsible')
+    internal_responsible = var_post.get('internal_responsible')
+    type = var_post.get('type')
+    description = var_post.get('description')
+    status = int(var_post.get('status'))
+            
+    if not id:
+        start_counter_research = 59
+        research_counter = Research.objects.count()
+        next_code = str(start_counter_research + research_counter + 1)
+        
+        if len(next_code) == 2:
+            code = "E00"+next_code
+        elif len(next_code) == 3:
+            code = "E0"+next_code
+        else:
+            code = "E"+next_code
+        
+        study = Research.objects.create(
+            code = code,
+            name = name,
+            description = description,
+            type = int(type),
+            init_date = datetime.datetime.strptime(init_date, '%d/%m/%Y %H:%M'),
+            status = status,
+            external_responsible = external_responsible,
+            internal_responsible_id = internal_responsible
+        )
+        clients_obj = Customer.objects.filter(id__in=clients)
+        for cl in clients_obj:
+            study.clients.add(cl)
+            
+        return redirect('/research/'+str(study.id))
+    else:
+        study = Research.objects.get(pk=id)
+        study.name = name
+        study.description = description
+        study.type = int(type)
+        study.init_date = datetime.datetime.strptime(init_date, '%d/%m/%Y %H:%M')
+        study.status = status
+        study.external_responsible = external_responsible
+        study.internal_responsible_id = internal_responsible
+        study.save()
+        
+        # Quitando servicios de clientes eliminados
+        for c in study.clients.all():
+            if str(c.id) not in clients:
+                for s in study.services.filter(entryform__customer_id=c):
+                    study.services.remove(s)
+                    
+        study.clients.clear()
+                
+        clients_obj = Customer.objects.filter(id__in=clients)
+        for cl in clients_obj:
+            study.clients.add(cl)
+            
+        return redirect('/estudios')
+    
+    
 
 @login_required
 def show_workflow_main_form(request, form_id):
