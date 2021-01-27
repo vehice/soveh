@@ -243,6 +243,7 @@ class EntryForm(models.Model):
         on_delete=models.SET_NULL,
     )
     attached_files = models.ManyToManyField(CaseFile)
+    transfer_order = models.CharField(max_length=250, null=True, blank=True)
     # score_diagnostic = models.FloatField(default=None, null=True, blank=True)
     # score_report = models.FloatField(default=None, null=True, blank=True)
     

@@ -1801,6 +1801,10 @@ def step_1_entryform(request):
         change = True
     entryform.center = var_post.get('center')
     
+    if str(entryform.transfer_order) != var_post.get('transfer_order') and (entryform.transfer_order == None and var_post.get('transfer_order') != ''):
+        change = True
+    entryform.transfer_order = var_post.get('transfer_order')
+    
     if str(entryform.responsible) != var_post.get('responsible') and (entryform.responsible == None and var_post.get('responsible') != ''):
         change = True
     entryform.responsible = var_post.get('responsible')

@@ -211,6 +211,7 @@ function init_step_1() {
         $('#company_input').val(entryform.company);
         $('#center_input').val(entryform.center);
         $('#responsible_input').val(entryform.responsible);
+        $('#transfer_order_input').val(entryform.transfer_order);
 
         if (entryform.larvalstage_id) {
           $('#larvalstage_select').val(entryform.larvalstage_id).trigger('change');

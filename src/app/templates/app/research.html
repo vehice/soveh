@@ -268,6 +268,8 @@
               </div>
               <div class="col-sm-4 form-group summaryEntryformType">
               </div>
+              <div class="col-sm-4 form-group summaryTransferOrder">
+              </div>
             </div>
             <hr>
             <h6 class="form-section mt-2"> <b>Detalle</b></h6>
@@ -375,6 +377,7 @@
     $('.summaryClient').html('<label>Cliente:</label>' + selectClient);
     $('.summaryCompany').html('<label>Empresa:</label> <input class="form-control" value="'+ data.entryform.company+'" name="company" {% if not edit or closed %}disabled{% endif %} />');
     $('.summaryCenter').html('<label>Centro:</label> <input class="form-control" value="'+ data.entryform.center+'" name="center" {% if not edit or closed  %}disabled{% endif %} />');
+    $('.summaryTransferOrder').html('<label>Orden de transporte:</label> <input class="form-control" value="'+ data.entryform.transfer_order+'" name="transfer_order" />');
     $('.summaryResponsible').html('<label>Responsable:</label> <input class="form-control responsible_place" readonly value="'+ data.entryform.responsible+'" name="responsable" onclick="responsibleModal()" {% if not edit or closed  %}disabled{% endif %} />');
     $('.summaryReception').html('<label>Fecha recepción:</label> <div class="input-group date" id=""><input type="text" class="form-control" name="recive" value="'+ moment(data.entryform.created_at).format("DD/MM/YYYY HH:mm")+'" {% if not edit or closed  %}disabled{% endif %} /><div class="input-group-append"><span class="input-group-text"><span class="fa fa-calendar"></span></span></div></div> ' );
     $('.sumarrySampling').html('<label>Fecha muestreo:</label> <div class="input-group date" id=""><input type="text" class="form-control" name="muestreo" value="'+ moment(data.entryform.sampled_at).format("DD/MM/YYYY HH:mm")+'" {% if not edit or closed  %}disabled{% endif %} /><div class="input-group-append"><span class="input-group-text"><span class="fa fa-calendar"></span></span></div></div> ' );

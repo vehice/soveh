@@ -125,6 +125,13 @@
           <label for="phoneNumber3">Anamnesis :</label>
           <textarea id="anamnesis_input" name="anamnesis" row="2" class="form-control" {% if not edit %}disabled{% endif %} ></textarea>
         </div>
+        <div class="form-group">
+          <label for="transfer_order_input">
+            Orden de transporte :
+          </label>
+          <input type='text' class="form-control" id="transfer_order_input" name="transfer_order"
+            {% if not edit %}disabled{% endif %} />
+        </div>
       </div>
     </div>
     <h4 class="form-section">
