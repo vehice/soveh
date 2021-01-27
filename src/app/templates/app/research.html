@@ -47,15 +47,23 @@
     <div class="card">
       <div class="card-content">
         <div class="card-body card-dashboard">
+          <div class="text-right">
+            <button 
+              class="btn btn-info editResearch" 
+              data-id="{{ research.id }}" 
+              data-toggle="tooltip" 
+              data-placement="top" 
+              title="Editar Estudio">
+              <i class="fa fa-edit fa-fx"></i> Editar Estudio
+            </button>
+          </div>
+
           <p><h1>Estudio {{research.code}} {{research.name.title}} </h1></p>
 
           <div class="row">
             <div class="col-md-12">
-              
-              
               <center><div class="badge badge-warning"><h3>ANÁLISIS DISPONIBLES</h3></div></center>
-
-              <div class="row mt-3 pl-3">
+              <div class="row mt-3 mb-2 pl-2">
                 <div class="col-md-2">
                   <div id="filter1-year">
                   </div>
@@ -138,7 +146,7 @@
 
               <center><div class="badge badge-success"><h3>ANÁLISIS AGREGADOS </h3></div></center>
 
-              <div class="row mt-3 pl-3">
+              <div class="row mt-3 mb-2 pl-2">
                 <div class="col-md-2">
                   <div id="filter2-year">
                   </div>
@@ -227,6 +235,106 @@
   </div>
 </div>
 
+<div class="modal fade text-left" id="new_research_modal" role="dialog" data-backdrop="static" data-keyboard="false">
+  <div class="modal-dialog" role="document" style="min-width: 50% !important;" >
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title" id="title"></h3>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body" style="font-size:14px !important; max-height: calc(100vh - 150px); overflow-y:scroll;">
+        <form method="POST" action="/research/new" id="create_research_form" class="form">
+          
+          <div class="row">
+            
+            <div class="col-md-6">
+              <div class="form-group">
+                <label for="input-name">Nombre de Estudio</label>
+                <input required type="text" class="form-control" name="name" id="input-name" />
+              </div>
+            </div>
+
+            <div class="col-md-6">
+              <div class="form-group">
+                <label for="select-clients">Clientes</label>
+                <select required class="select2 form-control select-clients" id="select-clients" name="clients" multiple>
+                  {% for client in clients_available %}
+                    <option value="{{client.id}}">{{client.name}}</option>
+                  {% endfor %}
+                </select>
+              </div>
+            </div>
+            
+            <div class="col-md-6">
+              <div class="form-group">
+                <label for="input-init-date">Fecha Apertura</label>
+                <input required type="text" class="form-control date" name="init_date" id="input-init-date" />
+              </div>
+            </div>
+
+            <div class="col-md-6">
+              <div class="form-group">
+                <label for="input-type">Tipo de Estudio</label>
+                <select required class="form-control" name="type" id="select-type">
+                  <option value="1">Estudio Vehice</option>
+                  <option value="2">Seguimiento de rutina</option>
+                </select>
+              </div>
+            </div>
+            
+            <div class="col-md-6">
+              <div class="form-group">
+                <label for="input-name">Responsable Externo</label>
+                <input required class="form-control responsible_place" name="external_responsible" id="input-external-responsible" onclick="responsibleModal()" value=""/>
+              </div>
+            </div>
+
+            <div class="col-md-6">
+              <div class="form-group">
+                <label for="input-name">Responsable Interno</label>
+                <select required class="select2 form-control select-users" name="internal_responsible" id="select-internal-responsible">
+                  {% for usr in users_available %}
+                    <option value="{{usr.id}}">{{usr.get_full_name}}</option>
+                  {% endfor %}
+                </select>
+              </div>
+            </div>
+            
+            <div class="col-md-8">
+              <div class="form-group">
+                <label for="input-type">Descripción</label>
+                <textarea required row="3" class="form-control" name="description" id="input-description"></textarea>
+              </div>
+            </div>
+
+            <div class="col-md-4">
+              <div class="form-group">
+                <label for="select-status">Estado</label>
+                <select required class="form-control" name="status" id="select-status">
+                  <option selected value="1">HABILITADO</option>
+                  <option value="0">DESHABILITADO</option>
+                </select>
+              </div>
+            </div>
+
+          </div>
+          
+          <input id="input-id" name="id" type="hidden" value="" />
+
+          <div class="modal-footer">
+            <button type="submit" class="btn btn-lg btn-primary" id="submit-research">
+              <i class="fa fa-sign-in"></i> <span id="modal_research_button"></span>
+            </button>
+          </div>
+
+        </form>   
+      </div>
+    </div>
+  </div>
+</div>
+
 <div class="modal fade text-left" id="show_summary" role="dialog" data-backdrop="static" data-keyboard="false">
   <div class="modal-dialog" role="document" style="min-width:90% !important;">
     <div class="modal-content">
@@ -304,6 +412,104 @@
   var tabla_casos;
   var tabla_casos2;
   
+  $(document).on('click', '.editResearch', function(e){
+    var research_id = $(this).data('id');
+    $('#title').html("Editar Estudio");
+    $('#modal_research_button').html("Guardar");
+    $('#submit-research').addClass("saveEditResearch");
+
+    var url = Urls.get_research(research_id);
+
+    $.ajax({
+      type: "GET",
+      url: url,
+    })
+    .done(function (data) {
+      if (data.ok){
+        r = data.research;
+        $('#input-id').val(r.id);
+        $('#input-name').val(r.name);
+        $('#select-clients').val('').trigger('change');
+        $('#select-clients').val(r.clients).trigger('change');
+        $('#input-init-date').val(r.init_date);
+        $('#select-type').val(r.type);
+        $('#input-external-responsible').val(r.external_responsible);
+        $('#select-internal-responsible').val(r.internal_responsible).trigger('change');
+        $('#input-description').val(r.description);
+        console.log(r.status)
+        $('#select-status').val(r.status);
+        
+        $('#new_research_modal').modal('show');
+      }
+    })
+    .fail(function () {
+      console.log("Fail")
+    });
+
+  });
+
+  $(document).on('click', '.saveEditResearch', function(e){
+    e.preventDefault();
+    var research_id = $('#input-id').val();
+    var url = Urls.get_research(research_id);
+    $.ajax({
+      type: "GET",
+      url: url,
+      async: false
+    })
+    .done(function (data) {
+      if (data.ok){
+        r = data.research;
+        var selected_clients = $('#select-clients').val();
+        
+        var removing_services = false;
+        $.each(r.client_services, function(key, value){
+          if (!selected_clients.includes(key)){
+            if (!removing_services){
+              removing_services = true;
+            }
+          }
+        });
+
+        if (removing_services){
+          swal({
+            title: "Confirmación",
+            text: "Estás eliminando un cliente que tiene servicios asociados al presente estudio, ¿deseas continuar?",
+            icon: "warning",
+            showCancelButton: true,
+            buttons: {
+              cancel: {
+                  text: "Cancelar!",
+                  value: null,
+                  visible: true,
+                  className: "btn-warning",
+                  closeModal: true,
+              },
+              confirm: {
+                  text: "Continuar",
+                  value: true,
+                  visible: true,
+                  className: "",
+                  closeModal: true,
+              }
+            }
+          }).then(isConfirm => {
+            if (isConfirm) {
+              $('#create_research_form').submit();
+            }
+          });
+        
+        } else {
+          $('#create_research_form').submit();
+        }
+      }
+    })
+    .fail(function () {
+      console.log("Fail")
+    });
+    
+  });
+
   $(document).on('click', '.showSummaryBtn', function(e){
     var entryform_id = $(this).data('id');
     closed = parseInt($(this).data('closed'));
@@ -869,17 +1075,22 @@
   });
 
   $(document).ready(function () {
+
+    $('.select-clients').select2({'width':'100%'});
+    $('.select-users').select2({'width':'100%'});
+    
     tabla_casos = $('#table-casos').DataTable({
       "rowsGroup": [0,1],
       "bPaginate" : true,
-      "bLengthChange": false,
+      "lengthMenu": [[5, 10, 15, 25, -1], [5, 10, 15, 25, "Todos"]],
       "pageLength": 5,
       "order": [[ 0, "desc" ]],
       "orderable": false,
       "targets": 'no-sort',
       "bSort": true,
       "oLanguage": {
-        "sSearch": "Filtro General"
+        "sSearch": "Filtro General",
+        "sLengthMenu": "Mostrar _MENU_"
       },
       "columnDefs": [
         {
@@ -932,14 +1143,15 @@
     tabla_casos2 = $('#table-casos2').DataTable({
       "rowsGroup": [0,1],
       "bPaginate" : true,
-      "bLengthChange": false,
+      "lengthMenu": [[5, 10, 15, 25, -1], [5, 10, 15, 25, "Todos"]],
       "pageLength": 5,
       "order": [[ 0, "desc" ]],
       "orderable": false,
       "targets": 'no-sort',
       "bSort": true,
       "oLanguage": {
-        "sSearch": "Filtro General"
+        "sSearch": "Filtro General",
+        "sLengthMenu": "Mostrar _MENU_"
       },
       "columnDefs": [
         {

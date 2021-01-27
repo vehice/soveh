@@ -190,7 +190,7 @@ def new_research(request):
         for cl in clients_obj:
             study.clients.add(cl)
             
-        return redirect('/estudios')
+        return redirect('/research/'+str(study.pk))
     
     
 

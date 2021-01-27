@@ -1264,9 +1264,9 @@ class SERVICE_RESEARCHES(View):
     
     def get(self, request, analysis_id):
         af = AnalysisForm.objects.get(pk=analysis_id)
-
+        
         data = []
-        for rs in af.researches.all():
+        for rs in Research.objects.filter(services__in=[af]).distinct():
             response = {
                 'id': rs.id,
                 'code': rs.code,
@@ -1284,9 +1284,15 @@ class SERVICE_RESEARCHES(View):
                 af = AnalysisForm.objects.get(pk=analysis_id)
                 var_post = request.POST.copy()
                 researches = var_post.getlist('researches[]')
-                af.researches.clear()
-                for r in researches:
-                    af.researches.add(Research.objects.get(pk=r))
+                # af.researches.clear()
+                for r in Research.objects.all():
+                    if r.services.filter(id=af.id).count():
+                        r.services.remove(af)
+                        r.save()
+                for r in Research.objects.filter(id__in=researches):
+                    r.services.add(af)
+                    r.save()
+                    
                 return JsonResponse({'ok': True})
 
             else:
@@ -1472,6 +1478,9 @@ class RESEARCH(View):
                 'entryform': a.entryform.id,
                 'estado': a.status,
             })
+            
+        clients_available = Customer.objects.all()
+        users_available = User.objects.all()
 
         return render(request, 'app/research.html', {
             'research': research,
@@ -1479,6 +1488,8 @@ class RESEARCH(View):
             'casos1': data1,
             'casos2': data2,
             'analysis_selected': [RA.id for RA in research_analysis],
+            'clients_available': clients_available, 
+            'users_available': users_available
             # 'form': form,
             # 'form_id': form_id,
             # 'entryform_id': entryform_id,
