@@ -205,6 +205,16 @@ class CaseFile(models.Model):
     loaded_by = models.ForeignKey(User, null=True, on_delete=models.SET_NULL)
     created_at = models.DateTimeField(auto_now_add=True)
     
+ENTRY_FORMAT_OPTIONS = [
+    (1, "Tubo"),
+    (2, "Cassette"),
+    (3, "Bloque"),
+    (4, "Slide s/teñir"),
+    (5, "Slide teñido"),
+    (6, "Vivo"),
+    (7, "Muerto"),    
+]
+    
 class EntryForm(models.Model):
     specie = models.ForeignKey(Specie, null=True, on_delete=models.SET_NULL)
     watersource = models.ForeignKey(
@@ -244,6 +254,8 @@ class EntryForm(models.Model):
     )
     attached_files = models.ManyToManyField(CaseFile)
     transfer_order = models.CharField(max_length=250, null=True, blank=True)
+    entry_format = models.IntegerField(choices=ENTRY_FORMAT_OPTIONS, default=1)
+    
     # score_diagnostic = models.FloatField(default=None, null=True, blank=True)
     # score_report = models.FloatField(default=None, null=True, blank=True)
     

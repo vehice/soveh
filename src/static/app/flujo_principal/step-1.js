@@ -199,11 +199,16 @@ function init_step_1() {
         if (entryform.customer_id) {
           $('#customer_select').val(entryform.customer_id).trigger('change');
         }
-        if (entryform.entryform_type_id) {
-          $('#entryform_type_select').val(entryform.entryform_type_id).trigger('change');
-        }
-        $('#fixtative_select').val(entryform.fixative_id).trigger('change');
 
+        if (entryform.entryform_type_id) {
+          if (entryform.entryform_type_id == 1){
+            $('#entryform_type_1').prop("checked", true);
+          } else {
+            $('#entryform_type_2').prop("checked", true);
+          }
+        }
+
+        $('#fixtative_select').val(entryform.fixative_id).trigger('change');
         $('#observation').val(entryform.observation);
         $('#order_number_input').val(entryform.no_order);
         $('#request_number_input').val(entryform.no_request);
@@ -212,6 +217,7 @@ function init_step_1() {
         $('#center_input').val(entryform.center);
         $('#responsible_input').val(entryform.responsible);
         $('#transfer_order_input').val(entryform.transfer_order);
+        $('#entryformat_select').val(entryform.entry_format).trigger('change');
 
         if (entryform.larvalstage_id) {
           $('#larvalstage_select').val(entryform.larvalstage_id).trigger('change');
@@ -314,7 +320,7 @@ function init_step_1() {
     loadSpecies(data.species)
     loadLarvalStages(data.larvalStages)
     loadWaterSources(data.waterSources)
-    loadEntryFormType(data.entryform_types)
+    // loadEntryFormType(data.entryform_types)
     // loadExams(data.exams)
     // loadOrgans(data.organs)
     // loadQuestions(data.questionReceptionCondition)
@@ -376,12 +382,6 @@ function init_step_1() {
 
     $('#watersource_select').select2({
       placeholder: "Porfavor seleccione una fuente de agua"
-    }).on("select2:select", function (e) {
-      formChanged = true;
-    });
-
-    $('#entryform_type_select').select2({
-      placeholder: "Porfavor seleccione un tipo de ingreso"
     }).on("select2:select", function (e) {
       formChanged = true;
     });
@@ -652,14 +652,14 @@ function loadFixtatives(fixtatives) {
   });
 }
 
-function loadEntryFormType(entryform_types) {
-  $.each(entryform_types, function (i, item) {
-    $('#entryform_type_select').append($('<option>', {
-      value: item.id,
-      text: item.name
-    }));
-  });
-}
+// function loadEntryFormType(entryform_types) {
+//   $.each(entryform_types, function (i, item) {
+//     $('#entryform_type_select').append($('<option>', {
+//       value: item.id,
+//       text: item.name
+//     }));
+//   });
+// }
 
 function loadSpecies(species) {
   $.each(species, function (i, item) {

@@ -144,13 +144,15 @@
               </div>
               <div class="col-sm-4 form-group summaryNoRequest">
               </div>
-              <div class="col-sm-4 form-group summaryFixative">
+              <div class="col-sm-4 form-group summaryTransferOrder">
               </div>
-              <div class="col-sm-12 form-group summaryAnamnesis">
+              <div class="col-sm-4 form-group summaryEntryFormat">
+              </div>
+              <div class="col-sm-4 form-group summaryFixative">
               </div>
               <div class="col-sm-4 form-group summaryEntryformType">
               </div>
-              <div class="col-sm-4 form-group summaryTransferOrder">
+              <div class="col-sm-12 form-group summaryAnamnesis">
               </div>
             </div>
             <hr>
@@ -293,6 +295,18 @@
     getSummaryData();
   });
 
+  $(document).on('change', '#entryformat_select', function(e){
+    if ( ["1","2","7"].includes($(this).val()) ){
+      $('#fixtative_select').select2("enable");
+      $('#fixative').select2("enable");
+    } else {
+      $('#fixtative_select').val("").trigger('change');
+      $('#fixtative_select').select2("enable", false);
+      $('#fixative').val("").trigger('change');
+      $('#fixative').select2("enable", false);
+    }
+  });
+
   function getSummaryData(){
     var entryform_id = resumenId;
     var clsd = is_closed;
@@ -337,11 +351,28 @@
     });
     selectFix +='</select>';
 
-    var selectEntryformType = '<select class="select2 form-control selectOpt" id="entryform_type" name="entryform_type">';
-    $.each(data.entryform_types_list, function(j, o){
-        selectEntryformType += '<option value="'+o.id+'">'+o.name+'</option>';
-    });
-    selectEntryformType +='</select>';
+    var selectEntryformType = '<fieldset>\
+      <div class="d-inline-block mr-1">\
+        <input {% if not edit or closed  %}disabled{% endif %} type="radio" class=" bg-primary" name="entryform_type" id="summary_entryform_type_1" value="1">\
+        <label for="summary_entryform_type_1">Normal</label>\
+      </div>\
+      <div class="d-inline-block mr-1">\
+        <input {% if not edit or closed  %}disabled{% endif %} type="radio" class=" bg-primary" name="entryform_type" id="summary_entryform_type_2" value="2">\
+        <label for="summary_entryform_type_2">Fast</label>\
+      </div>\
+    </fieldset>';
+
+    var selectEntryFormat = '\
+      <select class="form-control" id="entryformat_select" name="entry_format" {% if not edit %}disabled{% endif %}>\
+        <option value="1">Tubo</option>\
+        <option value="2">Cassette</option>\
+        <option value="3">Bloque</option>\
+        <option value="4">Slide s/teñir</option>\
+        <option value="5">Slide teñido</option>\
+        <option value="6">Vivo</option>\
+        <option value="7">Muerto</option>\
+      </select>\
+    ';
 
     var selectSpecie = '<select class="select2 form-control selectOpt" id="specie" name="specie">';
     $.each(data.species_list, function(j, o){
@@ -363,21 +394,21 @@
 
     $('.NoCasoSummary').html(data.entryform.no_caso);
     $('.summaryClient').html('<label>Cliente:</label>' + selectClient);
-    $('.summaryCompany').html('<label>Empresa:</label> <input class="form-control" value="'+ data.entryform.company+'" name="company"/>');
-    $('.summaryCenter').html('<label>Centro:</label> <input class="form-control" value="'+ data.entryform.center+'" name="center"/>');
-    $('.summaryTransferOrder').html('<label>Orden de transporte:</label> <input class="form-control" value="'+ data.entryform.transfer_order+'" name="transfer_order" />');
-    $('.summaryResponsible').html('<label>Responsable:</label> <input class="form-control responsible_place" readonly value="'+ data.entryform.responsible+'" name="responsable" onclick="responsibleModal()"/>');
+    $('.summaryCompany').html('<label>Empresa:</label> <input class="form-control" value="'+ replaceNull(data.entryform.company)+'" name="company"/>');
+    $('.summaryCenter').html('<label>Centro:</label> <input class="form-control" value="'+ replaceNull(data.entryform.center)+'" name="center"/>');
+    $('.summaryTransferOrder').html('<label>Orden de transporte:</label> <input class="form-control" value="'+ replaceNull(data.entryform.transfer_order)+'" name="transfer_order" />');
+    $('.summaryResponsible').html('<label>Responsable:</label> <input class="form-control responsible_place" readonly value="'+ replaceNull(data.entryform.responsible)+'" name="responsable" onclick="responsibleModal()"/>');
     $('.summaryReception').html('<label>Fecha recepción:</label> <div class="input-group date" id=""><input type="text" class="form-control" name="recive" value="'+ moment(data.entryform.created_at).format("DD/MM/YYYY HH:mm")+'"/><div class="input-group-append"><span class="input-group-text"><span class="fa fa-calendar"></span></span></div></div> ' );
     $('.sumarrySampling').html('<label>Fecha muestreo:</label> <div class="input-group date" id=""><input type="text" class="form-control" name="muestreo" value="'+ moment(data.entryform.sampled_at).format("DD/MM/YYYY HH:mm")+'"/><div class="input-group-append"><span class="input-group-text"><span class="fa fa-calendar"></span></span></div></div> ' );
-    $('.summaryNoOrder').html('<label>Nro Orden de Trabajo:</label> <input class="form-control" value="'+ data.entryform.no_order+'" name="no_order"/>');
-    $('.summaryNoRequest').html('<label>Nro Solicitud Interlaboratorio:</label> <input class="form-control" value="'+ data.entryform.no_request+'" name="no_solic"/>');
-    $('.summaryAnamnesis').html('<label>Anamnesis:</label> <textarea class="form-control" row="2" name="anamnesis" {% if not edit %}disabled{% endif %} >'+ data.entryform.anamnesis+'</textarea>');
+    $('.summaryNoOrder').html('<label>Nro Orden de Trabajo:</label> <input class="form-control" value="'+ replaceNull(data.entryform.no_order)+'" name="no_order"/>');
+    $('.summaryNoRequest').html('<label>Nro Solicitud Interlaboratorio:</label> <input class="form-control" value="'+ replaceNull(data.entryform.no_request)+'" name="no_solic"/>');
+    $('.summaryAnamnesis').html('<label>Anamnesis:</label> <textarea class="form-control" row="2" name="anamnesis" {% if not edit %}disabled{% endif %} >'+ replaceNull(data.entryform.anamnesis)+'</textarea>');
     $('.summaryFixative').html('<label>Fijador:</label>'+ selectFix);
     $('.summaryEntryformType').html('<label>Tipo de Ingreso:</label>'+ selectEntryformType);
-    
     $('.summarySpecie').html('<label>Especie:</label>'+selectSpecie  );
     $('.summaryDevStatus').html('<label>Estadío Desarrollo:</label>'+selectlarvalstage ); 
     $('.summaryWaterSource').html('<label>Fuente de agua:</label>'+selectwatersource);
+    $('.summaryEntryFormat').html('<label for="entryformat_select">Formato de Ingreso :</label>'+selectEntryFormat);
 
     // var tpl_identification = '';
     var tpl_identification = '<div class="col-sm-12"> <hr><h6 class="form-section mt-2"> <b>Identificación</b>&nbsp;&nbsp;&nbsp;';
@@ -491,12 +522,20 @@
     if (data.entryform.customer != null) {
       $('#client').val(data.entryform.customer.id);
     }
-    if (data.entryform.entryform_type != null) {
-      $('#entryform_type').val(data.entryform.entryform_type.id);
+    if (data.entryform.entry_format != null) {
+      $('#entryformat_select').val(data.entryform.entry_format);
     }
     if (data.entryform.fixative != null) {
       $('#fixative').val(data.entryform.fixative.id);
     }
+    if (data.entryform.entryform_type != null) {
+      if (data.entryform.entryform_type.id == 1){
+        $('#summary_entryform_type_1').prop("checked", true);
+      } else {
+        $('#summary_entryform_type_2').prop("checked", true);
+      }
+    }
+    
     if (data.entryform.specie != null) {
       $('#specie').val(data.entryform.specie.id);
     }
@@ -528,164 +567,5 @@
     //   });
   }
   
-  function newIdentification(entryform_id){
-    var url = Urls.new_identification(entryform_id);
-    $.ajax({
-      type: "GET",
-      url: url,
-    })
-    .done(function (data) {
-      if (data.ok){
-        getSummaryData();
-      }
-    })
-    .fail(function () {
-      console.log("Fail")
-    });
-  }
-
-  function removeIdentification(id){
-    var url = Urls.remove_identification(id);
-    $.ajax({
-      type: "GET",
-      url: url,
-    })
-    .done(function (data) {
-      if (data.ok){
-        getSummaryData();
-      }
-    })
-    .fail(function () {
-      console.log("Fail")
-    });
-  }
-
-  function submitGeneralData(){
-    swal({
-      title: "Confirmación",
-      text: "¿Está seguro que desea guardar los cambios?",
-      icon: "warning",
-      showCancelButton: true,
-      buttons: {
-        cancel: {
-            text: "No, cancelar!",
-            value: null,
-            visible: true,
-            className: "btn-warning",
-            closeModal: true,
-        },
-        confirm: {
-            text: "Sí!",
-            value: true,
-            visible: true,
-            className: "",
-            closeModal: true,
-        }
-      }
-    }).then(isConfirm => {
-      if (isConfirm) {
-        var data = $('#generalData').serialize();
-        $.ajax({
-          type: "POST",
-          url: '/generalData/'+resumenId,
-          data: data,
-          async: false,
-        })
-        .done(function (data) {
-          $('#show_summary').modal('hide');
-        })
-        .fail(function (data) {
-          console.log("Fail");
-        })
-      }
-    });
-}
-
-  function submitIdentification(id){
-    swal({
-        title: "Confirmación",
-        text: "¿Confirma que desea guardar los cambios?",
-        icon: "warning",
-        showCancelButton: true,
-        buttons: {
-        cancel: {
-            text: "Cancelar",
-            value: null,
-            visible: true,
-            className: "btn-warning",
-            closeModal: true,
-        },
-        confirm: {
-            text: "Continuar",
-            value: true,
-            visible: true,
-            className: "",
-            closeModal: true,
-        }
-        }
-    }).then(isConfirm => {
-        if (isConfirm) {
-            var data = $('#identification-'+id).serialize();
-            $.ajax({
-                type: "POST",
-                url: '/identification/'+id,
-                data: data,
-                async: false,
-            })
-            .done(function (data) {
-                response = data;
-                summary_edited = true;
-                toastr.success('Guardado exitosamente!');
-                getSummaryData();
-            })
-            .fail(function (data) {
-                console.log("Fail");
-            })
-        }
-    });
-
-  }
-
-  function deleteSample(id){
-
-    swal({
-        title: "Confirmación",
-        text: "Le recordamos que eliminar una muestra puede generar perdida de trabajo realizado si ya se encuentra procesada o tiene servicios asociados. ¿Confirma que desea eliminar?",
-        icon: "warning",
-        showCancelButton: true,
-        buttons: {
-        cancel: {
-            text: "Cancelar",
-            value: null,
-            visible: true,
-            className: "btn-warning",
-            closeModal: true,
-        },
-        confirm: {
-            text: "Continuar",
-            value: true,
-            visible: true,
-            className: "",
-            closeModal: true,
-        }
-        }
-    }).then(isConfirm => {
-        if (isConfirm) {
-            $.ajax({
-                type: "GET",
-                url: '/delete-sample/'+id,
-                async: false,
-            })
-            .done(function (data) {
-                summary_edited = true;
-                toastr.success('La muestra se ha eliminado exitosamente!');
-                getSummaryData();
-            })
-            .fail(function (data) {
-                console.log("Fail");
-            })
-        }
-    });
-  }
 
 </script> {% endblock scripts %}
