@@ -339,7 +339,17 @@ function showServiceResearchesModal(id, case_closed, form_closed=false){
       loadResearches();
       $('#researches_select').data('id', id);
       $.each(data.researches, function(index, item){
-        $('#researches_select option[value="'+item.id+'"]').prop("selected", true);
+
+        if ($('#researches_select option[value="'+item.id+'"]').length == 0){ 
+          $('#researches_select').append($('<option>', {
+            value: item.id,
+            text: item.code + " " + item.name,
+            disabled: "disabled",
+            selected: "selected"
+          }));
+        } else {
+          $('#researches_select option[value="'+item.id+'"]').prop("selected", true);
+        }
       });
       $('#researches_select').bootstrapDualListbox('refresh');
     }
@@ -374,12 +384,19 @@ function saveServiceComment(){
 function saveServiceResearch(){
   var id = $('#researches_select').data('id');
   var url = Urls.service_researches(id);
+
+  var values_selected = $('#researches_select').val();
+  var values_disabled_selected = $('#researches_select option[disabled]:selected').val();
+
+  var values = values_selected.concat(values_disabled_selected);
+
   $.ajax({
     type: "POST",
     url: url,
-    data: {'researches': $('#researches_select').val()}
+    data: {'researches': values}
   })
   .done(function (data) {
+    // research_select.prop('disabled', true);
     if (data.ok){
       toastr.success('Listo', 'Estudios guardados exitosamente.');
     } else {

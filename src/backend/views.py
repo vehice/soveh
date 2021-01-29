@@ -234,7 +234,11 @@ class ENTRYFORM(View):
             customers_list = list(Customer.objects.all().values())
             patologos = list(User.objects.filter(userprofile__profile_id__in=[4, 5]).values())
             # entryform_types = list(EntryForm_Type.objects.all().values())
-            researches = list(Research.objects.filter(status=True, clients__in=[entryform_object.customer]).values())
+            if entryform_object.customer:
+                researches = list(Research.objects.filter(status=True, clients__in=[entryform_object.customer]).values())
+            else:
+                researches = []
+                
             stains_list = list(Stain.objects.values())
             
             data = {
@@ -262,7 +266,7 @@ class ENTRYFORM(View):
             organs = list(Organ.objects.all().values())
             customers = list(Customer.objects.all().values())
             # entryform_types = list(EntryForm_Type.objects.all().values())
-            researches = list(Research.objects.filter(status=True, clients__in=[entryform_object.customer]).values())
+            researches = list(Research.objects.filter(status=True).values())
             stains_list = list(Stain.objects.values())
 
             data = {
@@ -556,7 +560,10 @@ class ANALYSIS(View):
         customers_list = list(Customer.objects.all().values())
         patologos = list(User.objects.filter(userprofile__profile_id__in=[4, 5]).values())
         # entryform_types = list(EntryForm_Type.objects.all().values())
-        researches = list(Research.objects.filter(status=True, clients__in=[entryform_object.customer]).values())
+        if entryform_object.customer:
+            researches = list(Research.objects.filter(status=True, clients__in=[entryform_object.customer]).values())
+        else:
+            researches = []
 
 
         data = {
