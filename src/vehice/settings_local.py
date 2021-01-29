@@ -24,7 +24,7 @@ SECRET_KEY = 'hx6zbkv$$72fhqt^$n8=j_#wocxb@qo30q^qhd$1zx)9=4(hf7'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-SITE_URL = 'http://127.0.0.1:5000'
+SITE_URL = 'http://127.0.0.1:8000'
 
 ALLOWED_HOSTS = ['*']
 
@@ -87,9 +87,9 @@ TEMPLATES = [
 DATABASES = {
     'default': {
         'ENGINE': 'mysql.connector.django',
-        'NAME': 'vehice_190820',
-        'USER': 'root',
-        'PASSWORD': '1q2w3e4r5t',
+        'NAME': 'vehice',
+        'USER': '',
+        'PASSWORD': '',
         'HOST': 'localhost',
         'PORT': '',
     }
@@ -154,6 +154,7 @@ JET_SIDE_MENU_ITEMS = [
         {'name': 'auth.user'},
         {'name': 'backend.customer'},
         {'name': 'backend.exam'},
+        {'name': 'backend.stain'},
         {'name': 'backend.fixative'},
         {'name': 'backend.organ'},
         {'name': 'backend.pathology'},
@@ -163,6 +164,11 @@ JET_SIDE_MENU_ITEMS = [
         {'name': 'backend.research'},
     ]},
 ]
+
+DATA_UPLOAD_MAX_MEMORY_SIZE = None
+DATA_UPLOAD_MAX_NUMBER_FIELDS = None
+FILE_UPLOAD_MAX_MEMORY_SIZE = 15000000
+FILE_UPLOAD_PERMISSIONS = 0o644
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.office365.com'
