@@ -540,6 +540,100 @@
         });
     }
 
+    function responsibleModal() {
+      $('#responsible_modal').modal('show');
+      reloadResponsibleTable();
+    }
+
+    function reloadResponsibleTable() {
+      $.ajax({
+        type: "GET",
+        url: '/responsible',
+      })
+      .done(function (data) {
+        if (data.ok)
+        {
+          var groupTemplate = document.getElementById("responsible_table_template").innerHTML;
+          var templateFn = _.template(groupTemplate);
+          var templateHTML = templateFn(data);
+
+          $("#responsible_table_div").html(templateHTML);
+
+          $('#responsible_table').DataTable({
+            "destroy": true,
+            "oLanguage": {
+              "sUrl": "https://cdn.datatables.net/plug-ins/1.10.16/i18n/Spanish.json"
+            },
+            initComplete: function () {
+              setTimeout(function(){ $('#responsible_table_filter input[type=search]').focus(); }, 500);
+            },
+          });
+        }
+      });
+    }
+
+    function saveResponsible(e) {
+      let form_data = $("#responsible_form").serialize();
+      $.ajax({
+        type: "POST",
+        url: '/responsible',
+        data: form_data,
+      })
+        .done(function (data) {
+          if (data.ok)
+          {
+            reloadResponsibleTable()
+            $("#responsible_form")[0].reset();
+            toastr.success('Se guardó satisfactoriamente', '');
+          }
+          else
+          {
+            toastr.error('No se pudo guardar satisfactoriamente', 'Aviso');
+          }
+        })
+        .fail(function (data) {
+          console.log("Fail");
+        })
+    }
+
+    function editResponsible(id, name, email, phone, job) {
+      $('#responsible_form input[name=id]').val(id);
+      $('#responsible_form input[name=name]').val(name);
+      $('#responsible_form input[name=email]').val(email);
+      $('#responsible_form input[name=phone]').val(phone);
+      $('#responsible_form input[name=job]').val(job);
+    }
+
+    function disabledResponsible(id) {
+      $.ajax({
+        type: "DELETE",
+        url: '/responsible/' + id,
+      })
+        .done(function (data) {
+          if (data.ok)
+          {
+            reloadResponsibleTable()
+            toastr.success('Se eliminó satisfactoriamente', '');
+          }
+          else
+          {
+            toastr.error('No se pudo eliminar satisfactoriamente', 'Aviso');
+          }
+        })
+        .fail(function (data) {
+          console.log("Fail");
+        })
+    }
+
+    function selectResponsible(id, name) {
+      $.each($('.responsible_place'), function(i, v){
+        $(v).val(name);
+      })
+      $.each($('#responsible_input'), function(i, v){
+        $(v).val(name);
+      })
+    }
+
     $(document).on('change', '#entryformat_select', function(e){
       if ( ["1","2","7"].includes($(this).val()) ){
         $('#fixtative_select').select2("enable");
@@ -552,24 +646,24 @@
       }
     });
 
-  </script> 
-  <script>
-      function myFunction() {
-        document.getElementById("myDropdown").classList.toggle("show");
-      }
-      window.onclick = function(event) {
-        if (!event.target.matches('.dropbtn')) {
-          var dropdowns = document.getElementsByClassName("dropdown-content-avatar");
-          var i;
-          for (i = 0; i < dropdowns.length; i++) {
-            var openDropdown = dropdowns[i];
-            if (openDropdown.classList.contains('show')) {
-              openDropdown.classList.remove('show');
-            }
+    function myFunction() {
+      document.getElementById("myDropdown").classList.toggle("show");
+    }
+    
+    window.onclick = function(event) {
+      if (!event.target.matches('.dropbtn')) {
+        var dropdowns = document.getElementsByClassName("dropdown-content-avatar");
+        var i;
+        for (i = 0; i < dropdowns.length; i++) {
+          var openDropdown = dropdowns[i];
+          if (openDropdown.classList.contains('show')) {
+            openDropdown.classList.remove('show');
           }
         }
       }
-      </script>
+    }
+
+  </script> 
   {% block scripts %}{% endblock scripts %}
 </body>
 
