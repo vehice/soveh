@@ -207,7 +207,7 @@
                       </td>
                       <td>
                         <div class="btn-group optionGroups-{{entryForm.analisis}}" data-entryform="{{ entryForm.entryform }}" role="group">
-                          <button class="btn btn-primary showSummaryBtn" data-id="{{ entryForm.entryform }}" data-closed="{% if entryForm.entryform_form_closed or entryForm.entryform_cancelled %} 1 {% else %} 0 {% endif %}" data-toggle="tooltip" data-placement="top" title="Resúmen del Caso"><i class="fa fa-list-alt fa-fx"></i></button>
+                          <button class="btn btn-primary showSummaryBtn" data-id="{{ entryForm.entryform }}" data-closed="{% if entryForm.entryform_form_closed or entryForm.entryform_cancelled %} 1 {% else %} 0 {% endif %}" data-editable="{% if edit %}1{% else %}0{% endif %}" data-toggle="tooltip" data-placement="top" title="Resúmen del Caso"><i class="fa fa-list-alt fa-fx"></i></button>
                           {% if request.user.is_superuser and entryForm.patologo %}
                             <button class="btn btn-info showScoreBtn" data-id="{{ entryForm.analisis }}" data-toggle="tooltip" data-placement="top" title="Notas"><i class="fa fa-check-square-o fa-fx"></i></button>
                           {% endif %}
@@ -217,78 +217,6 @@
                 </tbody>
               </table>
             </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-
-<div class="modal fade text-left" id="show_summary" role="dialog" data-backdrop="static" data-keyboard="false">
-  <div class="modal-dialog" role="document" style="min-width:80% !important;">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h3 class="modal-title" id="title">Resumen Caso <span class="NoCasoSummary"></span></h3>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-      <div class="modal-body" style="font-size:12px !important; max-height: calc(100vh - 150px); overflow-y:scroll;">
-        <div style="padding: 10px;background-color: #f2efed;">
-          {% if edit %}
-          <div class="col-md-12">
-            <a href="javascript:void(0);" id="btn_save" onclick="submitGeneralData()" class="btn btn-primary pull-right"> <i class="fa fa-save fa-2x"></i> </a>
-          </div>
-          {% endif %}
-          <form action="#" id="generalData">
-            <h6 class="form-section mt-2">  <b>Información general</b></h6>
-            <div class="row generalInfo">
-              <div class="col-sm-4 form-group summaryClient">
-              </div>
-              <div class="col-sm-4 form-group summaryCompany">
-              </div>
-              <div class="col-sm-4 form-group summaryCenter">
-              </div>
-              <div class="col-sm-4 form-group summaryResponsible">
-              </div>
-              <div class="col-sm-4 form-group summaryReception">
-              </div>
-              <div class="col-sm-4 form-group sumarrySampling">
-              </div>
-              <div class="col-sm-4 form-group summaryNoOrder">
-              </div>
-              <div class="col-sm-4 form-group summaryNoRequest">
-              </div>
-              <div class="col-sm-4 form-group summaryTransferOrder">
-              </div>
-              <div class="col-sm-4 form-group summaryEntryFormat">
-              </div>
-              <div class="col-sm-4 form-group summaryFixative">
-              </div>
-              <div class="col-sm-4 form-group summaryEntryformType">
-              </div>
-              <div class="col-sm-12 form-group summaryAnamnesis">
-              </div>
-            </div>
-            <hr>
-            <h6 class="form-section mt-2"> <b>Detalle</b></h6>
-            <div class="row ">
-              <div class="col-sm-4 summarySpecie">
-              </div>
-              <div class="col-sm-4 summaryDevStatus">
-              </div>
-              <div class="col-sm-4 summaryWaterSource">
-              </div>
-            </div>
-          </form>   
-        </div>
-        <div class="row">
-          <div class="row col-sm-12 summaryIdentification" style="margin:0">
-          </div>
-          <div class="col-sm-5 summaryExams">
-          </div>
-          <div class="col-sm-7 summarySamples">
           </div>
         </div>
       </div>
@@ -535,13 +463,6 @@
     tabla_casos.draw();
   });
 
-  $(document).on('click', '.showSummaryBtn', function(e){
-    var entryform_id = $(this).data('id');
-    closed = $(this).data('closed');
-    resumenId = entryform_id;
-    getSummaryData();
-  });
-
   $(document).on("keyup change", "#score_report", function(){
     $(this).val($(this).val().replace(',', '.').replace(/[^0-9\.]/g,''));
   });
@@ -700,31 +621,6 @@
     })
     .fail(function (data) {
       toastr.error("No ha sido posible realizar la derivación con éxito, itente nuevamente o contacte un administrador.", "Ups! Problemas.");
-    });
-  }
-
-  function getSummaryData(){
-    var entryform_id = resumenId;
-    var closed = closed;
-    var url = Urls.entryform_id(entryform_id);
-    $.ajax({
-      type: "GET",
-      url: url,
-    })
-    .done(function (data) {
-      fillSummary(data);
-      if(closed == 1){
-        $('#btn_save').hide();
-        $('.btn-save-identification').hide();
-      }
-      else{
-        $('#btn_save').show();
-        $('.btn-save-identification').show();
-      }
-      $("#show_summary").modal("show");
-    })
-    .fail(function () {
-      console.log("Fail")
     });
   }
 

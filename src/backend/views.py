@@ -523,8 +523,8 @@ class ANALYSIS(View):
                 'pre_report_started': analysis.pre_report_started,
                 'pre_report_ended': analysis.pre_report_ended,
                 'status': analysis.status,
-                'cancelled_by': analysis.manual_cancelled_by.get_full_name() if form.cancelled else "",
-                'cancelled_at': analysis.manual_cancelled_date.strftime('%d/%m/%Y') if form.cancelled else "", 
+                'cancelled_by': analysis.manual_cancelled_by.get_full_name() if analysis.manual_cancelled_by else "",
+                'cancelled_at': analysis.manual_cancelled_date.strftime('%d/%m/%Y') if analysis.manual_cancelled_date else "", 
                 'samples_count': samples_count,
             })
         
@@ -729,7 +729,9 @@ class WORKFLOW(View):
                     if not ch.form_closed and not ch.cancelled:
                         close_allowed = 0
                         break
-
+            up = UserProfile.objects.filter(user=request.user).first()
+            edit_case = not form.form_closed and (up.profile.id in (1,2,3) or request.user.is_superuser)  
+            
             data = {
                 'form': form,
                 'form_id': form_id,
@@ -737,7 +739,8 @@ class WORKFLOW(View):
                 'set_step_tag': step_tag,
                 'edit': edit,
                 'closed': closed,
-                'close_allowed': close_allowed
+                'close_allowed': close_allowed,
+                'edit_case': edit_case
             }
 
         elif (form.content_type.name == 'analysis form'):
@@ -1465,6 +1468,8 @@ class RESEARCH(View):
                 'f_m_month': a['analysis'].entryform.sampled_at.strftime("%m") if a['analysis'].entryform.sampled_at else "",
                 'entryform': a['analysis'].entryform.id,
                 'estado': a['analysis'].status,
+                'edit_case': not a['entryform_form'].form_closed and (up.profile.id in (1,2,3) or request.user.is_superuser),
+                'case_closed': a['entryform_form'].form_closed or a['entryform_form'].cancelled,
             })
             
         for a in research_analysis:
@@ -1473,6 +1478,7 @@ class RESEARCH(View):
                 parte = ''
             else:
                 parte = ' (Parte ' + parte + ')'
+                
             data2.append({
                 'analisis': a.id,
                 'no_caso': a.entryform.no_caso + parte, 
@@ -1484,6 +1490,8 @@ class RESEARCH(View):
                 'f_m_month': a.entryform.sampled_at.strftime("%m") if a.entryform.sampled_at else "",
                 'entryform': a.entryform.id,
                 'estado': a.status,
+                'edit_case': not a['entryform_form'].form_closed and (up.profile.id in (1,2,3) or request.user.is_superuser),
+                'case_closed': a['entryform_form'].form_closed or a['entryform_form'].cancelled,
             })
             
         clients_available = Customer.objects.all()
@@ -1491,23 +1499,16 @@ class RESEARCH(View):
 
         return render(request, 'app/research.html', {
             'research': research,
-            'edit': 1,
             'casos1': data1,
             'casos2': data2,
             'analysis_selected': [RA.id for RA in research_analysis],
             'clients_available': clients_available, 
             'users_available': users_available
-            # 'form': form,
-            # 'form_id': form_id,
-            # 'entryform_id': entryform_id,
-            #'edit': 1,
-            # 'closed': 0
         })
 
     def post(self, request, id):
         try:
             var_post = request.POST.copy()
-            print (var_post)
             research = Research.objects.get(pk=id)
             analisis = var_post.getlist('analisis[]', [])
             research.services.clear()

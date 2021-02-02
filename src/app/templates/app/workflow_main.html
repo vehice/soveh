@@ -56,7 +56,9 @@
       <div class="card-header">
         <center>
           <h3> <strong>CASO N° {{form.content_object.no_caso}}</strong></h3>
-          <button class="btn btn-secondary square showSummaryBtn hidden"><i class="fa fa-list fa-fx"></i> Resumen del caso</button>
+          <button class="btn btn-secondary square showSummaryBtn hidden" 
+          data-id="{{ form.content_object.pk }}" 
+          data-closed="{% if form.form_closed or form.cancelled %}1{% else %}0{% endif %}" data-editable="{% if edit_case %}1{% else %}0{% endif %}"><i class="fa fa-list fa-fx"></i> Resumen del caso</button>
           <button class="btn btn-secondary square showShareBtn hidden" onclick="shareChoice()"><i class="fa fa-paper-plane fa-fx"></i> Enviar caso</button>
           <button class="btn btn-secondary square showLogBtn hidden" onclick="logModal()"><i class="fa fa-list fa-fx"></i> Registro de Envíos</button>
           <button class="btn btn-secondary square showAttachedFilesBtn hidden" onclick='showAttachedFilesModal({{form.content_object.id}}, {{closed}})'><i class="fa fa-cloud-upload fa-fx"></i> Documentos Adjuntos</button>
@@ -72,124 +74,6 @@
           </form>
         </div>
       </div>
-    </div>
-  </div>
-</div>
-
-<div class="modal fade text-left" id="show_summary" role="dialog" data-backdrop="static" data-keyboard="false">
-  <div class="modal-dialog" role="document" style="min-width:80% !important;">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h3 class="modal-title" id="title">Resumen Caso <span class="NoCasoSummary"></span></h3>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-      <div class="modal-body" style="font-size:12px !important; max-height: calc(100vh - 150px); overflow-y:scroll;">
-        <div style="padding: 10px;background-color: #f2efed;">
-          {% if edit and not closed %}
-            <div class="col-md-12">
-              <a href="javascript:void(0);" onclick="submitGeneralData({{form.content_object.id}})" class="btn btn-primary pull-right"> <i class="fa fa-save fa-2x"></i> </a>
-            </div>
-          {% endif %}
-          <form action="#" id="generalData">
-            <h6 class="form-section mt-2">  <b>Información general</b></h6>
-            <div class="row generalInfo">
-              <div class="col-sm-4 form-group summaryClient">
-              </div>
-              <div class="col-sm-4 form-group summaryCompany">
-              </div>
-              <div class="col-sm-4 form-group summaryCenter">
-              </div>
-              <div class="col-sm-4 form-group summaryResponsible">
-              </div>
-              <div class="col-sm-4 form-group summaryReception">
-              </div>
-              <div class="col-sm-4 form-group sumarrySampling">
-              </div>
-              <div class="col-sm-4 form-group summaryNoOrder">
-              </div>
-              <div class="col-sm-4 form-group summaryNoRequest">
-              </div>
-              <div class="col-sm-4 form-group summaryTransferOrder">
-              </div>
-              <div class="col-sm-4 form-group summaryEntryFormat">
-              </div>
-              <div class="col-sm-4 form-group summaryFixative">
-              </div>
-              <div class="col-sm-4 form-group summaryEntryformType">
-              </div>
-              <div class="col-sm-12 form-group summaryAnamnesis">
-              </div>
-            </div>
-            <hr>
-            <h6 class="form-section mt-2"> <b>Detalle</b></h6>
-            <div class="row ">
-              <div class="col-sm-4 summarySpecie">
-              </div>
-              <div class="col-sm-4 summaryDevStatus">
-              </div>
-              <div class="col-sm-4 summaryWaterSource">
-              </div>
-            </div>
-          </form>   
-        </div>
-        <hr>
-        <div class="row">
-          <div class="row col-sm-12 summaryIdentification" style="margin:0">
-          </div>
-          <div class="col-sm-4 summaryExams">
-          </div>
-          <div class="col-sm-8 summarySamples">
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<div class="modal fade text-left" id="responsible_modal" role="dialog" data-backdrop="static" data-keyboard="false">
-  <div class="modal-dialog" role="" style="min-width:80% !important;">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h3 class="modal-title" id="title"> Lista de Responsables <span></span></h3>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-      <div class="modal-body" style="font-size:12px !important;">
-        <div style="padding: 10px;background-color: #f2efed;">
-          <form action="#" id="responsible_form" onsubmit="saveResponsible(); return false;">
-            <h6 class="form-section mt-2">Responsable</h6>
-            <div class="row generalInfo">
-              <div class="col-sm-3 form-group">
-                <input class="form-control" name="id" hidden />
-                <input class="form-control" name="name" placeholder="Nombre*" required/>
-              </div>
-              <div class="col-sm-3 form-group">
-                <input class="form-control" name="email" placeholder="Correos Electrónicos*" required/>
-                <p>* Puede ingresar multiples direcciones separadas por punto y coma (;)</p>
-              </div>
-              <div class="col-sm-2 form-group">
-                <input class="form-control" name="phone" placeholder="Teléfono" />
-              </div>
-              <div class="col-sm-3 form-group">
-                <input class="form-control" name="job" placeholder="Cargo*" required/>
-              </div>
-              <div class="col-sm-1 form-group">
-                <button type="submit" class="btn btn-primary">
-                  <i class="fa fa-save"></i>
-                </button>
-              </div>
-            </div>
-          </form>
-        </div>
-        <hr>
-        <div class="col-md-12" id="responsible_table_div">
-          
-        </div>
-      </div>
-
     </div>
   </div>
 </div>
@@ -394,35 +278,6 @@
 </div>
 {% endblock content %}
 {% block scripts %}
-
-<script id="responsible_table_template" type="text/x-lodash-template">
-  <table class="table table-bordered table-condensed" id="responsible_table" style="font-size:13px;">
-    <thead>
-      <tr>
-        <th>Nombre</th>
-        <th>Correo</th>
-        <th>Teléfono</th>
-        <th>Cargo</th>
-        <th>Acciones</th>
-      </tr>
-    </thead>
-    <tbody>
-      <% _.each(responsibles, function (responsible) { %>
-        <tr id="responsible-<%= responsible.id %>">
-        <td><%= responsible.name %></td>
-        <td><%= _.replace(responsible.email, /;/g, '</br>') %></td>
-        <td><%= responsible.phone %></td>
-        <td><%= responsible.job %></td>
-        <td>
-          <button class="btn btn-success" data-dismiss="modal" onclick="selectResponsible('<%= responsible.id %>','<%= responsible.name %>')"><i class="fa fa-check"></i></button>
-          <button class="btn btn-info" onclick="editResponsible('<%= responsible.id %>','<%= responsible.name %>','<%= responsible.email %>','<%= responsible.phone %>','<%= responsible.job %>')"><i class="fa fa-edit"></i></button>
-          <button class="btn btn-danger" onclick="disabledResponsible('<%= responsible.id %>')"><i class="fa fa-times"></i></button>
-        </td>
-        </tr>
-      <% }); %>
-    </tbody>
-  </table>
-  </script>
 
 <script src="{% url 'js_reverse' %}" type="text/javascript"></script>
 
@@ -696,10 +551,6 @@ $("#show_summary").on("hidden.bs.modal", function () {
     }
 });
 
-$(document).on('click', '.showSummaryBtn', function(e){
-  getSummaryData();
-});
-
 $(document).on('change', '.just_increasing', function(){
   var original_value = $(this).data('val');
   if ( $(this).val() < original_value) {
@@ -711,36 +562,6 @@ $(document).on('click', '.stepsToStep2', function(e){
     form.steps("previous");
     $("#show_summary").modal("hide");
 });
-
-function getSummaryData(edited=false, ident=0){
-  var entryform_id = $('#entryform_id').val();
-  var url = Urls.entryform_id(entryform_id);
-  $.ajax({
-    type: "GET",
-    url: url,
-  })
-  .done(function (data) {
-    fillSummary(data);
-    if(closed == 1){
-      $('#btn_save').hide();
-      $('.btn-save-identification').hide();
-    }
-    else{
-      $('#btn_save').show();
-      $('.btn-save-identification').show();
-    }
-    if (edited){
-      if (form.steps("getCurrentIndex") == 2) {
-         $('#ToStep2-'+ident).append("<button type='button' class='btn btn-secondary stepsToStep2'><i class='fa fa-reply'></i> Editar Servicios (Paso 2)</button>");
-      }
-    }
-    
-    $("#show_summary").modal("show");
-  })
-  .fail(function () {
-    console.log("Fail")
-  });
-}
 
 function shareChoice(){
   swal({
@@ -1041,11 +862,6 @@ $(document).on('change', '#plantilla', function(){
   });
 })
 
-function responsibleModal() {
-  $('#responsible_modal').modal('show');
-  reloadResponsibleTable();
-}
-
 function logModal() {
   $('#log_modal').modal('show');
   reloadLogTable();
@@ -1079,94 +895,6 @@ function reloadLogTable(entry) {
         });
       }
     });
-}
-
-function reloadResponsibleTable() {
-  $.ajax({
-    type: "GET",
-    url: '/responsible',
-  })
-  .done(function (data) {
-    if (data.ok)
-    {
-      var groupTemplate = document.getElementById("responsible_table_template").innerHTML;
-      var templateFn = _.template(groupTemplate);
-      var templateHTML = templateFn(data);
-
-      $("#responsible_table_div").html(templateHTML);
-      $('#responsible_table').DataTable({
-        "destroy": true,
-        "oLanguage": {
-          "sUrl": "https://cdn.datatables.net/plug-ins/1.10.16/i18n/Spanish.json"
-        },
-        initComplete: function () {
-          setTimeout(function(){ $('#responsible_table_filter input[type=search]').focus(); }, 500);
-        },
-      });
-    }
-  });
-}
-
-function saveResponsible(e) {
-  let form_data = $("#responsible_form").serialize();
-  $.ajax({
-    type: "POST",
-    url: '/responsible',
-    data: form_data,
-  })
-    .done(function (data) {
-      if (data.ok)
-      {
-        reloadResponsibleTable()
-        $("#responsible_form")[0].reset();
-        toastr.success('Se guardó satisfactoriamente', '');
-      }
-      else
-      {
-        toastr.error('No se pudo guardar satisfactoriamente', 'Aviso');
-      }
-    })
-    .fail(function (data) {
-      console.log("Fail");
-    })
-}
-
-function editResponsible(id, name, email, phone, job) {
-  $('#responsible_form input[name=id]').val(id);
-  $('#responsible_form input[name=name]').val(name);
-  $('#responsible_form input[name=email]').val(email);
-  $('#responsible_form input[name=phone]').val(phone);
-  $('#responsible_form input[name=job]').val(job);
-}
-
-function disabledResponsible(id) {
-  $.ajax({
-    type: "DELETE",
-    url: '/responsible/' + id,
-  })
-    .done(function (data) {
-      if (data.ok)
-      {
-        reloadResponsibleTable()
-        toastr.success('Se eliminó satisfactoriamente', '');
-      }
-      else
-      {
-        toastr.error('No se pudo eliminar satisfactoriamente', 'Aviso');
-      }
-    })
-    .fail(function (data) {
-      console.log("Fail");
-    })
-}
-
-function selectResponsible(id, name) {
-  $.each($('.responsible_place'), function(i, v){
-    $(v).val(name);
-  })
-  $.each($('#responsible_input'), function(i, v){
-    $(v).val(name);
-  })
 }
 
 </script> {% endblock scripts %}

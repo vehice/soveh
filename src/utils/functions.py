@@ -93,3 +93,16 @@ def model_to_dict(instance, fields=None, exclude=None):
         # print data
 
     return data
+
+
+from django.conf import settings
+import json
+def translation(lang='en'):
+    translation = {}
+    with open(settings.LANG_FILE, 'r') as f:
+        load_lang = json.load(f)
+        for key, value in load_lang.items():
+            translation[str(key)] = value[lang]
+    return translation
+    
+    

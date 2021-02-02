@@ -1,0 +1,115 @@
+{
+    "version": {
+        "es": "Spanish",
+        "en": "English"
+    },
+    "entries" : {
+        "es": "Ingresos",
+        "en": "Cases"
+    },
+    "home" : {
+        "es": "Inicio",
+        "en": "Home"
+    },
+    "entry_list" : {
+        "es": "Listado de Ingresos",
+        "en": "List of Cases"
+    },
+    "show" : {
+        "es": "Mostrar",
+        "en": "Show"
+    },
+    "no_case" : {
+        "es": "Nro Caso",
+        "en": "No. Case"
+    },
+    "client" : {
+        "es": "Cliente",
+        "en": "Client"
+    },
+    "centro" : {
+        "es": "Centro",
+        "en": "Center"
+    },
+    "new_case" : {
+        "es": "Nuevo Caso",
+        "en": "Add Case"
+    },
+    "search" : {
+        "es": "Buscar",
+        "en": "Search"
+    },
+    "summary" : {
+        "es": "Resumen",
+        "en": "Summary"
+    },
+    "cancel" : {
+        "es": "Anular",
+        "en": "Cancel"
+    },
+    "request" : {
+        "es": "Solicitud",
+        "en": "Request"
+    },
+    "reception_date" : {
+        "es": "Fecha Inicio",
+        "en": "Reception Date"
+    },
+    "current_stage" : {
+        "es": "Etapa en curso",
+        "en": "Current Stage"
+    },
+    "options" : {
+        "es": "Opciones",
+        "en": "Options"
+    },
+    "case_closed" : {
+        "es": "Caso Cerrado",
+        "en": "Case Closed"
+    },
+    "case_cancelled" : {
+        "es": "Caso Anulado",
+        "en": "Case Cancelled"
+    },
+    "reopen" : {
+        "es": "Reabrir",
+        "en": "Reopen"
+    },
+    "to_confirm": {
+        "es": "Confirmar",
+        "en": "Confirm"
+    },
+    "confirmation": {
+        "es": "Confirmación",
+        "en": "Confirmation"
+    },
+    "to_exit": {
+        "es": "Salir",
+        "en": "Cancel"
+    },
+    "done": {
+        "es": "Listo!",
+        "en": "Done!"
+    },
+    "error": {
+        "es": "Error!",
+        "en": "Error!"
+    },
+    "done_msg":{
+        "es": "Proceso ejecutado con éxito.",
+        "en": "Process executed successfully."
+    },
+    "error_msg":{
+        "es": "No ha sido posible ejecutar el proceso exitosamente.",
+        "en": "It has not been possible to execute the process successfully."
+    },
+    "cancel_case_confirm_text":{
+        "es": "Le notificamos que al anular un caso no será posible reabrirlo. Además, automáticamente serán anulados todos los servicios que se encuentren abiertos o en curso. ¿Está seguro que desea continuar con la anulación?",
+        "en": "We notify you that by canceling a case it will not be possible to reopen it. In addition, all services that are open or in progress will be automatically canceled. Are you sure you want to proceed with the cancellation?"
+    },
+    "reopen_case_text":{
+        "es": "¿Está seguro que desea reabrir este caso definitivamente?",
+        "en": "Are you sure you want to reopen this case permanently?"
+    }
+
+}

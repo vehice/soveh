@@ -141,14 +141,46 @@
       }
     }
 
+    var case_id;
+    var case_is_closed;
+    var case_is_editable;
+    
+    $(document).on('click', '.showSummaryBtn', function(e){
+      case_id = $(this).data('id');
+      case_is_closed = parseInt($(this).data('closed'));
+      case_is_editable = parseInt($(this).data('editable'));
+      getSummaryData();
+    });
+
+    function getSummaryData(){
+      var url = Urls.entryform_id(case_id);
+      $.ajax({
+        type: "GET",
+        url: url,
+      })
+      .done(function (data) {
+        fillSummary(data);
+        if(case_is_closed || !case_is_editable){
+          $('.btn_process_summary').hide();
+        }
+        else{
+          $('.btn_process_summary').show();
+        }
+        $("#show_summary").modal("show");
+      })
+      .fail(function () {
+        console.log("Fail")
+      });
+    }
+
     function fillSummary(data){
-      var selectClient = '<select class="select2 form-control selectOpt" id="client" name="client" {% if not edit or closed  %}disabled{% endif %} >';
+      var selectClient = '<select class="select2 form-control selectOpt" id="client" name="client" >';
       $.each(data.customers_list, function(j, o){
           selectClient += '<option value="'+o.id+'">'+o.name+'</option>';
       });
       selectClient +='</select>';
 
-      var selectFix = '<select class="select2 form-control selectOpt" id="fixative" name="fixative" {% if not edit or closed  %}disabled{% endif %} >';
+      var selectFix = '<select class="select2 form-control selectOpt" id="fixative" name="fixative" >';
       $.each(data.fixtatives_list, function(j, o){
           selectFix += '<option value="'+o.id+'">'+o.name+'</option>';
       });
@@ -156,17 +188,17 @@
 
       var selectEntryformType = '<fieldset>\
         <div class="d-inline-block mr-1">\
-          <input {% if not edit or closed  %}disabled{% endif %} type="radio" class=" bg-primary" name="entryform_type" id="summary_entryform_type_1" value="1">\
+          <input type="radio" class=" bg-primary" name="entryform_type" id="summary_entryform_type_1" value="1">\
           <label for="summary_entryform_type_1">Normal</label>\
         </div>\
         <div class="d-inline-block mr-1">\
-          <input {% if not edit or closed  %}disabled{% endif %} type="radio" class=" bg-primary" name="entryform_type" id="summary_entryform_type_2" value="2">\
+          <input type="radio" class=" bg-primary" name="entryform_type" id="summary_entryform_type_2" value="2">\
           <label for="summary_entryform_type_2">Fast</label>\
         </div>\
       </fieldset>';
 
       var selectEntryFormat = '\
-        <select class="form-control" id="entryformat_select" name="entry_format" {% if not edit %}disabled{% endif %}>\
+        <select class="form-control" id="entryformat_select" name="entry_format">\
           <option value="1">Tubo</option>\
           <option value="2">Cassette</option>\
           <option value="3">Bloque</option>\
@@ -177,19 +209,19 @@
         </select>\
       ';
 
-      var selectSpecie = '<select class="select2 form-control selectOpt" id="specie" name="specie" {% if not edit or closed  %}disabled{% endif %} >';
+      var selectSpecie = '<select class="select2 form-control selectOpt" id="specie" name="specie" >';
       $.each(data.species_list, function(j, o){
           selectSpecie += '<option value="'+o.id+'">'+o.name+'</option>';
       });
       selectSpecie +='</select>';
 
-      var selectlarvalstage = '<select class="select2 form-control selectOpt" id="larvalstage" name="larvalstage" {% if not edit or closed  %}disabled{% endif %} >';
+      var selectlarvalstage = '<select class="select2 form-control selectOpt" id="larvalstage" name="larvalstage" >';
       $.each(data.larvalStages_list, function(j, o){
           selectlarvalstage += '<option value="'+o.id+'">'+o.name+'</option>';
       });
       selectlarvalstage +='</select>';
 
-      var selectwatersource = '<select class="select2 form-control selectOpt" id="watersource" name="watersource" {% if not edit or closed  %}disabled{% endif %} >';
+      var selectwatersource = '<select class="select2 form-control selectOpt" id="watersource" name="watersource" >';
       $.each(data.waterSources_list, function(j, o){
           selectwatersource += '<option value="'+o.id+'">'+o.name+'</option>';
       });
@@ -200,23 +232,23 @@
       
       $('.summaryClient').html('<label>Cliente:</label>' + selectClient);
       
-      $('.summaryCompany').html('<label>Empresa:</label> <input class="form-control" value="'+ replaceNull(data.entryform.company)+'" name="company" {% if not edit or closed  %}disabled{% endif %} />');
+      $('.summaryCompany').html('<label>Empresa:</label> <input class="form-control" value="'+ replaceNull(data.entryform.company)+'" name="company" />');
       
-      $('.summaryCenter').html('<label>Centro:</label> <input class="form-control" value="'+ replaceNull(data.entryform.center)+'" name="center" {% if not edit or closed  %}disabled{% endif %} />');
+      $('.summaryCenter').html('<label>Centro:</label> <input class="form-control" value="'+ replaceNull(data.entryform.center)+'" name="center" />');
       
-      $('.summaryTransferOrder').html('<label>Orden de transporte:</label> <input class="form-control" value="'+ replaceNull(data.entryform.transfer_order) +'" name="transfer_order" {% if not edit or closed  %}disabled{% endif %} />');
+      $('.summaryTransferOrder').html('<label>Orden de transporte:</label> <input class="form-control" value="'+ replaceNull(data.entryform.transfer_order) +'" name="transfer_order" />');
       
-      $('.summaryResponsible').html('<label>Responsable:</label> <input class="form-control responsible_place" readonly value="'+ replaceNull(data.entryform.responsible)+'" name="responsable" onclick="responsibleModal()" {% if not edit or closed  %}disabled{% endif %} />');
+      $('.summaryResponsible').html('<label>Responsable:</label> <input class="form-control responsible_place" readonly value="'+ replaceNull(data.entryform.responsible)+'" name="responsable" onclick="responsibleModal()" />');
       
-      $('.summaryReception').html('<label>Fecha recepción:</label> <div class="input-group date" id=""><input type="text" class="form-control" name="recive" value="'+ moment(data.entryform.created_at).format("DD/MM/YYYY HH:mm")+'" {% if not edit or closed  %}disabled{% endif %} /><div class="input-group-append"><span class="input-group-text"><span class="fa fa-calendar"></span></span></div></div> ' );
+      $('.summaryReception').html('<label>Fecha recepción:</label> <div class="input-group date" id=""><input type="text" class="form-control" name="recive" value="'+ moment(data.entryform.created_at).format("DD/MM/YYYY HH:mm")+'" /><div class="input-group-append"><span class="input-group-text"><span class="fa fa-calendar"></span></span></div></div> ' );
       
-      $('.sumarrySampling').html('<label>Fecha muestreo:</label> <div class="input-group date" id=""><input type="text" class="form-control" name="muestreo" value="'+ moment(data.entryform.sampled_at).format("DD/MM/YYYY HH:mm")+'" {% if not edit or closed  %}disabled{% endif %} /><div class="input-group-append"><span class="input-group-text"><span class="fa fa-calendar"></span></span></div></div> ' );
+      $('.sumarrySampling').html('<label>Fecha muestreo:</label> <div class="input-group date" id=""><input type="text" class="form-control" name="muestreo" value="'+ moment(data.entryform.sampled_at).format("DD/MM/YYYY HH:mm")+'" /><div class="input-group-append"><span class="input-group-text"><span class="fa fa-calendar"></span></span></div></div> ' );
       
-      $('.summaryNoOrder').html('<label>Nro Orden de Trabajo:</label> <input class="form-control" value="'+ replaceNull(data.entryform.no_order)+'" name="no_order" {% if not edit or closed  %}disabled{% endif %} />');
+      $('.summaryNoOrder').html('<label>Nro Orden de Trabajo:</label> <input class="form-control" value="'+ replaceNull(data.entryform.no_order)+'" name="no_order" />');
       
-      $('.summaryNoRequest').html('<label>Nro Solicitud Interlaboratorio:</label> <input class="form-control" value="'+ replaceNull(data.entryform.no_request)+'" name="no_solic" {% if not edit or closed  %}disabled{% endif %} />');
+      $('.summaryNoRequest').html('<label>Nro Solicitud Interlaboratorio:</label> <input class="form-control" value="'+ replaceNull(data.entryform.no_request)+'" name="no_solic" />');
       
-      $('.summaryAnamnesis').html('<label>Anamnesis:</label> <textarea class="form-control" row="2" name="anamnesis" {% if not edit %}disabled{% endif %} >'+ replaceNull(data.entryform.anamnesis)+'</textarea>');
+      $('.summaryAnamnesis').html('<label>Anamnesis:</label> <textarea class="form-control" row="2" name="anamnesis" >'+ replaceNull(data.entryform.anamnesis)+'</textarea>');
       
       $('.summaryFixative').html('<label>Fijador:</label>'+ selectFix);
       
@@ -232,9 +264,7 @@
     
       // var tpl_identification = '';
       var tpl_identification = '<div class="col-sm-12"> <hr><h6 class="form-section mt-2"> <b>Identificación</b> &nbsp;&nbsp;&nbsp;';
-      {% if edit and not closed %}
-        tpl_identification += '<a href="javascript:void(0);" onclick="newIdentification('+data.entryform.id+')" class="btn btn-secondary btn-sm"> <i class="fa fa-plus"></i> Agregar Identificación</a>'
-      {% endif %}
+      tpl_identification += '<a href="javascript:void(0);" onclick="newIdentification('+data.entryform.id+')" class="btn btn-secondary btn-sm btn_process_summary"> <i class="fa fa-plus"></i> Agregar Identificación</a>'
       tpl_identification += '</h6></div>';
 
       $.each(data.entryform.identifications, function(i, item){
@@ -242,9 +272,9 @@
         if (!item.is_optimum){
           optimum = "selected"
         }
-        var selectOptimum = '<select class="select2 form-control selectOpt" name="optimo" {% if not edit or closed  %}disabled{% endif %} ><option value="1">Si</option><option value="0" '+optimum+'>No</option></select>'
+        var selectOptimum = '<select class="select2 form-control selectOpt" name="optimo" ><option value="1">Si</option><option value="0" '+optimum+'>No</option></select>'
         
-        var selectOrgans = '<select class="select2 form-control selectOrgs" name="organs" multiple {% if not edit or closed  %}disabled{% endif %} >';
+        var selectOrgans = '<select class="select2 form-control selectOrgs" name="organs" multiple >';
 
         $.each(data.organs, function(j, o){
           if(item.organs_bv_set.findIndex(x => x.id === o.id) != -1){
@@ -257,19 +287,19 @@
         
         tpl_identification += '<div class="col-md-4"><form id="identification-'+item.id+'" action="#" method="POST">';
         tpl_identification += '<div class="alert alert-light"><div class="row">';
-        tpl_identification += '<div class="form-group col-md-6"><label>Estanque/Jaula:</label> <input class="form-control" value="'+ item.cage+'"  name="jaula" {% if not edit or closed  %}disabled{% endif %} /></div>';
-        tpl_identification += '<div class="form-group col-md-6"><label>Grupo/Nro Caso Cliente:</label> <input class="form-control" value="'+ item.group+'"  name="grupo" {% if not edit or closed  %}disabled{% endif %} /></div>';
-        tpl_identification += '<div class="form-group col-md-6"><label>Peces:</label> <input class="form-control just_increasing" name="no_fish" data-val="'+ item.no_fish+'" value="'+ item.no_fish+'" {% if not edit or closed  %}disabled{% endif %} /></div>';
-        tpl_identification += '<div class="form-group col-md-6"><label>Contenedores:</label> <input class="form-control" type="number" value="'+ item.no_container+'"  name="contenedores" {% if not edit or closed  %}disabled{% endif %} /></div>';
-        tpl_identification += '<div class="form-group col-md-6"><label>Peso (gramos):</label> <input class="form-control" type="number" value="'+ item.weight+'"  name="peso" {% if not edit or closed  %}disabled{% endif %} /></div>';
+        tpl_identification += '<div class="form-group col-md-6"><label>Estanque/Jaula:</label> <input class="form-control" value="'+ item.cage+'"  name="jaula" /></div>';
+        tpl_identification += '<div class="form-group col-md-6"><label>Grupo/Nro Caso Cliente:</label> <input class="form-control" value="'+ item.group+'"  name="grupo" /></div>';
+        tpl_identification += '<div class="form-group col-md-6"><label>Peces:</label> <input class="form-control just_increasing" name="no_fish" data-val="'+ item.no_fish+'" value="'+ item.no_fish+'" /></div>';
+        tpl_identification += '<div class="form-group col-md-6"><label>Contenedores:</label> <input class="form-control" type="number" value="'+ item.no_container+'"  name="contenedores" /></div>';
+        tpl_identification += '<div class="form-group col-md-6"><label>Peso (gramos):</label> <input class="form-control" type="number" value="'+ item.weight+'"  name="peso" /></div>';
         tpl_identification += '<div class="form-group col-md-6"><label>Óptimo?:</label>'+ selectOptimum+'</div>';
-        tpl_identification += '<div class="form-group col-md-6"><label>Características Extras:</label> <textarea class="form-control" rows="2" name="extras" {% if not edit or closed  %}disabled{% endif %} >'+ item.extra_features_detail+' </textarea></div>';
-        tpl_identification += '<div class="form-group col-md-6"><label>Observaciones:</label> <textarea class="form-control" rows="2" name="observation" {% if not edit or closed  %}disabled{% endif %} >'+ item.observation+' </textarea></div>';
+        tpl_identification += '<div class="form-group col-md-6"><label>Características Extras:</label> <textarea class="form-control" rows="2" name="extras" >'+ item.extra_features_detail+' </textarea></div>';
+        tpl_identification += '<div class="form-group col-md-6"><label>Observaciones:</label> <textarea class="form-control" rows="2" name="observation" >'+ item.observation+' </textarea></div>';
         tpl_identification += '<div class="form-group col-md-9"><label>Órganos:</label>'+selectOrgans+'</div>';
         {% if edit and not closed %}
-          tpl_identification += '<div style="padding-top:25px;"><a href="javascript:void(0);" onclick="submitIdentification('+item.id+')" class="btn btn-primary"> <i class="fa fa-save"></i></a>';
+          tpl_identification += '<div style="padding-top:25px;"><a href="javascript:void(0);" onclick="submitIdentification('+item.id+')" class="btn btn-primary btn_process_summary"> <i class="fa fa-save"></i></a>';
           if (item.removable){
-            tpl_identification += '<a href="javascript:void(0);" onclick="removeIdentification('+item.id+')" class="btn btn-danger"> <i class="fa fa-trash"></i></a>';
+            tpl_identification += '<a href="javascript:void(0);" onclick="removeIdentification('+item.id+')" class="btn btn-danger btn_process_summary"> <i class="fa fa-trash"></i></a>';
           }
           tpl_identification += '</div>';
         {% endif %}
@@ -323,11 +353,8 @@
           tpl_exams += '<td>'+ Object.keys(v.organ_id).map(function(k){return v.organ_id[k].name}).join(", ") +'</td></tr>';
         });
         tpl_samples += '<tr id="sample-id-'+item.id+'">';
-        {% if edit and not closed %}
-          tpl_samples += '<td rowspan="'+len+'"><button type="button" class="btn btn-sm btn-danger round" onclick="deleteSample('+item.id+');">X</button> '+ item.index +'</td>';
-        {% else %}
-          tpl_samples += '<td rowspan="'+len+'">'+ item.index +'</td>';
-        {% endif %}
+        tpl_samples += '<td rowspan="'+len+'"><button type="button" class="btn btn-sm btn-danger round btn_process_summary" onclick="deleteSample('+item.id+');">X</button> '+ item.index +'</td>';
+
         tpl_samples += '<td rowspan="'+len+'">'+ item.identification.cage +'-'+item.identification.group+'</td>';
         tpl_samples += '</tr>';
         tpl_samples += tpl_exams;
@@ -441,7 +468,7 @@
           var data = $('#generalData').serialize();
           $.ajax({
             type: "POST",
-            url: '/generalData/'+resumenId,
+            url: '/generalData/'+case_id,
             data: data,
             async: false,
           })
@@ -664,7 +691,153 @@
     }
 
   </script> 
+  <script id="responsible_table_template" type="text/x-lodash-template">
+    <table class="table table-bordered table-condensed" id="responsible_table" style="font-size:13px;">
+      <thead>
+        <tr>
+          <th>Nombre</th>
+          <th>Correo</th>
+          <th>Teléfono</th>
+          <th>Cargo</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% _.each(responsibles, function (responsible) { %>
+          <tr id="responsible-<%= responsible.id %>">
+          <td><%= responsible.name %></td>
+          <td><%= _.replace(responsible.email, /;/g, '</br>') %></td>
+          <td><%= responsible.phone %></td>
+          <td><%= responsible.job %></td>
+          <td>
+            <button class="btn btn-success" data-dismiss="modal" onclick="selectResponsible('<%= responsible.id %>','<%= responsible.name %>')"><i class="fa fa-check"></i></button>
+            <button class="btn btn-info" onclick="editResponsible('<%= responsible.id %>','<%= responsible.name %>','<%= responsible.email %>','<%= responsible.phone %>','<%= responsible.job %>')"><i class="fa fa-edit"></i></button>
+            <button class="btn btn-danger" onclick="disabledResponsible('<%= responsible.id %>')"><i class="fa fa-times"></i></button>
+          </td>
+          </tr>
+        <% }); %>
+      </tbody>
+    </table>
+  </script>
   {% block scripts %}{% endblock scripts %}
+
+  <!-- MODAL SUMMARY CASE -->
+  <div class="modal fade text-left" id="show_summary" role="dialog" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog" role="document" style="min-width:90% !important;">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3 class="modal-title" id="title">Resumen Caso <span class="NoCasoSummary"></span></h3>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body" style="font-size:12px !important; max-height: calc(100vh - 150px); overflow-y:scroll;">
+          <div style="padding: 10px;background-color: #f2efed;">
+            <div class="col-md-12">
+              <a href="javascript:void(0);" id="btn_save" onclick="submitGeneralData()" class="btn btn-primary pull-right btn_process_summary"> <i class="fa fa-save fa-2x"></i> </a>
+            </div>
+            <form action="#" id="generalData">
+              <h6 class="form-section mt-2">  <b>Información general</b></h6>
+              <div class="row generalInfo">
+                <div class="col-sm-4 form-group summaryClient">
+                </div>
+                <div class="col-sm-4 form-group summaryCompany">
+                </div>
+                <div class="col-sm-4 form-group summaryCenter">
+                </div>
+                <div class="col-sm-4 form-group summaryResponsible">
+                </div>
+                <div class="col-sm-4 form-group summaryReception">
+                </div>
+                <div class="col-sm-4 form-group sumarrySampling">
+                </div>
+                <div class="col-sm-4 form-group summaryNoOrder">
+                </div>
+                <div class="col-sm-4 form-group summaryNoRequest">
+                </div>
+                <div class="col-sm-4 form-group summaryTransferOrder">
+                </div>
+                <div class="col-sm-4 form-group summaryEntryFormat">
+                </div>
+                <div class="col-sm-4 form-group summaryFixative">
+                </div>
+                <div class="col-sm-4 form-group summaryEntryformType">
+                </div>
+                <div class="col-sm-12 form-group summaryAnamnesis">
+                </div>
+              </div>
+              <hr>
+              <h6 class="form-section mt-2"> <b>Detalle</b></h6>
+              <div class="row ">
+                <div class="col-sm-4 summarySpecie">
+                </div>
+                <div class="col-sm-4 summaryDevStatus">
+                </div>
+                <div class="col-sm-4 summaryWaterSource">
+                </div>
+              </div>
+            </form>   
+          </div>
+          <div class="row">
+            <div class="row col-sm-12 summaryIdentification" style="margin:0">
+            </div>
+            <div class="col-sm-5 summaryExams">
+            </div>
+            <div class="col-sm-7 summarySamples">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL SELECT RESPONSIBLE -->
+  <div class="modal fade text-left" id="responsible_modal" role="dialog" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog" role="" style="min-width:80% !important;">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3 class="modal-title" id="title"> Lista de Responsables <span></span></h3>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body" style="font-size:12px !important;">
+          <div style="padding: 10px;background-color: #f2efed;">
+            <form action="#" id="responsible_form" onsubmit="saveResponsible(); return false;">
+              <h6 class="form-section mt-2">Responsable</h6>
+              <div class="row generalInfo">
+                <div class="col-sm-3 form-group">
+                  <input class="form-control" name="id" hidden />
+                  <input class="form-control" name="name" placeholder="Nombre*" required/>
+                </div>
+                <div class="col-sm-3 form-group">
+                  <input class="form-control" name="email" placeholder="Correos Electrónicos*" required/>
+                  <p>* Puede ingresar multiples direcciones separadas por punto y coma (;)</p>
+                </div>
+                <div class="col-sm-2 form-group">
+                  <input class="form-control" name="phone" placeholder="Teléfono" />
+                </div>
+                <div class="col-sm-3 form-group">
+                  <input class="form-control" name="job" placeholder="Cargo*" required/>
+                </div>
+                <div class="col-sm-1 form-group">
+                  <button type="submit" class="btn btn-primary">
+                    <i class="fa fa-save"></i>
+                  </button>
+                </div>
+              </div>
+            </form>
+          </div>
+          <hr>
+          <div class="col-md-12" id="responsible_table_div">
+            
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
 </body>
 
 </html>

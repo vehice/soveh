@@ -87,7 +87,7 @@ TEMPLATES = [
 DATABASES = {
     'default': {
         'ENGINE': 'mysql.connector.django',
-        'NAME': 'vehice_prod_291220',
+        'NAME': 'vehice',
         'USER': 'root',
         'PASSWORD': '!DataQuDb2019!',
         'HOST': '40.117.140.24',

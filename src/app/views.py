@@ -13,6 +13,7 @@ from django.db import connection
 from django.conf import settings
 
 from django.db.models import Q
+from utils import functions as fn
 
 import datetime
 import json
@@ -73,7 +74,7 @@ def show_analisis(request):
 @login_required
 def show_ingresos(request):
     up = UserProfile.objects.filter(user=request.user).first()
-    editar = up.profile_id in (1,3)
+    editar = up.profile_id in (1,3) or request.user.is_superuser
     eliminar = editar and request.user.is_superuser
     check_forms = Form.objects.filter(content_type__model='entryform', state__id=1)
 
@@ -83,8 +84,10 @@ def show_ingresos(request):
         form_ids = form.filter(object_id__in=ids).values_list('id')
         state_ids = Form.objects.filter(content_type__model='analysisform', parent_id__in=form_ids).values_list('parent_id')
         form = form.filter(id__in=state_ids)
+        
+    lang = fn.translation('es')
 
-    return render(request, 'app/ingresos.html', {'entryForm_list': form, 'edit': editar, 'eliminar': eliminar })
+    return render(request, 'app/ingresos.html', {'entryForm_list': form, 'edit': editar, 'eliminar': eliminar, 'lang': lang})
 
 @login_required
 def show_estudios(request):
@@ -198,6 +201,8 @@ def new_research(request):
 def show_workflow_main_form(request, form_id):
     form = Form.objects.get(pk=form_id)
     entryform_id = form.content_object.id
+    up = UserProfile.objects.filter(user=request.user).first()
+    edit_case = not form.form_closed and (up.profile.id in (1,2,3) or request.user.is_superuser)    
     actor = Actor.objects.filter(profile_id=request.user.userprofile.profile_id).first()
     edit = 1 if actor.permission.filter(from_state_id=1, type_permission='w').first() else 0
     if not edit:
@@ -208,7 +213,8 @@ def show_workflow_main_form(request, form_id):
         'form_id': form_id,
         'entryform_id': entryform_id,
         'edit': edit,
-        'closed': 0
+        'closed': 0,
+        'edit_case' : edit_case
     })
 
 def make_pdf_file(id, url):
@@ -719,7 +725,7 @@ def show_patologos(request, all):
             'patologo_name': a['analysis'].patologo.first_name +" "+a['analysis'].patologo.last_name if a['analysis'].patologo else "No Asignado",
             'closed': 1 if a['analysisform_form'].form_closed else 0,
             'cancelled': 1 if a['analysisform_form'].cancelled else 0,
-            'edit': not a['entryform_form'].form_closed and not a['analysisform_form']. form_closed and up.profile.id == 1,
+            'edit': not a['entryform_form'].form_closed and up.profile.id in (1,2,3) or request.user.is_superuser,
             'no_caso': a['analysis'].entryform.no_caso + parte, 
             'exam': a['analysis'].exam.name,
             'cliente': a['analysis'].entryform.customer.name,
