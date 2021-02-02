@@ -28,6 +28,8 @@ SITE_URL = 'http://127.0.0.1:8000'
 
 ALLOWED_HOSTS = ['*']
 
+LANG_FILE = os.path.join(BASE_DIR, 'vehice', 'lang.json')
+
 # Application definition
 
 INSTALLED_APPS = [

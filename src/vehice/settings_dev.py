@@ -28,6 +28,8 @@ SITE_URL = 'http://vehice.solmat.cl:8080'
 
 ALLOWED_HOSTS = ['*']
 
+LANG_FILE = os.path.join(BASE_DIR, 'vehice', 'lang.json')
+
 # Application definition
 
 INSTALLED_APPS = [

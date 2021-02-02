@@ -28,6 +28,8 @@ SITE_URL = 'http://vehice.ddns.net'
 
 ALLOWED_HOSTS = ['*']
 
+LANG_FILE = os.path.join(BASE_DIR, 'vehice', 'lang.json')
+
 # Application definition
 
 INSTALLED_APPS = [
