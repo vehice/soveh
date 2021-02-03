@@ -5,15 +5,15 @@
 {% block content_header %}
 <div class="content-header row">
   <div class="content-header-left col-md-6 col-12 mb-2">
-    <h3 class="content-header-title mb-0">{{lang.entries}}</h3>
+    <h3 class="content-header-title mb-0">{{request.lang.entries}}</h3>
     <div class="row breadcrumbs-top">
       <div class="breadcrumb-wrapper col-12">
         <ol class="breadcrumb">
           <li class="breadcrumb-item">
-            <a href="/">{{lang.home}}</a>
+            <a href="/">{{request.lang.home}}</a>
           </li>
           <li class="breadcrumb-item">
-            <a href="#">{{lang.entries}}</a>
+            <a href="#">{{request.lang.entries}}</a>
           </li>
         </ol>
       </div>
@@ -40,7 +40,7 @@
       {% if edit %}
       <a href="/ingresos/new" class="btn btn-success btn-lg round">
         <i class="fa fa-plus"></i>
-        {{lang.new_case}}
+        {{request.lang.new_case}}
       </a>
       {% endif %}
     </div>
@@ -51,7 +51,7 @@
   <div class="col-12">
     <div class="card">
       <div class="card-header">
-        <h4 class="card-title">{{lang.entry_list}}</h4>
+        <h4 class="card-title">{{request.lang.entry_list}}</h4>
       </div>
       <div class="card-content">
         <div class="card-body card-dashboard">
@@ -59,13 +59,13 @@
             <thead>
               <tr>
                 <!-- <th>Id</th> -->
-                <th>{{lang.no_case}}</th>
-                <th>{{lang.client}}</th>
-                <th>{{lang.center}}</th>
-                <th>{{lang.request}}</th>
-                <th>{{lang.reception_date}}</th>
-                <th>{{lang.current_stage}}</th>
-                <th>{{lang.options}}</th>
+                <th>{{request.lang.no_case}}</th>
+                <th>{{request.lang.client}}</th>
+                <th>{{request.lang.center}}</th>
+                <th>{{request.lang.request}}</th>
+                <th>{{request.lang.reception_date}}</th>
+                <th>{{request.lang.current_stage}}</th>
+                <th>{{request.lang.options}}</th>
               </tr>
             </thead>
             <tbody>
@@ -79,23 +79,23 @@
                     <td>{{ entryForm.content_object.created_at|date:"d/m/Y" }}</td>
                     <td>
                       {% if entryForm.form_closed %}
-                        <a href="workflow/{{ entryForm.id }}"> {{lang.case_closed}} </a>
+                        <a href="workflow/{{ entryForm.id }}"> {{request.lang.case_closed}} </a>
                       {% elif entryForm.cancelled %}
-                       {{lang.case_cancelled}}
+                       {{request.lang.case_cancelled}}
                       {% else %}
                         <a href="workflow/{{ entryForm.id }}"> {{ entryForm.state.step}}</a>
                       {% endif %}
                     </td>
                     <td>
                       <div class="btn-group" role="group" aria-label="Opciones">
-                        <button class="btn btn-sm btn-primary showSummaryBtn" data-id="{{ entryForm.content_object.pk }}" data-closed="{% if entryForm.form_closed or entryForm.cancelled %}1{% else %}0{% endif %}" data-editable="{% if edit %}1{% else %}0{% endif %}"><i class="fa fa-list fa-fx"></i> {{lang.summary}}</button>
+                        <button class="btn btn-sm btn-primary showSummaryBtn" data-id="{{ entryForm.content_object.pk }}" data-closed="{% if entryForm.form_closed or entryForm.cancelled %}1{% else %}0{% endif %}" data-editable="{% if edit %}1{% else %}0{% endif %}"><i class="fa fa-list fa-fx"></i> {{request.lang.summary}}</button>
                         
                         {% if entryForm.form_closed and request.user.is_superuser and not entryForm.cancelled %}
-                          <button type="button" data-id="{{ entryForm.id }}" class="btn btn-blue btn-sm reopenFlow"><i class="fa fa-check-square-o fa-fx"></i> {{lang.reopen}}</button>                   
+                          <button type="button" data-id="{{ entryForm.id }}" class="btn btn-blue btn-sm reopenFlow"><i class="fa fa-check-square-o fa-fx"></i> {{request.lang.reopen}}</button>                   
                         {% endif %}
 
                         {% if eliminar and not entryForm.cancelled %}
-                          <button type="button" data-id="{{ entryForm.id }}" class="btn btn-danger btn-sm deleteFlow"><i class="fa fa-trash fa-fx"></i> {{lang.cancel}}</button>
+                          <button type="button" data-id="{{ entryForm.id }}" class="btn btn-danger btn-sm deleteFlow"><i class="fa fa-trash fa-fx"></i> {{request.lang.cancel}}</button>
                         {% endif %}
                       </div>
                     </td>
@@ -114,20 +114,20 @@
 
   $(document).on('click', '.deleteFlow', function(e){
     swal({
-      title: "{{lang.confirmation}}",
-      text: "{{lang.cancel_case_confirm_text}}",
+      title: "{{request.lang.confirmation}}",
+      text: "{{request.lang.cancel_case_confirm_text}}",
       icon: "warning",
       showCancelButton: true,
       buttons: {
         cancel: {
-            text: "{{lang.to_exit}}",
+            text: "{{request.lang.to_exit}}",
             value: null,
             visible: true,
             className: "btn-warning",
             closeModal: true,
         },
         confirm: {
-            text: "{{lang.to_confirm}}",
+            text: "{{request.lang.to_confirm}}",
             value: true,
             visible: true,
             className: "",
@@ -147,16 +147,16 @@
         .done(function (data) {
           response = data;
           if (response.ok) {
-            toastr.success('{{lang.done}}', '{{lang.done_msg}}');
+            toastr.success('{{request.lang.done}}', '{{request.lang.done_msg}}');
             var timer = setTimeout(function() {
               window.location='/ingresos'
             }, 2000);
           } else {
-            toastr.error('{{lang.error}}', '{{lang.error}}');
+            toastr.error('{{request.lang.error}}', '{{request.lang.error}}');
           }
         })
         .fail(function (data) {
-          toastr.error('{{lang.error}}', '{{lang.error}}');
+          toastr.error('{{request.lang.error}}', '{{request.lang.error}}');
         });
       }
     });
@@ -164,20 +164,20 @@
 
   $(document).on('click', '.reopenFlow', function(e){
     swal({
-      title: "{{lang.confirmation}}",
-      text: "{{lang.reopen_case_text}}",
+      title: "{{request.lang.confirmation}}",
+      text: "{{request.lang.reopen_case_text}}",
       icon: "warning",
       showCancelButton: true,
       buttons: {
         cancel: {
-            text: "{{lang.to_exit}}",
+            text: "{{request.lang.to_exit}}",
             value: null,
             visible: true,
             className: "btn-warning",
             closeModal: true,
         },
         confirm: {
-            text: "{{lang.to_confirm}}",
+            text: "{{request.lang.to_confirm}}",
             value: true,
             visible: true,
             className: "",
@@ -193,13 +193,13 @@
           url: url,
         })
         .done(function (data) {
-          toastr.success('{{lang.done}}', '{{lang.done_msg}}');
+          toastr.success('{{request.lang.done}}', '{{request.lang.done_msg}}');
             var timer = setTimeout(function() {
               window.location='/ingresos'
             }, 2000);
         })
         .fail(function () {
-          toastr.error('{{lang.error}}', '{{lang.error_msg}}');
+          toastr.error('{{request.lang.error}}', '{{request.lang.error_msg}}');
         });
       }
     });
@@ -209,7 +209,7 @@
 
     var tableChildRows = $('.zero-configuration').DataTable({
       language: {
-        url: "https://cdn.datatables.net/plug-ins/1.10.16/i18n/{{lang.version}}.json"
+        url: "https://cdn.datatables.net/plug-ins/1.10.16/i18n/{{request.lang.version}}.json"
       },
       ordering: false,
     });

@@ -85,9 +85,7 @@ def show_ingresos(request):
         state_ids = Form.objects.filter(content_type__model='analysisform', parent_id__in=form_ids).values_list('parent_id')
         form = form.filter(id__in=state_ids)
         
-    lang = fn.translation('es')
-
-    return render(request, 'app/ingresos.html', {'entryForm_list': form, 'edit': editar, 'eliminar': eliminar, 'lang': lang})
+    return render(request, 'app/ingresos.html', {'entryForm_list': form, 'edit': editar, 'eliminar': eliminar})
 
 @login_required
 def show_estudios(request):
