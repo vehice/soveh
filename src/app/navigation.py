@@ -15,6 +15,7 @@ following fields::
 
 from django.urls import reverse
 from django.utils.translation import ugettext
+from accounts.models import UserProfile
 
 def generate_navigation_tree(user, request):
     "Returns a custom navigation tree for the given user."
@@ -34,21 +35,23 @@ def anon_tree():
 
 
 def default_tree(user):
+    usuario = UserProfile.objects.get(user = user)
+    language = usuario.language
     menu = [
         {
             'path': '/',
             'icon': 'ft-home',
-            'section_name': "Inicio",
+            'section_name': "Inicio" if language == 1 else "Home",
         },
         {
             'path': '/ingresos',
             'icon': 'ft-clipboard',
-            'section_name': "Ingreso de Casos",
+            'section_name': "Ingreso de Casos" if language == 1 else "Cases",
         },
         {
             'path': '/estudios',
             'icon': 'ft-book',
-            'section_name': "Estudios",
+            'section_name': "Estudios" if language == 1 else "Studies",
         },
 
     ]
@@ -56,13 +59,13 @@ def default_tree(user):
         menu.append({
             'path': '/derivacion/0',
             'icon': 'ft-users',
-            'section_name': "Derivación"
+            'section_name': "Derivación" if language == 1 else "Derivation",
         })
     if user.userprofile.profile_id == 1:
         menu.append({
             'path': '/admin',
             'icon': 'ft-settings',
-            'section_name': "Administración"
+            'section_name': "Administración" if language == 1 else "Administration",
         })
 
     return menu

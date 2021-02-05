@@ -1,4 +1,4 @@
-var researches;
+/*var researches;
 
 function init_step_3(active = true) {
   var entryform_id = $('#entryform_id').val();
@@ -672,3 +672,4 @@ function endPreReport(analysis_id){
     defaultDate: moment(),
   });
 }
+*/

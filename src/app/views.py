@@ -2,9 +2,10 @@ from django.shortcuts import render
 from django.shortcuts import redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
-from django.http import HttpResponseRedirect, HttpResponse
+from django.http import HttpResponseRedirect, HttpResponse, JsonResponse
 from django.db.models import Count
 from django.forms.models import model_to_dict
+from django.views.generic import View
 
 from accounts.models import *
 from backend.models import *
@@ -744,3 +745,13 @@ def show_patologos(request, all):
         })
 
     return render(request, 'app/patologos.html', {'casos': data, 'patologos': patologos, 'edit': editar, 'all': all})
+
+class ChangeLanguage(View):
+    def get(self, request):
+        user_profile = UserProfile.objects.get(user=request.user)
+        if user_profile.language == 2:
+            user_profile.language = 1
+        else:
+            user_profile.language = 2
+        user_profile.save()
+        return JsonResponse({'error': 0})
