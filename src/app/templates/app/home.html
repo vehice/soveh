@@ -15,7 +15,7 @@
         <div class="card-body card-dashboard">
           <div class="row">
           <div class="col-md-4">
-            <p><label for="">Años:</label></p>
+            <p><label for="">{{request.lang.year}}:</label></p>
             <select id="year" class="select2 form-control" style="width:100% !important;">
               {% for y in years %}
                 <option value="{{y}}">{{y}}</option>

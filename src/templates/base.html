@@ -230,41 +230,41 @@
       
       $('.NoCasoSummary').html(data.entryform.no_caso);
       
-      $('.summaryClient').html('<label>Cliente:</label>' + selectClient);
+      $('.summaryClient').html('<label>{{request.lang.client}}:</label>' + selectClient);
       
-      $('.summaryCompany').html('<label>Empresa:</label> <input class="form-control" value="'+ replaceNull(data.entryform.company)+'" name="company" />');
+      $('.summaryCompany').html('<label>{{request.lang.company}}:</label> <input class="form-control" value="'+ replaceNull(data.entryform.company)+'" name="company" />');
       
-      $('.summaryCenter').html('<label>Centro:</label> <input class="form-control" value="'+ replaceNull(data.entryform.center)+'" name="center" />');
+      $('.summaryCenter').html('<label>{{request.lang.centro}}:</label> <input class="form-control" value="'+ replaceNull(data.entryform.center)+'" name="center" />');
       
       $('.summaryTransferOrder').html('<label>Orden de transporte:</label> <input class="form-control" value="'+ replaceNull(data.entryform.transfer_order) +'" name="transfer_order" />');
       
-      $('.summaryResponsible').html('<label>Responsable:</label> <input class="form-control responsible_place" readonly value="'+ replaceNull(data.entryform.responsible)+'" name="responsable" onclick="responsibleModal()" />');
+      $('.summaryResponsible').html('<label>{{request.lang.responsable}}:</label> <input class="form-control responsible_place" readonly value="'+ replaceNull(data.entryform.responsible)+'" name="responsable" onclick="responsibleModal()" />');
       
-      $('.summaryReception').html('<label>Fecha recepción:</label> <div class="input-group date" id=""><input type="text" class="form-control" name="recive" value="'+ moment(data.entryform.created_at).format("DD/MM/YYYY HH:mm")+'" /><div class="input-group-append"><span class="input-group-text"><span class="fa fa-calendar"></span></span></div></div> ' );
+      $('.summaryReception').html('<label>{{request.lang.reception_date}}:</label> <div class="input-group date" id=""><input type="text" class="form-control" name="recive" value="'+ moment(data.entryform.created_at).format("DD/MM/YYYY HH:mm")+'" /><div class="input-group-append"><span class="input-group-text"><span class="fa fa-calendar"></span></span></div></div> ' );
       
-      $('.sumarrySampling').html('<label>Fecha muestreo:</label> <div class="input-group date" id=""><input type="text" class="form-control" name="muestreo" value="'+ moment(data.entryform.sampled_at).format("DD/MM/YYYY HH:mm")+'" /><div class="input-group-append"><span class="input-group-text"><span class="fa fa-calendar"></span></span></div></div> ' );
+      $('.sumarrySampling').html('<label>{{request.lang.sampling_date}}:</label> <div class="input-group date" id=""><input type="text" class="form-control" name="muestreo" value="'+ moment(data.entryform.sampled_at).format("DD/MM/YYYY HH:mm")+'" /><div class="input-group-append"><span class="input-group-text"><span class="fa fa-calendar"></span></span></div></div> ' );
       
-      $('.summaryNoOrder').html('<label>Nro Orden de Trabajo:</label> <input class="form-control" value="'+ replaceNull(data.entryform.no_order)+'" name="no_order" />');
+      $('.summaryNoOrder').html('<label>{{request.lang.work_order}}:</label> <input class="form-control" value="'+ replaceNull(data.entryform.no_order)+'" name="no_order" />');
       
-      $('.summaryNoRequest').html('<label>Nro Solicitud Interlaboratorio:</label> <input class="form-control" value="'+ replaceNull(data.entryform.no_request)+'" name="no_solic" />');
+      $('.summaryNoRequest').html('<label>{{request.lang.no_request}}:</label> <input class="form-control" value="'+ replaceNull(data.entryform.no_request)+'" name="no_solic" />');
       
       $('.summaryAnamnesis').html('<label>Anamnesis:</label> <textarea class="form-control" row="2" name="anamnesis" >'+ replaceNull(data.entryform.anamnesis)+'</textarea>');
       
-      $('.summaryFixative').html('<label>Fijador:</label>'+ selectFix);
+      $('.summaryFixative').html('<label>{{request.lang.fixative}}:</label>'+ selectFix);
       
-      $('.summaryEntryformType').html('<label>Tipo de Ingreso:</label>'+ selectEntryformType);
+      $('.summaryEntryformType').html('<label>{{request.lang.type_case}}:</label>'+ selectEntryformType);
       
-      $('.summarySpecie').html('<label>Especie:</label>'+selectSpecie  );
+      $('.summarySpecie').html('<label>{{request.lang.specie}}:</label>'+selectSpecie  );
       
-      $('.summaryDevStatus').html('<label>Estadío Desarrollo:</label>'+selectlarvalstage ); 
+      $('.summaryDevStatus').html('<label>{{request.lang.development_stage}}:</label>'+selectlarvalstage ); 
       
-      $('.summaryWaterSource').html('<label>Fuente de agua:</label>'+selectwatersource);
+      $('.summaryWaterSource').html('<label>{{request.lang.water_source}}:</label>'+selectwatersource);
       
       $('.summaryEntryFormat').html('<label for="entryformat_select">Formato de Ingreso :</label>'+selectEntryFormat);
     
       // var tpl_identification = '';
-      var tpl_identification = '<div class="col-sm-12"> <hr><h6 class="form-section mt-2"> <b>Identificación</b> &nbsp;&nbsp;&nbsp;';
-      tpl_identification += '<a href="javascript:void(0);" onclick="newIdentification('+data.entryform.id+')" class="btn btn-secondary btn-sm btn_process_summary"> <i class="fa fa-plus"></i> Agregar Identificación</a>'
+      var tpl_identification = '<div class="col-sm-12"> <hr><h6 class="form-section mt-2"> <b>{{request.lang.identification}}</b> &nbsp;&nbsp;&nbsp;';
+      tpl_identification += '<a href="javascript:void(0);" onclick="newIdentification('+data.entryform.id+')" class="btn btn-secondary btn-sm btn_process_summary"> <i class="fa fa-plus"></i> {{request.lang.add_identification}}</a>'
       tpl_identification += '</h6></div>';
 
       $.each(data.entryform.identifications, function(i, item){
@@ -287,15 +287,15 @@
         
         tpl_identification += '<div class="col-md-4"><form id="identification-'+item.id+'" action="#" method="POST">';
         tpl_identification += '<div class="alert alert-light"><div class="row">';
-        tpl_identification += '<div class="form-group col-md-6"><label>Estanque/Jaula:</label> <input class="form-control" value="'+ item.cage+'"  name="jaula" /></div>';
-        tpl_identification += '<div class="form-group col-md-6"><label>Grupo/Nro Caso Cliente:</label> <input class="form-control" value="'+ item.group+'"  name="grupo" /></div>';
-        tpl_identification += '<div class="form-group col-md-6"><label>Peces:</label> <input class="form-control just_increasing" name="no_fish" data-val="'+ item.no_fish+'" value="'+ item.no_fish+'" /></div>';
-        tpl_identification += '<div class="form-group col-md-6"><label>Contenedores:</label> <input class="form-control" type="number" value="'+ item.no_container+'"  name="contenedores" /></div>';
-        tpl_identification += '<div class="form-group col-md-6"><label>Peso (gramos):</label> <input class="form-control" type="number" value="'+ item.weight+'"  name="peso" /></div>';
-        tpl_identification += '<div class="form-group col-md-6"><label>Óptimo?:</label>'+ selectOptimum+'</div>';
-        tpl_identification += '<div class="form-group col-md-6"><label>Características Extras:</label> <textarea class="form-control" rows="2" name="extras" >'+ item.extra_features_detail+' </textarea></div>';
-        tpl_identification += '<div class="form-group col-md-6"><label>Observaciones:</label> <textarea class="form-control" rows="2" name="observation" >'+ item.observation+' </textarea></div>';
-        tpl_identification += '<div class="form-group col-md-9"><label>Órganos:</label>'+selectOrgans+'</div>';
+        tpl_identification += '<div class="form-group col-md-6"><label>{{request.lang.cage}}:</label> <input class="form-control" value="'+ item.cage+'"  name="jaula" /></div>';
+        tpl_identification += '<div class="form-group col-md-6"><label>{{request.lang.group_client}}:</label> <input class="form-control" value="'+ item.group+'"  name="grupo" /></div>';
+        tpl_identification += '<div class="form-group col-md-6"><label>{{request.lang.fishes}}:</label> <input class="form-control just_increasing" name="no_fish" data-val="'+ item.no_fish+'" value="'+ item.no_fish+'" /></div>';
+        tpl_identification += '<div class="form-group col-md-6"><label>{{request.lang.containers}}:</label> <input class="form-control" type="number" value="'+ item.no_container+'"  name="contenedores" /></div>';
+        tpl_identification += '<div class="form-group col-md-6"><label>{{request.lang.weight}}:</label> <input class="form-control" type="number" value="'+ item.weight+'"  name="peso" /></div>';
+        tpl_identification += '<div class="form-group col-md-6"><label>{{request.lang.optimum}}:</label>'+ selectOptimum+'</div>';
+        tpl_identification += '<div class="form-group col-md-6"><label>{{request.lang.extra_features}}:</label> <textarea class="form-control" rows="2" name="extras" >'+ item.extra_features_detail+' </textarea></div>';
+        tpl_identification += '<div class="form-group col-md-6"><label>{{request.lang.observations}}:</label> <textarea class="form-control" rows="2" name="observation" >'+ item.observation+' </textarea></div>';
+        tpl_identification += '<div class="form-group col-md-9"><label>{{request.lang.organs}}:</label>'+selectOrgans+'</div>';
         {% if edit and not closed %}
           tpl_identification += '<div style="padding-top:25px;"><a href="javascript:void(0);" onclick="submitIdentification('+item.id+')" class="btn btn-primary btn_process_summary"> <i class="fa fa-save"></i></a>';
           if (item.removable){
@@ -310,17 +310,17 @@
       // tpl_identification += '</div>';
       $('.summaryIdentification').html(tpl_identification);
 
-      var tpl_exams = '<div class="col-sm-12"><h6 class="form-section mt-2"> <b>Servicios</b></h6></br>';
+      var tpl_exams = '<div class="col-sm-12"><h6 class="form-section mt-2"> <b>{{request.lang.services}}</b></h6></br>';
       $.each(data.entryform.analyses, function(i, item){
         tpl_exams += '<div class="alert alert-light"><b>'+ item.exam__name +' (Tinción: '+item.stain+')</b> <span class="pull-right">'
         if(item.patologo__first_name != null)
           tpl_exams += '<b>Patólogo:</b> '+item.patologo__first_name+' ';
         if(item.patologo__last_name != null)
           tpl_exams += item.patologo__last_name;
-        tpl_exams += '</span> <br> <b>Fecha: </b>'+ moment(item.created_at).format("DD/MM/YYYY HH:mm");
-        tpl_exams += '</span> <br> <b>Estado: </b>'+ item.status;
-        tpl_exams += '</span> <br> <b>Muestras a cobrar: </b>'+ item.samples_count;
-        tpl_exams += '</span> <br> <b>Total órganos: </b>'+ item.organs_count;
+        tpl_exams += '</span> <br> <b>{{request.lang.date}}: </b>'+ moment(item.created_at).format("DD/MM/YYYY HH:mm");
+        tpl_exams += '</span> <br> <b>{{request.lang.status}}: </b>'+ item.status;
+        tpl_exams += '</span> <br> <b>{{request.lang.charge_samples}}: </b>'+ item.samples_count;
+        tpl_exams += '</span> <br> <b>{{request.lang.total_organs}}: </b>'+ item.organs_count;
 
         
         if (item.service_comments.length > 0) {
@@ -336,8 +336,8 @@
       tpl_exams += '</div>';
       $('.summaryExams').html(tpl_exams);
 
-      var tpl_samples = '<div class="col-sm-12"><h6 class="form-section mt-2"> <b>Muestras</b></h6></br><table class="table table-bordered table-xs">';
-      tpl_samples += '<thead><tr><th>Pez</th><th>Identificación</th><th>Análisis</th><th>Tinción</th><th>Órganos</th></tr></thead><tbody>';
+      var tpl_samples = '<div class="col-sm-12"><h6 class="form-section mt-2"> <b>{{request.lang.samples}}</b></h6></br><table class="table table-bordered table-xs">';
+      tpl_samples += '<thead><tr><th>{{request.lang.no_sample}}</th><th>{{request.lang.identification}}</th><th>{{request.lang.analysis}}</th><th>{{request.lang.stain}}</th><th>{{request.lang.organs}}</th></tr></thead><tbody>';
       var patologos = {};
       $.each(data.patologos, function(i, v){
         patologos[v.id]=v.first_name+' '+v.last_name;
@@ -726,7 +726,7 @@
     <div class="modal-dialog" role="document" style="min-width:90% !important;">
       <div class="modal-content">
         <div class="modal-header">
-          <h3 class="modal-title" id="title">Resumen Caso <span class="NoCasoSummary"></span></h3>
+          <h3 class="modal-title" id="title">{{request.lang.summary_case}} <span class="NoCasoSummary"></span></h3>
           <button type="button" class="close" data-dismiss="modal" aria-label="Close">
             <span aria-hidden="true">&times;</span>
           </button>
@@ -737,7 +737,7 @@
               <a href="javascript:void(0);" id="btn_save" onclick="submitGeneralData()" class="btn btn-primary pull-right btn_process_summary"> <i class="fa fa-save fa-2x"></i> </a>
             </div>
             <form action="#" id="generalData">
-              <h6 class="form-section mt-2">  <b>Información general</b></h6>
+              <h6 class="form-section mt-2">  <b>{{request.lang.general_info}}</b></h6>
               <div class="row generalInfo">
                 <div class="col-sm-4 form-group summaryClient">
                 </div>
@@ -767,7 +767,7 @@
                 </div>
               </div>
               <hr>
-              <h6 class="form-section mt-2"> <b>Detalle</b></h6>
+              <h6 class="form-section mt-2"> <b>{{request.lang.detail}}</b></h6>
               <div class="row ">
                 <div class="col-sm-4 summarySpecie">
                 </div>

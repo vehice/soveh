@@ -5,39 +5,39 @@
     <input type="hidden" id="form_id" name="form_id" value="{{form_id}}" >
     <input type="hidden" id="entryform_id" name="entryform_id" value="{{entryform_id}}" >
     <h4 class="form-section">
-      <i class="ft-search"></i> Servicios
+      <i class="ft-search"></i> {{request.lang.services}}
     </h4>
     <div class="row">
 
       <div class="col-sm-12" style="display:none;" id="pre-selected-exams">
         <div class="row">
           <div class="col-sm-9">
-            <p><label for="exam">Análisis pre-seleccionados:</label></p>
+            <p><label for="exam">{{request.lang.preselected_analysis}}:</label></p>
             <div id="pre-selected-exams-list"></div>
           </div>
           <div class="col-sm-3 text-right">
-            <button class="btn btn-secondary" onClick="window.location.reload();"><i class="fa fa-refresh"></i> Restablecer Configuración</button>
+            <button class="btn btn-secondary" onClick="window.location.reload();"><i class="fa fa-refresh"></i>{{request.lang.restore_configuration}}</button>
           </div>
         </div>
       </div>
       <div class="col-sm-12 mt-2">
-        <p><label for="exam">Seleccione los análisis:</label></p>
+        <p><label for="exam">{{request.lang.select_analysis}}:</label></p>
         <div class="input-group">
           <select class="select2" id="exam_select" name="analysis" multiple="multiple" style="width:100%;" {% if not edit %}disabled{% endif %}>
           </select>
           <div class="form-group pt-2">
             <input type="checkbox" id="switchery" class="switch2" checked />
-            <label for="switchery" class="font-medium-1 text-bold-600 ml-1">Ingresar análisis a todos</label>
+            <label for="switchery" class="font-medium-1 text-bold-600 ml-1">{{request.lang.analysis_all}}</label>
           </div>
           <div class="form-group pl-2 pt-2">
             <input type="checkbox" id="switchery2" class="switch2" checked />
             
-            <label for="switchery2" class="font-medium-1 text-bold-600 ml-1">Ingresar órganos a todos</label>
+            <label for="switchery2" class="font-medium-1 text-bold-600 ml-1">{{request.lang.organs_all}}</label>
           </div>
           <div class="form-group pl-2 pt-2">
             <input type="checkbox" id="switchery3" class="switch2" checked />
             
-            <label for="switchery3" class="font-medium-1 text-bold-600 ml-1">Tinción a todos</label>
+            <label for="switchery3" class="font-medium-1 text-bold-600 ml-1">{{request.lang.stain_all}}</label>
           </div>
         </div>
       </div>
@@ -57,12 +57,12 @@
         <table class="table table-bordered table-condensed" id="samples_table" style="font-size:13px;">
           <thead>
             <tr>
-              <th style="width:5%">Nº Muestra</th>
-              <th style="width:15%">Identificación</th>
-              <th style="width:25%">Análisis</th>
-              <th style="width:15%">Tinción</th>
-              <th style="width:30%">Órganos</th>
-              <th style="width:10%">Acciones</th>
+              <th style="width:5%">{{request.lang.nro_sample}}</th>
+              <th style="width:15%">{{request.lang.identification}}</th>
+              <th style="width:25%">{{request.lang.analysis}}</th>
+              <th style="width:15%">{{request.lang.stain}}</th>
+              <th style="width:30%">{{request.lang.organs}}</th>
+              <th style="width:10%">{{request.lang.actions}}</th>
             </tr>
           </thead>
           <tbody>

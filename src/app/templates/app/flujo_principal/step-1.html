@@ -6,18 +6,17 @@
     <input type="hidden" id="entryform_id" name="entryform_id" value="{{entryform_id}}">
     {% if edit %}
     <div class="offset-8 text-right m-1">
-      <button type="button" id="saveStep1" class="btn btn-warning square"><i class="fa fa-save"></i> Guardar
-        Cambios</button>
+      <button type="button" id="saveStep1" class="btn btn-warning square"><i class="fa fa-save"></i> {{request.lang.save_changes}}</button>
     </div>
     {% endif %}
     <h4 class="form-section">
-      <i class="ft-user"></i> Información General
+      <i class="ft-user"></i> {{request.lang.general_info}}
     </h4>
     <div class="row">
       <div class="col-md-6">
         <div class="form-group">
           <label for="customer">
-            Cliente :
+            {{request.lang.client}} :
           </label>
           <select class="select2 form-control" name="customer" id="customer_select"
             {% if not edit %}disabled{% endif %}>
@@ -26,14 +25,14 @@
         </div>
         <div class="form-group" id="company">
           <label for="company">
-            Empresa :
+            {{request.lang.company}} :
             <!-- <span class="danger">*</span> -->
           </label>
           <input class="form-control" name="company" id="company_input" {% if not edit %}disabled{% endif %} />
         </div>
         <div class="form-group" id="center">
           <label for="center">
-            Centro :
+            {{request.lang.centro}} :
             <!-- <span class="danger">*</span> -->
           </label>
           <input class="form-control" name="center" id="center_input" {% if not edit %}disabled{% endif %} />
@@ -52,20 +51,20 @@
         </div>
         <div class="form-group" id="order_number">
           <label for="order_number">
-            Nro Orden de Trabajo :
+            {{request.lang.work_order}} :
           </label>
           <input type='text' class="form-control" id="order_number_input" name="no_order"
             {% if not edit %}disabled{% endif %} />
         </div>
         <div class="form-group" id="request_number">
           <label for="request_number">
-            Nro Solicitud Interlaboratorio :
+            {{request.lang.no_request}} :
           </label>
           <input type='text' class="form-control" id="request_number_input" name="no_request"
             {% if not edit %}disabled{% endif %} />
         </div>
         <div class="form-group">
-          <label for="entryform_type_1">Tipo de ingreso :</label>
+          <label for="entryform_type_1">{{request.lang.type_case}} :</label>
           <fieldset>
             <div class="d-inline-block custom-control custom-radio mr-1">
               <input type="radio" checked class="custom-control-input bg-primary" name="entryform_type" id="entryform_type_1" value="1">
@@ -80,7 +79,7 @@
       </div>
       <div class="col-sm-6">
         <div class="form-group">
-          <label>Fecha / Hora Recepción : </label>
+          <label>{{request.lang.reception_date_time}} : </label>
           <div class='input-group date' id='datetime_created_at'>
             <input type="text" class="form-control" name="created_at" {% if not edit %}disabled{% endif %} />
             <div class="input-group-append">
@@ -92,7 +91,7 @@
           <input type="hidden" name="created_at_submit" id="created_at_submit" {% if not edit %}disabled{% endif %} />
         </div>
         <div class="form-group">
-          <label>Fecha / Hora Muestreo : </label>
+          <label>{{request.lang.sampling_date_time}} : </label>
           <div class='input-group date' id='datetime_sampled_at'>
             <input type='text' class="form-control" name='sampled_at' {% if not edit %}disabled{% endif %} />
             <div class="input-group-append">
@@ -105,7 +104,7 @@
         </div>
         <div class="form-group" id="responsible">
           <label for="responsible">
-            Responsable :
+            {{request.lang.responsable}} :
           </label>
           <div class='input-group'>
             <input type='text' class="form-control responsible_place" onclick="responsibleModal()" readonly
@@ -119,7 +118,7 @@
           <input type='text' class="form-control" id="responsible_input" name="responsible" hidden />
         </div>
         <div class="form-group">
-          <label for="phoneNumber3">Fijador :</label>
+          <label for="phoneNumber3">{{request.lang.fixative}} :</label>
           <select class="select2 form-control" id="fixtative_select" name="fixative"
             {% if not edit %}disabled{% endif %}>
             <option value="">S/I</option>
@@ -139,26 +138,26 @@
       </div>
     </div>
     <h4 class="form-section">
-      <i class="ft-droplet"></i> Detalle Muestra
+      <i class="ft-droplet"></i> {{request.lang.sample_detail}}
     </h4>
     <div class="row">
       <div class="col-sm-6">
         <div class="form-group">
-          <label for="date3">Especie :</label>
+          <label for="date3">{{request.lang.specie}} :</label>
           <select class="select2 form-control" id="specie_select" name="specie" {% if not edit %}disabled{% endif %}>
           </select>
         </div>
       </div>
       <div class="col-sm-6">
         <div class="form-group">
-          <label for="phoneNumber3">Estadío Desarrollo :</label>
+          <label for="phoneNumber3">{{request.lang.development_stage}} :</label>
           <select class="select2 form-control" id="larvalstage_select" name="larvalstage" {% if not edit %}disabled{% endif %}>
           </select>
         </div>
       </div>
       <div class="col-sm-6">
         <div class="form-group">
-          <label for="date3">Fuente Agua :</label>
+          <label for="date3">{{request.lang.water_source}} :</label>
           <select class="select2 form-control" id="watersource_select" name="watersource" {% if not edit %}disabled{% endif %}>
           </select>
         </div>
@@ -172,7 +171,7 @@
       </div>
     </div> -->
     <h4 class="form-section">
-      <i class="ft-clipboard"></i> Identificación
+      <i class="ft-clipboard"></i> {{request.lang.identification}}
     </h4>
     <!-- <div class="row">
       <div class="col-sm-12">
@@ -190,7 +189,7 @@
         <div class="col-sm-3 offset-md-9">
           <div class="form-group">
             <button class="btn_white_letter btn btn-success form-control" id="add_identification" type="button"
-              onclick="addIdentificador()" {% if not edit %}disabled{% endif %}>Añadir Identificación</button>
+              onclick="addIdentificador()" {% if not edit %}disabled{% endif %}>{{request.lang.add_identification}}</button>
           </div>
         </div>
       </div>
@@ -230,43 +229,43 @@
     <input type="hidden" value="<%= temp_id %>" name="identification[id]">
     <div class="col-sm-3">
       <div class="form-group">
-        <label for="cage">Estanque/Jaula</label>
+        <label for="cage">{{request.lang.cage}}</label>
         <input type="text" value="" name="identification[cage]" class="form-control estanque-cage"  {% if not edit %}disabled{% endif %} >
       </div>
     </div>
     <div class="col-sm-3">
       <div class="form-group">
-        <label for="group">Grupo/Nro Caso Cliente</label>
+        <label for="group">{{request.lang.group_client}}</label>
         <input name="identification[group]" class="form-control estanque-cage" {% if not edit %}disabled{% endif %} >
       </div>
     </div>
     <div class="col-sm-2">
       <div class="form-group">
-        <label for="no_fish">No. Peces</label>
+        <label for="no_fish">{{request.lang.fishes}}</label>
         <input name="identification[no_fish]" type="number" value="0" min="1" class="form-control no_peces" {% if not edit %}disabled{% endif %} >
       </div>
     </div>
     <div class="col-sm-2">
       <div class="form-group">
-        <label for="no_container">No. Contenedores</label>
+        <label for="no_container">{{request.lang.containers}}</label>
         <input name="identification[no_container]" type="number" value="1" min="1" class="form-control" {% if not edit %}disabled{% endif %} >
       </div>
     </div>
     <div class="col-sm-2">
       <div class="form-group">
-        <label for="wheight">Peso (gramos):</label>
+        <label for="wheight">{{request.lang.weight}}:</label>
         <input name="identification[weight]" value="0.0" class="form-control" {% if not edit %}disabled{% endif %} >
       </div>
     </div>
     <div class="col-sm-3">
       <div class="form-group">
-        <label for="wheight">Características Extras</label>
+        <label for="wheight">{{request.lang.extra_features}}</label>
         <textarea name="identification[extra_features_detail]" row="2" class="form-control" {% if not edit %}disabled{% endif %} ></textarea>
       </div>
     </div>
     <div class="col-sm-3">
       <div class="form-group">
-        <label> ¿Condiciones óptimas? </label>
+        <label> {{request.lang.optimus_condition}} </label>
         <div class="input-group">
           <div class="d-inline-block custom-control custom-radio">
             <input type="radio" checked name="identification[is_optimal][<%= temp_id %>]" class="custom-control-input" value="si" id="identification[is_optimal][<%= temp_id %>]_si" {% if not edit %}disabled{% endif %} >
@@ -281,13 +280,13 @@
     </div>
     <div class="col-sm-3">
       <div class="form-group">
-        <label>Observaciones</label>
+        <label>{{request.lang.observations}}</label>
         <textarea name="identification[observations]" class="form-control" row="2" {% if not edit %}disabled{% endif %} ></textarea>
       </div>
     </div>
     <div class="col-sm-3">
       <div class="form-group">
-        <label>Órganos</label>
+        <label>{{request.lang.organs}}</label>
         <select class="select2 form-control identification_organs" name="identification[organs][<%= temp_id %>]" multiple="multiple" {% if not edit %}disabled{% endif %} >
           <% _.each(organs, function (organ) { %>
             <option value="<%= organ.id %>"><%= organ.name %></option>

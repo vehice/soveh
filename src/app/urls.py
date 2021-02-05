@@ -22,4 +22,5 @@ urlpatterns = [
     url(r'^preview-report/(?P<id>\d+)$', views.preview_report, name='preview_report'),
     url(r'^notification$', views.notification, name='notification'),
     url(r'^logactions/(?P<id>\d+)$', views.show_log_actions, name='logactions'),
+    url(r'^change_language$', views.ChangeLanguage.as_view(), name='change_language'),
 ]

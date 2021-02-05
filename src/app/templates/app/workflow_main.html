@@ -31,15 +31,15 @@
 {% block content_header %}
 <div class="content-header row">
   <div class="content-header-left col-md-6 col-12 mb-2">
-    <h3 class="content-header-title mb-0">Ingreso</h3>
+    <h3 class="content-header-title mb-0">{{request.lang.entries}}</h3>
     <div class="row breadcrumbs-top">
       <div class="breadcrumb-wrapper col-12">
         <ol class="breadcrumb">
           <li class="breadcrumb-item">
-            <a href="/">INICIO</a>
+            <a href="/">{{request.lang.home}}</a>
           </li>
           <li class="breadcrumb-item">
-            <a href="#">CASOS</a>
+            <a href="#">{{request.lang.entries}}</a>
           </li>
           <li class="breadcrumb-item active">
             {{form.content_object.no_caso}}
@@ -55,13 +55,13 @@
     <div class="card">
       <div class="card-header">
         <center>
-          <h3> <strong>CASO N° {{form.content_object.no_caso}}</strong></h3>
+          <h3> <strong>{{request.lang.nro_case}} {{form.content_object.no_caso}}</strong></h3>
           <button class="btn btn-secondary square showSummaryBtn hidden" 
           data-id="{{ form.content_object.pk }}" 
-          data-closed="{% if form.form_closed or form.cancelled %}1{% else %}0{% endif %}" data-editable="{% if edit_case %}1{% else %}0{% endif %}"><i class="fa fa-list fa-fx"></i> Resumen del caso</button>
-          <button class="btn btn-secondary square showShareBtn hidden" onclick="shareChoice()"><i class="fa fa-paper-plane fa-fx"></i> Enviar caso</button>
-          <button class="btn btn-secondary square showLogBtn hidden" onclick="logModal()"><i class="fa fa-list fa-fx"></i> Registro de Envíos</button>
-          <button class="btn btn-secondary square showAttachedFilesBtn hidden" onclick='showAttachedFilesModal({{form.content_object.id}}, {{closed}})'><i class="fa fa-cloud-upload fa-fx"></i> Documentos Adjuntos</button>
+          data-closed="{% if form.form_closed or form.cancelled %}1{% else %}0{% endif %}" data-editable="{% if edit_case %}1{% else %}0{% endif %}"><i class="fa fa-list fa-fx"></i> {{request.lang.summary_case}}</button>
+          <button class="btn btn-secondary square showShareBtn hidden" onclick="shareChoice()"><i class="fa fa-paper-plane fa-fx"></i> {{request.lang.send_case}}</button>
+          <button class="btn btn-secondary square showLogBtn hidden" onclick="logModal()"><i class="fa fa-list fa-fx"></i> {{request.lang.shipment_record}}</button>
+          <button class="btn btn-secondary square showAttachedFilesBtn hidden" onclick='showAttachedFilesModal({{form.content_object.id}}, {{closed}})'><i class="fa fa-cloud-upload fa-fx"></i> {{request.lang.attachment_documents}}</button>
         </center>
       </div>
       <div class="card-content">
@@ -82,7 +82,7 @@
   <div class="modal-dialog" role="" style="min-width:40% !important;">
     <div class="modal-content">
       <div class="modal-header">
-        <h3 class="modal-title" id="title"> Registro de Envíos y Descargas Formulario de Recepción de Muestras <span></span></h3>
+        <h3 class="modal-title" id="title"> {{request.lang.shipment_record_form}} <span></span></h3>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
@@ -91,10 +91,10 @@
         <table class="table table-bordered table-condensed" id="log_table">
           <thead>
             <tr>
-              <th>Realizado Por</th>
-              <th>Tipo</th>
-              <th>Versión</th>
-              <th>Fecha</th>
+              <th>{{request.lang.performed_by}}</th>
+              <th>{{request.lang.type}}</th>
+              <th>{{request.lang.version2}}</th>
+              <th>{{request.lang.date}}</th>
             </tr>
           </thead>
           <tbody id="log_table_tbody">
@@ -109,7 +109,7 @@
   <div class="modal-dialog" role="" style="min-width:80% !important;">
     <div class="modal-content">
       <div class="modal-header">
-        <h3 class="modal-title" id="title"> Formulario de Email <span></span></h3>
+        <h3 class="modal-title" id="title"> {{request.lang.email_form}} <span></span></h3>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
@@ -117,17 +117,17 @@
       <form action="#" id="email_form" onsubmit="sendEmail(); return false;">
         <div class="modal-body" style="font-size:12px !important;">
           <div class="form-group">
-            <label>Destinatarios:</label>
+            <label>{{request.lang.receivers}}:</label>
             <input id="email_to" name="to" class="form-control basic-taginput" data-role="tagsinput" required>
           </div>
           <div class="form-group">
-            <label>Plantillas:</label>
+            <label>{{request.lang.template}}:</label>
             <select class="form-control" id="plantilla" name="plantilla">
-              <option value="0">Sin plantilla</option>
+              <option value="0"> {{request.lang.whithout_template}} </option>
             </select>
           </div>
           <div class="form-group">
-            <label>Mensaje: </label>
+            <label>{{request.lang.message}}: </label>
             <textarea id="body" name="body" class="form-control" rows="9"></textarea>
           </div>
         </div>
@@ -148,7 +148,7 @@
   <div class="modal-dialog" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h3 class="modal-title">Informes</h3>
+        <h3 class="modal-title">{{request.lang.reports}}</h3>
       </div>
       <div class="modal-body">
         <div class='row'>
@@ -164,8 +164,8 @@
           </div>
 
           <div class='col-sm-12 mt-3'>
-            <button class='btn btn-primary submit-file'>Cargar Informe</button>
-            <button class='btn btn-default' data-dismiss="modal">Salir</button>
+            <button class='btn btn-primary submit-file'>{{request.lang.upload_report}}</button>
+            <button class='btn btn-default' data-dismiss="modal">{{request.lang.exit}}</button>
           </div>
         </div>       
       </div>
@@ -177,7 +177,7 @@
   <div class="modal-dialog" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h3 class="modal-title">Documentos Adjuntos</h3>
+        <h3 class="modal-title">{{request.lang.attachment_documents}}</h3>
       </div>
       <div class="modal-body">
         <div class='row'>
@@ -190,8 +190,8 @@
           </div>
 
           <div class='col-sm-12 mt-3'>
-            <button class='btn btn-primary attach-file'>Cargar</button>
-            <button class='btn btn-default' data-dismiss="modal">Salir</button>
+            <button class='btn btn-primary attach-file'>{{request.lang.load}}</button>
+            <button class='btn btn-default' data-dismiss="modal">{{request.lang.exit}}</button>
           </div>
         </div>       
       </div>
@@ -203,7 +203,7 @@
   <div class="modal-dialog modal-lg" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h3 class="modal-title">Comentarios</h3>
+        <h3 class="modal-title">{{request.lang.comments}}</h3>
       </div>
       <div class="modal-body">
         <div class='row'>
@@ -212,8 +212,8 @@
           </div>
 
           <div class='col-sm-12 mt-3'>
-            <button class='btn btn-primary' onclick='saveServiceComment()'>Agregar Comentario</button>
-            <button class='btn btn-default' data-dismiss="modal">Salir</button>
+            <button class='btn btn-primary' onclick='saveServiceComment()'>{{request.lang.add_comment}}</button>
+            <button class='btn btn-default' data-dismiss="modal">{{request.lang.exit}}</button>
           </div>
         </div>       
       </div>
@@ -225,7 +225,7 @@
   <div class="modal-dialog" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h2 class="modal-title">Estudios</h2>
+        <h2 class="modal-title">{{request.lang.studies}}</h2>
       </div>
       <div class="modal-body">
         <div class='row'>
@@ -233,8 +233,8 @@
           </div>
 
           <div class='col-sm-12 mt-3'>
-            <button class='btn btn-primary' id='researches_modal_save_button' onclick='saveServiceResearch()'>Guardar</button>
-            <button class='btn btn-default' data-dismiss="modal">Salir</button>
+            <button class='btn btn-primary' id='researches_modal_save_button' onclick='saveServiceResearch()'>{{request.lang.save}}</button>
+            <button class='btn btn-default' data-dismiss="modal">{{request.lang.exit}}</button>
           </div>
         </div>       
       </div>
@@ -269,7 +269,7 @@
 
           <div class='col-sm-12 mt-3 pull-right'>
             <button class='btn btn-primary' onclick='saveCassettesNames()'>Guardar y Reemplazar Nombres</button>
-            <button class='btn btn-default' data-dismiss="modal">Salir</button>
+            <button class='btn btn-default' data-dismiss="modal">{{request.lang.exit}}</button>
           </div>
         </div>
       </div>
@@ -298,6 +298,9 @@ function confirmExit(event) {
 
 var form = $("#workflow_form");
 var summary_edited = false;
+var finalizar = "{{request.lang.finalize}}";
+var volver =  "{{request.lang.back}}";
+var continuar =  "{{request.lang.next}}";
 var steps = $("#workflow_form").steps({
     headerTag: "h6",
     bodyTag: "fieldset",
@@ -306,9 +309,9 @@ var steps = $("#workflow_form").steps({
     titleTemplate: '<span class="step">#index#</span> #title#',
     enablePagination: {{closed}} == 0 && {{edit}} == 1,
     labels: {
-        previous: 'Volver',
-        next: 'Continuar',
-        finish: 'Finalizar'
+        previous: volver,
+        next: continuar,
+        finish: finalizar
     },
     startIndex: 0,
     onStepChanging: function (events, currentIndex, newIndex)
@@ -440,20 +443,20 @@ var steps = $("#workflow_form").steps({
       {% if edit %}
         if ({{close_allowed}}){
           swal({
-            title: "Confirmación",
-            text: "¿Está seguro que desea finalizar el caso?",
+            title: "{{request.lang.confirmation}}",
+            text: "{{request.lang.close_case_text}}",
             icon: "warning",
             showCancelButton: true,
             buttons: {
               cancel: {
-                  text: "No, cancelar!",
+                  text: "{{request.lang.cancel_case}}",
                   value: null,
                   visible: true,
                   className: "btn-warning",
                   closeModal: true,
               },
               confirm: {
-                  text: "Sí!",
+                  text: "{{request.lang.confirm_case}}",
                   value: true,
                   visible: true,
                   className: "",
@@ -487,8 +490,8 @@ var steps = $("#workflow_form").steps({
         
         } else {
           swal({
-            title: "Información",
-            text: "Lo sentimos, aún se encuentran servicios abiertos que deben ser cerrados o anulados antes de cerrar el caso.",
+            title: "{{request.lang.information}}",
+            text: "{{request.lang.services_still_open_text}}",
             icon: "info",
             showCancelButton: true,
           });
@@ -565,8 +568,8 @@ $(document).on('click', '.stepsToStep2', function(e){
 
 function shareChoice(){
   swal({
-    title: "Información",
-    text: "¿Que acción desea realizar?",
+    title: "{{request.lang.information}}",
+    text: "{{request.lang.information_action}}",
     icon: "info",
     className: "multiple-action",
     closeOnClickOutside: false,
@@ -574,28 +577,28 @@ function shareChoice(){
     showCancelButton: false,
     buttons: {
       download: {
-        text: "Descargar!",
+        text: "{{request.lang.download}}",
         value: "download",
         visible: true,
         className: "",
         closeModal: true,
       },
       email: {
-        text: "Enviar por Correo!",
+        text: "{{request.lang.send_to_mail}}",
         value: "email",
         visible: true,
         className: "",
         closeModal: true,
       },
       downloadEmail: {
-        text: "Descargar y enviar!",
+        text: "{{request.lang.download_send}}",
         value: "downloadEmail",
         visible: true,
         className: "",
         closeModal: true,
       },
       continue: {
-        text: "Continuar!",
+        text: "{{request.lang.next}}",
         visible: true,
         className: "",
         closeModal: true,
@@ -620,8 +623,8 @@ function shareChoice(){
         return;
     }
     swal({
-      title: "Información",
-      text: "¿En que idioma desea enviar el documento resúmen?",
+      title: "{{request.lang.information}}",
+      text: "{{request.lang.send_document_languaje}}",
       icon: "info",
       className: "multiple-action",
       closeOnClickOutside: false,
@@ -630,21 +633,21 @@ function shareChoice(){
       buttons: {
         
         En: {
-          text: "Inglés!",
+          text: "{{request.lang.english}}",
           value: "en",
           visible: true,
           className: "",
           closeModal: true,
         },
         Es: {
-          text: "Español!",
+          text: "{{request.lang.spanish}}",
           value: "es",
           visible: true,
           className: "",
           closeModal: true,
         },
         cancel: {
-            text: "Cancelar!",
+            text: "{{request.lang.cancel}}",
             value: "",
             visible: true,
             className: "btn-warning",
@@ -700,7 +703,7 @@ function shareAction(email, download, lang){
         });
         $('#lang').val(lang);
         $('#formId').val({{form.id}});
-        let template = '<option value="0">Sin Plantilla</option>';
+        let template = '<option value="0">{{request.lang.without_template}}</option>';
         $.each(data.templates, function(i, v){
           template += '<option value="'+v.id+'">'+v.name+'</option>'
         });
@@ -747,7 +750,7 @@ function sendEmail(){
 function showAttachedFilesModal(id, closed){
 
   $('#attached_files').html('');
-  var temp = '<h4>Archivos</h4>';
+  var temp = '<h4>{{request.lang.files}}</h4>';
   temp += '<div id="file_list" class="col-sm-12 pl-2 pb-2">';
   var url = Urls.case_files(id);
   $.ajax({
@@ -777,10 +780,10 @@ function showAttachedFilesModal(id, closed){
 
   if (!closed) {
     var url = Urls.case_files(id);
-    var temp_uploader = "<h4>Cargador de archivos</h4>";
+    var temp_uploader = "<h4>{{request.lang.file_loader}}</h4>";
     temp_uploader += '<div class="col-sm-12"><form id="case_files_uploader" action="'+url+'" class="dropzone needsclick">';
     temp_uploader += '<div class="dz-message" data-dz-message>';
-    temp_uploader += '<center><span><h3>Arrastra o selecciona archivo que deseas cargar</h3></span></center>';
+    temp_uploader += '<center><span><h3>{{request.lang.drag_select_file}}</h3></span></center>';
     temp_uploader += '</div>';    
     temp_uploader += '</form></div>';
     // temp += '<input type="reset" class="btn btn-secondary" data-dismiss="modal" value="Salir">';
@@ -885,12 +888,15 @@ function reloadLogTable(entry) {
           template += "<td>"+ v['action_date'] + "</td>";
           template += "</tr>";
         })
-
+        var language = "{{request.lang.version}}",
+          url = "";
+        if (language === "English"){url="https://cdn.datatables.net/plug-ins/1.10.16/i18n/English.json"}
+        else {url="https://cdn.datatables.net/plug-ins/1.10.16/i18n/Spanish.json"}
         $("#log_table_tbody").html(template);
         $('#log_table').DataTable({
           "destroy": true,
           "oLanguage": {
-            "sUrl": "https://cdn.datatables.net/plug-ins/1.10.16/i18n/Spanish.json"
+            "sUrl": url
           }
         });
       }
