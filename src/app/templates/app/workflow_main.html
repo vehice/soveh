@@ -61,6 +61,7 @@
           data-closed="{% if form.form_closed or form.cancelled %}1{% else %}0{% endif %}" data-editable="{% if edit_case %}1{% else %}0{% endif %}"><i class="fa fa-list fa-fx"></i> {{request.lang.summary_case}}</button>
           <button class="btn btn-secondary square showShareBtn hidden" onclick="shareChoice()"><i class="fa fa-paper-plane fa-fx"></i> {{request.lang.send_case}}</button>
           <button class="btn btn-secondary square showLogBtn hidden" onclick="logModal()"><i class="fa fa-list fa-fx"></i> {{request.lang.shipment_record}}</button>
+          <button class="btn btn-secondary square showAttachedFilesBtn hidden" onclick="receptionFileModal({{form.content_object.id}})"><i class="fa fa-clipboard fa-fx"></i> {{request.lang.reception_receive}} </button>
           <button class="btn btn-secondary square showAttachedFilesBtn hidden" onclick='showAttachedFilesModal({{form.content_object.id}}, {{closed}})'><i class="fa fa-cloud-upload fa-fx"></i> {{request.lang.attachment_documents}}</button>
         </center>
       </div>
@@ -325,6 +326,7 @@ var steps = $("#workflow_form").steps({
         var form_data;
         if(currentIndex < newIndex){
           if (currentIndex == 0){
+            receptionFileModal({{form.content_object.id}});
             var resp = validate_step_1();
             if (!resp) {
               lockScreen(0);
@@ -901,6 +903,36 @@ function reloadLogTable(entry) {
         });
       }
     });
+}
+
+function receptionFileModal(id){
+  swal({
+    title: "{{request.lang.reception_receive}}",
+    text: "{{request.lang.reception_receive_question}}",
+    icon: "warning",
+    showCancelButton: true,
+    buttons: {
+      cancel: {
+          text: "{{request.lang.cancel_case}}",
+          value: null,
+          visible: true,
+          className: "btn-warning",
+          closeModal: true,
+      },
+      confirm: {
+          text: "{{request.lang.next}}",
+          value: true,
+          visible: true,
+          className: "",
+          closeModal: true,
+      }
+    }
+  }).then(isConfirm => {
+    if (isConfirm) {
+      let url = '/download-reception/'+id;
+      window.open(url, '_blank');
+    }
+  });
 }
 
 </script> {% endblock scripts %}

@@ -285,6 +285,14 @@ def template_report(request, id):
     report_final = ReportFinal.objects.filter(analysis_id=int(id)).last()
     return render(request, 'app/template_report.html',{'analisis': analisis, 'report': report, 'report_final':report_final })
 
+@login_required
+def download_reception(request, id):
+    pdf = make_pdf_file(id, '/template-reception/')
+    response = HttpResponse(pdf, content_type='application/pdf')
+    response['Content-Disposition'] = 'attachment; filename="comprobante.pdf"'
+
+    return response
+
 def get_resume_file(user, formId, lang):
     form = Form.objects.get(pk=formId)
     entryForm = EntryForm.objects.get(id=form.content_object.id)
@@ -413,6 +421,141 @@ def show_log_actions(request, id):
         action_dict['action_date'] = action.action_date.strftime('%d/%m/%Y %H:%M')
         action_list.append(action_dict)
     return JsonResponse({'ok': True, 'data': action_list})
+
+def template_reception(request, id):
+    entryform = EntryForm.objects.values().get(pk=id)
+    entryform_object = EntryForm.objects.get(pk=id)
+    
+    subflow = entryform_object.get_subflow
+    entryform["subflow"] = subflow
+    identifications = list(
+        Identification.objects.filter(
+            entryform=entryform['id']).values())
+    
+    samples = Sample.objects.filter(
+            entryform=entryform['id']).order_by('index')
+    entryform["entryform_type"] = entryform_object.entryform_type.name if entryform_object.entryform_type else ''
+    entryform["entry_format"] = entryform_object.get_entry_format_display if entryform_object.entry_format else ''
+    samples_as_dict = []
+    for s in samples:
+        s_dict = model_to_dict(s, exclude=['organs', 'sampleexams', 'exams', 'identification'])
+        organs = []
+        sampleexams = s.sampleexams_set.all()
+        sampleExa = {}
+        
+        for sE in sampleexams:
+            analysis_form = entryform_object.analysisform_set.filter(exam_id=sE.exam_id).first()
+            try:
+                a_form = analysis_form.forms.get()
+                is_cancelled = a_form.cancelled
+                is_closed = a_form.form_closed
+            except:
+                is_cancelled = False
+                is_closed = False
+            
+            if not is_cancelled:
+                try:
+                    sampleExa[sE.exam_id]['organ_id'].append({
+                        'name':sE.organ.name,
+                        'id':sE.organ.id})
+                except:
+                    sampleExa[sE.exam_id]={
+                        'exam_id': sE.exam_id,
+                        'exam_name': sE.exam.name,
+                        'exam_type': sE.exam.service_id,
+                        'stain': sE.stain.abbreviation.upper() if sE.stain else "N/A",
+                        'sample_id': sE.sample_id,
+                        'organ_id': [{
+                        'name':sE.organ.name,
+                        'id':sE.organ.id}]
+                    }
+                if sE.exam.service_id == 1:
+                    try:
+                        organs.index(model_to_dict(sE.organ))
+                    except:
+                        organs.append(model_to_dict(sE.organ))
+        s_dict['organs_set'] = organs
+        s_dict['sample_exams_set'] = sampleExa
+        s_dict['identification'] = model_to_dict(s.identification, exclude=["organs", 'organs_before_validations'])
+        samples_as_dict.append(s_dict)
+    
+    entryform["identifications"] = []
+    for ident in entryform_object.identification_set.all():
+        ident_json = model_to_dict(ident, exclude=["organs", 'organs_before_validations'])
+        ident_json['organs_set'] = list(ident.organs.all().values())
+        entryform["identifications"].append(ident_json)              
+
+    entryform["analyses"] = list(
+        entryform_object.analysisform_set.filter(exam__isnull=False).values('id', 'created_at', 'comments', 'entryform_id', 'exam_id', 'exam__name', 'patologo_id', 'patologo__first_name', 'patologo__last_name'))
+    entryform["cassettes"] = list(
+        entryform_object.cassette_set.all().values())
+    entryform["customer"] = model_to_dict(entryform_object.customer) if entryform_object.customer else None
+    entryform["larvalstage"] = model_to_dict(entryform_object.larvalstage) if entryform_object.larvalstage else None
+    entryform["fixative"] = model_to_dict(entryform_object.fixative) if entryform_object.fixative else None
+    entryform["watersource"] = model_to_dict(entryform_object.watersource) if entryform_object.watersource else None
+    entryform["specie"] = model_to_dict(entryform_object.specie) if entryform_object.specie else None
+
+    patologos = list(User.objects.filter(userprofile__profile_id__in=[4, 5]).values())
+
+    for item in entryform['identifications']:
+        servicios = {}
+        for item2 in samples_as_dict:
+            if item2['identification']['id'] == item['id']:
+                
+                for key, value in item2['sample_exams_set'].items():                    
+                    if value['exam_name'] in servicios:
+                        if value['stain'] in servicios[value['exam_name']]:
+                            for aux in value['organ_id']:    
+                                servicios[value['exam_name']][value['stain']].append(aux['name'])
+                        else:
+                            servicios[value['exam_name']][value['stain']] = []
+                            for aux in value['organ_id']:
+                                servicios[value['exam_name']][value['stain']].append(aux['name'])
+                    else:
+                        servicios[value['exam_name']] = {value['stain']: []}
+                        
+                        for aux in value['organ_id']:
+                            servicios[value['exam_name']][value['stain']].append(aux['name'])
+                            
+        serv = {}
+        for key, value in servicios.items():
+            stains = {}
+            for key2, value2 in value.items():
+                
+                organs = {}
+                for k in value2:
+                    if k in organs:
+                        organs[k] += 1
+                    else:
+                        organs[k] = 1
+                
+                stains[key2] = organs
+                    
+            new_key = key + " ("
+            organs_amount_by_stain = {}
+            for stain in value.keys():
+                for org, cant in stains[stain].items():
+                    if org in organs_amount_by_stain:
+                        organs_amount_by_stain[org].append(cant)
+                    else:
+                        organs_amount_by_stain[org] = [cant]
+                
+                new_key += stain + " - "   
+                
+            serv[new_key[:-3]+")"] = organs_amount_by_stain    
+        
+        item['servicios'] = serv
+                
+    data = {
+        'entryform': entryform,
+        'identifications': identifications,
+        'case_created_by': User.objects.get(pk=entryform['created_by_id']).get_full_name(),
+        'requested': datetime.datetime.now(),
+        # 'report_generated_by': User.objects.get(pk=userId).get_full_name(),
+        'patologos': patologos
+    }
+
+    return render(request, 'app/template_reception.html', data)
 
 def template_resumen_report(request, id, userId):
     entryform = EntryForm.objects.values().get(pk=id)

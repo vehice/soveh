@@ -566,5 +566,13 @@
     "reports_attached":{
         "es":"reportes adjuntos y",
         "en":"attached reports and"
+    },
+    "reception_receive":{
+        "es":"Comprobante de Recepción",
+        "en":"Receipt voucher"
+    },
+    "reception_receive_question":{
+        "es":"¿Deseas descargar el comprobante de recepción?",
+        "en":"Do you want to download the receipt? "
     }
 }
