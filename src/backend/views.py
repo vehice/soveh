@@ -1490,8 +1490,8 @@ class RESEARCH(View):
                 'f_m_month': a.entryform.sampled_at.strftime("%m") if a.entryform.sampled_at else "",
                 'entryform': a.entryform.id,
                 'estado': a.status,
-                'edit_case': not a['entryform_form'].form_closed and (up.profile.id in (1,2,3) or request.user.is_superuser),
-                'case_closed': a['entryform_form'].form_closed or a['entryform_form'].cancelled,
+                'edit_case': not a.entryform.forms.get().form_closed and (up.profile.id in (1,2,3) or request.user.is_superuser),
+                'case_closed': a.entryform.forms.get().form_closed or a.entryform.forms.get().cancelled,
             })
             
         clients_available = Customer.objects.all()
