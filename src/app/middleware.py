@@ -6,8 +6,10 @@ class LanguageMiddleware:
 
     def __call__(self, request):
         # LUEGO SETEAR AL VALOR A PARTIR DEL USER
-        usuario = UserProfile.objects.get(user=request.user)
-        language = 'es' if usuario.language == 1 else 'en'
+        language = 'es' 
+        if request.user.id:
+            usuario = UserProfile.objects.get(user=request.user)
+            language = 'es' if usuario and usuario.language == 1 else 'en'
         request.lang = fn.translation(language)
 
         response = self.get_response(request)
