@@ -287,7 +287,7 @@ def template_report(request, id):
 
 @login_required
 def download_reception(request, id):
-    pdf = make_pdf_file(id, '/template-reception/')
+    pdf = make_pdf_file("{0}/{1}".format(id, request.user.id), '/template-reception/')
     response = HttpResponse(pdf, content_type='application/pdf')
     response['Content-Disposition'] = 'attachment; filename="comprobante.pdf"'
 
@@ -422,7 +422,7 @@ def show_log_actions(request, id):
         action_list.append(action_dict)
     return JsonResponse({'ok': True, 'data': action_list})
 
-def template_reception(request, id):
+def template_reception(request, id, userId):
     entryform = EntryForm.objects.values().get(pk=id)
     entryform_object = EntryForm.objects.get(pk=id)
     
@@ -551,7 +551,7 @@ def template_reception(request, id):
         'identifications': identifications,
         'case_created_by': User.objects.get(pk=entryform['created_by_id']).get_full_name(),
         'requested': datetime.datetime.now(),
-        # 'report_generated_by': User.objects.get(pk=userId).get_full_name(),
+        'report_generated_by': User.objects.get(pk=userId).get_full_name(),
         'patologos': patologos
     }
 
