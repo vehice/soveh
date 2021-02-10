@@ -191,6 +191,18 @@
         "es":"Grupo/Nro Caso Cliente",
         "en":"Group/Client's case"
     },
+    "group":{
+        "es":"Grupo",
+        "en":"Group"
+    },
+    "case_client":{
+        "es":"Nro Caso Cliente",
+        "en":"Client's case"
+    },
+    "amount_identifications":{
+        "es":"Cantidad",
+        "en":"Amount"
+    },
     "fishes":{
         "es":"Peces",
         "en":"No. Fishes"
