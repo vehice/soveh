@@ -280,6 +280,8 @@ class EntryForm(models.Model):
 class Identification(models.Model):
     entryform = models.ForeignKey(
         EntryForm, null=True, on_delete=models.SET_NULL)
+    # QUE PASA CON LOS IDENTIFICADORES ANTERIORES???
+    correlative = models.IntegerField(default=1, null=True, blank=True)
     cage = models.CharField(max_length=250, default="", null=True, blank=True)
     no_fish = models.IntegerField(default="0", null=True, blank=True)
     no_container = models.IntegerField(default="0", null=True, blank=True)
@@ -292,6 +294,7 @@ class Identification(models.Model):
     organs = models.ManyToManyField(Organ)
     organs_before_validations = models.ManyToManyField(Organ, related_name='organs_before_validations')
     removable = models.BooleanField(default=False)
+    deleted = models.BooleanField(default=False)
 
     def __str__(self):
         return str(self.pk)

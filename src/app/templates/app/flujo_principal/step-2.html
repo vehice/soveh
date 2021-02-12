@@ -9,6 +9,7 @@
         <thead>
           <tr>
             <th></th>
+            <th>#</th>
             <th>{{request.lang.cage}}</th>
             <th>{{request.lang.group}}</th>
             <th>{{request.lang.case_client}}</th>
@@ -49,8 +50,8 @@
 <script id="unit_template" type="text/x-lodash-template">
   <tr>
     <td>#</td>
-    <td><input name="eee" class="form-control-table" placeholder="tipo unidad"></td>
-    <td><input name="eee" class="form-control-table" placeholder="organos"></td>
-    <td><button class="btn btn-danger btn-sm " type="button"><i class="fa fa-trash fa-fx"></i></button></td>
+    <td><input class="form-control-table" placeholder="tipo unidad"></td>
+    <td><input class="form-control-table" placeholder="organos"></td>
+    <td><button class="btn btn-danger btn-sm unit-delete" type="button" data-ident="<%= ident_id %>"><i class="fa fa-trash fa-fx"></i></button></td>
   </tr>
 </script>
