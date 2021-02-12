@@ -1,148 +1,56 @@
 <fieldset>
-  <div id="step_{{ step_tab }}">
+  <div id="step_{{ step_tab }}" style="margin-bottom: 10px;">
     <input type="hidden" id="step_id" name="step_id" value="{{step_id}}">
     <input type="hidden" id="step_tag" name="step_tag" value="{{step_tag}}">
-    <input type="hidden" id="form_id" name="form_id" value="{{form_id}}" >
-    <input type="hidden" id="entryform_id" name="entryform_id" value="{{entryform_id}}" >
-    <h4 class="form-section">
-      <i class="ft-search"></i> {{request.lang.services}}
-    </h4>
-    <div class="row">
-
-      <div class="col-sm-12" style="display:none;" id="pre-selected-exams">
-        <div class="row">
-          <div class="col-sm-9">
-            <p><label for="exam">{{request.lang.preselected_analysis}}:</label></p>
-            <div id="pre-selected-exams-list"></div>
-          </div>
-          <div class="col-sm-3 text-right">
-            <button class="btn btn-secondary" onClick="window.location.reload();"><i class="fa fa-refresh"></i>{{request.lang.restore_configuration}}</button>
-          </div>
-        </div>
-      </div>
-      <div class="col-sm-12 mt-2">
-        <p><label for="exam">{{request.lang.select_analysis}}:</label></p>
-        <div class="input-group">
-          <select class="select2" id="exam_select" name="analysis" multiple="multiple" style="width:100%;" {% if not edit %}disabled{% endif %}>
-          </select>
-          <div class="form-group pt-2">
-            <input type="checkbox" id="switchery" class="switch2" checked />
-            <label for="switchery" class="font-medium-1 text-bold-600 ml-1">{{request.lang.analysis_all}}</label>
-          </div>
-          <div class="form-group pl-2 pt-2">
-            <input type="checkbox" id="switchery2" class="switch2" checked />
-            
-            <label for="switchery2" class="font-medium-1 text-bold-600 ml-1">{{request.lang.organs_all}}</label>
-          </div>
-          <div class="form-group pl-2 pt-2">
-            <input type="checkbox" id="switchery3" class="switch2" checked />
-            
-            <label for="switchery3" class="font-medium-1 text-bold-600 ml-1">{{request.lang.stain_all}}</label>
-          </div>
-        </div>
-      </div>
-      <!-- <div class="col-sm-12 mt-3">
-        <table class="table table-bordered table-condensed" id="patologo_table" style="font-size:13px;">
-          <thead>
-            <tr>
-              <th style="width:40%">Análisis</th>
-              <th style="width:60%">Patólogo</th>
-            </tr>
-          </thead>
-          <tbody>
-          </tbody>
-        </table>
-      </div> -->
-      <div class="col-sm-12 mt-3">
-        <table class="table table-bordered table-condensed" id="samples_table" style="font-size:13px;">
-          <thead>
-            <tr>
-              <th style="width:5%">{{request.lang.nro_sample}}</th>
-              <th style="width:15%">{{request.lang.identification}}</th>
-              <th style="width:25%">{{request.lang.analysis}}</th>
-              <th style="width:15%">{{request.lang.stain}}</th>
-              <th style="width:30%">{{request.lang.organs}}</th>
-              <th style="width:10%">{{request.lang.actions}}</th>
-            </tr>
-          </thead>
-          <tbody>
-          </tbody>
-        </table>
-      </div>
+    <input type="hidden" id="form_id" name="form_id" value="{{form_id}}">
+    <input type="hidden" id="entryform_id" name="entryform_id" value="{{entryform_id}}">
+    <div class="table-responsive">
+      <table id="identifications" class="display table table-bordered table-condensed">
+        <thead>
+          <tr>
+            <th></th>
+            <th>{{request.lang.cage}}</th>
+            <th>{{request.lang.group}}</th>
+            <th>{{request.lang.case_client}}</th>
+            <th>{{request.lang.weight}}</th>
+            <th>{{request.lang.extra_features}}</th>
+            <th>{{request.lang.optimus_condition}}</th>
+            <th>{{request.lang.observations}}</th>
+            <th>{{request.lang.amount_identifications}}</th>
+            <th>{{request.lang.options}}</th>
+          </tr>
+        </thead>
+        <tbody class="text-center">
+          <!-- <tr>
+            <td></td>
+            <td><input name="eee" class="form-control-table"></td>
+            <td><input name="eee" class="form-control-table"></td>
+            <td><input name="eee" class="form-control-table"></td>
+            <td><input name="eee" class="form-control-table"></td>
+            <td><input name="eee" class="form-control-table"></td>
+            <td><input name="eee" class="form-control-table"></td>
+            <td><input name="eee" class="form-control-table"></td>
+            <td><input name="eee" class="form-control-table"></td>
+            <td><input name="eee" class="form-control-table amount" type="number" min="0"></td>
+            <td>
+              <button class="btn btn-danger btn-sm deleteIdent" type="button"><i class="fa fa-trash fa-fx"></i></button>
+            </td>
+          </tr> -->
+        </tbody>
+      </table>
     </div>
-    
+    <button id="addIdent" class="btn btn-primary col-12" type="button">
+      <i class="fa fa-plus-circle fa-fx"></i> Agregar Identificador
+    </button>
   </div>
 </fieldset>
 
-<script id="sample_row" type="text/x-lodash-template">
-  <tr id="sample-<%= sample.id %>">
-    <td id="sampleNro-<%= sample.id %>" rowspan="1">
-        <input type="hidden" value="<%= sample.id %>" name="sample[id][<%= sample.index %>]">
-        <%= sample.index %>
-    </td>
 
-    <td id="sampleIden-<%= sample.id %>" rowspan="1">
-        <%= sample.identification.cage %>-<%= sample.identification.group %>
-    </td>
-  
-    <!-- Analisis -->
-    <td class="samples_exams_list samples_exams delete-<%= sample.id %>" data-index="<%= sample.id %>" >
-      <!-- <input class="form-control samples_exams" style="width:100% !important;" data-index="<%= sample.id %>" disabled/> -->
-      <!-- </select> -->
-    </td>
-
-    <!-- Tinciones -->
-    <td class="delete-<%= sample.id %>">
-    </td>
-
-    <!-- Organs -->
-    <td class="delete-<%= sample.id %>">
-    </td>
-
-    <!-- Actions -->
-    <td class="delete-<%= sample.id %>">
-    </td>
-  </tr> 
-  
-</script>
-
-<script id="add_analisis" type="text/x-lodash-template">
-<tr id="analisis-<%= sampleId %>-<%= sampleIndex %>" class="analis-row analis-row-<%= sampleId %>" data-prevdata="<%= prevData %>" data-sampleid="<%= sampleIndex %>" data-sampleindex="<%= sampleId %>">
-  <td class="samples_exams_list" data-index="<%= sampleId %>">
-    <input class="form-control" style="width:100% !important;" readonly value="<%= analisis %>" />
-    <input class="form-control" style="width:100% !important;" name="sample[exams][<%= sampleId %>][<%= sampleIndex %>]" hidden value="<%= sampleIndex %>"/>
-  </td>
-  <td>
-    <select id="stain-<%= optionId %>" class="form-control stain-select stain-select-<%= sampleIndex %>" style="width:100% !important;" name="sample[stain][<%= sampleId %>][<%= sampleIndex %>]" {% if not edit %} disabled {% endif %} <% if (is_closed) { %> disabled <% } %> >
-      <% _.each(stains, function (stain) { %>
-        <option value=<%= stain.id %>> <%= _.toUpper(stain.abbreviation) %> </option>
-      <% }); %>
-    </select>
-  </td>
-  <td>
-    <select id="organs-<%= optionId %>" class="form-control organs-select organs-select-<%= sampleIndex %>" style="width:100% !important;" name="sample[organs][<%= sampleId %>][<%= sampleIndex %>]" multiple="multiple" {% if not edit %} disabled {% endif %} <% if (is_closed) { %> disabled <% } %> >
-      <% _.each(organs, function (organ) { %>
-        <option value=<%= organ.id %>> <%= _.toUpper(organ.name) %> </option>
-      <% }); %>
-    </select>
-  </td>
-  <td>
-    <a  href="javascript:void(0);" class="btn btn-danger <% if (is_closed) { %> disabled <% } %> " onclick="deleteAnalisis(<%= sampleId %>, <%= sampleIndex %>, {{ edit }}, <%= prevData %>);"><i class="fa fa-trash "></i></a>
-  </td>
-</tr>
-</script>
-
-<script id="patologo_row" type="text/x-lodash-template">
-  <tr id="exam-<%= exam.id %>">
-    <td>
-      <%= exam.text %>
-    </td>
-    <td>
-      <select id="patologos-select-<%= exam.id %>" class="select2 form-control patologos-select" style="width:100% !important;" name="sample[patologos][<%= exam.id %>]" {% if not edit %}disabled{% endif %}>
-        <% _.each(patologos, function (patologo) { %>
-          <option value=<%= patologo.id %>> <%= _.toUpper(patologo.first_name +' '+ patologo.last_name) %> </option>
-        <% }); %>
-      </select>
-    </td>
-  </tr> 
+<script id="unit_template" type="text/x-lodash-template">
+  <tr>
+    <td>#</td>
+    <td><input name="eee" class="form-control-table" placeholder="tipo unidad"></td>
+    <td><input name="eee" class="form-control-table" placeholder="organos"></td>
+    <td><button class="btn btn-danger btn-sm " type="button"><i class="fa fa-trash fa-fx"></i></button></td>
+  </tr>
 </script>

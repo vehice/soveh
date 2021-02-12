@@ -1846,50 +1846,51 @@ def step_1_entryform(request):
     
     entryform.save()
 
-    optimals = [
-        v for k, v in dict(var_post).items() if k.startswith("identification[is_optimal]")
-    ]
+    #### OLD IDENTIFICATION
+    # optimals = [
+    #     v for k, v in dict(var_post).items() if k.startswith("identification[is_optimal]")
+    # ]
 
-    organs = [
-        list(v) for k, v in dict(var_post).items() if k.startswith("identification[organs]")
-    ]
-    identification_cage = var_post.getlist("identification[cage]")
-    identification_group = var_post.getlist("identification[group]")
-    identification_no_container = var_post.getlist("identification[no_container]")
-    identification_no_fish = var_post.getlist("identification[no_fish]")
-    identification_id = var_post.getlist("identification[id]")
-    identification_weight = var_post.getlist("identification[weight]")
-    identification_extra_features_detail = var_post.getlist("identification[extra_features_detail]")
-    identification_is_optimal = optimals
-    identification_observations = var_post.getlist("identification[observations]")
-    identification_organs = organs
+    # organs = [
+    #     list(v) for k, v in dict(var_post).items() if k.startswith("identification[organs]")
+    # ]
+    # identification_cage = var_post.getlist("identification[cage]")
+    # identification_group = var_post.getlist("identification[group]")
+    # identification_no_container = var_post.getlist("identification[no_container]")
+    # identification_no_fish = var_post.getlist("identification[no_fish]")
+    # identification_id = var_post.getlist("identification[id]")
+    # identification_weight = var_post.getlist("identification[weight]")
+    # identification_extra_features_detail = var_post.getlist("identification[extra_features_detail]")
+    # identification_is_optimal = optimals
+    # identification_observations = var_post.getlist("identification[observations]")
+    # identification_organs = organs
 
-    zip_identification = zip(identification_cage, 
-                        identification_group,
-                        identification_no_container,
-                        identification_no_fish, 
-                        identification_id, 
-                        identification_weight,
-                        identification_extra_features_detail, 
-                        identification_is_optimal, 
-                        identification_observations,
-                        identification_organs)
-    zip_identification1 = zip(identification_cage, 
-                        identification_group,
-                        identification_no_container,
-                        identification_no_fish, 
-                        identification_id, 
-                        identification_weight,
-                        identification_extra_features_detail, 
-                        identification_is_optimal, 
-                        identification_observations,
-                        identification_organs)
+    # zip_identification = zip(identification_cage, 
+    #                     identification_group,
+    #                     identification_no_container,
+    #                     identification_no_fish, 
+    #                     identification_id, 
+    #                     identification_weight,
+    #                     identification_extra_features_detail, 
+    #                     identification_is_optimal, 
+    #                     identification_observations,
+    #                     identification_organs)
+    # zip_identification1 = zip(identification_cage, 
+    #                     identification_group,
+    #                     identification_no_container,
+    #                     identification_no_fish, 
+    #                     identification_id, 
+    #                     identification_weight,
+    #                     identification_extra_features_detail, 
+    #                     identification_is_optimal, 
+    #                     identification_observations,
+    #                     identification_organs)
 
-    entryform_identification = entryform.identification_set.all()
+    # entryform_identification = entryform.identification_set.all()
     
-    change = change or checkIdentification(entryform_identification, zip_identification1)
-    if change:
-        changeCaseVersion(False, entryform.id, request.user.id)
+    # change = change or checkIdentification(entryform_identification, zip_identification1)
+    # if change:
+    #     changeCaseVersion(False, entryform.id, request.user.id)
     # if strtobool(var_post.get('select_if_divide_flow')):
     #     if var_post.get('flow_divide_option') == "1":
     #         i = 0
@@ -2082,43 +2083,45 @@ def step_1_entryform(request):
     #                             sample_index += 1
 
     # else:
-    entryform_identification.delete()
-    entryform.sample_set.all().delete()
-    sample_index = 1
 
-    for values in zip_identification:
-        # print (values)
-        identificacion = Identification.objects.create(
-            entryform_id=entryform.id,
-            cage=values[0],
-            group=values[1],
-            no_container=values[2],
-            no_fish=values[3],
-            temp_id=values[4],
-            weight=values[5],
-            extra_features_detail=values[6],
-            is_optimum = True if "si" in values[7] else False,
-            observation = values[8]
-        )
+    #### OLD IDENTIFICATION
+    # entryform_identification.delete()
+    # entryform.sample_set.all().delete()
+    # sample_index = 1
 
-        organs_type2_count = Organ.objects.filter(id__in=values[9], organ_type=2).count()
-        if organs_type2_count > 0:
-            for org in Organ.objects.all():
-                identificacion.organs.add(org)
-        else:
-            for org in values[9]:
-                identificacion.organs.add(org)
+    # for values in zip_identification:
+    #     # print (values)
+    #     identificacion = Identification.objects.create(
+    #         entryform_id=entryform.id,
+    #         cage=values[0],
+    #         group=values[1],
+    #         no_container=values[2],
+    #         no_fish=values[3],
+    #         temp_id=values[4],
+    #         weight=values[5],
+    #         extra_features_detail=values[6],
+    #         is_optimum = True if "si" in values[7] else False,
+    #         observation = values[8]
+    #     )
+
+    #     organs_type2_count = Organ.objects.filter(id__in=values[9], organ_type=2).count()
+    #     if organs_type2_count > 0:
+    #         for org in Organ.objects.all():
+    #             identificacion.organs.add(org)
+    #     else:
+    #         for org in values[9]:
+    #             identificacion.organs.add(org)
         
-        for org in values[9]:
-            identificacion.organs_before_validations.add(org)
+    #     for org in values[9]:
+    #         identificacion.organs_before_validations.add(org)
 
-        for i in range(int(values[3])):
-            sample = Sample.objects.create(
-                entryform_id=entryform.id,
-                index=sample_index,
-                identification=identificacion
-            )
-            sample_index += 1
+    #     for i in range(int(values[3])):
+    #         sample = Sample.objects.create(
+    #             entryform_id=entryform.id,
+    #             index=sample_index,
+    #             identification=identificacion
+    #         )
+    #         sample_index += 1
        
     return True
 
@@ -2757,10 +2760,20 @@ def save_identification(request, id):
         changeCaseVersion(True, ident.entryform.id, request.user.id)
     return JsonResponse({})
 
+def list_identification(request, entryform_id):
+    try:
+        idents = Identification.objects.filter(entryform_id=entryform_id)
+        data = []
+        for i in idents:
+            data.append(model_to_dict(i))
+        return JsonResponse({'ok': 1, 'data': data})
+    except:
+        return JsonResponse({'ok': 0})
+
 def new_empty_identification(request, entryform_id):
     try:
         ident = Identification.objects.create(entryform_id=entryform_id, temp_id=''.join(random.choices(string.ascii_uppercase + string.digits, k=11)), removable=True)
-        return JsonResponse({'ok': 1, 'id': ident.id})
+        return JsonResponse({'ok': 1, 'id': ident.id, 'obj': model_to_dict(ident)})
     except:
         return JsonResponse({'ok': 0})
 

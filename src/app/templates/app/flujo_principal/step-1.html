@@ -1,57 +1,322 @@
 <fieldset>
-  <div id="step_{{ step_tab }}" style="margin-bottom: 10px;">
+  <div id="step_{{ step_tab }}">
     <input type="hidden" id="step_id" name="step_id" value="{{step_id}}">
     <input type="hidden" id="step_tag" name="step_tag" value="{{step_tag}}">
     <input type="hidden" id="form_id" name="form_id" value="{{form_id}}">
     <input type="hidden" id="entryform_id" name="entryform_id" value="{{entryform_id}}">
-    <div class="table-responsive">
-      <table id="identifications" class="display table table-bordered table-condensed">
-        <thead>
-          <tr>
-            <th></th>
-            <th>{{request.lang.cage}}</th>
-            <th>{{request.lang.group}}</th>
-            <th>{{request.lang.case_client}}</th>
-            <th>{{request.lang.weight}}</th>
-            <th>{{request.lang.extra_features}}</th>
-            <th>{{request.lang.optimus_condition}}</th>
-            <th>{{request.lang.observations}}</th>
-            <th>{{request.lang.extra_features}}</th>
-            <th>{{request.lang.amount_identifications}}</th>
-            <th>{{request.lang.options}}</th>
-          </tr>
-        </thead>
-        <tbody class="text-center">
-          <tr>
-            <td></td>
-            <td><input name="eee" class="form-control1"></td>
-            <td><input name="eee" class="form-control1"></td>
-            <td><input name="eee" class="form-control1"></td>
-            <td><input name="eee" class="form-control1"></td>
-            <td><input name="eee" class="form-control1"></td>
-            <td><input name="eee" class="form-control1"></td>
-            <td><input name="eee" class="form-control1"></td>
-            <td><input name="eee" class="form-control1"></td>
-            <td><input name="eee" class="form-control1" type="number"></td>
-            <td>
-              <button class="btn btn-danger btn-sm deleteIdent" type="button"><i class="fa fa-trash fa-fx"></i></button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+    {% if edit %}
+    <div class="offset-8 text-right m-1">
+      <button type="button" id="saveStep1" class="btn btn-warning square"><i class="fa fa-save"></i> {{request.lang.save_changes}}</button>
     </div>
-    <button id="addIdent" class="btn btn-primary col-12" type="button">
-      <i class="fa fa-plus-circle fa-fx"></i> Agregar Identificador
-    </button>
+    {% endif %}
+    <h4 class="form-section">
+      <i class="ft-user"></i> {{request.lang.general_info}}
+    </h4>
+    <div class="row">
+      <div class="col-md-6">
+        <div class="form-group">
+          <label for="customer">
+            {{request.lang.client}} :
+          </label>
+          <select class="select2 form-control" name="customer" id="customer_select"
+            {% if not edit %}disabled{% endif %}>
+            <!-- <option></option> -->
+          </select>
+        </div>
+        <div class="form-group" id="company">
+          <label for="company">
+            {{request.lang.company}} :
+            <!-- <span class="danger">*</span> -->
+          </label>
+          <input class="form-control" name="company" id="company_input" {% if not edit %}disabled{% endif %} />
+        </div>
+        <div class="form-group" id="center">
+          <label for="center">
+            {{request.lang.centro}} :
+            <!-- <span class="danger">*</span> -->
+          </label>
+          <input class="form-control" name="center" id="center_input" {% if not edit %}disabled{% endif %} />
+        </div>
+        <div class="form-group">
+          <label for="entryformat_select">Formato de Ingreso :</label>
+          <select class="form-control" id="entryformat_select" name="entry_format" {% if not edit %}disabled{% endif %}>
+            <option selected value="1">Tubo</option>
+            <option value="2">Cassette</option>
+            <option value="3">Bloque</option>
+            <option value="4">Slide s/teñir</option>
+            <option value="5">Slide teñido</option>
+            <option value="6">Vivo</option>
+            <option value="7">Muerto</option>
+          </select>
+        </div>
+        <div class="form-group" id="order_number">
+          <label for="order_number">
+            {{request.lang.work_order}} :
+          </label>
+          <input type='text' class="form-control" id="order_number_input" name="no_order"
+            {% if not edit %}disabled{% endif %} />
+        </div>
+        <div class="form-group" id="request_number">
+          <label for="request_number">
+            {{request.lang.no_request}} :
+          </label>
+          <input type='text' class="form-control" id="request_number_input" name="no_request"
+            {% if not edit %}disabled{% endif %} />
+        </div>
+        <div class="form-group">
+          <label for="entryform_type_1">{{request.lang.type_case}} :</label>
+          <fieldset>
+            <div class="d-inline-block custom-control custom-radio mr-1">
+              <input type="radio" checked class="custom-control-input bg-primary" name="entryform_type" id="entryform_type_1" value="1">
+              <label class="custom-control-label" for="entryform_type_1">Normal</label>
+            </div>
+            <div class="d-inline-block custom-control custom-radio mr-1">
+              <input type="radio" class="custom-control-input bg-primary" name="entryform_type" id="entryform_type_2" value="2">
+              <label class="custom-control-label" for="entryform_type_2">Fast</label>
+            </div>
+          </fieldset>
+        </div>
+      </div>
+      <div class="col-sm-6">
+        <div class="form-group">
+          <label>{{request.lang.reception_date_time}} : </label>
+          <div class='input-group date' id='datetime_created_at'>
+            <input type="text" class="form-control" name="created_at" {% if not edit %}disabled{% endif %} />
+            <div class="input-group-append">
+              <span class="input-group-text">
+                <span class="fa fa-calendar"></span>
+              </span>
+            </div>
+          </div>
+          <input type="hidden" name="created_at_submit" id="created_at_submit" {% if not edit %}disabled{% endif %} />
+        </div>
+        <div class="form-group">
+          <label>{{request.lang.sampling_date_time}} : </label>
+          <div class='input-group date' id='datetime_sampled_at'>
+            <input type='text' class="form-control" name='sampled_at' {% if not edit %}disabled{% endif %} />
+            <div class="input-group-append">
+              <span class="input-group-text">
+                <span class="fa fa-calendar"></span>
+              </span>
+            </div>
+          </div>
+          <input type="hidden" name="sampled_at_submit" id="sampled_at_submit" {% if not edit %}disabled{% endif %} />
+        </div>
+        <div class="form-group" id="responsible">
+          <label for="responsible">
+            {{request.lang.responsable}} :
+          </label>
+          <div class='input-group'>
+            <input type='text' class="form-control responsible_place" onclick="responsibleModal()" readonly
+              {% if not edit %}disabled{% endif %} />
+            <div class="input-group-append">
+              <span class="input-group-text">
+                <span class="fa fa-user"></span>
+              </span>
+            </div>
+          </div>
+          <input type='text' class="form-control" id="responsible_input" name="responsible" hidden />
+        </div>
+        <div class="form-group">
+          <label for="phoneNumber3">{{request.lang.fixative}} :</label>
+          <select class="select2 form-control" id="fixtative_select" name="fixative"
+            {% if not edit %}disabled{% endif %}>
+            <option value="">S/I</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="transfer_order_input">
+            Orden de transporte :
+          </label>
+          <input type='text' class="form-control" id="transfer_order_input" name="transfer_order"
+            {% if not edit %}disabled{% endif %} />
+        </div>
+        <div class="form-group">
+          <label for="phoneNumber3">Anamnesis :</label>
+          <textarea id="anamnesis_input" name="anamnesis" row="2" class="form-control" {% if not edit %}disabled{% endif %} ></textarea>
+        </div>
+      </div>
+    </div>
+    <h4 class="form-section">
+      <i class="ft-droplet"></i> {{request.lang.sample_detail}}
+    </h4>
+    <div class="row">
+      <div class="col-sm-6">
+        <div class="form-group">
+          <label for="date3">{{request.lang.specie}} :</label>
+          <select class="select2 form-control" id="specie_select" name="specie" {% if not edit %}disabled{% endif %}>
+          </select>
+        </div>
+      </div>
+      <div class="col-sm-6">
+        <div class="form-group">
+          <label for="phoneNumber3">{{request.lang.development_stage}} :</label>
+          <select class="select2 form-control" id="larvalstage_select" name="larvalstage" {% if not edit %}disabled{% endif %}>
+          </select>
+        </div>
+      </div>
+      <div class="col-sm-6">
+        <div class="form-group">
+          <label for="date3">{{request.lang.water_source}} :</label>
+          <select class="select2 form-control" id="watersource_select" name="watersource" {% if not edit %}disabled{% endif %}>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    {% comment %} <h4 class="form-section">
+      <i class="ft-grid"></i> Subdividir Flujo de Trabajo
+    </h4>
+    <div class="row">
+      <div class="col-sm-6">
+        <div class="alert alert-warning mb-2" role="alert">
+          <strong>Aviso Importante!</strong>
+          Si eliges subdividir este flujo de trabajo para realizar procesos en paralelo te recordamos
+          que se considerará la identificación de peces y análisis ingresados como definitivos, evitando afectar
+          en el futuro los subflujos asociados.
+        </div>
+      </div>
+      <div class="col-sm-6">
+        <label for="flow_divider">¿Desea dividir en trabajo en partes o trabajar con grupos de peces por separado?.
+        </label>
+        <select class="form-control" id="select_if_divide_flow" name="select_if_divide_flow"
+          {% if not edit %}disabled{% endif %}>
+          <option selected value="0">No</option>
+          <option value="1">Sí</option>
+        </select>
+      </div>
+      <input type="hidden" value="0" name="flow_divide_option" id="flow_divide_option"
+        {% if not edit %}disabled{% endif %} />
+      <div class="col-sm-12" id="flow_divider_options"></div>
+    </div> {% endcomment %}
   </div>
 </fieldset>
 
+<script id="identification_template" type="text/x-lodash-template">
+<div class="row identification border p-2 m-2" id="<%= temp_id %>">
+  <div class="col-sm-11 row">
+    <input type="hidden" value="<%= temp_id %>" name="identification[id]">
+    <div class="col-sm-3">
+      <div class="form-group">
+        <label for="cage">{{request.lang.cage}}</label>
+        <input type="text" value="" name="identification[cage]" class="form-control estanque-cage"  {% if not edit %}disabled{% endif %} >
+      </div>
+    </div>
+    <div class="col-sm-3">
+      <div class="form-group">
+        <label for="group">{{request.lang.group_client}}</label>
+        <input name="identification[group]" class="form-control estanque-cage" {% if not edit %}disabled{% endif %} >
+      </div>
+    </div>
+    <div class="col-sm-2">
+      <div class="form-group">
+        <label for="no_fish">{{request.lang.fishes}}</label>
+        <input name="identification[no_fish]" type="number" value="0" min="1" class="form-control no_peces" {% if not edit %}disabled{% endif %} >
+      </div>
+    </div>
+    <div class="col-sm-2">
+      <div class="form-group">
+        <label for="no_container">{{request.lang.containers}}</label>
+        <input name="identification[no_container]" type="number" value="1" min="1" class="form-control" {% if not edit %}disabled{% endif %} >
+      </div>
+    </div>
+    <div class="col-sm-2">
+      <div class="form-group">
+        <label for="wheight">{{request.lang.weight}}:</label>
+        <input name="identification[weight]" value="0.0" class="form-control" {% if not edit %}disabled{% endif %} >
+      </div>
+    </div>
+    <div class="col-sm-3">
+      <div class="form-group">
+        <label for="wheight">{{request.lang.extra_features}}</label>
+        <textarea name="identification[extra_features_detail]" row="2" class="form-control" {% if not edit %}disabled{% endif %} ></textarea>
+      </div>
+    </div>
+    <div class="col-sm-3">
+      <div class="form-group">
+        <label> {{request.lang.optimus_condition}} </label>
+        <div class="input-group">
+          <div class="d-inline-block custom-control custom-radio">
+            <input type="radio" checked name="identification[is_optimal][<%= temp_id %>]" class="custom-control-input" value="si" id="identification[is_optimal][<%= temp_id %>]_si" {% if not edit %}disabled{% endif %} >
+            <label class="custom-control-label" for="identification[is_optimal][<%= temp_id %>]_si">Si</label>
+          </div> &nbsp;&nbsp;&nbsp;
+          <div class="d-inline-block custom-control custom-radio">
+            <input type="radio" name="identification[is_optimal][<%= temp_id %>]" class="custom-control-input" value="no" id="identification[is_optimal][<%= temp_id %>]_no" {% if not edit %}disabled{% endif %} >
+            <label class="custom-control-label" for="identification[is_optimal][<%= temp_id %>]_no">No</label>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-sm-3">
+      <div class="form-group">
+        <label>{{request.lang.observations}}</label>
+        <textarea name="identification[observations]" class="form-control" row="2" {% if not edit %}disabled{% endif %} ></textarea>
+      </div>
+    </div>
+    <div class="col-sm-3">
+      <div class="form-group">
+        <label>{{request.lang.organs}}</label>
+        <select class="select2 form-control identification_organs" name="identification[organs][<%= temp_id %>]" multiple="multiple" {% if not edit %}disabled{% endif %} >
+          <% _.each(organs, function (organ) { %>
+            <option value="<%= organ.id %>"><%= organ.name %></option>
+          <% }); %>
+        </select>
+      </div>
+    </div>
+  </div>
+  <div class="col-sm-1 text-right">
+    {% if edit %}
+    <div class="form-group">
+      <label for="delete">&nbsp;</label>
+      <button class="btn btn-danger" id="delete_identification" type="button"><i class="fa fa-close fa-fx fa-1x"></i></button>
+    </div>
+    {% endif %} 
+  </div>
+</div>
+</script>
 
-<script id="unit_template" type="text/x-lodash-template">
-  <tr>
-    <td>#</td>
-    <td><input name="eee" class="form-control1" placeholder="tipo unidad"></td>
-    <td><input name="eee" class="form-control1" placeholder="organos"></td>
-    <td><button class="btn btn-danger btn-sm " type="button"><i class="fa fa-trash fa-fx"></i></button></td>
-  </tr>
+<script id="flowgroup_template" type="text/x-lodash-template">
+  <div class="badge badge-pill badge-success p-2 m-1"><strong>PARTE <%= group_count %>: <%= group_size_text %></strong></div>
+</script>
+
+<script id="group_content_manual_template" type="text/x-lodash-template">
+  <div class="col-sm-12 pt-1 pb-1">
+    <label>Peces grupo <%= group_nro %></label>
+    <select class="select2 form-control fishSelection" name="subflow_select[group][<%= group_nro %>]" multiple="multiple" {% if not edit %}disabled{% endif %} >
+      <% _.each(group_fishes, function (fish) { %>
+        <option value="<%= fish.identification_id %>_<%= fish.fish_num %>"><%= fish.cage %>_<%= fish.group %>_P<%= fish.fish_num %> </option>
+      <% }); %>
+    </select>
+  </div>
+</script>
+
+<script id="flowdivider_options_template" type="text/x-lodash-template">
+  <ul class="nav nav-tabs nav-top-border no-hover-bg" id="FlowDividerOptions">
+    <li class="nav-item">
+      <a class="nav-link" id="base_flowdivider_by_identification" data-toggle="tab" aria-controls="flowdivider_by_identification" href="#flowdivider_by_identification" aria-expanded="true">
+        Subdividir por estanque/jaula
+      </a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" id="base_flowdivider_by_manual" data-toggle="tab" aria-controls="flowdivider_by_manual" href="#flowdivider_by_manual" aria-expanded="false">
+        Subdividir manualmente
+      </a>
+    </li>
+  </ul>
+  <div class="tab-content px-1 pt-1">
+    <div role="tabpanel" class="tab-pane" id="flowdivider_by_identification" aria-labelledby="base_flowdivider_by_identification">
+    </div>
+    <div role="tabpanel" class="tab-pane" id="flowdivider_by_manual" aria-labelledby="base_flowdivider_by_manual">
+      <div class="row">
+        <div class="col-sm-3 text-right pt-1">
+          <label for="flowdivider_manual_group_quantity" class="control-label"><h5>¿Cuántos grupos desea realizar?</h5></label>
+        </div>
+        <div class="col-sm-2">
+          <input id="flowdivider_manual_group_quantity" name="flowdivider_manual_group_quantity" class="form-control" type="number" min="2" value="2"  {% if not edit %}disabled{% endif %} />
+        </div>
+      </div>
+      <div class="col-sm-12" id="flowdivider_manual_groups">
+      </div>
+    </div>
+  </div>
 </script>

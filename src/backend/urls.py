@@ -76,11 +76,7 @@ urlpatterns = [
     #     csrf_exempt(views.IMAGES.as_view()),
     #     'images_w_id'
     # ),
-    path(
-        'identification/<int:id>',
-        csrf_exempt(views.save_identification),
-        name="identification"
-    ),
+   
     path(
         'generalData/<int:id>',
         csrf_exempt(views.save_generalData),
@@ -149,6 +145,16 @@ urlpatterns = [
         'delete-sample/<int:id>',
         csrf_exempt(views.delete_sample),
         name="delete-sample"
+    ),
+    path(
+        'list-identification/<int:entryform_id>',
+        csrf_exempt(views.list_identification),
+        name="list_identification"
+    ),
+    path(
+        'identification/<int:id>',
+        csrf_exempt(views.save_identification),
+        name="identification"
     ),
     path(
         'new-identification/<int:entryform_id>',
