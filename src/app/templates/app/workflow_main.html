@@ -326,13 +326,13 @@ var steps = $("#workflow_form").steps({
         var form_data;
         if(currentIndex < newIndex){
           if (currentIndex == 0){
-            receptionFileModal({{form.content_object.id}});
             var resp = validate_step_1();
             if (!resp) {
               lockScreen(0);
               window.onbeforeunload = confirmExit;
               return false
             }
+            receptionFileModal({{form.content_object.id}});
           } 
           else if (currentIndex == 1) {
             var resp = validate_step_2();
@@ -340,6 +340,7 @@ var steps = $("#workflow_form").steps({
               lockScreen(0);
               return false
             }
+            shareChoice()
             //shareChoice();
              // lockScreen(0);
             // return false
