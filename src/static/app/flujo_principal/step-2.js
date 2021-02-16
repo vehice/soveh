@@ -109,33 +109,56 @@ function init_step_2() {
       console.log("Fail")
     });
 
-  function format(data) {
+  function format(dataRow) {
+    let data = retrieveDataRow(dataRow)
     let id = data.id;
     // color: #ffffff; background-color: #63d0ba; border: none
     let table_id = `units-table-${id}` // hay que linkearlo a la funcion ajax
     let table_template = `
+    <div class="row justify-content-center">
+      <div class="form-group pl-2 pt-2">
+        <input type="checkbox" id="organs-${id}" class="switch2" />
+        <label for="organs-${id}" class="font-medium-1 text-bold-600 ml-1">Organos para todas las unidades</label>
+      </div>
+      <div class="form-group pl-2 pt-2">
+        <input type="checkbox" id="correlative-${id}" class="switch2" />
+        <label for="correlative-${id}" class="font-medium-1 text-bold-600 ml-1">Correlativos</label>
+      </div>
+    </div>
     <table class='table w-100 table-unit'>
     <thead> 
     <th>#</th> 
     <th>Tipo</th> 
-    <th>Organos</th> 
+    <th style="width: 50%">Organos</th> 
     <th>Eliminar</th> 
     </thead>
     <tbody id="${table_id}">
-    </tbody>
-    </table>
     <div id="${table_id}_loading" class="text-center">
     Cargando ...
     </div>
+    </tbody>
+    </table>
     `
     let table = $(table_template);
-    setTimeout(function () { //sustituir por una funcion ajax
-      let rows = addUnitTemplate({
-        ident_id: id
-      })
+    setTimeout(function () { //sustituir por una funcion ajax && ver en que punto guardar datos
       $(`#${table_id}_loading`).remove();
-      $(`#${table_id}`).append(rows);
-    }, 2000)
+      $('.switchery').remove();
+      var elems = $('.switch2');
+      $.each(elems, function (key, value) {
+        new Switchery($(this)[0]);
+      });
+      for (let index = 0; index < data.no_container; index++) {
+        let rows = addUnitTemplate({
+          ident_id: id,
+          index: index
+        });
+        $(`#${table_id}`).append(rows);
+        $(`#select-${id}-${index}`).select2({
+          templateResult: formatResultData,
+          tags: true
+        });
+      }
+    }, 1000)
     return table_template;
   }
 
@@ -160,7 +183,7 @@ function init_step_2() {
     }
     else {
       // Open this row
-      row.child(format(row.data())).show();
+      row.child(format(row)).show();
 
       icon.removeClass('fa-chevron-right');
       icon.addClass('fa-chevron-down');
@@ -267,7 +290,8 @@ function init_step_2() {
     if (direction) {
       // Increase
       let rows = addUnitTemplate({
-        ident_id: id
+        ident_id: id,
+        index: 0
       });
       $(`#${table_id}`).append(rows);
     }
@@ -295,6 +319,49 @@ function retrieveDataRow(row) {
   $.each($(`#${data.id} .form-control-table`), function (i, v) {
     data[v.name] = v.value;
   });
-  
+
   return data;
 }
+
+$(document).on("select2:selecting", function (e) {
+  // Aqui tambien viene el id, hay que modificar los id, para tomar valores randoms y que no se repitan
+  let new_id = `${e.params.args.data.id}-${Math.random()}`;
+  let new_value = e.params.args.data.text;
+
+  if ($('#organs-2346')[0].checked) {
+    $.each($('#units-table-2346 .organs'), function (i, v) {
+
+      let select = $(v);
+      select.append(`<option value="${new_id}">${new_value}</option>`);
+      let values = select.val()
+      values.push(new_id);
+      console.log(values);
+      select.val(values);
+      select.trigger('change');
+      select.trigger({
+        type: 'select2:select',
+        params: {
+          data: e.params.args.data
+        }
+      });
+    });
+    $(e.target).trigger('close');
+    e.preventDefault();
+  }
+  else {
+    $(e.target).append(`<option value="${new_id}">${new_value}</option>`);
+  }
+});
+// $(document).on("select2:select", function (e) {
+//   console.log(e.params.data.text)
+
+//   $(e.target).append(`<option value="${e.params.data.text}${Math.random()}">${e.params.data.text}</option>`);
+// });
+$(document).on("select2:unselect", function (e) {
+  e.params.data.element.remove();
+});
+function formatResultData(data) {
+  if (!data.id) return data.text;
+  if (data.element.selected) return
+  return data.text;
+};

@@ -48,10 +48,22 @@
 
 
 <script id="unit_template" type="text/x-lodash-template">
-  <tr>
+  <tr id="unit-<%= ident_id %>-<%= index %>">
     <td>#</td>
-    <td><input class="form-control-table" placeholder="tipo unidad"></td>
-    <td><input class="form-control-table" placeholder="organos"></td>
+    <td>
+      <select class="form-control-table" name="tipo">
+        <option disabled>Seleccionar Tipo de Unidad</option>
+        <option>tubo</option>
+        <option>cassette</option>
+        <option>etc</option>
+      </select>
+    </td>
+    <td><select id="select-<%= ident_id %>-<%= index %>" class="form-control-table organs" name="organos" multiple>
+      <option disabled>Seleccionar Tipo de Unidad</option>
+      <option>tubo</option>
+      <option>cassette</option>
+      <option>etc</option>
+    </select></td>
     <td><button class="btn btn-danger btn-sm unit-delete" type="button" data-ident="<%= ident_id %>"><i class="fa fa-trash fa-fx"></i></button></td>
   </tr>
 </script>
