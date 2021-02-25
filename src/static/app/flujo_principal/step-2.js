@@ -1,5 +1,7 @@
 bd_correlative = 0;
 current_correlative = 0;
+organs;
+
 function init_step_2() {
   var entryform_id = $('#entryform_id').val();
 
@@ -94,11 +96,8 @@ function init_step_2() {
     url: url,
   })
     .done(function (data) {
-      // initialData(data);
-      // organs = data.organs;
-      // initialConf();
-      // loadData();
-      data.data.forEach(element => {
+      organs = data.data.organs;
+      data.data.ident.forEach(element => {
         if (!element.deleted)
           addRow(element);
         current_correlative = Math.max(element.correlative, current_correlative)
@@ -120,22 +119,22 @@ function init_step_2() {
         <input type="checkbox" id="organs-${id}" class="switch2" />
         <label for="organs-${id}" class="font-medium-1 text-bold-600 ml-1">Organos para todas las unidades</label>
       </div>
-      <div class="form-group pl-2 pt-2">
-        <input type="checkbox" id="correlative-${id}" class="switch2" />
+      <div class="switch-div form-group pl-2 pt-2">
+        <input type="checkbox" id="correlative-${id}" class="switch2 correlative" />
         <label for="correlative-${id}" class="font-medium-1 text-bold-600 ml-1">Correlativos</label>
       </div>
     </div>
     <table class='table w-100 table-unit'>
     <thead> 
-    <th>#</th> 
+    <th style="width:5%">#</th> 
     <th>Tipo</th> 
     <th style="width: 50%">Organos</th> 
     <th>Eliminar</th> 
     </thead>
-    <tbody id="${table_id}">
     <div id="${table_id}_loading" class="text-center">
     Cargando ...
     </div>
+    <tbody id="${table_id}">
     </tbody>
     </table>
     `
@@ -145,12 +144,13 @@ function init_step_2() {
       $('.switchery').remove();
       var elems = $('.switch2');
       $.each(elems, function (key, value) {
-        new Switchery($(this)[0]);
+        new Switchery($(this)[0], { className: 'switch2 switchery switchery-default' });
       });
       for (let index = 0; index < data.no_container; index++) {
         let rows = addUnitTemplate({
           ident_id: id,
-          index: index
+          index: index,
+          organs
         });
         $(`#${table_id}`).append(rows);
         $(`#select-${id}-${index}`).select2({
@@ -269,16 +269,17 @@ function init_step_2() {
 
   });
 
-  $(document).on('click', '.unit-delete', function () {
+  $(document).on('click', '.unit-delete', function (e) {
     let id = $(this).data('ident');
     let amount_control = $(`#amount_${id}`);
     let new_value = amount_control.val() - 1;
     amount_control[0].min = new_value;
     amount_control.val(new_value);
-    amount_control.trigger('change');
+    $(this).parent().parent().remove();
+    amount_control.trigger('change', [true]);
   });
 
-  $(document).on('change', '.form-control-table.amount', function () {
+  $(document).on('change', '.form-control-table.amount', function (e, param1) {
     if (this.defaultValue == this.value)
       return;
 
@@ -291,12 +292,17 @@ function init_step_2() {
       // Increase
       let rows = addUnitTemplate({
         ident_id: id,
-        index: 0
+        index: this.value
       });
       $(`#${table_id}`).append(rows);
+      $(`#select-${id}-${this.value}`).select2({
+        templateResult: formatResultData,
+        tags: true
+      });
     }
     else {
-      $(`#${table_id} > tr:last`).remove();
+      if (!param1)
+        $(`#${table_id} > tr:last`).remove();
     }
   });
 
@@ -324,44 +330,139 @@ function retrieveDataRow(row) {
 }
 
 $(document).on("select2:selecting", function (e) {
-  // Aqui tambien viene el id, hay que modificar los id, para tomar valores randoms y que no se repitan
-  let new_id = `${e.params.args.data.id}-${Math.random()}`;
+  let correlative_btn = '#correlative-2346';
+  let new_id = `${e.params.args.data.id}`;
   let new_value = e.params.args.data.text;
-
+  if (!$(correlative_btn)[0].checked) {
+    new_id = `${e.params.args.data.id}-${Math.random()}`;
+    new_value = e.params.args.data.text;
+  }
   if ($('#organs-2346')[0].checked) {
     $.each($('#units-table-2346 .organs'), function (i, v) {
-
       let select = $(v);
-      select.append(`<option value="${new_id}">${new_value}</option>`);
+      if (!$(correlative_btn)[0].checked) {
+        select.append(`<option value="${new_id}">${new_value}</option>`);
+      }
       let values = select.val()
       values.push(new_id);
       console.log(values);
       select.val(values);
       select.trigger('change');
-      select.trigger({
-        type: 'select2:select',
-        params: {
-          data: e.params.args.data
-        }
-      });
     });
-    $(e.target).trigger('close');
     e.preventDefault();
   }
   else {
-    $(e.target).append(`<option value="${new_id}">${new_value}</option>`);
+    let select = $(e.target);
+    if (!$(correlative_btn)[0].checked) {
+      select.append(`<option value="${new_id}">${new_value}</option>`);
+    }
+    let values = select.val()
+    values.push(new_id);
+    console.log(values);
+    select.val(values);
+    select.trigger('change');
+    e.preventDefault();
   }
 });
-// $(document).on("select2:select", function (e) {
-//   console.log(e.params.data.text)
 
-//   $(e.target).append(`<option value="${e.params.data.text}${Math.random()}">${e.params.data.text}</option>`);
-// });
 $(document).on("select2:unselect", function (e) {
-  e.params.data.element.remove();
+  if (e.params.data.id.search('-') != -1) {
+    e.params.data.element.remove();
+  }
 });
+
+$(document).on("change", ".correlative", function (e) {
+  let id = e.target.id.split('-')[1];
+
+  if (e.target.checked) {
+    swal({
+      title: "Organos en correlativos",
+      text: "Se eliminarán los órganos repetidos",
+      icon: "warning",
+      showCancelButton: true,
+      buttons: {
+        cancel: {
+          value: null,
+          visible: true,
+          className: "btn-danger",
+          closeModal: true,
+        },
+        confirm: {
+          value: true,
+          visible: true,
+          className: "",
+          closeModal: true,
+        }
+      }
+    }).then(isConfirm => {
+      if (!isConfirm) {
+        e.target.click();
+        return;
+      }
+      resetOrgansOptions(id, true);
+    });
+  }
+  else {
+    resetOrgansOptions(id, false);
+  }
+});
+
+function resetOrgansOptions(id, correlative) {
+  var unitTemplate = document.getElementById("organos_options").innerHTML;
+  var templateFn = _.template(unitTemplate);
+  var templateHTML = templateFn({ organs });
+
+  $.each($(`.organs-${id}`), function (i, v) {
+    let select = $(v);
+    let values = select.val()
+    let selected = []
+
+    values.forEach(element => {
+      let x = element.split('-')[0];
+      if (selected.indexOf(x) == -1) {
+        selected.push(x);
+      }
+    });
+
+    select.html(templateHTML)
+
+    if (correlative) {
+      select.val(selected)
+    }
+    else {
+      let selected_unique = []
+      selected.forEach(element => {
+        let new_id = `${element}-${Math.random()}`;
+        let new_value = element;
+        select.append(`<option value="${new_id}">${new_value}</option>`);
+        selected_unique.push(new_id);
+      });
+      select.val(selected_unique)
+    }
+    select.trigger('change')
+  });
+}
+
 function formatResultData(data) {
   if (!data.id) return data.text;
   if (data.element.selected) return
   return data.text;
 };
+
+function validate_step_2() {
+  let sucess = 1;
+  $.each($('input[name=no_container]'), function (i, v) {
+    if ($(v).val() <= 0) {
+      sucess = 0;
+
+    }
+  });
+  if (!sucess) {
+    toastr.error(
+      'Para continuar todas las cantidades deben ser mayores a 0.',
+      'Ups!',
+      { positionClass: 'toast-top-full-width', containerId: 'toast-bottom-full-width' }
+    );
+  }
+  return sucess;
+}

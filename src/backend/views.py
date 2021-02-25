@@ -2762,10 +2762,17 @@ def save_identification(request, id):
 
 def list_identification(request, entryform_id):
     try:
+        organs = list(Organ.objects.all().values())
+        
         idents = Identification.objects.filter(entryform_id=entryform_id)
-        data = []
+        ident = []
         for i in idents:
-            data.append(model_to_dict(i))
+            ident.append(model_to_dict(i))
+
+        data = {
+            'ident': ident,
+            'organs': organs,
+        }
         return JsonResponse({'ok': 1, 'data': data})
     except:
         return JsonResponse({'ok': 0})

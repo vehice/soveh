@@ -49,21 +49,26 @@
 
 <script id="unit_template" type="text/x-lodash-template">
   <tr id="unit-<%= ident_id %>-<%= index %>">
-    <td>#</td>
+    <td><input name="eee" class="form-control-table"></td>
     <td>
       <select class="form-control-table" name="tipo">
-        <option disabled>Seleccionar Tipo de Unidad</option>
+        <option selected disabled>Seleccionar Tipo de Unidad</option>
         <option>tubo</option>
         <option>cassette</option>
         <option>etc</option>
       </select>
     </td>
-    <td><select id="select-<%= ident_id %>-<%= index %>" class="form-control-table organs" name="organos" multiple>
-      <option disabled>Seleccionar Tipo de Unidad</option>
-      <option>tubo</option>
-      <option>cassette</option>
-      <option>etc</option>
+    <td><select id="select-<%= ident_id %>-<%= index %>" class="form-control-table organs organs-<%= ident_id %>" name="organos" multiple>
+      <% _.each(organs, function (organ) { %>
+        <option value="<%= organ.name %>"><%= organ.name %></option>
+      <% }); %>
     </select></td>
     <td><button class="btn btn-danger btn-sm unit-delete" type="button" data-ident="<%= ident_id %>"><i class="fa fa-trash fa-fx"></i></button></td>
   </tr>
+</script>
+
+<script id="organos_options" type="text/x-lodash-template">
+  <% _.each(organs, function (organ) { %>
+    <option value="<%= organ.name %>"><%= organ.name %></option>
+  <% }); %>
 </script>
