@@ -433,7 +433,7 @@
     },
     "services_still_open_text":{
         "es":"Lo sentimos, aún se encuentran servicios abiertos que deben ser cerrados o anulados antes de cerrar el caso.",
-        "en":"Wea are sorry, services are still open. These must be closed or cancelled before closing the case."
+        "en":"We are sorry, services are still open. These must be closed or cancelled before closing the case."
     },
     "close_case_text":{
         "es":"¿Está seguro que desea finalizar el caso?",
@@ -469,7 +469,7 @@
     },
     "optimus_condition":{
         "es":"¿Condiciones óptimas?",
-        "en":"optimum conditions?"
+        "en":"Optimum conditions?"
     },
     "change_language":{
         "es":"¿Cambiar idioma?",
@@ -574,5 +574,13 @@
     "reception_receive_question":{
         "es":"¿Deseas descargar el comprobante de recepción?",
         "en":"Do you want to download the receipt? "
+    },
+    "yes":{
+        "es":"Si",
+        "en":"Yes"
+    },
+    "no":{
+        "es":"No",
+        "en":"No"
     }
 }

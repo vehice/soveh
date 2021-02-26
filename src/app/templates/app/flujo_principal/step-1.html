@@ -269,11 +269,11 @@
         <div class="input-group">
           <div class="d-inline-block custom-control custom-radio">
             <input type="radio" checked name="identification[is_optimal][<%= temp_id %>]" class="custom-control-input" value="si" id="identification[is_optimal][<%= temp_id %>]_si" {% if not edit %}disabled{% endif %} >
-            <label class="custom-control-label" for="identification[is_optimal][<%= temp_id %>]_si">Si</label>
+            <label class="custom-control-label" for="identification[is_optimal][<%= temp_id %>]_si">{{request.lang.yes}}</label>
           </div> &nbsp;&nbsp;&nbsp;
           <div class="d-inline-block custom-control custom-radio">
             <input type="radio" name="identification[is_optimal][<%= temp_id %>]" class="custom-control-input" value="no" id="identification[is_optimal][<%= temp_id %>]_no" {% if not edit %}disabled{% endif %} >
-            <label class="custom-control-label" for="identification[is_optimal][<%= temp_id %>]_no">No</label>
+            <label class="custom-control-label" for="identification[is_optimal][<%= temp_id %>]_no">{{request.lang.no}}</label>
           </div>
         </div>
       </div>
