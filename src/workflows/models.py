@@ -1,6 +1,7 @@
-from django.db import models
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
+from django.db import models
+
 from accounts.models import Profile
 
 
@@ -14,14 +15,15 @@ class State(models.Model):
 class Flow(models.Model):
     name = models.CharField(max_length=250, null=True, blank=True)
     parent = models.ForeignKey(
-        'self', null=True, related_name='child', on_delete=models.CASCADE)
+        "self", null=True, related_name="child", on_delete=models.CASCADE
+    )
 
     def __str__(self):
         return self.name
 
 
 class Permission(models.Model):
-    PERMISSION = (('w', 'Write'), ('a', 'Authorize'), ('r', 'Read'))
+    PERMISSION = (("w", "Write"), ("a", "Authorize"), ("r", "Read"))
 
     name = models.CharField(max_length=250, null=True, blank=True)
     type_permission = models.CharField(max_length=1, choices=PERMISSION)
@@ -29,12 +31,11 @@ class Permission(models.Model):
         State,
         null=True,
         on_delete=models.SET_NULL,
-        related_name="permission_from_state")
+        related_name="permission_from_state",
+    )
     to_state = models.ForeignKey(
-        State,
-        null=True,
-        on_delete=models.SET_NULL,
-        related_name="permission_to_state")
+        State, null=True, on_delete=models.SET_NULL, related_name="permission_to_state"
+    )
 
     def __str__(self):
         return self.name
@@ -63,8 +64,8 @@ class Step(models.Model):
     actors = models.ManyToManyField(Actor)
 
     class Meta:
-        unique_together = ('flow', 'order')
-        ordering = ['order']
+        unique_together = ("flow", "order")
+        ordering = ["order"]
 
     def __str__(self):
         return self.name
@@ -76,18 +77,14 @@ class Form(models.Model):
     form_closed = models.BooleanField(default=False)
     form_reopened = models.BooleanField(default=False)
     parent = models.ForeignKey(
-        'self',
-        related_name='children',
-        null=True,
-        blank=True,
-        on_delete=models.CASCADE)
+        "self", related_name="children", null=True, blank=True, on_delete=models.CASCADE
+    )
     content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
     object_id = models.PositiveIntegerField(null=True)
     content_object = GenericForeignKey()
     cancelled = models.BooleanField(default=False)
     cancelled_at = models.DateTimeField(null=True)
     closed_at = models.DateTimeField(null=True)
-
 
     def __str__(self):
         return str(self.content_type)
