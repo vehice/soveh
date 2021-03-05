@@ -19,64 +19,65 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # See https://docs.djangoproject.com/en/1.11/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'hx6zbkv$$72fhqt^$n8=j_#wocxb@qo30q^qhd$1zx)9=4(hf7'
+SECRET_KEY = "hx6zbkv$$72fhqt^$n8=j_#wocxb@qo30q^qhd$1zx)9=4(hf7"
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-SITE_URL = 'http://127.0.0.1:8000'
+SITE_URL = "http://127.0.0.1:8000"
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = ["*"]
 
-LANG_FILE = os.path.join(BASE_DIR, 'vehice', 'lang.json')
+LANG_FILE = os.path.join(BASE_DIR, "vehice", "lang.json")
 
 # Application definition
 
 INSTALLED_APPS = [
-    'jet',
-    'django.contrib.admin',
-    'django.contrib.auth',
-    'django.contrib.contenttypes',
-    'django.contrib.sessions',
-    'django.contrib.messages',
-    'django.contrib.staticfiles',
-    'django_js_reverse',
-    'django_extensions',
+    "jet",
+    "django.contrib.admin",
+    "django.contrib.admindocs",
+    "django.contrib.auth",
+    "django.contrib.contenttypes",
+    "django.contrib.sessions",
+    "django.contrib.messages",
+    "django.contrib.staticfiles",
+    "django_js_reverse",
+    "django_extensions",
     #'debug_toolbar',
-    'accounts',
-    'workflows',
-    'backend',
-    'app',
-    'avatar',
+    "accounts",
+    "workflows",
+    "backend",
+    "app",
+    "avatar",
 ]
 
 MIDDLEWARE = [
     #'debug_toolbar.middleware.DebugToolbarMiddleware',
-    'django.middleware.security.SecurityMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'app.middleware.LanguageMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    "django.middleware.security.SecurityMiddleware",
+    "django.contrib.sessions.middleware.SessionMiddleware",
+    "django.middleware.common.CommonMiddleware",
+    "django.middleware.csrf.CsrfViewMiddleware",
+    "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "app.middleware.LanguageMiddleware",
+    "django.contrib.messages.middleware.MessageMiddleware",
+    "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
-ROOT_URLCONF = 'vehice.urls'
+ROOT_URLCONF = "vehice.urls"
 
 TEMPLATES = [
     {
-        'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [
-            'templates',
+        "BACKEND": "django.template.backends.django.DjangoTemplates",
+        "DIRS": [
+            "templates",
         ],
-        'APP_DIRS': True,
-        'OPTIONS': {
-            'context_processors': [
-                'django.template.context_processors.debug',
-                'django.template.context_processors.request',
-                'django.contrib.auth.context_processors.auth',
-                'django.contrib.messages.context_processors.messages',
+        "APP_DIRS": True,
+        "OPTIONS": {
+            "context_processors": [
+                "django.template.context_processors.debug",
+                "django.template.context_processors.request",
+                "django.contrib.auth.context_processors.auth",
+                "django.contrib.messages.context_processors.messages",
             ],
         },
     },
@@ -88,13 +89,13 @@ TEMPLATES = [
 # https://docs.djangoproject.com/en/1.11/ref/settings/#databases
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'mysql.connector.django',
-        'NAME': 'vehice',
-        'USER': '',
-        'PASSWORD': '',
-        'HOST': 'localhost',
-        'PORT': '',
+    "default": {
+        "ENGINE": "mysql.connector.django",
+        "NAME": "vehice_solmat_test",
+        "USER": "root",
+        "PASSWORD": "",
+        "HOST": "localhost",
+        "PORT": "",
     }
 }
 
@@ -103,29 +104,25 @@ DATABASES = {
 
 AUTH_PASSWORD_VALIDATORS = [
     {
-        'NAME':
-        'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
+        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
     },
     {
-        'NAME':
-        'django.contrib.auth.password_validation.MinimumLengthValidator',
+        "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
     },
     {
-        'NAME':
-        'django.contrib.auth.password_validation.CommonPasswordValidator',
+        "NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",
     },
     {
-        'NAME':
-        'django.contrib.auth.password_validation.NumericPasswordValidator',
+        "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
     },
 ]
 
 # Internationalization
 # https://docs.djangoproject.com/en/1.11/topics/i18n/
 
-LANGUAGE_CODE = 'es-CL'
+LANGUAGE_CODE = "es-CL"
 
-TIME_ZONE = 'America/Santiago'
+TIME_ZONE = "America/Santiago"
 
 USE_I18N = True
 
@@ -138,34 +135,37 @@ TZ_INFO = False
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.11/howto/static-files/
 
-STATIC_ROOT = os.path.join(BASE_DIR, 'public', 'static')
+STATIC_ROOT = os.path.join(BASE_DIR, "public", "static")
 
-STATIC_URL = '/static/'
+STATIC_URL = "/static/"
 
-STATICFILES_DIRS = (os.path.join(BASE_DIR, 'static'), )
+STATICFILES_DIRS = (os.path.join(BASE_DIR, "static"),)
 
-MEDIA_ROOT = os.path.join(BASE_DIR, 'public', 'media')
+MEDIA_ROOT = os.path.join(BASE_DIR, "public", "media")
 
-MEDIA_URL = '/media/'
+MEDIA_URL = "/media/"
 
-INTERNAL_IPS = '127.0.0.1'
+INTERNAL_IPS = "127.0.0.1"
 
 JET_SIDE_MENU_COMPACT = True
 
 JET_SIDE_MENU_ITEMS = [
-    {'label': ('General'), 'items': [
-        {'name': 'auth.user'},
-        {'name': 'backend.customer'},
-        {'name': 'backend.exam'},
-        {'name': 'backend.stain'},
-        {'name': 'backend.fixative'},
-        {'name': 'backend.organ'},
-        {'name': 'backend.pathology'},
-        {'name': 'backend.diagnostic'},
-        {'name': 'backend.organlocation'},
-        {'name': 'backend.emailtemplate'},
-        {'name': 'backend.research'},
-    ]},
+    {
+        "label": ("General"),
+        "items": [
+            {"name": "auth.user"},
+            {"name": "backend.customer"},
+            {"name": "backend.exam"},
+            {"name": "backend.stain"},
+            {"name": "backend.fixative"},
+            {"name": "backend.organ"},
+            {"name": "backend.pathology"},
+            {"name": "backend.diagnostic"},
+            {"name": "backend.organlocation"},
+            {"name": "backend.emailtemplate"},
+            {"name": "backend.research"},
+        ],
+    },
 ]
 
 DATA_UPLOAD_MAX_MEMORY_SIZE = None
@@ -173,12 +173,12 @@ DATA_UPLOAD_MAX_NUMBER_FIELDS = None
 FILE_UPLOAD_MAX_MEMORY_SIZE = 15000000
 FILE_UPLOAD_PERMISSIONS = 0o644
 
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.office365.com'
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_HOST = "smtp.office365.com"
 EMAIL_USE_TLS = True
 EMAIL_PORT = 587
-EMAIL_HOST_USER = 'no-reply@dataqu.cl'
-EMAIL_HOST_PASSWORD = 'n8JM4hjX6w53HZk6oqe0'
+EMAIL_HOST_USER = "no-reply@dataqu.cl"
+EMAIL_HOST_PASSWORD = "n8JM4hjX6w53HZk6oqe0"
 
-EMAIL_HOST_USER2 = 'no-reply@dataqu.cl'
-EMAIL_HOST_PASSWORD2 = 'n8JM4hjX6w53HZk6oqe0'
+EMAIL_HOST_USER2 = "no-reply@dataqu.cl"
+EMAIL_HOST_PASSWORD2 = "n8JM4hjX6w53HZk6oqe0"
