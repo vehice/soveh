@@ -25,6 +25,7 @@ tests/report/
 /lib/
 env/
 virtualenv/
+venv/
 local/
 .vscode/
 
