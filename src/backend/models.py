@@ -1,4 +1,5 @@
 from django.contrib.contenttypes.fields import GenericRelation
+from datetime import datetime
 from django.db import models
 
 from accounts.models import User
@@ -10,42 +11,79 @@ def entry_files_directory_path(instance, filename):
 
 
 class Specie(models.Model):
+    """
+    Stores information about the sample's species.
+
+    - Name is optional.
+
+    """
+
     name = models.CharField(max_length=250, null=True, blank=True)
 
     def __str__(self):
-        return self.name
+        return str(self.name)
 
 
 class WaterSource(models.Model):
+    """
+    Stores information about the sample's water source.
+
+    - Name is optional.
+
+    """
+
     name = models.CharField(max_length=250, null=True, blank=True)
 
     def __str__(self):
-        return self.name
+        return str(self.name)
 
 
 class LarvalStage(models.Model):
+    """
+    Stores information about the sample's growth stage.
+
+
+    - Name is optional.
+
+    """
+
     name = models.CharField(max_length=250, null=True, blank=True)
 
     def __str__(self):
-        return self.name
+        return str(self.name)
 
 
 class Fixative(models.Model):
+    """
+    Stores information about the unit's used fixative.
+
+    - Name is optional.
+
+    """
+
     name = models.CharField(
-        max_length=250, null=True, blank=True, verbose_name="Nombre"
+        max_length=250, null=True, blank=True, verbose_name="nombre"
     )
 
     def __str__(self):
         return self.name
 
     class Meta:
-        verbose_name = "Fijador"
-        verbose_name_plural = "Fijadores"
+        verbose_name = "fijador"
+        verbose_name_plural = "fijadores"
 
 
 class Service(models.Model):
+    """
+    Service defines the workflow to be followed, and the analysis availables.
+
+    - Name is optional.
+    - Description is optional.
+
+    """
+
     name = models.CharField(
-        max_length=250, null=True, blank=True, verbose_name="Nombre"
+        max_length=250, null=True, blank=True, verbose_name="nombre"
     )
     description = models.TextField(null=True, blank=True)
 
@@ -53,138 +91,197 @@ class Service(models.Model):
         return self.name
 
     class Meta:
-        verbose_name = "Servicio"
-        verbose_name_plural = "Servicios"
-
-
-RESEARCH_TYPE_OPTIONS = [(1, "Estudio Vehice"), (2, "Seguimiento de rutina")]
+        verbose_name = "servicio"
+        verbose_name_plural = "servicios"
 
 
 class Research(models.Model):
+    """
+    Research encapsulates multiple :model:`backend.Entryform` with their common data.
+
+    - Code is optional.
+    - Name is optional.
+    - Description is optional.
+    - Type is a choice, defaults to 1.
+    - Init Date is optional.
+    - Status is a boolean, defaults to False.
+    - External Responsible is optional.
+    - Internal Responsible is optional.
+    - Clients is a list of :model:`backend.Customer`
+    - Services is a list of :model:`backend.Service`
+
+    """
+
+    RESEARCH_TYPE_OPTIONS = [(1, "Estudio Vehice"), (2, "Seguimiento de rutina")]
     code = models.CharField(
-        max_length=250, null=True, blank=True, verbose_name="Código"
+        max_length=250, null=True, blank=True, verbose_name="código"
     )
     name = models.CharField(
-        max_length=250, null=True, blank=True, verbose_name="Nombre"
+        max_length=250, null=True, blank=True, verbose_name="nombre"
     )
-    description = models.TextField(null=True, blank=True, verbose_name="Descripción")
+    description = models.TextField(null=True, blank=True, verbose_name="descripción")
     type = models.IntegerField(
-        default=1, choices=RESEARCH_TYPE_OPTIONS, verbose_name="Tipo"
+        default=1, choices=RESEARCH_TYPE_OPTIONS, verbose_name="tipo"
     )
     init_date = models.DateTimeField(null=True, blank=True)
-    clients = models.ManyToManyField("Customer", verbose_name="Clientes")
+    clients = models.ManyToManyField("Customer", verbose_name="clientes")
     services = models.ManyToManyField(
-        "AnalysisForm", verbose_name="Servicios Asociados"
+        "AnalysisForm", verbose_name="servicios Asociados"
     )
-    status = models.BooleanField(default=False, verbose_name="¿Activo?")
+    status = models.BooleanField(default=False, verbose_name="¿activo?")
 
     # Copy of user full name to avoid empty data if user is removed
     external_responsible = models.CharField(
-        max_length=250, null=True, blank=True, verbose_name="Responsable Externo"
+        max_length=250, null=True, blank=True, verbose_name="responsable externo"
     )
     internal_responsible = models.ForeignKey(
-        User, null=True, on_delete=models.PROTECT, verbose_name="Responsable Interno"
+        User, null=True, on_delete=models.PROTECT, verbose_name="responsable interno"
     )
 
     def __str__(self):
         return self.code + " " + self.name
 
     class Meta:
-        verbose_name = "Estudio"
-        verbose_name_plural = "Estudios"
-
-
-PRICING_UNIT = ((1, "Por órgano"), (2, "Por pez"))
+        verbose_name = "estudio"
+        verbose_name_plural = "estudios"
 
 
 class Stain(models.Model):
+    """
+    A stain dyes a sample which allows the Pathologist to study certain chemicals reactions on it.
+    Certain services :model:`backend.Stain` use a speficic Stain.
+
+    - Name is optional.
+    - Abbreviation is optional.
+    - Description is optional.
+
+    """
+
     name = models.CharField(
-        max_length=250, null=True, blank=True, verbose_name="Nombre"
+        max_length=250, null=True, blank=True, verbose_name="nombre"
     )
     abbreviation = models.CharField(
-        max_length=250, null=True, blank=True, verbose_name="Abreviación"
+        max_length=250, null=True, blank=True, verbose_name="abreviación"
     )
-    description = models.TextField(null=True, blank=True, verbose_name="Descripción")
+    description = models.TextField(null=True, blank=True, verbose_name="descripción")
 
     def __str__(self):
         return self.abbreviation
 
     class Meta:
-        verbose_name = "Tinción"
-        verbose_name_plural = "Tinciones"
+        verbose_name = "tinción"
+        verbose_name_plural = "tinciones"
 
 
 class Exam(models.Model):
+    """
+    Stores basic information about a study done by a Pathologist.
+
+    - Name is optional.
+    - Pathologists Assignment checks if it has been assigned.
+    - Pricing Unit is a choice.
+    - Stain is related :model:`backend.Stain`.
+    - Service is related :model:`backend.Service`.
+
+    """
+
+    PRICING_UNIT = ((1, "Por órgano"), (2, "Por pez"))
     name = models.CharField(
-        max_length=250, null=True, blank=True, verbose_name="Nombre"
+        max_length=250, null=True, blank=True, verbose_name="nombre"
     )
     stain = models.ForeignKey(
-        Stain, null=True, on_delete=models.SET_NULL, verbose_name="Tinción"
+        Stain, null=True, on_delete=models.SET_NULL, verbose_name="tinción"
     )
-    # stain = models.CharField(max_length=250, null=True, blank=True, verbose_name="Tinción")
     pathologists_assignment = models.BooleanField(
-        default=True, verbose_name="Asignación de patólogo"
+        default=True, verbose_name="asignación de patólogo"
     )
     pricing_unit = models.IntegerField(
-        default=1, choices=PRICING_UNIT, verbose_name="Unidad de cobro"
+        default=1, choices=PRICING_UNIT, verbose_name="unidad de cobro"
     )
     service = models.ForeignKey(
         Service,
         null=True,
         default=1,
         on_delete=models.SET_NULL,
-        verbose_name="Tipo de Servicio",
+        verbose_name="tipo de Servicio",
     )
 
     def __str__(self):
         return self.name
 
     class Meta:
-        verbose_name = "Exámen"
-        verbose_name_plural = "Exámenes"
-
-
-ORGAN_TYPE = ((1, "Órgano por sí solo"), (2, "Conjunto de órganos"))
+        verbose_name = "exámen"
+        verbose_name_plural = "exámenes"
 
 
 class Organ(models.Model):
+    """
+    An Organ stores information about the organ itself
+    but also helps as a pivot to bind different Findings to it.
+
+    - Name is optional.
+    - Abbreviation is optional.
+
+    These fields expect an Spanish input, there are also fields for English.
+
+    - Organ Type is a choice.
+
+    """
+
+    ORGAN_TYPE = ((1, "Órgano por sí solo"), (2, "Conjunto de órganos"))
     name = models.CharField(
-        max_length=250, null=True, blank=True, verbose_name="Nombre (ESP)"
+        max_length=250, null=True, blank=True, verbose_name="nombre (ESP)"
     )
     abbreviation = models.CharField(
-        max_length=250, null=True, blank=True, verbose_name="Abreviatura (ESP)"
+        max_length=250, null=True, blank=True, verbose_name="abreviatura (ESP)"
     )
     name_en = models.CharField(
-        max_length=250, null=True, blank=True, verbose_name="Nombre (EN)"
+        max_length=250, null=True, blank=True, verbose_name="nombre (EN)"
     )
     abbreviation_en = models.CharField(
-        max_length=250, null=True, blank=True, verbose_name="Abreviatura (EN)"
+        max_length=250, null=True, blank=True, verbose_name="abreviatura (EN)"
     )
-    organ_type = models.IntegerField(default=1, choices=ORGAN_TYPE, verbose_name="Tipo")
+    organ_type = models.IntegerField(default=1, choices=ORGAN_TYPE, verbose_name="tipo")
 
     def __str__(self):
         return self.name
 
     class Meta:
-        verbose_name = "Órgano"
-        verbose_name_plural = "Órganos"
+        verbose_name = "órgano"
+        verbose_name_plural = "órganos"
 
 
 class OrganLocation(models.Model):
+    """
+    Stores information about the area where an specific Organ can be located.
+
+    - Name is optional.
+    - Organs is a list :model:`backend.Organ`
+
+    """
+
     name = models.CharField(
-        max_length=250, null=True, blank=True, verbose_name="Nombre de localización"
+        max_length=250, null=True, blank=True, verbose_name="nombre de localización"
     )
-    organs = models.ManyToManyField(Organ, verbose_name="Órganos")
+    organs = models.ManyToManyField(Organ, verbose_name="órganos")
 
     def __str__(self):
         return self.name
 
     class Meta:
-        verbose_name = "Localización"
-        verbose_name_plural = "Localizaciones"
+        verbose_name = "localización"
+        verbose_name_plural = "localizaciones"
 
 
 class Pathology(models.Model):
+    """
+    Stores information about findings for an Organ.
+
+    - Name is optional.
+    - Organs is a list of :model:`backend.Organ`.
+
+    """
+
     name = models.CharField(
         max_length=250, null=True, blank=True, verbose_name="Nombre del hallazgo"
     )
