@@ -868,53 +868,52 @@ class WORKFLOW(View):
             process_answer = True
             
             actor_user = None
-            next_state = None
+ 
+            next_state = next_step.state
+        
             for actor in next_step.actors.all():
                 if actor.profile == up.profile:
                     actor_user = actor
-                    if previous_step:
-                        next_state = Permission.objects.get(to_state=form.state, type_permission='w').from_state
-                    else:
-                        # fix para saltar bloque cassete slice flujo prinicpal
-
-                        if form.state_id == 3 and int(id_next_step) == 5:
-                            next_state = State.objects.get(pk=5)
-                        else:
-                            next_state = actor.permission.get(
-                                from_state=form.state, type_permission='w').to_state
-                    break
-
+                    break;
+                    
             if not previous_step:
                 process_answer = call_process_method(form.content_type.model,
                                                      request)
-                next_step_permission = next_state.id != 1 and not len(actor_user.permission.filter(to_state=next_state, type_permission='w'))
+                try:
+                    next_step_permission = next_state.id != 1 and len(actor_user.permission.filter(to_state=next_state, type_permission='w')) > 0
+                except:
+                    next_step_permission = False
             else:
-                next_step_permission = next_state.id != 1 and not len(actor_user.permission.filter(from_state=next_state, type_permission='w'))
+                try:
+                    next_step_permission = next_state.id != 1 and len(actor_user.permission.filter(from_state=next_state, type_permission='w')) > 0
+                except:
+                    next_step_permission = False
+
                 form.form_reopened = False
-            # for actor in next_state.step.actors.all():
-            #     if actor.profile == up.profile:
-            #         next_step_permission = True
+
             if process_answer and next_state:
                 current_state = form.state
                 form.state = next_state
                 form.save()
-                if next_step_permission:
+                
+                if not next_step_permission:
                     return redirect(app_view.show_ingresos)
-                next_step_permission = not next_step_permission
-                process_response = True
+                
+                return JsonResponse({
+                    'process_response': process_response,
+                    'next_step_permission': next_step_permission
+                })
                 # sendEmailNotification(form, current_state, next_state)
             else:
-                print("FALLO EL PROCESAMIENTO")
-                return redirect(app_view.show_ingresos)
+                return JsonResponse({
+                    'process_response': False,
+                    'next_step_permission': next_step_permission
+                })
 
-            return JsonResponse({
-                'process_response': process_response,
-                'next_step_permission': next_step_permission
-            })
+
         else:
             process_answer = call_process_method(form.content_type.model,
                                                      request)
-            
 
             form.form_closed = False
             
