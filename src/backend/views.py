@@ -866,27 +866,22 @@ class WORKFLOW(View):
             next_step_permission = False
             process_response = False
             process_answer = True
-            
-            actor_user = None
- 
+             
             next_state = next_step.state
         
-            for actor in next_step.actors.all():
-                if actor.profile == up.profile:
-                    actor_user = actor
-                    break;
+            actor_user = next_step.actors.filter(profile=up.profile).first()
                     
             if not previous_step:
                 process_answer = call_process_method(form.content_type.model,
                                                      request)
-                try:
+                if actor_user:
                     next_step_permission = next_state.id != 1 and len(actor_user.permission.filter(to_state=next_state, type_permission='w')) > 0
-                except:
+                else:
                     next_step_permission = False
             else:
-                try:
+                if actor_user:
                     next_step_permission = next_state.id != 1 and len(actor_user.permission.filter(from_state=next_state, type_permission='w')) > 0
-                except:
+                else:
                     next_step_permission = False
 
                 form.form_reopened = False
