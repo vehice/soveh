@@ -112,6 +112,16 @@
   <!-- END STACK JS-->
 
   <script>
+   $(document).ready(function() {
+      toastr.options = {
+        "debug": false,
+        "positionClass": "toast-bottom-right",
+        "fadeIn": 300,
+        "fadeOut": 1000,
+        "timeOut": 1000,
+        "extendedTimeOut": 3000
+        }
+   });
     function lockScreen(enable){
       if (enable) {
         $.blockUI({
