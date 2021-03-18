@@ -34,41 +34,55 @@
             <td><input name="eee" class="form-control-table"></td>
             <td><input name="eee" class="form-control-table amount" type="number" min="0"></td>
             <td>
-              <button class="btn btn-danger btn-sm deleteIdent" type="button"><i class="fa fa-trash fa-fx"></i></button>
+              <button class="btn btn-danger deleteIdent" type="button"><i class="fa fa-trash fa-fx"></i></button>
             </td>
           </tr> -->
         </tbody>
       </table>
     </div>
     <button id="addIdent" class="btn btn-primary col-12" type="button">
-      <i class="fa fa-plus-circle fa-fx"></i> Agregar Identificador
+      <i class="fa fa-plus-circle fa-fx"></i> Agregar Identificación
     </button>
   </div>
 </fieldset>
 
 
 <script id="unit_template" type="text/x-lodash-template">
-  <tr id="unit-<%= ident_id %>-<%= index %>">
-    <td><input name="eee" class="form-control-table"></td>
+  <tr id="unit-<%= ident_id %>-<%= id %>">
+    <td><input id="input-<%= ident_id %>-<%= id %>" class="form-control-table unit-correlative" value="<%= unit_correlative %>"></td>
     <td>
-      <select class="form-control-table" name="tipo">
-        <option selected disabled>Seleccionar Tipo de Unidad</option>
-        <option>tubo</option>
-        <option>cassette</option>
-        <option>etc</option>
-      </select>
+      <input type="text" class="form-control-table" disabled value="<%= entry_format %>" />
     </td>
-    <td><select id="select-<%= ident_id %>-<%= index %>" class="form-control-table organs organs-<%= ident_id %>" name="organos" multiple>
-      <% _.each(organs, function (organ) { %>
-        <option value="<%= organ.name %>"><%= organ.name %></option>
-      <% }); %>
-    </select></td>
-    <td><button class="btn btn-danger btn-sm unit-delete" type="button" data-ident="<%= ident_id %>"><i class="fa fa-trash fa-fx"></i></button></td>
+    <td>
+      <div class="input-group">
+        <select id="select-<%= ident_id %>-<%= id %>" class="form-control-table form-control organs organs-<%= ident_id %>" name="organos" multiple>
+          <% _.each(organs, function (organ) { %>
+            <option value="<%= organ.id %>"><%= organ.name %></option>
+          <% }); %>
+        </select>
+        <div class="input-group-append">
+          <button type="button" class="btn btn-warning" onclick="openOrgansKeypad('<%= ident_id %>', '<%= id %>')"><i class="fa fa-th"></i></button>
+        </div>
+      </div>
+    </td>
+    <td><button class="btn btn-danger unit-delete" type="button" data-ident="<%= ident_id %>" data-id="<%= id %>"><i class="fa fa-trash fa-fx"></i></button></td>
   </tr>
 </script>
 
 <script id="organos_options" type="text/x-lodash-template">
   <% _.each(organs, function (organ) { %>
-    <option value="<%= organ.name %>"><%= organ.name %></option>
+    <option value="<%= organ.id %>"><%= organ.name %></option>
   <% }); %>
+</script>
+
+<script id="organs_keypad" type="text/x-lodash-template">
+  <div data-toggle="buttons">
+    <% _.each(data.organs, function (organ) { %>
+      <label class="btn btn-light">
+        <input type="checkbox" name="organs-keypad-checkbox[]" data-id="<%= organ.id %>" data-name="<%= organ.name %>" class="hidden" autocomplete="off"> <%= organ.abbreviation %>
+      </label>
+    <% }); %>
+  </div>
+  <button type="button" class="btn btn-primary btn-block" onclick="AddOrgansFromKeypadToSelect('<%= data.ident_id %>','<%= data.index %>' )"> Presione para agregar órganos a la unidad</button>
+
 </script>
