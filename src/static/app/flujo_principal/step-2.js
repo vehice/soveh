@@ -143,17 +143,9 @@ function init_step_2() {
       </div>
       <table class='table w-100 table-unit' id="main-${table_id}">
       <thead> 
-    <thead> 
-      <thead> 
       <th style="width:5%">#</th> 
-    <th style="width:5%">#</th> 
-      <th style="width:5%">#</th> 
-      <th>Tipo</th> 
-    <th>Tipo</th> 
       <th>Tipo</th> 
       <th style="width: 65%">Órganos</th> 
-      <th>Eliminar</th> 
-    <th>Eliminar</th> 
       <th>Eliminar</th> 
       </thead>
       <div id="${table_id}_loading" class="text-center">
