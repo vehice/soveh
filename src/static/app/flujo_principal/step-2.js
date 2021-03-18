@@ -125,56 +125,78 @@ function init_step_2() {
 
   function format(dataRow) {
     let data = retrieveDataRow(dataRow)
-    let id = data.id;
-    // color: #ffffff; background-color: #63d0ba; border: none
-    let table_id = `units-table-${id}` // hay que linkearlo a la funcion ajax
-    let table_template = `
-    <div class="row justify-content-center">
-      <div class="form-group pl-2 pt-2">
-        <input type="checkbox" id="organs-${id}" class="switch2" />
-        <label for="organs-${id}" class="font-medium-1 text-bold-600 ml-1">Organos para todas las unidades</label>
+    var id = data.id;
+    var table_id = `units-table-${id}`
+    var correlative_checked = ""
+    if (data.samples_are_correlative)
+      correlative_checked = "checked"
+    var table_template = `
+      <div class="row justify-content-center">
+        <div class="form-group pl-2 pt-2">
+          <input type="checkbox" id="organs-${id}" class="switch2" />
+          <label for="organs-${id}" class="font-medium-1 text-bold-600 ml-1">Organos para todas las unidades</label>
+        </div>
+        <div class="switch-div form-group pl-2 pt-2">
+          <input type="checkbox" id="correlative-${id}" class="switch2 correlative" ${correlative_checked} />
+          <label for="correlative-${id}" class="font-medium-1 text-bold-600 ml-1">Correlativos</label>
+        </div>
       </div>
-      <div class="switch-div form-group pl-2 pt-2">
-        <input type="checkbox" id="correlative-${id}" class="switch2 correlative" />
-        <label for="correlative-${id}" class="font-medium-1 text-bold-600 ml-1">Correlativos</label>
-      </div>
-    </div>
-    <table class='table w-100 table-unit'>
+      <table class='table w-100 table-unit' id="main-${table_id}">
+      <thead> 
     <thead> 
+      <thead> 
+      <th style="width:5%">#</th> 
     <th style="width:5%">#</th> 
+      <th style="width:5%">#</th> 
+      <th>Tipo</th> 
     <th>Tipo</th> 
-    <th style="width: 50%">Organos</th> 
+      <th>Tipo</th> 
+      <th style="width: 65%">Órganos</th> 
+      <th>Eliminar</th> 
     <th>Eliminar</th> 
-    </thead>
-    <div id="${table_id}_loading" class="text-center">
-    Cargando ...
-    </div>
-    <tbody id="${table_id}">
-    </tbody>
-    </table>
+      <th>Eliminar</th> 
+      </thead>
+      <div id="${table_id}_loading" class="text-center">
+      Cargando ...
+      </div>
+      <tbody id="${table_id}">
+      </tbody>
+      </table>
     `
-    let table = $(table_template);
-    setTimeout(function () { //sustituir por una funcion ajax && ver en que punto guardar datos
+    var url = Urls.list_units(id);
+    $.ajax({
+      type: "GET",
+      url: url
+    })
+    .done(function (response) {
       $(`#${table_id}_loading`).remove();
       $('.switchery').remove();
       var elems = $('.switch2');
       $.each(elems, function (key, value) {
         new Switchery($(this)[0], { className: 'switch2 switchery switchery-default' });
       });
-      for (let index = 0; index < data.no_container; index++) {
+      $.each(response.units, function(_, unit){
         let rows = addUnitTemplate({
           ident_id: id,
-          index: index,
-          organs
+          id: unit.id,
+          entry_format: entryform.entry_format[1],
+          organs: organs,
+          unit_correlative: unit.correlative
         });
         $(`#${table_id}`).append(rows);
-        $(`#select-${id}-${index}`).select2({
+        $(`#select-${id}-${unit.id}`).select2({
           templateResult: formatResultData,
           tags: true
         });
-      }
-    }, 1000)
-    return table_template;
+        $.each(unit.organs, function(_, org){
+          selectOrgansWithConditions(org.id, org.name, id, $(`#select-${id}-${unit.id}`));
+        });
+      });
+    })
+    .fail(function () {
+      console.log("Fail")
+    });
+    return table_template;    
   }
 
   function addRow(data) {
