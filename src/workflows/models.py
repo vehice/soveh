@@ -37,6 +37,9 @@ class Flow(models.Model):
         return str(self.name)
 
 
+PERMISSION = (("w", "Write"), ("a", "Authorize"), ("r", "Read"))
+
+
 class Permission(models.Model):
     """
     Permissions define the required permission to move from a State to another :model:`workflows.State`
@@ -47,8 +50,6 @@ class Permission(models.Model):
     - To State is the target State.
 
     """
-
-    PERMISSION = (("w", "Write"), ("a", "Authorize"), ("r", "Read"))
 
     name = models.CharField(max_length=250, null=True, blank=True)
     type_permission = models.CharField(max_length=1, choices=PERMISSION)

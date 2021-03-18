@@ -1,5 +1,6 @@
-from django.contrib.contenttypes.fields import GenericRelation
 from datetime import datetime
+
+from django.contrib.contenttypes.fields import GenericRelation
 from django.db import models
 
 from accounts.models import User
@@ -71,13 +72,15 @@ class Service(models.Model):
         verbose_name_plural = "servicios"
 
 
+RESEARCH_TYPE_OPTIONS = [(1, "Estudio Vehice"), (2, "Seguimiento de rutina")]
+
+
 class Research(models.Model):
     """
     Research encapsulates multiple :model:`backend.Entryform`
     with their common data.
     """
 
-    RESEARCH_TYPE_OPTIONS = [(1, "Estudio Vehice"), (2, "Seguimiento de rutina")]
     code = models.CharField(
         max_length=250, null=True, blank=True, verbose_name="código"
     )
@@ -135,10 +138,12 @@ class Stain(models.Model):
         verbose_name_plural = "tinciones"
 
 
+PRICING_UNIT = ((1, "Por órgano"), (2, "Por pez"))
+
+
 class Exam(models.Model):
     """Stores basic information about a study done by a Pathologist."""
 
-    PRICING_UNIT = ((1, "Por órgano"), (2, "Por pez"))
     name = models.CharField(
         max_length=250, null=True, blank=True, verbose_name="nombre"
     )
@@ -167,13 +172,15 @@ class Exam(models.Model):
         verbose_name_plural = "exámenes"
 
 
+ORGAN_TYPE = ((1, "Órgano por sí solo"), (2, "Conjunto de órganos"))
+
+
 class Organ(models.Model):
     """
     An Organ stores information about the organ itself
     but also helps as a pivot to bind different Findings to it.
     """
 
-    ORGAN_TYPE = ((1, "Órgano por sí solo"), (2, "Conjunto de órganos"))
     name = models.CharField(
         max_length=250, null=True, blank=True, verbose_name="nombre (ESP)"
     )
@@ -235,6 +242,7 @@ class Diagnostic(models.Model):
     Stores detailed information about a Diagnostic,
     which can be generated from a Finding and a Localization.
     """
+
     name = models.CharField(
         max_length=250, null=True, blank=True, verbose_name="nombre del diagnóstico"
     )
@@ -253,6 +261,7 @@ class DiagnosticDistribution(models.Model):
     Stores possible distribution level that a diagnostic can have,
     where a distribution is how focused in an area the Finding is.
     """
+
     name = models.CharField(max_length=250, null=True, blank=True)
     organs = models.ManyToManyField(Organ)
 
@@ -264,6 +273,7 @@ class DiagnosticIntensity(models.Model):
     """
     Stores information about the intensity level of a diagnostic
     """
+
     name = models.CharField(max_length=250, null=True, blank=True)
     organs = models.ManyToManyField(Organ)
 
@@ -271,11 +281,14 @@ class DiagnosticIntensity(models.Model):
         return self.name
 
 
+TYPE_CUSTOMER = (("l", "Laboratorio"), ("e", "Empresa"))
+
+
 class Customer(models.Model):
     """
     Stores detailed information about a Customer that request Services.
     """
-    TYPE_CUSTOMER = (("l", "Laboratorio"), ("e", "Empresa"))
+
     name = models.CharField(
         max_length=250, null=True, blank=True, verbose_name="nombre"
     )
@@ -303,6 +316,7 @@ class EntryForm_Type(models.Model):
     flow the process will take, as different types require different
     processes.
     """
+
     name = models.CharField(max_length=250, null=True, blank=True)
 
     def __str__(self):
@@ -321,21 +335,22 @@ class CaseFile(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
 
+ENTRY_FORMAT_OPTIONS = [
+    (1, "Tubo"),
+    (2, "Cassette"),
+    (3, "Bloque"),
+    (4, "Slide s/teñir"),
+    (5, "Slide teñido"),
+    (6, "Vivo"),
+    (7, "Muerto"),
+]
+
 
 class EntryForm(models.Model):
     """
     Stores information about a new Case, this is detailed data for the services
     to be done.
     """
-    ENTRY_FORMAT_OPTIONS = [
-        (1, "Tubo"),
-        (2, "Cassette"),
-        (3, "Bloque"),
-        (4, "Slide s/teñir"),
-        (5, "Slide teñido"),
-        (6, "Vivo"),
-        (7, "Muerto"),
-    ]
 
     specie = models.ForeignKey(Specie, null=True, on_delete=models.SET_NULL)
     watersource = models.ForeignKey(
@@ -400,6 +415,7 @@ class Identification(models.Model):
     """
     Details information about a group of :model:`backend.Sample` that share the same origin.
     """
+
     entryform = models.ForeignKey(EntryForm, null=True, on_delete=models.SET_NULL)
     cage = models.CharField(max_length=250, default="", null=True, blank=True)
     no_fish = models.IntegerField(default="0", null=True, blank=True)
@@ -424,6 +440,7 @@ class ServiceComment(models.Model):
     """
     Stores comments done by a User related to a specific service in a :model:`backend.AnalysisForm`
     """
+
     text = models.TextField(blank=True, null=True)
     done_by = models.ForeignKey(User, null=True, on_delete=models.SET_NULL)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -435,6 +452,7 @@ class ExternalReport(models.Model):
 
     Files uploaded are stored in the MEDIA_ROOT/vehice_external_reports folder
     """
+
     file = models.FileField(upload_to="vehice_external_reports")
     loaded_by = models.ForeignKey(User, null=True, on_delete=models.SET_NULL)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -446,6 +464,7 @@ class AnalysisForm(models.Model):
     An Analysis is the process in which a Pathologists User can store Findings related to a specific service,
     it details the time it took to complete, and serves as a pivot to other models.
     """
+
     entryform = models.ForeignKey(EntryForm, null=True, on_delete=models.SET_NULL)
     exam = models.ForeignKey(Exam, null=True, on_delete=models.SET_NULL)
     forms = GenericRelation(Form)
@@ -502,6 +521,7 @@ class Sample(models.Model):
     A Sample also known as Unit, is the lowest level subject of study in a Case, (Tube, Fish, Cassette, ...),
     to this Unit is the lab process applied to and it's its Slide what Pathologist users study.
     """
+
     entryform = models.ForeignKey(EntryForm, null=True, on_delete=models.SET_NULL)
     index = models.IntegerField(null=True, blank=True)
     identification = models.ForeignKey(
@@ -517,6 +537,7 @@ class SampleExams(models.Model):
     Pivot model to bind Samples :model:`backend.Sample` to the services applied to them :model:`backend.Exam`
     and the :model:`backend.Organ` that will be studied using a specific :model:`backend.Stain`
     """
+
     sample = models.ForeignKey(Sample, null=True, on_delete=models.CASCADE)
     exam = models.ForeignKey(Exam, null=True, on_delete=models.CASCADE)
     organ = models.ForeignKey(Organ, null=True, on_delete=models.CASCADE)
@@ -534,6 +555,7 @@ class Cassette(models.Model):
 
     A Cassette is a small plastic instrument where the Units are organized to be processed and later on turned into Blocks
     """
+
     entryform = models.ForeignKey(EntryForm, null=True, on_delete=models.SET_NULL)
     index = models.IntegerField(null=True, blank=True)
     cassette_name = models.CharField(max_length=250, null=True, blank=True)
@@ -549,6 +571,7 @@ class Slice(models.Model):
     A Slice is a thin layer of paraffin with a cut of an Unit :model:`backend.Sample` (usually an Organ :model:`backend.Organ`)
     meant to be Stained using a :model:`backend.Stain` depending on the Service.
     """
+
     slice_name = models.CharField(max_length=250, null=True, blank=True)
     start_block = models.DateTimeField(null=True, blank=True)
     end_block = models.DateTimeField(null=True, blank=True)
@@ -572,6 +595,7 @@ class Img(models.Model):
 
     Uploaded images are stored in MEDIA_URL/vehice_images
     """
+
     file = models.ImageField(upload_to="vehice_images")
     desc = models.TextField(blank=True, null=True)
     time_stamp = models.DateTimeField(auto_now_add=True)
@@ -587,6 +611,7 @@ class Report(models.Model):
     """
     Stores information about a Pathologist User's Findings to be structured and export in printable format.
     """
+
     analysis = models.ForeignKey(AnalysisForm, null=True, on_delete=models.SET_NULL)
     slice = models.ForeignKey(Slice, null=True, on_delete=models.SET_NULL)
     organ = models.ForeignKey(Organ, null=True, on_delete=models.SET_NULL)
@@ -612,6 +637,7 @@ class ReportFinal(models.Model):
     """
     Stores summarised data of a single :model:`backend.Report` to be exported.
     """
+
     analysis = models.ForeignKey(AnalysisForm, null=True, on_delete=models.SET_NULL)
     no_reporte = models.CharField(max_length=250, null=True, blank=True)
     box_findings = models.TextField(null=True, blank=True)
@@ -625,6 +651,7 @@ class Responsible(models.Model):
     Stores detailed information about a the individual responsible
     in a :model:`backend.Customer` side to keep track of a :model:`backend.Entryform`
     """
+
     name = models.CharField(max_length=250, null=True, blank=True)
     email = models.CharField(max_length=250, null=True, blank=True)
     phone = models.CharField(max_length=250, null=True, blank=True)
@@ -643,6 +670,7 @@ class EmailCcTo(models.Model):
     """
     Stores information a email address to send a copy :model:`backend.EmailTemplate`.
     """
+
     email = models.CharField(
         max_length=250, null=True, blank=True, verbose_name="correo Electrónico"
     )
@@ -657,6 +685,7 @@ class EmailCcTo(models.Model):
 
 class EmailTemplate(models.Model):
     """Stores information about reusable email template."""
+
     name = models.CharField(
         max_length=250, null=True, blank=True, verbose_name="Nombre"
     )
@@ -672,6 +701,7 @@ class EmailTemplate(models.Model):
 
 class EmailTemplateAttachment(models.Model):
     """Stores information about an attachment for a single :model:`backend.EmailTemplate`"""
+
     template = models.ForeignKey(EmailTemplate, on_delete=models.CASCADE)
     template_file = models.FileField(
         upload_to=entry_files_directory_path, verbose_name="archivo Adjunto"
@@ -687,22 +717,24 @@ class CaseVersion(models.Model):
     """
     Stores information about a Case study is current version, as changes are generated over time revisions can be added.
     """
+
     entryform = models.ForeignKey(EntryForm, null=True, on_delete=models.SET_NULL)
     version = models.IntegerField(null=True, blank=True)
     generated_by = models.ForeignKey(User, null=True, on_delete=models.SET_NULL)
     generated_at = models.DateTimeField(auto_now_add=True)
 
 
+RESUME_DOCUMENT_LANG = (
+    (1, "es"),
+    (2, "en"),
+)
 
 
 class DocumentCaseResume(models.Model):
     """
     Details information about a file upload to attach to a :model:`backend.EntryForm`
     """
-    RESUME_DOCUMENT_LANG = (
-        (1, "es"),
-        (2, "en"),
-    )
+
     entryform = models.ForeignKey(EntryForm, null=True, on_delete=models.SET_NULL)
     filename = models.CharField(max_length=250, null=True, blank=True)
     file = models.FileField(upload_to="pdfs", blank=True)
@@ -720,6 +752,7 @@ class DocumentResumeActionLog(models.Model):
     """
     Logs information about actions performed on a :model:`backend.DocumentCaseResume`
     """
+
     document = models.ForeignKey(
         DocumentCaseResume, null=True, on_delete=models.SET_NULL
     )
