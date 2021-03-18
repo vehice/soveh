@@ -244,7 +244,7 @@ function init_step_2() {
     var row = table.row($(this).parents('tr'));
     var url = Urls.remove_identification($(this).data('ident'));
     swal({
-      title: "Desea borrar la identificación??",
+      title: "Desea eliminar la identificación?",
       text: "Esta acción es permanente!",
       icon: "warning",
       showCancelButton: true,
@@ -364,32 +364,161 @@ function init_step_2() {
     if (this.defaultValue == this.value)
       return;
 
-    var direction = this.defaultValue < this.value
-    this.defaultValue = this.value;
+    var direction = parseInt(this.defaultValue) < parseInt(this.value)
 
-    let id = $(this).data('ident');
+    var id = $(this).data('ident');
     let table_id = `units-table-${id}`;
     if (direction) {
-      // Increase
-      let rows = addUnitTemplate({
-        ident_id: id,
-        index: this.value
-      });
-      $(`#${table_id}`).append(rows);
-      $(`#select-${id}-${this.value}`).select2({
-        templateResult: formatResultData,
-        tags: true
+      let data_saved = false
+      for (let i = parseInt(this.defaultValue) + 1; i <= parseInt(this.value); i++) {
+        let result_ident = saveIdentification(id)
+        if (result_ident.ok){
+          let last_tr_pos = parseInt(this.defaultValue)-1
+          let last_correlative = $(`#${table_id}`).find("tr:eq("+last_tr_pos+") .unit-correlative").val();
+          let result_unit = createUnit(id, parseInt(last_correlative) + 1)
+          if (result_unit.ok) {
+            let unit = result_unit.unit
+            let rows = addUnitTemplate({
+              ident_id: unit.identification,
+              id: unit.id,
+              entry_format: entryform.entry_format[1],
+              organs:organs,
+              unit_correlative: unit.correlative
+            });
+            $(`#${table_id}`).append(rows);
+            $(`#select-${id}-${unit.id}`).select2({
+              templateResult: formatResultData,
+              tags: true
+            });
+            data_saved = true
+          }
+        }
+      }
+      if (data_saved){
+        this.defaultValue = this.value
+      }
+    }
+    else {
+      this.value = this.defaultValue;
+    }
+  });
+
+  $(document).on("select2:selecting", function (e) {
+    e.preventDefault();
+
+    let new_id = `${e.params.args.data.id}`;
+    let new_value = e.params.args.data.text;
+    let ident_id = e.target.id.split("-")[1];
+    let select = e.target
+
+    selectOrgansWithConditions(new_id, new_value, ident_id, $(select));
+    saveUnitsByIdentification(ident_id)
+
+  });
+
+  $(document).on("select2:unselect", function (e) {
+    if (e.params.data.id.search('-') != -1) {
+      e.params.data.element.remove();
+    }
+    let ident_id = e.target.id.split("-")[1];
+    saveUnitsByIdentification(ident_id)
+  });
+
+  $(document).on("change", ".correlative", function (e) {
+    let id = e.target.id.split('-')[1];
+    if (e.target.checked) {
+      swal({
+        title: "Organos en correlativos",
+        text: "Se eliminarán los órganos repetidos",
+        icon: "warning",
+        showCancelButton: true,
+        buttons: {
+          cancel: {
+            value: null,
+            visible: true,
+            className: "btn-danger",
+            closeModal: true,
+          },
+          confirm: {
+            value: true,
+            visible: true,
+            className: "",
+            closeModal: true,
+          }
+        }
+      }).then(isConfirm => {
+        if (!isConfirm) {
+          e.target.click();
+          return;
+        }
+        resetOrgansOptions(id, true);
       });
     }
     else {
-      if (!param1)
-        $(`#${table_id} > tr:last`).remove();
+      resetOrgansOptions(id, false);
     }
+    saveIdentification(id)
+    saveUnitsByIdentification(id)
   });
 
-  $(document).on('blur', '.form-control-table.amount', function () {
-    this.min = this.value;
+  $(document).on("change", ".ident-data", function () {
+    let id = $(this).parent().parent().attr("id")
+    saveIdentification(id)
   });
+
+  $(document).on("change", ".unit-correlative", function (e, param1) {
+    let correlative_input = this
+    let ident_id = $(correlative_input).attr("id").split("-")[1]
+    let current_unit_id = $(correlative_input).attr("id").split("-")[2]
+
+    let current_correlative_value = correlative_input.value
+    let current_default_value = correlative_input.defaultValue
+    
+    let correlative_switch_option = $('#correlative-'+ident_id).is(":checked")
+
+    if (correlative_switch_option){
+      if (checkDuplicatedOrgansInSameCorrelative(ident_id, current_unit_id)){
+        correlative_input.value = current_default_value
+        alertDuplicatedOrgansInSameCorrelative()
+      } else {
+        correlative_input.defaultValue = current_correlative_value
+        saveUnitsByIdentification(ident_id)
+      }
+    } else {
+      correlative_input.defaultValue = current_correlative_value;
+      saveUnitsByIdentification(ident_id)
+    }
+  })
+}
+
+function alertDuplicatedOrgansInSameCorrelative(){
+  swal({
+    title: "Información",
+    text: "No ha sido posible realizar el cambio debido a que existe duplicidad de órganos en muestra correlativa.",
+    icon: "warning",
+    showCancelButton: false,
+  }); 
+}
+
+function checkDuplicatedOrgansInSameCorrelative(ident_id, unit_id, organs_selected=false){
+  let current_correlative = $("#input-"+ident_id+"-"+unit_id).val()
+  if (!organs_selected){
+    var organs_selected = $("#select-"+ident_id+"-"+unit_id).val()
+  }
+
+  let organs_validator = false;
+  $.each( $("#units-table-"+ident_id+" tr"), function (i, tr) {
+    let tr_unit_id = $(tr).attr("id").split("-")[2]
+    let tr_correlative_value = $(tr).find(".unit-correlative").val()
+    if (unit_id != tr_unit_id && current_correlative == tr_correlative_value){
+      let tr_organs_selected = $(tr).find(".organs").val()
+      if (organs_selected.some(r=> tr_organs_selected.indexOf(r) >= 0)){
+        organs_validator = true
+        return false
+      }
+    }
+  });
+  return organs_validator
 }
 
 function addUnitTemplate(data) {
@@ -410,83 +539,54 @@ function retrieveDataRow(row) {
   return data;
 }
 
-$(document).on("select2:selecting", function (e) {
-  let correlative_btn = '#correlative-2346';
-  let new_id = `${e.params.args.data.id}`;
-  let new_value = e.params.args.data.text;
-  if (!$(correlative_btn)[0].checked) {
-    new_id = `${e.params.args.data.id}-${Math.random()}`;
-    new_value = e.params.args.data.text;
-  }
-  if ($('#organs-2346')[0].checked) {
-    $.each($('#units-table-2346 .organs'), function (i, v) {
-      let select = $(v);
-      if (!$(correlative_btn)[0].checked) {
-        select.append(`<option value="${new_id}">${new_value}</option>`);
-      }
+/*** Select organs based on switches values (organs for all and correlative samples) ***/
+function selectOrgansWithConditions(new_id, new_value, ident_id, select){
+  let organs_switch_option = $('#organs-'+ident_id).is(":checked")
+  let correlative_switch_option = $('#correlative-'+ident_id).is(":checked")
+
+  if ( organs_switch_option ) {
+    $.each( $("#units-table-"+ident_id+" .organs"), function (i, v) {
+      let select = $(v)
+      let unit_id = select.attr("id").split("-")[2]
       let values = select.val()
-      values.push(new_id);
-      console.log(values);
-      select.val(values);
-      select.trigger('change');
-    });
-    e.preventDefault();
-  }
-  else {
-    let select = $(e.target);
-    if (!$(correlative_btn)[0].checked) {
-      select.append(`<option value="${new_id}">${new_value}</option>`);
-    }
-    let values = select.val()
-    values.push(new_id);
-    console.log(values);
-    select.val(values);
-    select.trigger('change');
-    e.preventDefault();
-  }
-});
 
-$(document).on("select2:unselect", function (e) {
-  if (e.params.data.id.search('-') != -1) {
-    e.params.data.element.remove();
-  }
-});
-
-$(document).on("change", ".correlative", function (e) {
-  let id = e.target.id.split('-')[1];
-
-  if (e.target.checked) {
-    swal({
-      title: "Organos en correlativos",
-      text: "Se eliminarán los órganos repetidos",
-      icon: "warning",
-      showCancelButton: true,
-      buttons: {
-        cancel: {
-          value: null,
-          visible: true,
-          className: "btn-danger",
-          closeModal: true,
-        },
-        confirm: {
-          value: true,
-          visible: true,
-          className: "",
-          closeModal: true,
+      if ( !correlative_switch_option ) {
+        new_id = `${new_id}-${Math.random()}`
+        select.append(`<option value="${new_id}">${new_value}</option>`)
+        values.push(new_id)
+        select.val(values)
+        select.trigger('change')
+      } else {
+        values.push(new_id)
+        if (!checkDuplicatedOrgansInSameCorrelative(ident_id, unit_id, values)){
+          select.val(values)
+          select.trigger('change')
+        } else {
+          alertDuplicatedOrgansInSameCorrelative()
         }
       }
-    }).then(isConfirm => {
-      if (!isConfirm) {
-        e.target.click();
-        return;
+    })
+  } else {
+    let values = select.val();
+    let unit_id = select.attr("id").split("-")[2]
+    if ( !correlative_switch_option ) {
+      new_id = `${new_id}-${Math.random()}`;
+      select.append(`<option value="${new_id}">${new_value}</option>`);
+      values.push(new_id)
+      select.val(values)
+      select.trigger('change')
+    } else {
+      values.push(new_id)
+      if (!checkDuplicatedOrgansInSameCorrelative(ident_id, unit_id, values)){
+        select.val(values)
+        select.trigger('change')
+      } else {
+        alertDuplicatedOrgansInSameCorrelative()
       }
-      resetOrgansOptions(id, true);
-    });
+    
+    }
   }
-  else {
-    resetOrgansOptions(id, false);
-  }
-});
+}
 
 function resetOrgansOptions(id, correlative) {
   var unitTemplate = document.getElementById("organos_options").innerHTML;
@@ -494,7 +594,7 @@ function resetOrgansOptions(id, correlative) {
   var templateHTML = templateFn({ organs });
 
   $.each($(`.organs-${id}`), function (i, v) {
-    let select = $(v);
+    let select = $(v)
     let values = select.val()
     let selected = []
 
@@ -508,19 +608,17 @@ function resetOrgansOptions(id, correlative) {
     select.html(templateHTML)
 
     if (correlative) {
-      select.val(selected)
-    }
-    else {
+      select.val(selected).trigger('change')
+    } else {
       let selected_unique = []
       selected.forEach(element => {
         let new_id = `${element}-${Math.random()}`;
-        let new_value = element;
+        let new_value = select.find("option[value='"+element+"']").text();
         select.append(`<option value="${new_id}">${new_value}</option>`);
         selected_unique.push(new_id);
       });
-      select.val(selected_unique)
+      select.val(selected_unique).trigger('change')
     }
-    select.trigger('change')
   });
 }
 
@@ -546,4 +644,108 @@ function validate_step_2() {
     );
   }
   return sucess;
+}
+
+function openOrgansKeypad(ident_id, index){
+  var organs_keypad_template = document.getElementById("organs_keypad").innerHTML;
+  var templateFn = _.template(organs_keypad_template);
+
+  var data = {
+    'ident_id': ident_id,
+    'index': index,
+    'organs': organs
+  }
+
+  var templateHTML = templateFn({ data });
+  $("#organ_table_keypad_body").html(templateHTML);
+  $("#organ_table_keypad").modal("show");
+}
+
+function AddOrgansFromKeypadToSelect(ident_id, index){
+  
+  let organs_selected_from_keypad = [];
+  $('input[name="organs-keypad-checkbox[]"]').each(function (e) {
+    if ($(this).is(":checked")) {
+      organs_selected_from_keypad.push([$(this).data("id"), $(this).data("name")])
+    }   
+  });
+
+  let organs_selector = '#select-'+ident_id+'-'+index;
+
+  $.each(organs_selected_from_keypad, function(index, value){
+    selectOrgansWithConditions(value[0], value[1], ident_id, $(organs_selector))
+  });
+
+  saveUnitsByIdentification(ident_id)
+
+  $("#organ_table_keypad").modal("hide");
+  
+}
+
+function createUnit(identification_id, correlative){
+  let url = Urls.create_unit(identification_id, correlative)
+  let response
+  $.ajax({
+    type: "POST",
+    url: url,
+    async: false,
+  })
+  .done(function (data) {
+    response = data
+  })
+  .fail(function () {
+    reponse = {ok: 0}
+  });
+
+  return response; 
+}
+
+function saveIdentification(id){
+  let url = Urls.save_new_identification(id)
+  let ident = retrieveDataRow( $("#identifications").DataTable().row($('#'+id)))
+  ident["samples_are_correlative"] = $('#correlative-'+id).is(":checked") ? 1 : 0
+
+  let response
+  $.ajax({
+    type: "POST",
+    url: url,
+    async: false,
+    data: ident
+  })
+  .done(function (data) {
+    response = data
+  })
+  .fail(function () {
+    reponse = {ok: 0}
+  });
+  return response; 
+}
+
+function saveUnitsByIdentification(ident_id){
+  let units = []
+  $.each( $("#units-table-"+ident_id+" tr"), function (i, tr) {
+    let unit = {}
+    unit['id'] = $(tr).attr("id").split("-")[2]
+    unit['correlative'] = $("#input-"+ident_id+"-"+unit['id']).val()
+    unit['organs'] = $("#select-"+ident_id+"-"+unit['id']).val()
+    units.push(unit)
+  });
+
+  let url = Urls.save_units()
+  let response
+  $.ajax({
+    type: "POST",
+    url: url,
+    async: false,
+    data: {'units': JSON.stringify(units)}
+  })
+  .done(function (data) {
+    response = data
+  })
+  .fail(function () {
+    reponse = {ok: 0}
+  });
+  return response; 
+
+
 }
