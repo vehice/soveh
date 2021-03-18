@@ -1,10 +1,20 @@
-bd_correlative = 0;
-current_correlative = 0;
-organs;
+var entryform;
 
 function init_step_2() {
   var entryform_id = $('#entryform_id').val();
 
+  var url = Urls.entryform_id(entryform_id);
+  $.ajax({
+    type: "GET",
+    url: url,
+  })
+  .done(function (data) {
+    $('#identification_group_list').html('');
+    entryform = data.entryform;
+  })
+  .fail(function () {
+    console.log("Fail")
+  });
   var table = $('#identifications').DataTable({
     "rowId": "id",
     "columnDefs": [
