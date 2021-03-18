@@ -270,14 +270,66 @@ function init_step_2() {
   });
 
   $(document).on('click', '.unit-delete', function (e) {
-    let id = $(this).data('ident');
-    let amount_control = $(`#amount_${id}`);
-    let new_value = amount_control.val() - 1;
-    amount_control[0].min = new_value;
-    amount_control.val(new_value);
-    $(this).parent().parent().remove();
-    amount_control.trigger('change', [true]);
-  });
+    let id = $(this).data('id')
+    let ident_id = $(this).data('ident')
+    swal({
+      title: "Desea eliminar la unidad?",
+      text: "Esta acción es permanente!",
+      icon: "warning",
+      showCancelButton: true,
+      buttons: {
+        cancel: {
+          // text: "{{request.lang.cancel_case}}",
+          value: null,
+          visible: true,
+          className: "btn-danger",
+          closeModal: true,
+        },
+        confirm: {
+          // text: "{{request.lang.next}}",
+          value: true,
+          visible: true,
+          className: "",
+          closeModal: true,
+        }
+      }
+    }).then(isConfirm => {
+      if (isConfirm) {
+        let url = Urls.remove_unit(id)
+        $.ajax({
+          type: "POST",
+          url: url,
+          async: false,
+        })
+        .done(function (data) {
+          if (data.ok){
+            let amount_control = $(`#amount_${ident_id}`)
+            let new_value = amount_control.val() - 1
+            amount_control[0].min = new_value
+            amount_control[0].defaultValue = new_value
+            amount_control.val(new_value)
+            saveIdentification(ident_id)
+            $("#unit-"+ident_id+"-"+id).remove()
+            toastr.success(
+              'Unidad eliminada exitosamente.',
+              'Listo!',
+            )
+        } else {
+            toastr.error(
+              'No ha sido posible eliminar la unidad, intente nuevamente.',
+              'Ups!',
+            )
+          }
+        })
+        .fail(function () {
+          toastr.error(
+            'No ha sido posible eliminar la unidad, intente nuevamente.',
+            'Ups!',
+          )
+        })
+      }
+    })
+  })
 
   $(document).on('change', '.form-control-table.amount', function (e, param1) {
     if (this.defaultValue == this.value)
