@@ -152,14 +152,39 @@ urlpatterns = [
         name="list_identification"
     ),
     path(
+        'units/<int:identification_id>',
+        csrf_exempt(views.list_units),
+        name="list_units"
+    ),
+    path(
+        'unit/<int:identification_id>/<int:correlative>',
+        csrf_exempt(views.create_unit),
+        name="create_unit"
+    ),
+    path(
+        'remove-unit/<int:id>',
+        csrf_exempt(views.remove_unit),
+        name="remove_unit"
+    ),
+    path(
+        'save-units',
+        csrf_exempt(views.save_units),
+        name="save_units"
+    ),
+    path(
         'identification/<int:id>',
         csrf_exempt(views.save_identification),
         name="identification"
     ),
     path(
-        'new-identification/<int:entryform_id>',
+        'new-identification/<int:entryform_id>/<int:correlative>',
         csrf_exempt(views.new_empty_identification),
         name="new_identification"
+    ),
+    path(
+        'save-new-identification/<int:id>',
+        csrf_exempt(views.save_new_identification),
+        name="save_new_identification"
     ),
     path(
         'remove-identification/<int:id>',
