@@ -20,6 +20,7 @@ from django.db import connection
 from django.core import mail
 import random
 import string
+import json
 
 # from utils import functions as fn
 
@@ -168,8 +169,8 @@ class ENTRYFORM(View):
             entryform["identifications"] = []
             for ident in entryform_object.identification_set.all():
                 ident_json = model_to_dict(ident, exclude=["organs", "organs_before_validations"])
-                ident_json['organs_set'] = list(ident.organs.all().values())
-                ident_json['organs_bv_set'] = list(ident.organs_before_validations.all().values())
+                # ident_json['organs_set'] = list(ident.organs.all().values())
+                # ident_json['organs_bv_set'] = list(ident.organs_before_validations.all().values())
                 entryform["identifications"].append(ident_json)              
 
             # entryform["analyses"] = list(
@@ -215,14 +216,15 @@ class ENTRYFORM(View):
                 
                 entryform["analyses"].append(aux)
             
-            entryform["cassettes"] = list(
-                entryform_object.cassette_set.all().values())
+            # entryform["cassettes"] = list(
+                # entryform_object.cassette_set.all().values())
             entryform["customer"] = model_to_dict(entryform_object.customer) if entryform_object.customer else None
             entryform["larvalstage"] = model_to_dict(entryform_object.larvalstage) if entryform_object.larvalstage else None
             entryform["fixative"] = model_to_dict(entryform_object.fixative) if entryform_object.fixative else None
             entryform["entryform_type"] = model_to_dict(entryform_object.entryform_type) if entryform_object.entryform_type else None
             entryform["watersource"] = model_to_dict(entryform_object.watersource) if entryform_object.watersource else None
             entryform["specie"] = model_to_dict(entryform_object.specie) if entryform_object.specie else None
+            entryform["entry_format"] = (entryform_object.entry_format,entryform_object.get_entry_format_display())
 
             exams_set = list(Exam.objects.all().values())
             organs_set = list(Organ.objects.all().values())
@@ -2761,28 +2763,130 @@ def save_identification(request, id):
     return JsonResponse({})
 
 def list_identification(request, entryform_id):
-    try:
-        organs = list(Organ.objects.all().values())
+    # try:
+    organs = list(Organ.objects.all().values())
+    
+    ident = []
+    for i in Identification.objects.filter(entryform_id=entryform_id):
+        ident_as_dict = model_to_dict(i, exclude=[
+            'organs', 
+            'organs_before_validations',
+            'no_fish',
+            'no_container',
+            'temp_id'
+        ])
+        ident.append(ident_as_dict)
+
+    data = {
+        'ident': ident,
+        'organs': organs,
+    }
+    return JsonResponse({'ok': 1, 'data': data})
+    # except :
+    #     return JsonResponse({'ok': 0})
+    
+def list_units(request, identification_id):
+    units = []
+    for u in Unit.objects.filter(identification_id=identification_id):
+        unit = model_to_dict(u)
+        unit['organs'] = []
+        for ou in OrganUnit.objects.filter(unit=u):
+            unit['organs'].append(model_to_dict(ou.organ))
+        units.append(unit)
+
+    return JsonResponse({'ok': 1, 'units': units})
+
+def create_unit(request, identification_id, correlative):
+    unit = Unit.objects.create(
+        identification_id = identification_id,
+        correlative = correlative
+    )
+    return JsonResponse({'ok': 1, 'unit': model_to_dict(unit)}) 
+
+def save_units(request):
+    units = json.loads(request.POST.get('units'))
+    for unit in units:
+        unit_obj = Unit.objects.get(pk=unit["id"])
+        unit_obj.correlative = unit["correlative"]
+        unit_obj.save()
         
-        idents = Identification.objects.filter(entryform_id=entryform_id)
-        ident = []
-        for i in idents:
-            ident.append(model_to_dict(i))
+        organs_fmt = list(map(lambda x: int(x.split("-")[0]), unit["organs"]))
+        OrganUnit.objects.filter(unit=unit_obj).delete()
+        for org in organs_fmt:
+            OrganUnit.objects.create(
+                unit=unit_obj,
+                organ_id=org
+            )
 
-        data = {
-            'ident': ident,
-            'organs': organs,
-        }
-        return JsonResponse({'ok': 1, 'data': data})
-    except:
-        return JsonResponse({'ok': 0})
-
-def new_empty_identification(request, entryform_id):
+    return JsonResponse({'ok': 1})
+       
+def remove_unit(request, id):
+    Unit.objects.get(pk=id).delete()
+    return JsonResponse({'ok': 1})
+     
+def new_empty_identification(request, entryform_id, correlative):
     try:
-        ident = Identification.objects.create(entryform_id=entryform_id, temp_id=''.join(random.choices(string.ascii_uppercase + string.digits, k=11)), removable=True)
+        ident = Identification.objects.create(
+            entryform_id=entryform_id, 
+            temp_id=''.join(random.choices(string.ascii_uppercase + string.digits, k=11)), 
+            removable=True,
+            correlative=correlative
+        )
         return JsonResponse({'ok': 1, 'id': ident.id, 'obj': model_to_dict(ident)})
     except:
         return JsonResponse({'ok': 0})
+
+def save_new_identification(request, id):
+    var_post = request.POST.copy()
+    change = False
+    ident = Identification.objects.get(pk=id)
+    if ident.cage != var_post['cage']:
+        change = True
+    ident.cage = var_post['cage']
+
+    if ident.group != var_post['group']:
+        change = True
+    ident.group = var_post['group']
+
+    if ident.weight != var_post['weight'] and (var_post['weight'] != '0' and ident.weight == 0.0) :
+        change = True
+    ident.weight = var_post['weight']
+
+    if ident.extra_features_detail != var_post['extra_features_detail']:
+        change = True
+    ident.extra_features_detail = var_post['extra_features_detail']
+
+    if ident.observation != var_post['observation']:
+        change = True
+    ident.observation = var_post['observation'].strip()
+
+    if ident.is_optimum != True if '1' == var_post['is_optimum'] else False:
+        change = True
+    ident.is_optimum = var_post['is_optimum']
+    
+    if ident.client_case_number != var_post['client_case_number']:
+        change = True
+    ident.client_case_number = var_post['client_case_number'].strip()
+    
+    if ident.quantity != var_post['quantity']:
+        change = True
+    ident.quantity = int(var_post['quantity'])
+    
+    if ident.correlative != var_post['correlative']:
+        change = True
+    ident.correlative = int(var_post['correlative'])
+    
+    if ident.samples_are_correlative != True if '1' == var_post['samples_are_correlative'] else False:
+        change = True
+    ident.samples_are_correlative = var_post['samples_are_correlative']
+        
+    ident.save()
+
+    if change:
+        ident.removable = False
+        ident.save()
+        changeCaseVersion(True, ident.entryform.id, request.user.id)
+    return JsonResponse({"ok": 1})
 
 def remove_identification(request, id):
     try: 
