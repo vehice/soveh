@@ -109,18 +109,19 @@ function init_step_2() {
     type: "GET",
     url: url,
   })
-    .done(function (data) {
-      organs = data.data.organs;
-      data.data.ident.forEach(element => {
-        if (!element.deleted)
-          addRow(element);
-        current_correlative = Math.max(element.correlative, current_correlative)
-      });
-      bd_correlative = current_correlative;
-    })
-    .fail(function () {
-      console.log("Fail")
+  .done(function (data) {
+    organs = data.data.organs;
+    data.data.ident.forEach(element => {
+      if (!element.deleted){
+        addRow(element);
+      }
+      current_correlative = Math.max(element.correlative, current_correlative)
     });
+    bd_correlative = current_correlative;
+  })
+  .fail(function () {
+    console.log("Fail")
+  });
 
   function format(dataRow) {
     let data = retrieveDataRow(dataRow)
