@@ -1,3 +1,6 @@
+var bd_correlative = 0;
+var current_correlative = 0;
+var organs;
 var entryform;
 
 function init_step_2() {
@@ -15,6 +18,7 @@ function init_step_2() {
   .fail(function () {
     console.log("Fail")
   });
+
   var table = $('#identifications').DataTable({
     "rowId": "id",
     "columnDefs": [
@@ -24,7 +28,7 @@ function init_step_2() {
         "orderable": false,
         "data": null,
         "render": function (data, type, row, meta) {
-          return `<i class="fa fa-chevron-right fa-fx" data-ident="${row.id}"></i>`;
+          return `<i class="fa fa-chevron-right fa-fx fa-2x" data-ident="${row.id}"></i>`;
         }
       },
       {
@@ -37,38 +41,38 @@ function init_step_2() {
       {
         "targets": 2, "orderable": false, "data": "cage",
         "render": function (data, type, row, meta) {
-          return `<input name="cage" class="form-control-table" value="${data ? data : ""}" >`;
+          return `<input name="cage" class="form-control-table ident-data" value="${data ? data : ""}" >`;
         }
       },
       {
         "targets": 3, "orderable": false, "data": "group",
         "render": function (data, type, row, meta) {
-          return `<input name="group" class="form-control-table" value="${data ? data : ""}" >`;
+          return `<input name="group" class="form-control-table ident-data" value="${data ? data : ""}" >`;
         }
       },
       {
-        "targets": 4, "orderable": false, "data": "group",
+        "targets": 4, "orderable": false, "data": "client_case_number",
         "render": function (data, type, row, meta) {
-          return `<input name="_group" class="form-control-table" value="${data ? data : ""}" >`;
+          return `<input name="client_case_number" class="form-control-table ident-data" value="${data ? data : ""}" >`;
         }
       },
       {
         "targets": 5, "orderable": false, "data": "weight",
         "render": function (data, type, row, meta) {
-          return `<input name="weight" class="form-control-table" type="number" step="0.1" min="0" value="${data ? data : "0"}" >`;
+          return `<input name="weight" class="form-control-table ident-data" type="number" step="0.1" min="0" value="${data ? data : "0"}" >`;
         }
       },
       {
         "targets": 6, "orderable": false, "data": "extra_features_detail",
         "render": function (data, type, row, meta) {
-          return `<textarea name="extra_features_detail" class="form-control-table" rows="3" > ${data ? data : ""} </textarea>`;
+          return `<textarea name="extra_features_detail" class="form-control-table ident-data" rows="3" > ${data ? data : ""} </textarea>`;
         }
       },
       {
         "targets": 7, "orderable": false, "data": "is_optimum",
         "render": function (data, type, row, meta) {
           return `
-          <select name="is_optimum" class="form-control-table">
+          <select name="is_optimum" class="form-control-table ident-data">
             <option value="1"> Sí </option>
             <option value="0" ${(data != null && !data) ? 'selected' : ''}> No </option>
           </select>
@@ -78,19 +82,19 @@ function init_step_2() {
       {
         "targets": 8, "orderable": false, "data": "observation",
         "render": function (data, type, row, meta) {
-          return `<textarea name="observation" class="form-control-table" rows="3"> ${data ? data : ""} </textarea>`;
+          return `<textarea name="observation" class="form-control-table ident-data" rows="3"> ${data ? data : ""} </textarea>`;
         }
       },
       {
-        "targets": 9, "orderable": false, "data": "no_container",
+        "targets": 9, "orderable": false, "data": "quantity",
         "render": function (data, type, row, meta) {
-          return `<input id="amount_${row.id}" name="no_container" class="form-control-table amount" type="number" data-ident="${row.id}" value="${data ? data : "0"}" min="${data ? data : ""}">`;
+          return `<input id="amount_${row.id}" name="quantity" class="form-control-table amount" type="number" data-ident="${row.id}" value="${data ? data : "0"}" min="${data ? data : ""}">`;
         }
       },
       {
         "targets": 10, "orderable": false, "data": null,
         "render": function (data, type, row, meta) {
-          return `<button class="btn btn-danger btn-sm deleteIdent" type="button" data-ident="${row.id}"><i class="fa fa-trash fa-fx"></i></button>`
+          return `<button class="btn btn-danger deleteIdent" type="button" data-ident="${row.id}"><i class="fa fa-trash fa-fx"></i></button>`
         }
       },
     ],
