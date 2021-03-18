@@ -221,23 +221,23 @@ function init_step_2() {
   });
 
   $('#addIdent').on('click', function () {
-    var url = Urls.new_identification(entryform_id);
     current_correlative += 1;
-    addRow({
-      id: `new_${current_correlative}`,
-      correlative: current_correlative
+    var url = Urls.new_identification(entryform_id, current_correlative);
+    let response
+    $.ajax({
+      type: "POST",
+      url: url,
+      async: false,
+    })
+    .done(function (data) {
+      addRow({
+        id: data.obj.id,
+        correlative: data.obj.correlative
+      });
+    })
+    .fail(function () {
+      return false
     });
-
-    // $.ajax({
-    //   type: "GET",
-    //   url: url,
-    // })
-    //   .done(function (data) {
-    //     addRow(data.obj);
-    //   })
-    //   .fail(function () {
-    //     console.log("Fail")
-    //   });
   });
 
   $(document).on('click', '.deleteIdent', function () {
