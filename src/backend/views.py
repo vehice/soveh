@@ -2786,15 +2786,18 @@ def list_identification(request, entryform_id):
     #     return JsonResponse({'ok': 0})
     
 def list_units(request, identification_id):
-    units = []
-    for u in Unit.objects.filter(identification_id=identification_id):
-        unit = model_to_dict(u)
-        unit['organs'] = []
-        for ou in OrganUnit.objects.filter(unit=u):
-            unit['organs'].append(model_to_dict(ou.organ))
-        units.append(unit)
+    try:
+        units = []
+        for u in Unit.objects.filter(identification_id=identification_id):
+            unit = model_to_dict(u)
+            unit['organs'] = []
+            for ou in OrganUnit.objects.filter(unit=u):
+                unit['organs'].append(model_to_dict(ou.organ))
+            units.append(unit)
 
-    return JsonResponse({'ok': 1, 'units': units})
+        return JsonResponse({'ok': 1, 'units': units})
+    except:
+        return JsonResponse({'ok': 0})
 
 def create_unit(request, identification_id, correlative):
     unit = Unit.objects.create(
@@ -2848,9 +2851,11 @@ def save_new_identification(request, id):
         change = True
     ident.group = var_post['group']
 
-    if ident.weight != var_post['weight'] and (var_post['weight'] != '0' and ident.weight == 0.0) :
+    if ident.weight != var_post['weight'] and \
+        var_post['weight'] and \
+        var_post['weight'].strip() != '':
         change = True
-    ident.weight = var_post['weight']
+        ident.weight = var_post['weight']
 
     if ident.extra_features_detail != var_post['extra_features_detail']:
         change = True
