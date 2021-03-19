@@ -308,6 +308,7 @@ class Unit(models.Model):
     correlative = models.IntegerField(default=1, null=True, blank=True)
     organs = models.ManyToManyField('Organ', through='OrganUnit')
     identification = models.ForeignKey(Identification, null=True, on_delete=models.SET_NULL)
+    samples = models.ManyToManyField("Sample")
     
     def __str__(self):
         return str(self.correlative)
