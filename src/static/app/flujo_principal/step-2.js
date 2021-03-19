@@ -361,6 +361,7 @@ function init_step_2() {
   })
 
   $(document).on('change', '.form-control-table.amount', function (e, param1) {
+    lockScreen(1);
     if (this.defaultValue == this.value)
       return;
 
@@ -370,28 +371,43 @@ function init_step_2() {
     let table_id = `units-table-${id}`;
     if (direction) {
       let data_saved = false
+      
       for (let i = parseInt(this.defaultValue) + 1; i <= parseInt(this.value); i++) {
         let result_ident = saveIdentification(id)
+        
         if (result_ident.ok){
-          let last_tr_pos = parseInt(this.defaultValue)-1
-          let last_correlative = $(`#${table_id}`).find("tr:eq("+last_tr_pos+") .unit-correlative").val();
-          let result_unit = createUnit(id, parseInt(last_correlative) + 1)
-          if (result_unit.ok) {
-            let unit = result_unit.unit
-            let rows = addUnitTemplate({
-              ident_id: unit.identification,
-              id: unit.id,
-              entry_format: entryform.entry_format[1],
-              organs:organs,
-              unit_correlative: unit.correlative
+          let last_tr_pos = parseInt(this.defaultValue)-1          
+          let res = getUnits(id)
+          
+          if (res.ok){
+            let units_correlatives = []
+            res.units.forEach(function(u){
+              units_correlatives.push(u.correlative);
             });
-            $(`#${table_id}`).append(rows);
-            $(`#select-${id}-${unit.id}`).select2({
-              templateResult: formatResultData,
-              tags: true
-            });
-            data_saved = true
-          }
+            let max_corr = units_correlatives.length > 0 ? Math.max(...units_correlatives) : 0
+            let result_unit = createUnit(id, max_corr + 1)
+            
+            if (result_unit.ok) {
+              let unit = result_unit.unit
+              
+              let rows = addUnitTemplate({
+                ident_id: unit.identification,
+                id: unit.id,
+                entry_format: entryform.entry_format[1],
+                organs:organs,
+                unit_correlative: unit.correlative
+              });
+
+              $(`#${table_id}`).append(rows);
+              
+              $(`#select-${id}-${unit.id}`).select2({
+                templateResult: formatResultData,
+                tags: true
+              });
+
+              data_saved = true
+            }
+          }          
         }
       }
       if (data_saved){
@@ -401,6 +417,7 @@ function init_step_2() {
     else {
       this.value = this.defaultValue;
     }
+    lockScreen(0);
   });
 
   $(document).on("select2:selecting", function (e) {
@@ -461,7 +478,7 @@ function init_step_2() {
     saveUnitsByIdentification(id)
   });
 
-  $(document).on("change", ".ident-data", function () {
+  $(document).on("blur", ".ident-data", function () {
     let id = $(this).parent().parent().attr("id")
     saveIdentification(id)
   });
@@ -748,4 +765,21 @@ function saveUnitsByIdentification(ident_id){
   return response; 
 
 
+}
+
+function getUnits(ident_id){
+  let url = Urls.list_units(ident_id)
+  let response
+  $.ajax({
+    type: "GET",
+    url: url,
+    async: false
+  })
+  .done(function (data) {
+    response = data
+  })
+  .fail(function () {
+    response = {ok:0}
+  })
+  return response
 }
