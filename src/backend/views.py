@@ -2895,9 +2895,9 @@ def save_new_identification(request, id):
 
 def remove_identification(request, id):
     try: 
-        ident = Identification.objects.get(pk=id)
-        ident.deleted=True
-        ident.save()
+        Identification.objects.get(pk=id).delete()
+        # ident.deleted=True
+        # ident.save()
         return JsonResponse({'ok': 1})
     except:
         return JsonResponse({'ok': 0})
