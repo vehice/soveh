@@ -194,7 +194,6 @@ function init_step_1() {
       url: url,
     })
       .done(function (data) {
-        $('#identification_group_list').html('');
         var entryform = data.entryform;
         if (entryform.customer_id) {
           $('#customer_select').val(entryform.customer_id).trigger('change');
@@ -251,63 +250,6 @@ function init_step_1() {
 
         $('#created_at_submit').val(entryform.created_at);
         $('#sampled_at_submit').val(entryform.sampled_at);
-
-        // $.each(entryform.answer_questions, function (i, item) {
-        //   var question_id = item.question_id
-        //   var answer = item.answer
-        //   var temp_id = i
-
-        //   $("#question_" + question_id + "_" + answer).prop('checked', true);
-        // });
-
-        var identification_size = entryform.identifications.length;
-
-        if (identification_size == 0)
-        {
-          var temp_id = Math.random().toString(36).replace('0.', '');
-          addIdentificationTemplate({
-            temp_id: temp_id,
-            organs: organs
-          });
-        }
-
-        if (identification_size >= 1)
-        {
-          $.each(entryform.identifications, function (i, item) {
-            // $("#add_identification").trigger("click");
-            addIdentificador(item.temp_id);
-            var identifications_cage = $('[name="identification[cage]"]');
-            var identifications_group = $('[name="identification[group]"]');
-            var identifications_no_fish = $('[name="identification[no_fish]"]');
-            var identifications_no_container = $('[name="identification[no_container]"]')
-            var identifications_weight = $('[name="identification[weight]"]')
-            var identifications_extra_features_detail = $('[name="identification[extra_features_detail]"]')
-            var identifications_observations = $('[name="identification[observations]"]')
-            var identifications_organs = $('[name="identification[organs][' + item.temp_id + ']"]')
-
-            $(identifications_cage[i]).val(item.cage);
-            $(identifications_group[i]).val(item.group);
-            $(identifications_no_fish[i]).val(item.no_fish);
-            $(identifications_no_container[i]).val(item.no_container);
-            $(identifications_weight[i]).val(item.weight);
-            $(identifications_extra_features_detail[i]).val(item.extra_features_detail);
-            $(identifications_observations[i]).val(item.observation);
-            var orgs = [];
-            $.each(item.organs_bv_set, function (j, v) {
-              orgs.push(v.id);
-            });
-            $(identifications_organs[0]).val(orgs);
-            $(identifications_organs[0]).trigger('change');
-            if (item.is_optimum)
-            {
-              $('[name="identification[is_optimal][' + item.temp_id + ']"]')[0].checked = true;
-            }
-            else
-            {
-              $('[name="identification[is_optimal][' + item.temp_id + ']"]')[1].checked = true;
-            }
-          });
-        }
       })
       .fail(function () {
         console.log("Fail")
@@ -320,10 +262,6 @@ function init_step_1() {
     loadSpecies(data.species)
     loadLarvalStages(data.larvalStages)
     loadWaterSources(data.waterSources)
-    // loadEntryFormType(data.entryform_types)
-    // loadExams(data.exams)
-    // loadOrgans(data.organs)
-    // loadQuestions(data.questionReceptionCondition)
   }
 
   function initialConf() {
@@ -343,18 +281,6 @@ function init_step_1() {
     }).on('dp.change', function (ev) {
       formChanged = true;
     });
-
-    // $('#datetime_created_at').on("dp.change", function (e) {
-    //   if (e.date) {
-    //     $("#created_at_submit").val(e.date.format());
-    //   }
-    // });
-
-    // $('#datetime_sampled_at').on("dp.change", function (e) {
-    //   if (e.date) {
-    //     $("#sampled_at_submit").val(e.date.format());
-    //   }
-    // });
 
     $('#customer_select').select2({
       placeholder: "Porfavor seleccione un cliente"
@@ -511,33 +437,33 @@ function validate_step_1() {
 
 // Function for events
 
-function countNoFish() {
-  var no_fish = 0
-  $('[name="identification[no_fish]"]').each(function (i, element) {
-    no_fish += parseInt($(element).val()) || 0
-  });
+// function countNoFish() {
+//   var no_fish = 0
+//   $('[name="identification[no_fish]"]').each(function (i, element) {
+//     no_fish += parseInt($(element).val()) || 0
+//   });
 
-  return no_fish
-}
+//   return no_fish
+// }
 
-function countSelectedFishes() {
-  var no_fish = 0
-  $('[name*="analysis[no_fish]"]').each(function (i, element) {
-    no_fish += parseInt($(element).val()) || 0
-  });
+// function countSelectedFishes() {
+//   var no_fish = 0
+//   $('[name*="analysis[no_fish]"]').each(function (i, element) {
+//     no_fish += parseInt($(element).val()) || 0
+//   });
 
-  return no_fish
-}
+//   return no_fish
+// }
 
-function refreshNoFish() {
-  var no_fish = countNoFish()
+// function refreshNoFish() {
+//   var no_fish = countNoFish()
 
-  $('[name*="analysis[no_fish]"]').each(function (i, element) {
-    $(element).val(no_fish);
-  });
+//   $('[name*="analysis[no_fish]"]').each(function (i, element) {
+//     $(element).val(no_fish);
+//   });
 
-  // $('#flow_divider').trigger('change');
-}
+//   // $('#flow_divider').trigger('change');
+// }
 
 function splitArrayByChunkSize(arr, n) {
   var rest = arr.length % n,
@@ -593,48 +519,48 @@ function splitArrayByChunkSize(arr, n) {
 
 // }
 
-function addIdentificationTemplate(data) {
-  var identificationTemplate = document.getElementById("identification_template").innerHTML;
+// function addIdentificationTemplate(data) {
+//   var identificationTemplate = document.getElementById("identification_template").innerHTML;
 
-  var templateFn = _.template(identificationTemplate);
-  var templateHTML = templateFn(data);
+//   var templateFn = _.template(identificationTemplate);
+//   var templateHTML = templateFn(data);
 
-  $("#identification_group_list").append(templateHTML);
+//   $("#identification_group_list").append(templateHTML);
 
-  $('.identification_organs').select2();
-}
+//   $('.identification_organs').select2();
+// }
 
-function addQuestionReceptionTemplate(data) {
-  var questionTemplate = document.getElementById("questionReception_template").innerHTML;
-  var templateFn = _.template(questionTemplate);
-  var templateHTML = templateFn(data);
+// function addQuestionReceptionTemplate(data) {
+//   var questionTemplate = document.getElementById("questionReception_template").innerHTML;
+//   var templateFn = _.template(questionTemplate);
+//   var templateHTML = templateFn(data);
 
-  $("#question_reception_" + data.temp_id).append(templateHTML);
-}
+//   $("#question_reception_" + data.temp_id).append(templateHTML);
+// }
 
-function addWorkGroupTemplateByIdentity(data) {
-  var groupTemplate = document.getElementById("flowgroup_template").innerHTML;
-  var templateFn = _.template(groupTemplate);
-  var templateHTML = templateFn(data);
+// function addWorkGroupTemplateByIdentity(data) {
+//   var groupTemplate = document.getElementById("flowgroup_template").innerHTML;
+//   var templateFn = _.template(groupTemplate);
+//   var templateHTML = templateFn(data);
 
-  $("#flowdivider_by_identification").append(templateHTML);
-}
+//   $("#flowdivider_by_identification").append(templateHTML);
+// }
 
-function addWorkGroupTemplateByManual(data) {
-  var groupTemplate = document.getElementById("group_content_manual_template").innerHTML;
-  var templateFn = _.template(groupTemplate);
-  var templateHTML = templateFn(data);
+// function addWorkGroupTemplateByManual(data) {
+//   var groupTemplate = document.getElementById("group_content_manual_template").innerHTML;
+//   var templateFn = _.template(groupTemplate);
+//   var templateHTML = templateFn(data);
 
-  $("#flowdivider_manual_groups").append(templateHTML);
-}
+//   $("#flowdivider_manual_groups").append(templateHTML);
+// }
 
-function addFlowDividerTemplate() {
-  var dividerTemplate = document.getElementById("flowdivider_options_template").innerHTML;
-  var templateFn = _.template(dividerTemplate);
-  var templateHTML = templateFn();
+// function addFlowDividerTemplate() {
+//   var dividerTemplate = document.getElementById("flowdivider_options_template").innerHTML;
+//   var templateFn = _.template(dividerTemplate);
+//   var templateHTML = templateFn();
 
-  $("#flow_divider_options").append(templateHTML);
-}
+//   $("#flow_divider_options").append(templateHTML);
+// }
 // Initial Data and Config
 
 
@@ -711,14 +637,14 @@ function loadWaterSources(waterSources) {
 //   });
 // }
 
-function loadQuestions(questionReceptionCondition) {
-  $("#question_reception").html("");
-  var temp_id = Math.floor(Math.random() * Math.floor(1000))
-  $.each(questionReceptionCondition, function (i, item) {
-    var data = {'question_id': item.id, 'question_text': item.text, 'question_index': i, 'temp_id': temp_id}
-    addQuestionReceptionTemplate(data);
-  });
-}
+// function loadQuestions(questionReceptionCondition) {
+//   $("#question_reception").html("");
+//   var temp_id = Math.floor(Math.random() * Math.floor(1000))
+//   $.each(questionReceptionCondition, function (i, item) {
+//     var data = {'question_id': item.id, 'question_text': item.text, 'question_index': i, 'temp_id': temp_id}
+//     addQuestionReceptionTemplate(data);
+//   });
+// }
 
 $(document).on('click', '.showResearchPopover', function () {
   var id = $("#researches_select").val();
