@@ -43,7 +43,7 @@
   }
   .form-control-table{
     padding: 5px 2px;
-    width: 95%;
+    width: 90%;
   }
   .correlative-text{
     vertical-align: middle !important;
@@ -300,6 +300,21 @@
     </div>
   </div>
 </div>
+
+<div class="modal fade text-left" id="organ_table_keypad" role="dialog" data-backdrop="static" data-keyboard="false">
+  <div class="modal-dialog modal-lg" role="">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body" id="organ_table_keypad_body">
+      </div>
+    </div>
+  </div>
+</div>
+
 {% endblock content %}
 {% block scripts %}
 
@@ -325,6 +340,7 @@ var summary_edited = false;
 var finalizar = "{{request.lang.finalize}}";
 var volver =  "{{request.lang.back}}";
 var continuar =  "{{request.lang.next}}";
+
 var steps = $("#workflow_form").steps({
     headerTag: "h6",
     bodyTag: "fieldset",
@@ -347,6 +363,7 @@ var steps = $("#workflow_form").steps({
       if(!set_state) {
         var previous_step = false;
         var form_data;
+        
         if(currentIndex < newIndex){
           if (currentIndex == 0){
             receptionFileModal({{form.content_object.id}});
@@ -369,8 +386,7 @@ var steps = $("#workflow_form").steps({
           }
         }
         
-        if (currentIndex > newIndex)
-        {
+        if (currentIndex > newIndex){
           previous_step = true;
           var disform = $("#step_" + newIndex + " :input").find(':disabled').prop('disabled', false);
           var disform2 = $('.organs-select').prop('disabled', false);
@@ -379,8 +395,7 @@ var steps = $("#workflow_form").steps({
           disform.prop('disabled', true);
           disform2.prop('disabled', true);
           disform3.prop('disabled', true);
-        } 
-        else {
+        } else {
           previous_step = false;
           var disform = $("#step_" + currentIndex + " :input").find(':disabled').prop('disabled', false);
           var disform2 = $('.organs-select').prop('disabled', false);
@@ -394,6 +409,8 @@ var steps = $("#workflow_form").steps({
         var url = Urls.workflow();
         var id_next_step = $("#step_" + newIndex).children("#step_id").val();
         //if(currentIndex == 1 || currentIndex == 2){
+
+        console.log("FORM DATA", form_data);
         var response;
         $.ajax({
           type: "POST",
@@ -557,14 +574,12 @@ var steps = $("#workflow_form").steps({
 });
 
 $(window).on('load', function (e) {
-    // If para cargar un paso en especifico
   set_state = true;
   {% if set_step_tag != "step_1" %}
   window.onbeforeunload = function(){};
   {% endif %}
   
-  // PARCHE MOMENTANEO PARA OCULTAR PASO 3 Y 4
-  var step_wizard = parseInt("{{ set_step_tag }}".split("_")[1]) - 1; // Se resta 1 para igualar a los indices del plugin
+  var step_wizard = parseInt("{{ set_step_tag }}".split("_")[1]) - 1;
   var step_tag_function = "init_{{ set_step_tag }}";
   
   form.steps("setStep", step_wizard);
@@ -957,5 +972,21 @@ function receptionFileModal(id){
     }
   });
 }
+
+$(document).on('click', '[data-toggle="buttons"] .btn', function () {
+    let $btn = $(this);
+    $(this).toggleClass('btn-warning');
+    
+    // toggle checkbox
+    let $chk = $(this).find('[type=checkbox]');
+
+    if ($btn.hasClass('btn-warning')){
+      $chk.prop('checked', true);
+    } else {
+      $chk.prop('checked', false);
+    }
+    
+    return false;
+});
 
 </script> {% endblock scripts %}
