@@ -81,7 +81,9 @@
                       {% if entryForm.form_closed %}
                         <a href="workflow/{{ entryForm.id }}"> {{request.lang.case_closed}} </a>
                       {% elif entryForm.cancelled %}
-                       {{request.lang.case_cancelled}}
+                        {{request.lang.case_cancelled}}
+                      {% elif entryForm.reception_finished %}
+                        <a href="workflow/{{ entryForm.id }}"> Ingresado </a>
                       {% else %}
                         <a href="workflow/{{ entryForm.id }}"> {{ entryForm.state.step}}</a>
                       {% endif %}
