@@ -3,7 +3,6 @@ var researches;
 function init_step_4(active = true) {
   var entryform_id = $('#entryform_id').val();
   var url = Urls.analysis_entryform_id(entryform_id);
-  $("#workflow_form > .actions").find('a').first().text("Editar Servicios");
 
   $.ajax({
     type: "GET",
