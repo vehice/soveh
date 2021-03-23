@@ -73,6 +73,7 @@ class Step(models.Model):
 class Form(models.Model):
     flow = models.ForeignKey(Flow, on_delete=models.CASCADE)
     state = models.ForeignKey(State, on_delete=models.CASCADE)
+    # form closed is a finished case
     form_closed = models.BooleanField(default=False)
     form_reopened = models.BooleanField(default=False)
     parent = models.ForeignKey(
@@ -87,6 +88,9 @@ class Form(models.Model):
     cancelled = models.BooleanField(default=False)
     cancelled_at = models.DateTimeField(null=True)
     closed_at = models.DateTimeField(null=True)
+    reception_finished = models.BooleanField(default=False)
+    reception_finished_at = models.DateTimeField(null=True)
+    
 
 
     def __str__(self):
