@@ -308,7 +308,7 @@ class Unit(models.Model):
     correlative = models.IntegerField(default=1, null=True, blank=True)
     organs = models.ManyToManyField('Organ', through='OrganUnit')
     identification = models.ForeignKey(Identification, null=True, on_delete=models.SET_NULL)
-    samples = models.ManyToManyField("Sample")
+    # samples = models.ManyToManyField("Sample")
     
     def __str__(self):
         return str(self.correlative)
@@ -376,10 +376,8 @@ class AnalysisForm(models.Model):
 class Sample(models.Model):
     entryform = models.ForeignKey(
         EntryForm, null=True, on_delete=models.SET_NULL)
-    index = models.IntegerField(null=True, blank=True)
-    # exams = models.ManyToManyField(Exam)
-    # organs = models.ManyToManyField(Organ)
-    # cassette = models.ForeignKey(Cassette, null=True, on_delete=models.SET_NULL)
+    index = models.IntegerField(null=True, blank=True) #correlative
+    organs = models.ManyToManyField(Organ)
     identification = models.ForeignKey(Identification, null=True, on_delete=models.SET_NULL)
 
     def __str__(self):
