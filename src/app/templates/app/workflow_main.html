@@ -48,6 +48,15 @@
   .correlative-text{
     vertical-align: middle !important;
   }
+  .checkbox-1x {
+    transform: scale(1.5);
+    -webkit-transform: scale(1.5);
+  }
+  .checkbox-2x {
+    transform: scale(2);
+    -webkit-transform: scale(2);
+  }
+
 </style>
 
 {% endblock stylesheets %}
@@ -78,7 +87,11 @@
     <div class="card">
       <div class="card-header">
         <center>
-          <h3> <strong>{{request.lang.nro_case}} {{form.content_object.no_caso}}</strong></h3>
+          {% if reception_finished %}
+            <h3> <strong>{{request.lang.nro_case}} {{form.content_object.no_caso}} - SERVICIOS INGRESADOS</strong></h3>
+          {% else %}
+            <h3> <strong>{{request.lang.nro_case}} {{form.content_object.no_caso}}</strong></h3>
+          {% endif %}
           <button class="btn btn-secondary square showSummaryBtn hidden" 
           data-id="{{ form.content_object.pk }}" 
           data-closed="{% if form.form_closed or form.cancelled %}1{% else %}0{% endif %}" data-editable="{% if edit_case %}1{% else %}0{% endif %}"><i class="fa fa-list fa-fx"></i> {{request.lang.summary_case}}</button>
@@ -91,10 +104,16 @@
       <div class="card-content">
         <div class="card-body">
           <form action="#" id="workflow_form" class="wizard-circle">
-            {% for step in form.flow.step_set.all %}
-              <h6>{{ step.name }}</h6>
-              {% include step.route|add:".html" with step_tag=step.tag step_id=step.pk form_id=form_id entryform_id=entryform_id step_tab=forloop.counter0 %}
-            {% endfor %}
+            {% if reception_finished %}
+              {% include "app/flujo_principal/step-4.html" with step_tag=step.tag step_id=step.pk form_id=form_id entryform_id=entryform_id step_tab=4 %}
+            {% else %}
+              {% for step in form.flow.step_set.all %}
+                {% if step.state_id != 4 %}
+                  <h6>{{ step.name }}</h6>
+                  {% include step.route|add:".html" with step_tag=step.tag step_id=step.pk form_id=form_id entryform_id=entryform_id step_tab=forloop.counter0 %}
+                {% endif %}
+              {% endfor %}
+            {% endif %}
           </form>
         </div>
       </div>
@@ -320,11 +339,18 @@
 
 <script src="{% url 'js_reverse' %}" type="text/javascript"></script>
 
-{% for step in form.flow.step_set.all %}
-  {% with step.route|add:".js" as script_step %}
+{% if reception_finished %}
+  {% with "app/flujo_principal/step-4.js" as script_step %}
     <script src="{% static script_step %}" type="text/javascript"></script>
   {% endwith %}
-{% endfor %}
+{% else %}
+  {% for step in form.flow.step_set.all %}
+    {% with step.route|add:".js" as script_step %}
+      <script src="{% static script_step %}" type="text/javascript"></script>
+    {% endwith %}
+  {% endfor %}
+{% endif %}
+
 <script language="JavaScript">
 window.onbeforeunload = confirmExit;
 
@@ -341,237 +367,226 @@ var finalizar = "{{request.lang.finalize}}";
 var volver =  "{{request.lang.back}}";
 var continuar =  "{{request.lang.next}}";
 
-var steps = $("#workflow_form").steps({
-    headerTag: "h6",
-    bodyTag: "fieldset",
-    enableKeyNavigation: false,
-    transitionEffect: "fade",
-    titleTemplate: '<span class="step">#index#</span> #title#',
-    enablePagination: {{closed}} == 0 && {{edit}} == 1,
-    labels: {
-        previous: volver,
-        next: continuar,
-        finish: finalizar
-    },
-    startIndex: 0,
-    onStepChanging: function (events, currentIndex, newIndex)
-    {
+{% if not reception_finished %}
+  var steps = $("#workflow_form").steps({
+      headerTag: "h6",
+      bodyTag: "fieldset",
+      enableKeyNavigation: false,
+      transitionEffect: "fade",
+      titleTemplate: '<span class="step">#index#</span> #title#',
+      enablePagination: {{closed}} == 0 && {{edit}} == 1,
+      labels: {
+          previous: volver,
+          next: continuar,
+          finish: finalizar
+      },
+      startIndex: 0,
+      onStepChanging: function (events, currentIndex, newIndex)
+      {
 
-      lockScreen(1);
-      window.onbeforeunload = function(){};
+        lockScreen(1);
+        window.onbeforeunload = function(){};
 
-      if(!set_state) {
-        var previous_step = false;
-        var form_data;
-        
-        if(currentIndex < newIndex){
-          if (currentIndex == 0){
-            receptionFileModal({{form.content_object.id}});
-            var resp = validate_step_1();
-            if (!resp) {
-              lockScreen(0);
-              window.onbeforeunload = confirmExit;
-              return false
+        if(!set_state) {
+          var previous_step = false;
+          var form_data;
+          
+          if(currentIndex < newIndex){
+            if (currentIndex == 0){
+              receptionFileModal({{form.content_object.id}});
+              var resp = validate_step_1();
+              if (!resp) {
+                lockScreen(0);
+                window.onbeforeunload = confirmExit;
+                return false
+              }
+            } 
+            else if (currentIndex == 1) {
+              var resp = validate_step_2();
+              if (!resp) {
+                lockScreen(0);
+                return false
+              }
+              //shareChoice();
+              // lockScreen(0);
+              // return false
             }
-          } 
-          else if (currentIndex == 1) {
-            var resp = validate_step_2();
-            if (!resp) {
-              lockScreen(0);
-              return false
-            }
-            //shareChoice();
-             // lockScreen(0);
-            // return false
           }
+          
+          if (currentIndex > newIndex){
+            previous_step = true;
+            var disform = $("#step_" + newIndex + " :input").find(':disabled').prop('disabled', false);
+            var disform2 = $('.organs-select').prop('disabled', false);
+            var disform3 = $('.stain-select').prop('disabled', false);
+            form_data = $("#step_" + newIndex + " :input").serialize();
+            disform.prop('disabled', true);
+            disform2.prop('disabled', true);
+            disform3.prop('disabled', true);
+          } else {
+            previous_step = false;
+            var disform = $("#step_" + currentIndex + " :input").find(':disabled').prop('disabled', false);
+            var disform2 = $('.organs-select').prop('disabled', false);
+            var disform3 = $('.stain-select').prop('disabled', false);
+            form_data = $("#step_" + currentIndex + " :input").serialize();
+            disform.prop('disabled', true);
+            disform2.prop('disabled', true);
+            disform3.prop('disabled', true);
+          }
+
+          var url = Urls.workflow();
+          var id_next_step = $("#step_" + newIndex).children("#step_id").val();
+          //if(currentIndex == 1 || currentIndex == 2){
+
+          console.log("FORM DATA", form_data);
+          var response;
+          $.ajax({
+            type: "POST",
+            url: url,
+            data: form_data + "&id_next_step=" + id_next_step +"&previous_step=" + previous_step,
+            async: false,
+          })
+          .done(function (data) {
+            response = data;
+          })
+          .fail(function (data) {
+            console.log("Fail");
+          })
+          if (response == undefined) {
+            lockScreen(0);
+            return false
+          }
+          if (response.next_step_permission) {
+            var step;
+            var function_name;
+            if(previous_step) {
+              step = currentIndex
+              function_name = "init_step_" + step;
+            } 
+            else {
+              step = newIndex + 1
+              function_name = "init_step_" + step;
+            }
+            setTimeout(function() {
+              window[function_name]({{edit}} == 1);
+              $.get(
+                Urls.sendNotification()+'?'+form_data + "&id_next_step=" + id_next_step +"&previous_step=" + previous_step,
+                function (data) {
+                }
+              )
+            }, 500);
+          } 
+          else {
+            toastr.error('No puedes continuar ya que no tienes permisos para los siguientes pasos.', 'No tienes permisos');
+            setTimeout(function() {
+              window.location.href = '/ingresos'
+            }, 1000);
+          }
+          if(!previous_step) {
+            if(response.process_response) {
+              toastr.success('', 'Paso guardado exitosamente!');
+            }
+          }
+          return response.next_step_permission;
+          //}
+          
+          //return true;
+        } 
+        else {
+          set_state = false;
+          return true
         }
-        
-        if (currentIndex > newIndex){
-          previous_step = true;
-          var disform = $("#step_" + newIndex + " :input").find(':disabled').prop('disabled', false);
-          var disform2 = $('.organs-select').prop('disabled', false);
-          var disform3 = $('.stain-select').prop('disabled', false);
-          form_data = $("#step_" + newIndex + " :input").serialize();
-          disform.prop('disabled', true);
-          disform2.prop('disabled', true);
-          disform3.prop('disabled', true);
+      },
+      onStepChanged:function (event, currentIndex, prevIndex){
+        lockScreen(0);
+
+        if (currentIndex == 1){
+          $('.actions > ul > li:first-child').attr('style', 'display:none');
         } else {
-          previous_step = false;
-          var disform = $("#step_" + currentIndex + " :input").find(':disabled').prop('disabled', false);
-          var disform2 = $('.organs-select').prop('disabled', false);
-          var disform3 = $('.stain-select').prop('disabled', false);
-          form_data = $("#step_" + currentIndex + " :input").serialize();
-          disform.prop('disabled', true);
-          disform2.prop('disabled', true);
-          disform3.prop('disabled', true);
+          $('.actions > ul > li:first-child').attr('style', '');
         }
 
+        return true; 
+      }, 
+      onFinished: function (event, currentIndex)
+      {
+        lockScreen(1);
+        event.preventDefault();
         var url = Urls.workflow();
-        var id_next_step = $("#step_" + newIndex).children("#step_id").val();
-        //if(currentIndex == 1 || currentIndex == 2){
+        var disform = $("#step_" + currentIndex + " :input").find(':disabled').prop('disabled', false);
+        var disform2 = $('.organs-select').prop('disabled', false);
+        var disform3 = $('.stain-select').prop('disabled', false);
+        form_data = $("#step_" + currentIndex + " :input").serialize();
+        disform.prop('disabled', true);
+        disform2.prop('disabled', true);
+        disform3.prop('disabled', true);
 
-        console.log("FORM DATA", form_data);
-        var response;
         $.ajax({
           type: "POST",
           url: url,
-          data: form_data + "&id_next_step=" + id_next_step +"&previous_step=" + previous_step,
-          async: false,
+          data: form_data,
         })
-        .done(function (data) {
-          response = data;
-        })
-        .fail(function (data) {
-          console.log("Fail");
-        })
-        if (response == undefined) {
-          lockScreen(0);
-          return false
-        }
-        if (response.next_step_permission) {
-          var step;
-          var function_name;
-          if(previous_step) {
-            step = currentIndex
-            function_name = "init_step_" + step;
-          } 
-          else {
-            step = newIndex + 1
-            function_name = "init_step_" + step;
-          }
-          setTimeout(function() {
-            window[function_name]({{edit}} == 1);
-            $.get(
-              Urls.sendNotification()+'?'+form_data + "&id_next_step=" + id_next_step +"&previous_step=" + previous_step,
-              function (data) {
-              }
-            )
-          }, 500);
-        } 
-        else {
-          toastr.error('No puedes continuar ya que no tienes permisos para los siguientes pasos.', 'No tienes permisos');
-          setTimeout(function() {
-            window.location.href = '/ingresos'
-          }, 1000);
-        }
-        if(!previous_step) {
-          if(response.process_response) {
-            toastr.success('', 'Paso guardado exitosamente!');
-          }
-        }
-        return response.next_step_permission;
-        //}
-        
-        //return true;
-      } 
-      else {
-        set_state = false;
-        return true
-      }
-    },
-    onStepChanged:function (event, currentIndex, prevIndex){
-      lockScreen(0);
-
-      if (currentIndex == 1){
-        $('.actions > ul > li:first-child').attr('style', 'display:none');
-      } else {
-        $('.actions > ul > li:first-child').attr('style', '');
-      }
-
-      return true; 
-    }, 
-    onFinishing: function (event, currentIndex)
-    {
-      {% if edit %}
-        if ({{close_allowed}}){
-          swal({
-            title: "{{request.lang.confirmation}}",
-            text: "{{request.lang.close_case_text}}",
-            icon: "warning",
-            showCancelButton: true,
-            buttons: {
-              cancel: {
-                  text: "{{request.lang.cancel_case}}",
-                  value: null,
-                  visible: true,
-                  className: "btn-warning",
-                  closeModal: true,
-              },
-              confirm: {
-                  text: "{{request.lang.confirm_case}}",
-                  value: true,
-                  visible: true,
-                  className: "",
-                  closeModal: true,
-              }
-            }
-          }).then(isConfirm => {
-            if (isConfirm) {
-              var url = Urls.complete_form({{form_id}});
-              $.ajax({
-                type: "GET",
-                url: url,
-                async: false,
-              })
-              .done(function (data) {
-                response = data;
-                if (response.ok) {
-                  toastr.success('', 'Se ha completado el caso exitosamente.');
-                  var timer = setTimeout(function() {
-                    window.location='/ingresos'
-                  }, 2000);
-                } else {
-                  toastr.error('', 'No ha sido posible completar el caso.');
+        .done(function () {
+          {% if edit %}
+            swal({
+              title: "{{request.lang.confirmation}}",
+              text: "{{request.lang.close_case_text}}",
+              icon: "warning",
+              showCancelButton: true,
+              buttons: {
+                cancel: {
+                    text: "{{request.lang.cancel_case}}",
+                    value: null,
+                    visible: true,
+                    className: "btn-warning",
+                    closeModal: true,
+                },
+                confirm: {
+                    text: "{{request.lang.confirm_case}}",
+                    value: true,
+                    visible: true,
+                    className: "",
+                    closeModal: true,
                 }
-              })
-              .fail(function (data) {
-                toastr.error('', 'No ha sido posible completar el caso.');
+              }
+            }).then(isConfirm => {
+              if (isConfirm) {
+                var url = Urls.finish_reception({{form_id}});
+                $.ajax({
+                  type: "GET",
+                  url: url,
+                  async: false,
+                })
+                .done(function (data) {
+                  response = data;
+                  if (response.ok) {
+                    toastr.success('', 'Se ha finalizado la repceión exitosamente.');
+                  } else {
+                    toastr.error('', 'No ha sido posible finalizar la recepción del caso.');
+                  }
+                })
+                .fail(function (data) {
+                  toastr.error('', 'No ha sido posible finalizar la recepción del caso.');
+                });
+              }
+            });
+            
+          {% else %}
+            swal({
+                title: "Información",
+                text: "Lo sentimos, usted no posee los permisos necesarios para finalizar la recepción del caso.",
+                icon: "info",
+                showCancelButton: true,
               });
-            }
-          });
-        
-        } else {
-          swal({
-            title: "{{request.lang.information}}",
-            text: "{{request.lang.services_still_open_text}}",
-            icon: "info",
-            showCancelButton: true,
-          });
-        }
-      {% else %}
-        swal({
-            title: "Información",
-            text: "Lo sentimos, usted no posee los permisos necesarios para finalizar el caso.",
-            icon: "info",
-            showCancelButton: true,
-          });
-      {% endif %}
-      
-    },
-    onFinished: function (event, currentIndex)
-    {
-      lockScreen(1);
-      event.preventDefault();
-      var url = Urls.entryform();
-      var disform = $("form").find(':disabled').prop('disabled', false);
-      var form_data = ($("form").serialize());
-      disform.prop('disabled', true);
+          {% endif %}
 
-      $.ajax({
-        type: "POST",
-        url: url,
-        data: form_data,
-      })
-      .done(function () {
-      alert(2);
-
-      })
-      .fail(function () {
-        console.log("Fail")
-      })
-      lockScreen(0);
-    }
-});
+        })
+        .fail(function () {
+          console.log("Fail")
+        })
+        lockScreen(0);
+      }
+  });
+{% endif %}
 
 $(window).on('load', function (e) {
   set_state = true;
@@ -579,13 +594,17 @@ $(window).on('load', function (e) {
   window.onbeforeunload = function(){};
   {% endif %}
   
-  var step_wizard = parseInt("{{ set_step_tag }}".split("_")[1]) - 1;
-  var step_tag_function = "init_{{ set_step_tag }}";
-  
-  form.steps("setStep", step_wizard);
-  set_state = false;
+  {% if not reception_finished %}
+    var step_wizard = parseInt("{{ set_step_tag }}".split("_")[1]) - 1;
+    var step_tag_function = "init_{{ set_step_tag }}";
+    
+    form.steps("setStep", step_wizard);
+    set_state = false;
 
-  window[step_tag_function]({{edit}} == 1);
+    window[step_tag_function]({{edit}} == 1);
+  {% else %}
+    window["init_step_4"]({{edit}} == 1);
+  {% endif %}
 });
 
 $("#show_summary").on("hidden.bs.modal", function () {
