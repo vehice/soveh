@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     "workflows",
     "backend",
     "app",
+    "lab",
     "avatar",
 ]
 
@@ -92,7 +93,7 @@ DATABASES = {
     "default": {
         "ENGINE": "mysql.connector.django",
         "NAME": "vehice_solmat_test",
-        "USER": "root",
+        "USER": "jmonagas",
         "PASSWORD": "",
         "HOST": "localhost",
         "PORT": "",
