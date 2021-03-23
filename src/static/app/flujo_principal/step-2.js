@@ -420,7 +420,7 @@ function init_step_2() {
     lockScreen(0);
   });
 
-  $(document).on("select2:selecting", function (e) {
+  $(document).on("select2:selecting", ".organs", function (e) {
     e.preventDefault();
 
     let new_id = `${e.params.args.data.id}`;
@@ -433,7 +433,7 @@ function init_step_2() {
 
   });
 
-  $(document).on("select2:unselect", function (e) {
+  $(document).on("select2:unselect", ".organs", function (e) {
     if (e.params.data.id.search('-') != -1) {
       e.params.data.element.remove();
     }
