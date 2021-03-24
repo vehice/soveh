@@ -1,6 +1,6 @@
 from django.db import models
 
-from backend.models import EntryForm, Organ
+from backend.models import EntryForm, Organ, Unit
 
 
 class Cassette(models.Model):
@@ -9,11 +9,12 @@ class Cassette(models.Model):
     processed in formalin to later be converted to blocks.
 
     A Cassette is turned into one :models:`lab.Block`.
+    It's related to :models:`backend.EntryForm` through :models:`backend.Unit`
     """
 
     correlative = models.PositiveIntegerField(verbose_name="correlative")
     organs = models.ManyToManyField(Organ, related_name="cassettes")
-    unit = models.ForeignKey("Unit", on_delete=models.CASCADE)
+    unit = models.ForeignKey(Unit, on_delete=models.CASCADE, related_name="cassettes")
     build_at = models.DateTimeField(auto_now=False, auto_now_add=True)
     processed_at = models.DateTimeField()
 
