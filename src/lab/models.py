@@ -13,15 +13,23 @@ class CaseManager(models.Manager):
     def get_queryset(self):
         return super().get_queryset().filter(forms__cancelled=0, forms__form_closed=0)
 
-    def identifications(self):
-        return self.get_queryset().prefetch_related(
-            models.Prefetch("identification_set", to_attr="identifications")
+    def identifications(self, **kwargs):
+        return (
+            self.get_queryset()
+            .filter(**kwargs)
+            .prefetch_related(
+                models.Prefetch("identification_set", to_attr="identifications")
+            )
         )
 
-    def units(self):
-        return self.get_queryset().prefetch_related(
-            models.Prefetch("identification_set", to_attr="identifications"),
-            models.Prefetch("identifications__unit_set", to_attr="units"),
+    def units(self, **kwargs):
+        return (
+            self.get_queryset()
+            .filter(**kwargs)
+            .prefetch_related(
+                models.Prefetch("identification_set", to_attr="identifications"),
+                models.Prefetch("identifications__unit_set", to_attr="units"),
+            )
         )
 
 
