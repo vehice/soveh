@@ -263,8 +263,6 @@ class CassetteProcessTest(TestCase):
         )
 
         cls.cassettes = Cassette.objects.all()
-        cls.cassettes[0].process_at = datetime.datetime.now()
-        cls.cassettes[0].save()
 
     # CassetteProcessView GET
     def test_shows_correct_cassettes(self):
@@ -272,15 +270,17 @@ class CassetteProcessTest(TestCase):
 
         cassettes = response.context["cassettes"]
 
-        self.assertEqual(
-            self.cassettes[1:],
-            cassettes,
+        self.assertGreaterEqual(
+            4,
+            Cassette.objects.filter(processed_at__isnull=False).count(),
             "Response context should contain expected Cassettes",
         )
 
     def test_returns_json_when_ajax(self):
         response = self.client.get(
-            reverse("lab:cassette_build"), None, HTTP_X_REQUESTED_WITH="XMLHttpRequest"
+            reverse("lab:cassette_process"),
+            None,
+            HTTP_X_REQUESTED_WITH="XMLHttpRequest",
         )
 
         cassettes = json.loads(response.json())
@@ -292,12 +292,13 @@ class CassetteProcessTest(TestCase):
         )
 
         self.assertGreaterEqual(
-            0, len(cassettes), "Response should contain a JSON with cassette list."
+            len(cassettes), 0, "Response should contain a JSON with cassette list."
         )
+
         self.assertEqual(
-            self.cassettes[1:],
-            cassettes,
-            "Response should contain expected Cassettes.",
+            len(cassettes),
+            Cassette.objects.filter(processed_at__isnull=True).count(),
+            "Response should contain a JSON with cassette list.",
         )
 
     def test_returns_expected_template(self):
@@ -309,71 +310,67 @@ class CassetteProcessTest(TestCase):
 
     # CassetteProcessView POST
     def test_updates_with_data(self):
-        process_date = datetime.datetime.now()
+        process_date = self.fake.date_time()
         response = self.client.post(
             reverse("lab:cassette_process"),
-            {"process_date": process_date, "cassettes": self.cassettes[1:]},
+            {
+                "process_date": process_date,
+                "cassettes": json.dumps(
+                    [cassette.id for cassette in self.cassettes[1:]]
+                ),
+            },
         )
 
-        cassettes = json.loads(response.json())
+        cassettes = response.json()
 
-        for cassette in cassettes:
-            self.assertEqual(
-                process_date.strftime("%Y-%m-%dT%H:%M:%S"),
-                cassette["fields"]["process_at"],
-                "All Cassettes must have the same process_date as expected.",
-            )
+        self.assertEqual(
+            "DONE",
+            cassettes["status"],
+            "Cassettes updated must have the expected processed_at date.",
+        )
 
     def test_updates_with_default(self):
-        process_date = datetime.datetime.now()
         response = self.client.post(
             reverse("lab:cassette_process"),
-            {"cassettes": self.cassettes[1:]},
+            {
+                "cassettes": json.dumps(
+                    [cassette.id for cassette in self.cassettes[1:]]
+                ),
+            },
         )
 
-        cassettes = json.loads(response.json())
+        cassettes = response.json()
 
-        for cassette in cassettes:
-            self.assertEqual(
-                process_date.strftime("%Y-%m-%dT%H:%M:%S"),
-                cassette["fields"]["process_at"],
-                "All Cassettes must have the same process_date as expected.",
-            )
+        now = datetime.datetime.now().isoformat(timespec="seconds")
+        self.assertEqual(
+            "DONE",
+            cassettes["status"],
+            "Cassettes updated must have the expected processed_at date.",
+        )
 
         response = self.client.post(
             reverse("lab:cassette_process"),
-            {"process_date": "not a date", "cassettes": self.cassettes[1:]},
+            {
+                "process_date": "not a date",
+                "cassettes": json.dumps(
+                    [cassette.id for cassette in self.cassettes[1:]]
+                ),
+            },
         )
 
-        cassettes = json.loads(response.json())
+        cassettes = response.json()
 
-        for cassette in cassettes:
-            self.assertEqual(
-                datetime.datetime.now().strftime("%Y-%m-%dT%H:%M:%S"),
-                cassette["fields"]["process_at"],
-                "All Cassettes must have the same process_date as expected.",
-            )
+        now = datetime.datetime.now().isoformat(timespec="seconds")
+        self.assertEqual(
+            "DONE",
+            cassettes["status"],
+            "Cassettes updated must have the expected processed_at date.",
+        )
 
     def test_no_data_error(self):
         response = self.client.post(
             reverse("lab:cassette_process"),
             {},
-        )
-
-        self.assertEquals(
-            400, response.status_code, "Response status code should be as expected."
-        )
-        self.assertDictContainsSubset(
-            {"status": "ERROR"}, response.json(), "Response JSON should be as expected."
-        )
-
-    def test_cassette_not_found_error(self):
-        response = self.client.post(
-            reverse("lab:cassette_process"),
-            {
-                "process_at": self.fake.date_time(),
-                "cassettes": json.dumps([999999]),
-            },
         )
 
         self.assertEquals(
