@@ -58,8 +58,8 @@ class Cassette(models.Model):
     correlative = models.PositiveIntegerField(verbose_name="correlative")
     organs = models.ManyToManyField(Organ, related_name="cassettes")
     unit = models.ForeignKey(Unit, on_delete=models.CASCADE, related_name="cassettes")
-    build_at = models.DateTimeField(auto_now=False, auto_now_add=True)
-    processed_at = models.DateTimeField()
+    build_at = models.DateTimeField(null=True)
+    processed_at = models.DateTimeField(null=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
