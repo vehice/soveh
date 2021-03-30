@@ -1,5 +1,8 @@
+from datetime import datetime
+
 from django.db import models
 
+from numpy import busday_count
 from backend.models import EntryForm, Organ, Unit
 
 
@@ -42,8 +45,15 @@ class Case(EntryForm):
 
     objects = CaseManager()
 
+    @property
+    def delay(self):
+        return busday_count(
+            self.created_at.date(), datetime.now().date(), weekmask="1111110"
+        )
+
     class Meta:
         proxy = True
+        ordering = ["-entryform_type_id", "-created_at"]
 
 
 class Cassette(models.Model):
