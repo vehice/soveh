@@ -5,7 +5,7 @@ from dateutil.parser import ParserError, parse
 from django.core import serializers
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.utils import IntegrityError
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 from django.shortcuts import render
 from django.utils.decorators import method_decorator
 from django.views import View
@@ -41,12 +41,14 @@ class CassetteBuildView(View):
         ``lab/build.html``
         """
 
-        units = Case.objects.units(entry_format__in=[1, 2, 6, 7])
+        cases = Case.objects.units(entry_format__in=[1, 2, 6, 7])
 
         if request.is_ajax():
-            return JsonResponse(serializers.serialize("json", units), safe=False)
+            return HttpResponse(
+                serializers.serialize("json", cases), content_type="application/json"
+            )
 
-        return render(request, "cassettes/build.html", {"units": units})
+        return render(request, "cassettes/build.html", {"cases": cases})
 
     def post(self, request):
         """
@@ -167,3 +169,15 @@ class CassetteProcessView(View):
         )
 
         return JsonResponse({"status": "DONE", "message": "%d rows updated" % updated})
+
+
+def unit_list(request):
+    """
+    Returns a json list detailing units received as parameters.
+    """
+
+    units = Unit.objects.filter(pk__in=json.loads(request.POST.get("units")))
+
+    return HttpResponse(
+        serializers.serialize("json", units), content_type="application/json"
+    )

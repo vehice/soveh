@@ -24,12 +24,12 @@ class CassetteBuildTest(TestCase):
 
         response = self.client.get(reverse("lab:cassette_build"))
         self.assertIn(
-            "units", response.context, "Response context should contain units."
+            "cases", response.context, "Response context should contain Cases."
         )
-        units = response.context["units"]
+        units = response.context["cases"]
         self.assertFalse(
             units.filter(entry_format__in=[3, 4, 5]).exists(),
-            "Units shouldn't contain entry types `3`, `4`, or `5`.",
+            "Cases shouldn't contain entry types `3`, `4`, or `5`.",
         )
 
     def test_returns_json_when_ajax(self):
@@ -37,7 +37,7 @@ class CassetteBuildTest(TestCase):
             reverse("lab:cassette_build"), None, HTTP_X_REQUESTED_WITH="XMLHttpRequest"
         )
 
-        units = json.loads(response.json())
+        units = response.json()
 
         self.assertTemplateNotUsed(
             response,
@@ -378,4 +378,21 @@ class CassetteProcessTest(TestCase):
         )
         self.assertDictContainsSubset(
             {"status": "ERROR"}, response.json(), "Response JSON should be as expected."
+        )
+
+
+class VariantTest(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.client = Client()
+        cls.client.login(username="jmonagas", password="vehice1234")
+        cls.fake = Faker()
+
+    def test_unit_list(self):
+        response = self.client.post(
+            reverse("lab:unit_list"), {"units": json.dumps([1, 2, 3, 4])}
+        )
+
+        self.assertEquals(
+            4, len(response.json()), "Response should contain expected Units."
         )
