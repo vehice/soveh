@@ -5,10 +5,11 @@ from dateutil.parser import ParserError, parse
 from django.core import serializers
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.utils import IntegrityError
-from django.http import JsonResponse, HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render
 from django.utils.decorators import method_decorator
 from django.views import View
+from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.vary import vary_on_headers
 from django.views.generic.detail import SingleObjectMixin
 
@@ -171,13 +172,31 @@ class CassetteProcessView(View):
         return JsonResponse({"status": "DONE", "message": "%d rows updated" % updated})
 
 
-def unit_list(request):
+@csrf_exempt
+def cassette_prebuild(request):
     """
-    Returns a json list detailing units received as parameters.
+    Receives an array of unit ids, and returns an array of `pseudo` Cassettes,
+    grouped by :model:`lab.Case` with their own correlatives.
     """
+    unit_ids = json.loads(request.body)
+    units = Unit.objects.filter(pk__in=unit_ids).order_by("identification__entryform")
 
-    units = Unit.objects.filter(pk__in=json.loads(request.POST.get("units")))
+    response = []
 
-    return HttpResponse(
-        serializers.serialize("json", units), content_type="application/json"
-    )
+    for unit in units:
+        cassette_count = unit.cassettes.count()
+        cassette_count = 1 if cassette_count == 0 else cassette_count
+        unit_organs = unit.organs.all()
+        response.append(
+            {
+                "case": unit.identification.entryform.no_caso,
+                "identification": unit.identification.cage,
+                "unit": unit.correlative,
+                "unit_id": unit.id,
+                "cassette": cassette_count,
+                "organs": serializers.serialize("json", unit_organs),
+                "cassette_organs": serializers.serialize("json", unit_organs),
+            }
+        )
+
+    return HttpResponse(json.dumps(response), content_type="application/json")

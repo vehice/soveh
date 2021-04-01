@@ -9,5 +9,5 @@ urlpatterns = [
     path(
         "cassette/process", views.CassetteProcessView.as_view(), name="cassette_process"
     ),
-    path("unit/list", views.unit_list, name="unit_list"),
+    path("cassette/prebuild", views.cassette_prebuild, name="cassette_prebuild"),
 ]

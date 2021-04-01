@@ -388,11 +388,9 @@ class VariantTest(TestCase):
         cls.client.login(username="jmonagas", password="vehice1234")
         cls.fake = Faker()
 
-    def test_unit_list(self):
+    def test_cassette_prebuilt(self):
         response = self.client.post(
-            reverse("lab:unit_list"), {"units": json.dumps([1, 2, 3, 4])}
+            reverse("lab:cassette_prebuild"), {json.dumps([1, 2, 3])}
         )
 
-        self.assertEquals(
-            4, len(response.json()), "Response should contain expected Units."
-        )
+        self.assertTrue(response.json(), "Should return a response.")
