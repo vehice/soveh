@@ -11,6 +11,30 @@
 
    const selectUnit = $("#selectNewCassetteUnit");
 
+   const rulesForm = {
+     uniqueOrgans: $("#selUniqueOrgans"),
+     groupOrgans: $("#selGroupOrgans"),
+   };
+
+   var rules = {
+     uniques: [],
+     groups: [],
+     max: 0,
+   };
+
+   // organs was defined in the build.html as it was a variable returned from the server
+   const organOptions = organs.map((organ) => {
+     return {
+       id: organ.pk,
+       text: organ.fields.name,
+     };
+   });
+
+   $(".organSelect").select2({
+     data: organOptions,
+     width: "100%",
+   });
+
    // Main table which displays all availables Cases to build Cassettes from.
    const tableIndex = $(".zero-configuration").DataTable({
      dom: "Bfrtip",
@@ -328,6 +352,44 @@
          organs: organs,
        });
      });
+   });
+
+   $("#btnGroupOrgans").click(() => {
+     const selectedOrgans = rulesForm.groupOrgans.select2("data");
+     let ids = [];
+     let text = [];
+
+     for (let select of selectedOrgans) {
+       ids.push(select.id);
+       text.push(select.text);
+     }
+     rules.groups.push(ids);
+
+     $("#tableGroupOrgans > tbody:last-child").append(
+       `<tr>
+            <td style="display: none;" class="groupIds">${ids.join(";")}</td>
+            <td>${text.join(", ")}</td>
+            <td>
+                <button type="button" class="btn btn-danger">X</button>
+            </td>
+        </tr>`
+     );
+
+     rulesForm.groupOrgans.val(null).trigger("change");
+   });
+
+   $("#tableGroupOrgans").on("click", "button.btn-danger", function () {
+     const ids = $(this).parent().siblings(".groupIds").text().split(";");
+     const index = rules.groups.findIndex((group) => {
+       return group === ids;
+     });
+     rules.groups.splice(index, 1);
+     $(this).parents("tr").remove();
+   });
+
+   $("#selUniqueOrgans").on("select2:select", function (e) {
+     console.log(e.params.data);
+     console.log(e.params.data.reduce((carry, row) => carry + ";" + row.id));
    });
 
    /* END EVENTS */

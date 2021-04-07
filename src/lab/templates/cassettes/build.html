@@ -144,11 +144,71 @@
                 </button>
             </div>
             <div class="modal-body container-fluid">
-                Configuracion
+                <div class="row">
+                    <div class="col-md-12">
+                        <h4>1. Organos unicos por cassette</h4>
+                    </div>
+                </div>
+                <div class="row justify-content-center my-2">
+                    <div class="col-md-5">
+                        <div class="form-group">
+                            
+                            <label for="">Seleccionar Organos:</label>
+                            <select multiple id="selUniqueOrgans" class="organSelect"></select>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12">
+                        <h4>2. Grupos de organos por cassette</h4>
+                    </div>
+                </div>
+                <div class="row justify-content-center align-items-center mt-2">
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label for="">Seleccionar Organos:</label>
+                            <select multiple id="selGroupOrgans" class="organSelect"></select>
+                        </div>
+                    </div>
+                    <div class="col-md-1">
+                        <button id="btnGroupOrgans" class="btn btn-success">+</button>
+                    </div>
+                </div>
+                <div class="row justify-content-center mb-2">
+                    <div class="col-md-6">
+                        <table class="table table-sm table-striped"  id="tableGroupOrgans">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Grupo</th>
+                                    <th scope="col">Eliminar</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12">
+                        <h4>3. Cantidad maxima de organos por cassette</h4>
+                    </div>
+                </div>
+                <div class="row justify-content-center my-2">
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label for="">Cantidad Maxima:</label>
+                            <input type="number" value="0" class="form-control" type="text"/>
+                            <small class="text-muted">
+                                Por defecto 0, si es 0 no hay limite, cualquier numero mayor a 0 indica un limite maximo
+                                de organos para un cassette.
+                            </small>
+                        </div>
+                    </div>
+                </div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary btn-close" data-bs-dismiss="modal">Cancelar</button>
-                <button type="button" class="btn btn-primary">Guardar</button>
+                <button type="button" class="btn btn-primary" id="btnSaveConfiguration">Guardar</button>
             </div>
         </div>
     </div>
@@ -169,6 +229,11 @@
     src="https://cdn.datatables.net/buttons/1.7.0/js/dataTables.buttons.min.js"
     defer>
 </script>
+
+<script type="text/javascript">
+ var organs = JSON.parse('{{ organs|safe }}');
+</script>
+
 
 <script type="text/javascript"
         src="{% static 'lab/js/cassette-build.js' %}"
