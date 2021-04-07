@@ -13,7 +13,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.vary import vary_on_headers
 from django.views.generic.detail import SingleObjectMixin
 
-from backend.models import Unit
+from backend.models import Unit, Organ
 from lab.models import Case, Cassette
 
 
@@ -43,13 +43,16 @@ class CassetteBuildView(View):
         """
 
         cases = Case.objects.units(entry_format__in=[1, 2, 6, 7])
+        organs = serializers.serialize("json", Organ.objects.all())
 
         if request.is_ajax():
             return HttpResponse(
                 serializers.serialize("json", cases), content_type="application/json"
             )
 
-        return render(request, "cassettes/build.html", {"cases": cases})
+        return render(
+            request, "cassettes/build.html", {"cases": cases, "organs": organs}
+        )
 
     def post(self, request):
         """
