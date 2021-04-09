@@ -1,8 +1,9 @@
 from datetime import datetime
 
 from django.db import models
-
+from django.urls import reverse
 from numpy import busday_count
+
 from backend.models import EntryForm, Organ, Unit
 
 
@@ -47,9 +48,17 @@ class Case(EntryForm):
 
     @property
     def delay(self):
-        return busday_count(
-            self.created_at.date(), datetime.now().date(), weekmask="1111110"
-        )
+        days = 0
+        try:
+            days = busday_count(
+                self.created_at.date(), datetime.now().date(), weekmask="1111110"
+            )
+        except AttributeError:
+            days = 0
+        return days
+
+    def get_absolute_url(self):
+        return reverse("lab:case_detail", kwargs={"pk": self.id})
 
     class Meta:
         proxy = True
