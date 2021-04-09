@@ -90,11 +90,19 @@
        url: Urls["lab:cassette_prebuild"](),
        contentType: "application/json",
        type: "POST",
+       headers: {
+         "X-CSRFToken": getCookie("csrftoken"),
+       },
        data: function () {
-         return JSON.stringify(selectedItems);
+         return JSON.stringify({
+           selected: selectedItems,
+           rules: rules,
+         });
        },
        dataSrc: "",
      },
+
+     paging: false,
 
      columns: [
        {
@@ -147,6 +155,21 @@
    /* END VARIABLES*/
 
    /* FUNCTIONS */
+   function getCookie(name) {
+     var cookieValue = null;
+     if (document.cookie && document.cookie !== "") {
+       var cookies = document.cookie.split(";");
+       for (var i = 0; i < cookies.length; i++) {
+         var cookie = jQuery.trim(cookies[i]);
+         // Does this cookie string begin with the name we want?
+         if (cookie.substring(0, name.length + 1) === name + "=") {
+           cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+           break;
+         }
+       }
+     }
+     return cookieValue;
+   }
 
    // Convert the response received from the server
    // into a format that Select2 can handle
@@ -262,9 +285,17 @@
    });
 
    $(".btn-close").click(function () {
-     selectUnit.select2("destroy");
+     if (selectUnit.hasClass("select2-hidden-accessible")) {
+       selectUnit.select2("destroy");
+     }
      dlgArmarCassette.hide();
      dlgConfigurarCassette.hide();
+
+     rules = {
+       uniques: [],
+       groups: [],
+       max: 0,
+     };
    });
 
    $("#btnDeleteSelected").click(() => {
@@ -347,10 +378,37 @@
          .map((organ) => parseInt(organ.id));
 
        new_cassettes.push({
-         unit_id: data.unit_id,
+         id: data.unit_id,
          correlative: cassette,
          organs: organs,
        });
+     });
+     const build_at = $("#buildAt").val();
+     $.ajax(Urls["lab:cassette_build"](), {
+       data: JSON.stringify({
+         build_at: build_at,
+         units: new_cassettes,
+       }),
+
+       method: "POST",
+
+       headers: {
+         "X-CSRFToken": getCookie("csrftoken"),
+       },
+
+       contentType: "application/json; charset=utf-8",
+
+       success: (data, textStatus) => {
+         Swal.fire({
+           icon: "success",
+           title: "Guardado",
+         });
+       },
+       error: (xhr, textStatus, error) => {
+         Swal.fire({
+           icon: "error",
+         });
+       },
      });
    });
 
@@ -360,7 +418,7 @@
      let text = [];
 
      for (let select of selectedOrgans) {
-       ids.push(select.id);
+       ids.push(parseInt(select.id));
        text.push(select.text);
      }
      rules.groups.push(ids);
@@ -387,9 +445,31 @@
      $(this).parents("tr").remove();
    });
 
-   $("#selUniqueOrgans").on("select2:select", function (e) {
-     console.log(e.params.data);
-     console.log(e.params.data.reduce((carry, row) => carry + ";" + row.id));
+   $("#selUniqueOrgans").on("select2:select select2:unselect", () => {
+     const selected = $("#selUniqueOrgans")
+       .select2("data")
+       .map((row) => parseInt(row.id));
+
+     rules.uniques = selected;
+   });
+
+   $("#inputMaxOrgans").on("input", (e) => {
+     rules.max = parseInt(e.target.value);
+   });
+
+   $("#btnSaveConfiguration").click(() => {
+     dlgConfigurarCassette.hide();
+   });
+
+   $(".detailTrigger").click(function (e) {
+     e.preventDefault();
+     const url = $(e.target).attr("href");
+     $.get(url, function (data, textStatus) {
+       Swal.fire({
+         html: data,
+         width: "80%",
+       });
+     });
    });
 
    /* END EVENTS */

@@ -55,7 +55,7 @@
                             <td>{{ unit.correlative }}</td>
                             <td>{{ unit.id }}</td>
                             <td>{{ case.delay }}</td>
-                            <td><a href="#">Detalle</a></td>
+                            <td><a href="{{ case.get_absolute_url }}" class="detailTrigger">Detalle</a></td>
                         </tr>
                         {% endfor %}
                         {% endfor %}
@@ -70,6 +70,8 @@
 <!-- End Main Content -->
 
 <!-- Modal Dialogs -->
+
+<!-- CASSETTE BUILD MODAL -->
 
 <div class="modal fade" id="dlgArmarCassette" tabindex="-1" aria-labelledby="btnArmarCassette" aria-hidden="true">
     <div class="modal-dialog modal-xl">
@@ -132,7 +134,7 @@
     </div>
 </div>
 
-
+<!-- CASSETTE CONFIGURATION MODAL -->
 
 <div class="modal fade" id="dlgConfigurarCassette" tabindex="-1" aria-labelledby="btnConfigurarCassette" aria-hidden="true">
     <div class="modal-dialog modal-xl">
@@ -197,7 +199,7 @@
                     <div class="col-md-3">
                         <div class="form-group">
                             <label for="">Cantidad Maxima:</label>
-                            <input type="number" value="0" class="form-control" type="text"/>
+                            <input type="number" value="0" class="form-control" type="text" id="inputMaxOrgans"/>
                             <small class="text-muted">
                                 Por defecto 0, si es 0 no hay limite, cualquier numero mayor a 0 indica un limite maximo
                                 de organos para un cassette.
@@ -227,6 +229,12 @@
 <script
     type="text/javascript"
     src="https://cdn.datatables.net/buttons/1.7.0/js/dataTables.buttons.min.js"
+    defer>
+</script>
+
+<script
+    type="text/javascript"
+    src="//cdn.jsdelivr.net/npm/sweetalert2@10"
     defer>
 </script>
 
