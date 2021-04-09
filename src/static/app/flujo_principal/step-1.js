@@ -2,17 +2,6 @@
 var organs;
 var questionReceptionCondition;
 var researches_json = {};
-function addIdentificador(temp_id = null) {
-  $("#select_if_divide_flow").val(0);
-  $("#select_if_divide_flow").trigger('change');
-  if (temp_id == null) {
-    temp_id = Math.random().toString(36).replace('0.', '');
-  }
-  addIdentificationTemplate({
-    temp_id: temp_id,
-    organs: organs
-  });
-}
 
 function init_step_1() {
   var url = Urls.entryform();
@@ -31,127 +20,6 @@ function init_step_1() {
       console.log("Fail")
     });
 
-
-  $('#identification_group').on("click", "#delete_identification", function (e) {
-    $(this).closest(".identification").remove();
-    refreshNoFish();
-  })
-
-  $('#identification_group').on('change', '[name="identification[no_fish]"]', function (e) {
-    refreshNoFish();
-  })
-
-  $(document).on('click', '#FlowDividerOptions a', function (e) {
-    if (e.target.id === 'base_flowdivider_by_identification')
-    {
-      $('#flow_divide_option').val(1);
-      $("#flowdivider_by_identification").html('');
-      $('[name="identification[no_fish]"]').each(function (i, element) {
-        var no_fish = parseInt($(element).val()) || 0;
-        var templateData = {
-          'group_size_text': no_fish.toString() + " PECES",
-          'group_count': (i + 1).toString()
-        };
-        addWorkGroupTemplateByIdentity(templateData);
-      });
-    } else
-    {
-      $('#flow_divide_option').val(2);
-      var group_data = getManualGroupsData();
-      $("#flowdivider_manual_groups").html('');
-      $.each(group_data, function (i, item) {
-        var aux = {
-          "group_fishes": item,
-          "group_nro": i + 1
-        };
-        addWorkGroupTemplateByManual(aux);
-      });
-
-      $('.fishSelection').select2({
-        'placeholder': "Por favor selecciona los peces"
-      });
-
-      $('.fishSelection').on('select2:select', function (e) {
-        var id = e.params.data.id;
-        $(".fishSelection > option[value='" + id + "']").each(function (i, element) {
-          $(element).prop("disabled", true);
-        });
-        $('.fishSelection').select2({
-          'placeholder': "Por favor selecciona los peces"
-        });
-      });
-
-      $('.fishSelection').on('select2:unselect', function (e) {
-        var id = e.params.data.id;
-        $(".fishSelection > option[value='" + id + "']").each(function (i, element) {
-          $(element).prop("disabled", false);
-        });
-        $('.fishSelection').select2({
-          'placeholder': "Por favor selecciona los peces"
-        });
-      });
-    }
-  });
-
-  $('#select_if_divide_flow').on("change", function (e) {
-    var if_split = $(this).val();
-    $('#flow_divider_options').html("");
-
-    if (if_split == "1")
-    {
-      if (countNoFish() > 0)
-      {
-        addFlowDividerTemplate();
-        $('#FlowDividerOptions li:first-child a').trigger('click');
-      } else
-      {
-        toastr.error('Es necesario completar la identificación de peces para poder subdividir el flujo de trabajo.', 'Aviso');
-        $(this).find('option[value="0"]').prop('selected', true);
-      }
-    }
-  });
-
-  $(document).on('change', '#flowdivider_manual_group_quantity', function (e) {
-    var group_data = getManualGroupsData();
-    $("#flowdivider_manual_groups").html('');
-    $.each(group_data, function (i, item) {
-      var aux = {
-        "group_fishes": item,
-        "group_nro": i + 1
-      };
-      addWorkGroupTemplateByManual(aux);
-    });
-
-    $('.fishSelection').select2({
-      'placeholder': "Por favor selecciona los peces"
-    });
-
-    $('.fishSelection').on('select2:select', function (e) {
-      var id = e.params.data.id;
-      $(".fishSelection > option[value='" + id + "']").each(function (i, element) {
-        $(element).prop("disabled", true);
-      });
-      $('.fishSelection').select2({
-        'placeholder': "Por favor selecciona los peces"
-      });
-    });
-
-    $('.fishSelection').on('select2:unselect', function (e) {
-      var id = e.params.data.id;
-      $(".fishSelection > option[value='" + id + "']").each(function (i, element) {
-        $(element).prop("disabled", false);
-      });
-      $('.fishSelection').select2({
-        'placeholder': "Por favor selecciona los peces"
-      });
-    });
-  });
-
-  $(document).on('change', '.no_peces', function () {
-    $("#select_if_divide_flow").val(0);
-    $("#select_if_divide_flow").trigger('change');
-  });
-
   $(document).on('change', '#step_0 input', function () {
     formChanged = true;
   });
@@ -159,32 +27,6 @@ function init_step_1() {
   $(document).on('change', '#step_0 textarea', function () {
     formChanged = true;
   });
-
-  function getManualGroupsData() {
-    var group_quantity = parseInt(parseFloat($('#flowdivider_manual_group_quantity').val()));
-    var group_data = [];
-    for (var i = 1; i <= group_quantity; i++)
-    {
-      var select = [];
-      $('[name="identification[no_fish]"]').each(function (i, element) {
-        var no_fish = parseInt($(element).val()) || 0;
-        var identification_id = $(element).closest('.identification').get(0).id;
-        var cage = $(element).closest('.identification').find('[name="identification[cage]"]').val();
-        var group = $(element).closest('.identification').find('[name="identification[group]"]').val();
-        for (var j = 1; j <= no_fish; j++)
-        {
-          select.push({
-            'identification_id': identification_id,
-            'fish_num': j,
-            'cage': cage,
-            'group': group
-          });
-        }
-      });
-      group_data.push(select);
-    }
-    return group_data;
-  }
 
   function loadData() {
     var entryform_id = $('#entryform_id').val();
@@ -340,130 +182,10 @@ $(document).on('click', '#saveStep1', function () {
 });
 
 function validate_step_1() {
-  // OLD IDENTIFICATION
-  
-  // var no_fish = countNoFish();
-
-  // // Validates Identifications
-  // if (no_fish <= 0)
-  // {
-  //   toastr.error(
-  //     'Para continuar debes determinar la cantidad de peces para las muestras.',
-  //     'Ups!',
-  //     {positionClass: 'toast-top-full-width', containerId: 'toast-bottom-full-width'}
-  //   );
-  //   $('input[name="identification[no_fish]"]').focus({preventScroll:false});
-  //   return false;
-  // }
-
-  // var orgas = $('.identification_organs');
-  // no_organ = true;
-  // $.each(orgas, function (i, v) {
-  //   if ($(v).val().length == 0)
-  //     no_organ = false
-  // })
-
-  // if (!no_organ)
-  // {
-  //   toastr.error(
-  //     'Para continuar debes seleccionar organos para las muestras.',
-  //     'Ups!',
-  //     {positionClass: 'toast-top-full-width', containerId: 'toast-bottom-full-width'}
-  //   );
-  //   return false;
-  // }
-
-  // var identif = $('.estanque-cage');
-  // no_identif = true;
-  // $.each(identif, function (i, v) {
-  //   if ($(v).val() == '')
-  //     no_identif = false
-  // })
-
-  // if (!no_identif)
-  // {
-  //   toastr.error(
-  //     'Para continuar debes determinar las identificaciones de los estanques y los grupos para las muestras.',
-  //     'Ups!',
-  //     {positionClass: 'toast-top-full-width', containerId: 'toast-bottom-full-width'}
-  //   );
-  //   return false;
-  // }
-
-  // OLD IDENTIFICATION 
-
-
-  // var orgas = $('input[name=identification[cage]]');
-  // no_organ = true;
-  // $.each(orgas, function(i,v){
-  //   if($(v).val() == '')
-  //     no_organ = false
-  // })
-
-  // if ( !no_organ ) {
-  //   toastr.error(
-  //     'Para continuar debes definir las jualas para las muestras.', 
-  //     'Ups!', 
-  //     {positionClass: 'toast-top-full-width', containerId: 'toast-bottom-full-width'}
-  //   );
-  //   return false;
-  // }
-  // return no_organ;
-  // // Validates exam selection
-  // if ( $('#exam_select :selected').length <= 0 ) {
-  //   toastr.error(
-  //     'Para continuar debes tener seleccionado al menos un análisis.', 
-  //     'Ups!', 
-  //     {positionClass: 'toast-top-full-width', containerId: 'toast-bottom-full-width'}
-  //   );
-  //   $('#exam_select').focus();
-  //   return false;
-  // }
-
-  // // Validates samples asignation
-  // if ( $('input[name*="sample[index]"').length <= 0) {
-  //   toastr.error(
-  //     'Para continuar debes asignar los examenes seleccionados a las muestras ingresadas.', 
-  //     'Ups!', 
-  //     {positionClass: 'toast-top-full-width', containerId: 'toast-bottom-full-width'}
-  //   );
-  //   $('#loadSamplesToAnalysis').focus();
-  //   return false;
-  // }
 
   return true;
 
 }
-
-// Function for events
-
-// function countNoFish() {
-//   var no_fish = 0
-//   $('[name="identification[no_fish]"]').each(function (i, element) {
-//     no_fish += parseInt($(element).val()) || 0
-//   });
-
-//   return no_fish
-// }
-
-// function countSelectedFishes() {
-//   var no_fish = 0
-//   $('[name*="analysis[no_fish]"]').each(function (i, element) {
-//     no_fish += parseInt($(element).val()) || 0
-//   });
-
-//   return no_fish
-// }
-
-// function refreshNoFish() {
-//   var no_fish = countNoFish()
-
-//   $('[name*="analysis[no_fish]"]').each(function (i, element) {
-//     $(element).val(no_fish);
-//   });
-
-//   // $('#flow_divider').trigger('change');
-// }
 
 function splitArrayByChunkSize(arr, n) {
   var rest = arr.length % n,
@@ -539,32 +261,6 @@ function loadWaterSources(waterSources) {
   });
 }
 
-// function loadExams(exams) {
-//   $.each(exams, function (i, item) {
-//     $('#exam_select').append($('<option>', {
-//       value: item.id,
-//       text: item.name
-//     }));
-//   });
-// }
-
-// function loadOrgans(organs) {
-//   $.each(organs, function (i, item) {
-//     $('#analysis-select').append($('<option>', {
-//       value: item.id,
-//       text: item.name
-//     }));
-//   });
-// }
-
-// function loadQuestions(questionReceptionCondition) {
-//   $("#question_reception").html("");
-//   var temp_id = Math.floor(Math.random() * Math.floor(1000))
-//   $.each(questionReceptionCondition, function (i, item) {
-//     var data = {'question_id': item.id, 'question_text': item.text, 'question_index': i, 'temp_id': temp_id}
-//     addQuestionReceptionTemplate(data);
-//   });
-// }
 
 $(document).on('click', '.showResearchPopover', function () {
   var id = $("#researches_select").val();

@@ -205,7 +205,7 @@
     },
     "case_client":{
         "es":"Nro Caso<br> Cliente",
-        "en":"Client's case"
+        "en":"Client <br> Case"
     },
     "amount_identifications_units":{
         "es":"Cantidad<br>Unidades",
@@ -602,5 +602,25 @@
     "reception_done":{
         "es":"La recepción ha finalizado exitosamente",
         "en":"Reception done successfully"
+    },
+    "selection":{
+        "es":"Selección",
+        "en":"Selection"
+    },
+    "select_all":{
+        "es":"Seleccionar todos",
+        "en":"Select All"
+    },
+    "deselect_all":{
+        "es":"Deseleccionar todos",
+        "en":"Deselect All"
+    },
+    "add":{
+        "es":"Ingresar",
+        "en":"Add"
+    },
+    "remove":{
+        "es":"Eliminar",
+        "en":"Remove"
     }
 }

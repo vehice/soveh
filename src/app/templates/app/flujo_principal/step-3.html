@@ -32,24 +32,24 @@
             </select>
           </div>
           <div class="col-sm-3">
-            <button type="button" class="btn btn-primary" onclick="addExamToSamples()"><i class="fa fa-plus"></i> Ingresar</button>
-            <button type="button" class="btn btn-danger" onclick="removeExamFromSamples()"><i class="fa fa-close"></i> Eliminar</button>
+            <button type="button" class="btn btn-primary" onclick="addExamToSamples()"><i class="fa fa-plus"></i> {{request.lang.add}}</button>
+            <button type="button" class="btn btn-danger" onclick="removeExamFromSamples()"><i class="fa fa-close"></i> {{request.lang.remove}}</button>
           </div>
         </div>
       </div>
       <div class="col-sm-12 mt-3">
-        <button type="button" class="btn btn-sm btn-light" onclick="selectAllChecks(1)"><i class="fa fa-check-square-o"></i> Seleccionar todos</button>
-        <button type="button" class="btn btn-sm btn-light" onclick="selectAllChecks(0)"><i class="fa fa-square-o"></i> Deseleccionar todos</button>
+        <button type="button" class="btn btn-sm btn-light" onclick="selectAllChecks(1)"><i class="fa fa-check-square-o"></i> {{request.lang.select_all}}</button>
+        <button type="button" class="btn btn-sm btn-light" onclick="selectAllChecks(0)"><i class="fa fa-square-o"></i> {{request.lang.deselect_all}}</button>
         <table class="table table-bordered table-condensed mt-1" id="samples_table" style="font-size:13px;">
           <thead>
             <tr>
-              <th style="width:5%">Selección</th>
+              <th style="width:5%">{{request.lang.selection}}</th>
               <th style="width:5%">{{request.lang.nro_sample}}</th>
               <th style="width:15%">{{request.lang.identification}}</th>
               <th style="width:25%">{{request.lang.organs}}</th>
               <th style="width:25%">{{request.lang.analysis}} / Tinción</th>
               <th style="width:30%">{{request.lang.organs}} a Analizar</th>
-              <th style="width:10%">Estado</th>
+              <th style="width:10%">{{request.lang.status}}</th>
               <th style="width:5%"></th>
             </tr>
           </thead>
