@@ -8,6 +8,28 @@ from faker import Faker
 from lab.models import Case, Cassette
 
 
+class CaseTest(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.client = Client()
+        cls.client.login(username="jmonagas", password="vehice1234")
+        cls.fake = Faker()
+
+    def test_detail_returns_template(self):
+        response = self.client.get(reverse("lab:case_detail", kwargs={"pk": 983}))
+
+        self.assertTemplateUsed(
+            response, "cassettes/detail.html", "Response should use expected template."
+        )
+
+    def test_detail_returns_case(self):
+        response = self.client.get(reverse("lab:case_detail", kwargs={"pk": 983}))
+
+        self.assertTrue(
+            response.context["case"].id == 983, "Response should return expected Case."
+        )
+
+
 class CassetteBuildTest(TestCase):
     @classmethod
     def setUpTestData(cls):
@@ -110,8 +132,8 @@ class CassetteBuildTest(TestCase):
         for cassette in cassettes:
             self.assertGreaterEqual(cassette["pk"], 1, "All Cassettes must have a PK.")
             self.assertEqual(
-                datetime.datetime.now().isoformat(timespec="seconds"),
-                cassette["fields"]["build_at"][:-4],
+                datetime.datetime.now().isoformat(timespec="minutes"),
+                cassette["fields"]["build_at"][:-7],
                 "All Cassettes must have the same build_date as expected.",
             )
 
@@ -236,6 +258,140 @@ class CassetteBuildTest(TestCase):
             },
             response.json(),
             "Response JSON should be as expected.",
+        )
+
+
+class CassettePrebuildTest(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.client = Client()
+        cls.client.login(username="jmonagas", password="vehice1234")
+        cls.fake = Faker()
+
+    def test_no_rules(self):
+        response = self.client.generic(
+            "GET",
+            reverse("lab:cassette_prebuild"),
+            json.dumps(
+                {
+                    "selected": [13, 12],
+                    "rules": {"uniques": [], "groups": [], "max": 0},
+                }
+            ),
+        )
+
+        self.assertGreaterEqual(
+            len(response.json()),
+            2,
+            "Response should contain as many items as units given.",
+        )
+
+        self.assertDictContainsSubset(
+            {"unit_id": 13},
+            response.json()[0],
+            "Response should contain expected data.",
+        )
+
+        self.assertDictContainsSubset(
+            {"unit_id": 12},
+            response.json()[1],
+            "Response should contain expected data.",
+        )
+
+        self.assertDictContainsSubset(
+            {"cassette": 1},
+            response.json()[0],
+            "Response should contain expected data.",
+        )
+
+        self.assertEqual(
+            response.json()[0]["cassette_organs"],
+            response.json()[0]["organs"],
+            "Response should contain expected data.",
+        )
+
+    def test_rule_unique(self):
+        response = self.client.generic(
+            "GET",
+            reverse("lab:cassette_prebuild"),
+            json.dumps(
+                {
+                    "selected": [2, 12],
+                    "rules": {"uniques": [59], "groups": [], "max": 0},
+                }
+            ),
+        )
+
+        self.assertEquals(
+            59,
+            json.loads(response.json()[0]["cassette_organs"])[0].get("pk"),
+            "Response should contain expected data.",
+        )
+
+    def test_rule_groups(self):
+        response = self.client.generic(
+            "GET",
+            reverse("lab:cassette_prebuild"),
+            json.dumps(
+                {
+                    "selected": [2, 12],
+                    "rules": {"uniques": [], "groups": [[59, 57], [58, 56]], "max": 0},
+                }
+            ),
+        )
+
+        self.assertEquals(
+            len(json.loads(response.json()[0]["cassette_organs"])),
+            2,
+            "Response should contain expected data.",
+        )
+
+    def test_rule_max(self):
+        response = self.client.generic(
+            "GET",
+            reverse("lab:cassette_prebuild"),
+            json.dumps(
+                {
+                    "selected": [2, 12],
+                    "rules": {"uniques": [], "groups": [], "max": 2},
+                }
+            ),
+        )
+
+        self.assertEquals(
+            len(json.loads(response.json()[0]["cassette_organs"])),
+            2,
+            "Response should contain expected data.",
+        )
+
+    def test_rule_all(self):
+        response = self.client.generic(
+            "GET",
+            reverse("lab:cassette_prebuild"),
+            json.dumps(
+                {
+                    "selected": [2, 12],
+                    "rules": {"uniques": [55], "groups": [[56, 57]], "max": 2},
+                }
+            ),
+        )
+
+        self.assertEquals(
+            len(json.loads(response.json()[0]["cassette_organs"])),
+            1,
+            "Response should contain expected data.",
+        )
+
+        self.assertEquals(
+            len(json.loads(response.json()[1]["cassette_organs"])),
+            2,
+            "Response should contain expected data.",
+        )
+
+        self.assertEquals(
+            len(json.loads(response.json()[2]["cassette_organs"])),
+            2,
+            "Response should contain expected data.",
         )
 
 
@@ -379,18 +535,3 @@ class CassetteProcessTest(TestCase):
         self.assertDictContainsSubset(
             {"status": "ERROR"}, response.json(), "Response JSON should be as expected."
         )
-
-
-class VariantTest(TestCase):
-    @classmethod
-    def setUpTestData(cls):
-        cls.client = Client()
-        cls.client.login(username="jmonagas", password="vehice1234")
-        cls.fake = Faker()
-
-    def test_cassette_prebuilt(self):
-        response = self.client.post(
-            reverse("lab:cassette_prebuild"), {json.dumps([1, 2, 3])}
-        )
-
-        self.assertTrue(response.json(), "Should return a response.")
