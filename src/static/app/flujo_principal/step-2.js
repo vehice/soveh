@@ -14,6 +14,10 @@ function init_step_2() {
   .done(function (data) {
     $('#identification_group_list').html('');
     entryform = data.entryform;
+
+    $('.showSummaryBtn').removeClass("hidden");
+    $('.showReceptionFileBtn').removeClass("hidden");
+    $('.showAttachedFilesBtn').removeClass("hidden");
   })
   .fail(function () {
     console.log("Fail")
@@ -23,75 +27,82 @@ function init_step_2() {
     "rowId": "id",
     "columnDefs": [
       {
+        "width": "3%",
         "targets": 0,
         "className": 'details-control',
         "orderable": false,
         "data": null,
         "render": function (data, type, row, meta) {
-          return `<i class="fa fa-chevron-right fa-fx fa-2x" data-ident="${row.id}"></i>`;
+          return `<i class="fa fa-chevron-right fa-fx fa-2x control-table" data-ident="${row.id}"></i>`;
         }
       },
       {
-
+        "width": "3%",
         "targets": 1, "orderable": false, "data": "correlative", "className": 'correlative-text',
         "render": function (data, type, row, meta) {
           return `${data ? data : ""}`;
         }
       },
       {
+        "width": "15%",
         "targets": 2, "orderable": false, "data": "cage",
         "render": function (data, type, row, meta) {
           return `<input name="cage" class="form-control-table ident-data" value="${data ? data : ""}" >`;
         }
       },
       {
+        "width": "15%",
         "targets": 3, "orderable": false, "data": "group",
         "render": function (data, type, row, meta) {
           return `<input name="group" class="form-control-table ident-data" value="${data ? data : ""}" >`;
         }
       },
       {
-        "targets": 4, "orderable": false, "data": "client_case_number",
+        "width": "20%",
+        "targets": 4, "orderable": false, "data": "extra_features_detail",
+        "render": function (data, type, row, meta) {
+          return `<textarea style="resize:none;" name="extra_features_detail" class="form-control-table ident-data" rows="3" >${data ? data : ""} </textarea>`;
+        }
+      },
+      {
+        "width": "8%",
+        "targets": 5, "orderable": false, "data": "client_case_number",
         "render": function (data, type, row, meta) {
           return `<input name="client_case_number" class="form-control-table ident-data" value="${data ? data : ""}" >`;
         }
       },
       {
-        "targets": 5, "orderable": false, "data": "weight",
+        "width": "5%",
+        "targets": 6, "orderable": false, "data": "weight",
         "render": function (data, type, row, meta) {
           return `<input name="weight" class="form-control-table ident-data" type="number" step="0.1" min="0" value="${data ? data : "0"}" >`;
         }
       },
       {
-        "targets": 6, "orderable": false, "data": "extra_features_detail",
-        "render": function (data, type, row, meta) {
-          return `<textarea name="extra_features_detail" class="form-control-table ident-data" rows="3" > ${data ? data : ""} </textarea>`;
-        }
-      },
-      {
+        "width": "3%",
         "targets": 7, "orderable": false, "data": "is_optimum",
         "render": function (data, type, row, meta) {
           return `
-          <select name="is_optimum" class="form-control-table ident-data">
-            <option value="1"> Sí </option>
-            <option value="0" ${(data != null && !data) ? 'selected' : ''}> No </option>
-          </select>
+          <input type="checkbox" style="margin-top:10%" name="is_optimum" class="form-control-table ident-data checkbox-2x" ${data ? 'checked' : ''}>
           `;
         }
       },
       {
+        "width": "20%",
         "targets": 8, "orderable": false, "data": "observation",
         "render": function (data, type, row, meta) {
-          return `<textarea name="observation" class="form-control-table ident-data" rows="3"> ${data ? data : ""} </textarea>`;
+          return `<textarea name="observation" class="form-control-table ident-data" rows="3">${data ? data : ""} </textarea>`;
         }
       },
       {
+        "width": "3%",
         "targets": 9, "orderable": false, "data": "quantity",
         "render": function (data, type, row, meta) {
           return `<input id="amount_${row.id}" name="quantity" class="form-control-table amount" type="number" data-ident="${row.id}" value="${data ? data : "0"}" min="${data ? data : ""}">`;
         }
       },
       {
+        "width": "3%",
         "targets": 10, "orderable": false, "data": null,
         "render": function (data, type, row, meta) {
           return `<button class="btn btn-danger deleteIdent" type="button" data-ident="${row.id}"><i class="fa fa-trash fa-fx"></i></button>`
@@ -101,7 +112,12 @@ function init_step_2() {
     "info": false,
     "paging": false,
     "searching": false,
-    "order": [[1, 'asc']]
+    "order": [[1, 'asc']],
+    "autoWidth": false,
+    "fixedHeader": {
+        "header": false,
+        "footer": false
+    },
   });
 
   var url = Urls.list_identification(entryform_id);
@@ -550,7 +566,11 @@ function retrieveDataRow(row) {
   var data = row.data();
 
   $.each($(`#${data.id} .form-control-table`), function (i, v) {
-    data[v.name] = v.value;
+    if ( $(v).attr("type") == "checkbox" ){
+      data[v.name] = v.checked ? 1 : 0
+    } else {
+      data[v.name] = v.value
+    }
   });
 
   return data;

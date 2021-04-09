@@ -128,7 +128,7 @@
         "en": "Summary case"
     },
     "general_info":{
-        "es":"Iformación general",
+        "es":"Información general",
         "en":"General information"
     },
     "company":{
@@ -183,9 +183,17 @@
         "es":"Agregar identificación",
         "en":"Add identification"
     },
+    "edit_units":{
+        "es":"Editar Unidades/Identificación",
+        "en":"Edit Units"
+    },
+    "edit_services":{
+        "es":"Editar Servicios",
+        "en":"Edit Services"
+    },
     "cage":{
-        "es":"Estanque/Jaula",
-        "en":"Tank/Cage"
+        "es":"Estanque/<br>Jaula",
+        "en":"Tank/<br>Cage"
     },
     "group_client":{
         "es":"Grupo/Nro Caso Cliente",
@@ -196,8 +204,12 @@
         "en":"Group"
     },
     "case_client":{
-        "es":"Nro Caso Cliente",
+        "es":"Nro Caso<br> Cliente",
         "en":"Client's case"
+    },
+    "amount_identifications_units":{
+        "es":"Cantidad<br>Unidades",
+        "en":"Units<br>Amount"
     },
     "amount_identifications":{
         "es":"Cantidad",
@@ -212,7 +224,7 @@
         "en":"No. containers"
     },
     "weight":{
-        "es":"Peso (gramos)",
+        "es":"Peso (gr)",
         "en":"Weight (g)"
     },
     "optimum":{
@@ -220,8 +232,8 @@
         "en":"Optimum?"
     },
     "extra_features":{
-        "es":"Características Extras",
-        "en":"Extra features"
+        "es":"Característica<br> Extra",
+        "en":"Extra <br>feature"
     },
     "observations":{
         "es":"Observaciones",
@@ -252,7 +264,7 @@
         "en":"Samples"
     },
     "no_sample":{
-        "es":"Pez",
+        "es":"No. muestra",
         "en":"No. sample"
     },
     "analysis":{
@@ -348,7 +360,7 @@
         "en":"Close Service"
     },
     "cancel_service":{
-        "es":"Anular Servicop",
+        "es":"Anular Servicio",
         "en":"Cancel Service"
     },
     "finalize":{
@@ -448,8 +460,8 @@
         "en":"Wea are sorry, services are still open. These must be closed or cancelled before closing the case."
     },
     "close_case_text":{
-        "es":"¿Está seguro que desea finalizar el caso?",
-        "en":"Are you sure you want to close the case?"
+        "es":"¿Está seguro que desea finalizar la recepción del caso?",
+        "en":"Are you sure you want to finish the case reception?"
     },
     "confirm_case":{
         "es":"Sí!",
@@ -480,8 +492,8 @@
         "en":"Sample Detail"
     },
     "optimus_condition":{
-        "es":"¿Condiciones óptimas?",
-        "en":"optimum conditions?"
+        "es":"¿Óptimo?",
+        "en":"Optimum?"
     },
     "change_language":{
         "es":"¿Cambiar idioma?",
@@ -586,5 +598,9 @@
     "reception_receive_question":{
         "es":"¿Deseas descargar el comprobante de recepción?",
         "en":"Do you want to download the receipt? "
+    },
+    "reception_done":{
+        "es":"La recepción ha finalizado exitosamente",
+        "en":"Reception done successfully"
     }
 }

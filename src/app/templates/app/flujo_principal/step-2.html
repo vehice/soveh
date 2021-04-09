@@ -5,38 +5,23 @@
     <input type="hidden" id="form_id" name="form_id" value="{{form_id}}">
     <input type="hidden" id="entryform_id" name="entryform_id" value="{{entryform_id}}">
     <div class="table-responsive">
-      <table id="identifications" class="display table table-bordered table-condensed">
+      <table id="identifications" class="table table-xs table-bordered table-condensed table-ident" cellpadding="0" cellspacing="0">
         <thead>
           <tr>
             <th></th>
             <th>#</th>
-            <th>{{request.lang.cage}}</th>
-            <th>{{request.lang.group}}</th>
-            <th>{{request.lang.case_client}}</th>
-            <th>{{request.lang.weight}}</th>
-            <th>{{request.lang.extra_features}}</th>
-            <th>{{request.lang.optimus_condition}}</th>
-            <th>{{request.lang.observations}}</th>
-            <th>{{request.lang.amount_identifications}}</th>
-            <th>{{request.lang.options}}</th>
+            <th>{{request.lang.cage|safe}}</th>
+            <th>{{request.lang.group|safe}}</th>
+            <th>{{request.lang.extra_features|safe}}</th>
+            <th>{{request.lang.case_client|safe}}</th>
+            <th>{{request.lang.weight|safe}}</th>
+            <th>{{request.lang.optimus_condition|safe}}</th>
+            <th>{{request.lang.observations|safe}}</th>
+            <th>{{request.lang.amount_identifications|safe}}</th>
+            <th>{{request.lang.options|safe}}</th>
           </tr>
         </thead>
         <tbody class="text-center">
-          <!-- <tr>
-            <td></td>
-            <td><input name="eee" class="form-control-table"></td>
-            <td><input name="eee" class="form-control-table"></td>
-            <td><input name="eee" class="form-control-table"></td>
-            <td><input name="eee" class="form-control-table"></td>
-            <td><input name="eee" class="form-control-table"></td>
-            <td><input name="eee" class="form-control-table"></td>
-            <td><input name="eee" class="form-control-table"></td>
-            <td><input name="eee" class="form-control-table"></td>
-            <td><input name="eee" class="form-control-table amount" type="number" min="0"></td>
-            <td>
-              <button class="btn btn-danger deleteIdent" type="button"><i class="fa fa-trash fa-fx"></i></button>
-            </td>
-          </tr> -->
         </tbody>
       </table>
     </div>

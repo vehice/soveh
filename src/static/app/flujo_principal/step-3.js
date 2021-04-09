@@ -16,6 +16,7 @@ function init_step_3() {
     // console.log(data_step_3)
     $('.showSummaryBtn').removeClass("hidden");
     $('.showAttachedFilesBtn').removeClass("hidden");
+    $('.showReceptionFileBtn').removeClass("hidden");
     $('.showShareBtn').addClass("hidden");
     $('.showLogBtn').addClass("hidden");
     $('.newAnalysisBtn').addClass("hidden");
@@ -101,7 +102,6 @@ function initialData(data) {
 function loadData(data){
   $.each(data.samples, function(i, sample){
     $.each(sample.sample_exams_set, function(_, value){
-      console.log("value", value)
       let exam_id = value[0].exam_id
       let exam_name = value[0].exam_name
       let stain = {
@@ -127,7 +127,6 @@ function loadData(data){
       let analisis_tr = $("#analisis-"+sample.id+"-"+exam_id+"-"+stain.id)
       let select_organs = analisis_tr.find(".organs-select").first()
       select_organs.select2();
-      console.log("organs", value.map(o => o.organ_id))
       select_organs.val(value.map(o => o.organ_id)).trigger('change')
       
     });
@@ -195,8 +194,6 @@ function addExamToSamples(){
 }
 
 function removeExamFromSamples(){
-  console.log("removeexam")
-
   let analysis_selected = $("#exam_select").val();
   let stain_selected = $("#stain_select").val();
   let organs_selected = $("#organs_select").val();
@@ -233,6 +230,43 @@ function removeExamFromSamples(){
     }
   })
   return false
+}
+
+function forceRemoveService(sample, tr){
+  swal({
+    title: "Confirmación",
+    text: "¿Está seguro que desea remover el servicio de la muestra?",
+    icon: "warning",
+    showCancelButton: true,
+    buttons: {
+      cancel: {
+          text: "No, cancelar",
+          value: null,
+          visible: true,
+          className: "btn-warning",
+          closeModal: true,
+      },
+      confirm: {
+          text: "Continuar",
+          value: true,
+          visible: true,
+          className: "",
+          closeModal: true,
+      }
+    }
+  }).then(isConfirm => {
+    if (isConfirm) {
+      $("#"+tr).remove();
+      let rowspan = $('#sampleCheck-'+sample)[0].rowSpan
+      $('#sampleCheck-'+sample)[0].rowSpan = rowspan - 1
+      $('#sampleNro-'+sample)[0].rowSpan = rowspan - 1
+      $('#sampleIden-'+sample)[0].rowSpan = rowspan - 1
+      $('#sampleOrgans-'+sample)[0].rowSpan = rowspan - 1
+      if (rowspan == 2)
+        $('.delete-'+sample).show()
+    }
+  });
+
 }
 
 function validate_step_3(){
@@ -304,4 +338,17 @@ function addServiceRow(analisis, sampleId, examId, stain, organs, status) {
   var templateFn = _.template(sampleRowTemplate);
   var templateHTML = templateFn({'organs': organs, 'stain':stain, 'analisis': analisis, 'sampleId': sampleId, 'examId': examId, 'status':status});
   return templateHTML;
+}
+
+function selectAllChecks(opt){
+  console.log("llegue")
+  if (opt == 1){
+    $('#samples_table input[type=checkbox]').each(function (_, input) {
+      input.checked = true;
+    });
+  } else {
+    $('#samples_table input[type=checkbox]').each(function (_, input) {
+      input.checked = false;
+    });
+  }
 }

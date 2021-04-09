@@ -93,7 +93,7 @@ class ENTRYFORM(View):
                     entryform=entryform['id']).values())
             
             samples = Sample.objects.filter(
-                    entryform=entryform['id']).order_by('index', 'identification_id')
+                    entryform=entryform['id']).order_by('identification_id', 'index')
             
             samples_as_dict = []
             for s in samples:
@@ -145,7 +145,13 @@ class ENTRYFORM(View):
             #     entryform_object.identification_set.all().values())
             entryform["identifications"] = []
             for ident in entryform_object.identification_set.all():
-                ident_json = model_to_dict(ident, exclude=["organs", "organs_before_validations"])
+                ident_json = model_to_dict(ident, exclude=[
+                    'organs', 
+                    'organs_before_validations',
+                    'no_fish',
+                    'no_container',
+                    'temp_id'
+                ])
                 # ident_json['organs_set'] = list(ident.organs.all().values())
                 # ident_json['organs_bv_set'] = list(ident.organs_before_validations.all().values())
                 entryform["identifications"].append(ident_json)              
@@ -2135,10 +2141,11 @@ def step_2_entryform(request):
     index = 1
     for ident in identifications:
         
-        # Deleting previous samples
-        Sample.objects.filter(
-            identification=ident, 
-        ).delete()
+        #Deleting previous samples
+        
+        # Sample.objects.filter(
+        #     identification=ident, 
+        # ).delete()
         
         units = Unit.objects.filter(identification=ident)
         if ident.samples_are_correlative:
@@ -2151,16 +2158,24 @@ def step_2_entryform(request):
                   
             for k, v in unit_by_correlative.items():
                 
-                sample = Sample.objects.create(
+                sample = Sample.objects.filter(
                     entryform = entryform,
                     index = index,
                     identification = ident
-                )
+                ).first()
+                
+                if not sample:
+                    sample = Sample.objects.create(
+                        entryform = entryform,
+                        index = index,
+                        identification = ident
+                    )
+                
+                sample.organs.clear()
                 for ou in OrganUnit.objects.filter(unit__in=map(lambda x: x.pk, v)):
                     sample.organs.add(ou.organ)
                 
                 index += 1
-                
         else:
             organs = [ou.organ.pk for ou in OrganUnit.objects.filter(unit__in=map(lambda x: x.pk, units))]
             organs_copy = organs[:]
@@ -2177,11 +2192,19 @@ def step_2_entryform(request):
                     samples_from_organs.append(new_comb)
             
             for s in samples_from_organs:
-                sample = Sample.objects.create(
+                sample = Sample.objects.filter(
                     entryform = entryform,
                     index = index,
                     identification = ident
-                )
+                ).first()
+                
+                if not sample:
+                    sample = Sample.objects.create(
+                        entryform = entryform,
+                        index = index,
+                        identification = ident
+                    )
+                sample.organs.clear()
                 for org in s:
                     sample.organs.add(Organ.objects.get(pk=org))
                 
@@ -2189,125 +2212,6 @@ def step_2_entryform(request):
     
     return True 
     
-#############################
-#     DEPRECATED            #
-#############################
-
-# def step_2_entryform(request):
-#     var_post = request.POST.copy()
-
-#     entryform = EntryForm.objects.get(pk=var_post.get('entryform_id'))
-#     Cassette.objects.filter(entryform=entryform).delete()
-#     exams_to_do = var_post.getlist("analysis")
-#     analyses_qs = entryform.analysisform_set.all()
-#     change = False
-    
-#     exam_stains = {}
-
-#     sample_id = [
-#         v for k, v in var_post.items() if k.startswith("sample[id]")
-#     ]
-
-#     for values in sample_id:
-#         sample = Sample.objects.get(pk=int(values))
-#         # sample.cassette_set.all().delete()
-        
-#         sample_exams = [
-#             v[0] for k, v in dict(var_post).items() if k.startswith("sample[exams]["+values)
-#         ]
-#         sample_organs = []
-#         bulk_data = []
-        
-#         for se in SampleExams.objects.filter(sample=sample):
-#             if se.exam_id not in sample_exams:
-#                 se.delete()
-
-#         for exam in sample_exams:
-            
-#             sample_organs = [
-#                 v for k, v in dict(var_post).items() if k.startswith("sample[organs]["+values+"]["+exam)
-#             ]
-            
-#             sample_stain = [
-#                 v for k, v in dict(var_post).items() if k.startswith("sample[stain]["+values+"]["+exam)
-#             ]
-            
-#             # Saving Services or AnalysisForm based on exam and stains
-#             if exam in exam_stains:
-#                 exam_stains[exam].append(sample_stain[0][0])
-#             else:
-#                 exam_stains[exam] = [sample_stain[0][0]]
-            
-#             for se in SampleExams.objects.filter(sample=sample, exam_id=exam):
-#                 if se.organ_id not in sample_organs[0]:
-#                     se.delete()
-#                 else:
-#                     se.stain_id = sample_stain[0][0] if sample_stain else None
-#                     se.save()
-
-#             for organ in sample_organs[0]:
-#                 if SampleExams.objects.filter(sample=sample, exam_id=exam, organ_id=organ).count() == 0:
-#                     bulk_data.append(SampleExams(
-#                         sample_id = sample.pk,
-#                         exam_id = exam,
-#                         organ_id= organ,
-#                         stain_id = sample_stain[0][0] if sample_stain else None
-#                     ))
-#         change = change or checkSampleExams(sample.sampleexams_set.all(), bulk_data)
-#         SampleExams.objects.bulk_create(bulk_data)
-#         sample.save()
-        
-#     # AnalysisForm.objects.filter(entryform_id=entryform.id).exclude(exam_id__in=exam_stains.keys()).delete()
-
-#     services = []
-#     for key, value in exam_stains.items():
-#         # AnalysisForm.objects.filter(entryform_id=entryform.id, exam_id=key).exclude(stain_id__in=value).delete()        
-#         for item in value:
-#             services.append((key, item))
-            
-            
-#     for a, b in services:
-#         ex = Exam.objects.get(pk=a)
-
-#         if ex.service_id in [1,3,4]:
-#             flow = Flow.objects.get(pk=2)
-#         elif ex.service_id == 5:
-#             continue;
-#         else:
-#             flow = Flow.objects.get(pk=3)
-
-#         AFS = AnalysisForm.objects.filter(entryform_id=entryform.id, exam=ex, stain_id=b)
-#         if AFS.count() == 0:
-#             analysis_form = AnalysisForm.objects.create(
-#                 entryform_id=entryform.id,
-#                 exam=ex,
-#                 stain_id=b
-#             )
-
-#             Form.objects.create(
-#                 content_object=analysis_form,
-#                 flow=flow,
-#                 state=flow.step_set.all()[0].state,
-#                 parent_id=entryform.forms.first().id)
-#         else:
-#             AFS_list = list(AFS)
-#             for AF in AFS_list[1:]:
-#                 AF.delete()
-                
-#             sampleExams = SampleExams.objects.filter(sample__in=sample_id, exam=AFS_list[0].exam, stain=AFS_list[0].stain)
-
-#             af_form = AFS_list[0].forms.get()
-#             if af_form.cancelled and sampleExams.count() > 0:
-#                 af_form.cancelled = False
-#                 af_form.cancelled_at = None
-#                 af_form.save()
-#                 AFS_list[0].manual_cancelled_date = None
-#                 AFS_list[0].manual_cancelled_by = None
-#                 AFS_list[0].save()
-#     if change:
-#         changeCaseVersion(True,entryform.id, request.user.id)
-#     return True
-
 def checkSampleExams(olds, news):
     if len(olds) != len(news):
         return True
@@ -2389,7 +2293,7 @@ def step_3_entryform(request):
         if ex.service_id in [1,3,4]:
             flow = Flow.objects.get(pk=2)
         elif ex.service_id == 5:
-            continue;
+            continue
         else:
             flow = Flow.objects.get(pk=3)
 
@@ -2425,98 +2329,6 @@ def step_3_entryform(request):
         changeCaseVersion(True,entryform.id, request.user.id)
         
     return 1
-#############################
-#     DEPRECATED            #
-#############################
-
-# def step_3_entryform(request):
-#     var_post = request.POST.copy()
-
-#     entryform = EntryForm.objects.get(pk=var_post.get('entryform_id'))
-
-#     processor_loaded_at = None
-#     try:
-#         processor_loaded_at = datetime.strptime(var_post.get('processor_loaded_at'), '%d/%m/%Y %H:%M')
-#     except: 
-#         pass
-
-#     cassette_sample_id = [
-#         v for k, v in var_post.items() if k.startswith("cassette[sample_id]")
-#     ]
-#     cassette_name = [
-#         v for k, v in var_post.items()
-#         if k.startswith("cassette[cassette_name]")
-#     ]
-
-#     cassette_organs = [
-#         var_post.getlist(k) for k, v in var_post.items()
-#         if k.startswith("cassette[organ]")
-#     ]
-
-#     zip_cassettes = zip(cassette_sample_id, cassette_name, cassette_organs)
-
-#     entryform.cassette_set.all().delete()
-#     entryform.slice_set.all().delete()
-#     count = 1
-#     for values in zip_cassettes:
-#         sample = Sample.objects.get(pk=values[0])
-#         prev_cassettes = Cassette.objects.filter(entryform_id=entryform.id, cassette_name=values[1].strip())
-
-#         if prev_cassettes.count() > 0:
-#             cassette = prev_cassettes.first()
-#             cassette.samples.add(sample)
-#             for org in values[2]:
-#                 if not cassette.organs.filter(pk=org).exists():
-#                     cassette.organs.add(org)
-#         else:
-#             cassette = Cassette.objects.create(
-#                 entryform_id=entryform.id,
-#                 processor_loaded_at=processor_loaded_at,
-#                 cassette_name=values[1],
-#                 index=count,
-#                 # sample=sample
-#             )
-#             cassette.samples.add(sample)
-#             cassette.organs.set(values[2])
-#             count += 1
-#         cassette.save()
-
-
-#     for cassette in Cassette.objects.filter(entryform_id=entryform.id):
-#         exams_final = []
-#         for sample in cassette.samples.all():
-#             exams = [ sampleexam.exam for sampleexam in sample.sampleexams_set.all() if sampleexam.exam.service_id in [1,2,3]]
-#             exams_final = exams_final + exams
-       
-#         exams_uniques = []
-#         _exams = []
-
-#         for item in exams_final:
-#             if item.pk not in exams_uniques:
-#                 exams_uniques.append(item.pk)
-#                 _exams.append(item)
-        
-#         slice_index = 0
-        
-#         for index, val in enumerate(_exams):
-#             slice_index = index + 1
-#             slice_name = cassette.cassette_name + "-S" + str(slice_index)
-            
-#             analysis_form = AnalysisForm.objects.filter(
-#                 entryform_id=entryform.id,
-#                 exam_id=val.id,
-#             ).first()
-
-#             slice_new = Slice.objects.create(
-#                 entryform_id = entryform.id,
-#                 slice_name = slice_name,
-#                 index=slice_index,
-#                 cassette=cassette,
-#                 analysis=analysis_form
-#             )
-#             slice_new.save()
-        
-#     return True
 
 def step_4_entryform(request):
     var_post = request.POST.copy()
@@ -2997,13 +2809,14 @@ def save_new_identification(request, id):
     var_post = request.POST.copy()
     change = False
     ident = Identification.objects.get(pk=id)
+    
     if ident.cage != var_post['cage']:
         change = True
-    ident.cage = var_post['cage']
+        ident.cage = var_post['cage']
 
     if ident.group != var_post['group']:
         change = True
-    ident.group = var_post['group']
+        ident.group = var_post['group']
 
     if ident.weight != var_post['weight'] and \
         var_post['weight'] and \
@@ -3013,31 +2826,31 @@ def save_new_identification(request, id):
 
     if ident.extra_features_detail != var_post['extra_features_detail']:
         change = True
-    ident.extra_features_detail = var_post['extra_features_detail']
+        ident.extra_features_detail = var_post['extra_features_detail'].strip()
 
     if ident.observation != var_post['observation']:
         change = True
-    ident.observation = var_post['observation'].strip()
+        ident.observation = var_post['observation'].strip()
 
-    if ident.is_optimum != True if '1' == var_post['is_optimum'] else False:
+    if ident.is_optimum != (True if '1' == var_post['is_optimum'] else False):
         change = True
-    ident.is_optimum = var_post['is_optimum']
+        ident.is_optimum = (True if '1' == var_post['is_optimum'] else False)
     
     if ident.client_case_number != var_post['client_case_number']:
         change = True
-    ident.client_case_number = var_post['client_case_number'].strip()
+        ident.client_case_number = var_post['client_case_number'].strip()
     
     if ident.quantity != var_post['quantity']:
         change = True
-    ident.quantity = int(var_post['quantity'])
+        ident.quantity = int(var_post['quantity'])
     
     if ident.correlative != var_post['correlative']:
         change = True
-    ident.correlative = int(var_post['correlative'])
+        ident.correlative = int(var_post['correlative'])
     
-    if ident.samples_are_correlative != True if '1' == var_post['samples_are_correlative'] else False:
+    if ident.samples_are_correlative != (True if '1' == var_post['samples_are_correlative'] else False):
         change = True
-    ident.samples_are_correlative = var_post['samples_are_correlative']
+        ident.samples_are_correlative = var_post['samples_are_correlative']
         
     ident.save()
 
@@ -3511,3 +3324,21 @@ def get_research_metadata(request, id):
     except Exception as e:
         print (e)
         return JsonResponse({'ok':False})
+    
+def force_form_to_step(request, form, step):
+    try:
+        form = Form.objects.get(pk=form)
+        
+        print ("form", form.pk)
+        print ("step to", step)
+        if form.reception_finished and int(step) in (2, 3):
+            form.reception_finished = False
+            form.reception_finished_at = None
+        form.state_id = step
+        form.save()
+        
+        return JsonResponse({'ok':True})
+    except: 
+        return JsonResponse({'ok':False})
+    
+    

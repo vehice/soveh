@@ -199,4 +199,6 @@ urlpatterns = [
     path('get-scores/<int:id>', csrf_exempt(views.get_scores), name='get_scores'),
     path('research/<int:id>', csrf_exempt(views.RESEARCH.as_view()), name='research'),
     path('get-research/<int:id>', csrf_exempt(views.get_research_metadata), name='get_research'),
+    
+    path('force-step/<int:form>/<int:step>', csrf_exempt(views.force_form_to_step), name='force_form_to_step'),
 ]

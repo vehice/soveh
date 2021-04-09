@@ -493,77 +493,6 @@ function splitArrayByChunkSize(arr, n) {
   return result;
 }
 
-// Template management
-
-// function addAnalysisTemplate(data) {
-//   var analysisTemplate = document.getElementById("analysis_template").innerHTML;
-
-//   var templateFn = _.template(analysisTemplate);
-//   var templateHTML = templateFn(data);
-
-//   $("#exam_group").html(templateHTML)
-//   $('.samples_organs').select2();
-//   $('.samples_analysis').select2();
-
-//   $('.samples_organs').on("select2:unselecting", function (e) {
-//     if (e.params.args.originalEvent) {
-//       e.params.args.originalEvent.stopPropagation();
-//     }
-//   });
-
-//   $('.samples_analysis').on("select2:unselecting", function (e) {
-//     if (e.params.args.originalEvent) {
-//       e.params.args.originalEvent.stopPropagation();
-//     }
-//   });
-
-// }
-
-// function addIdentificationTemplate(data) {
-//   var identificationTemplate = document.getElementById("identification_template").innerHTML;
-
-//   var templateFn = _.template(identificationTemplate);
-//   var templateHTML = templateFn(data);
-
-//   $("#identification_group_list").append(templateHTML);
-
-//   $('.identification_organs').select2();
-// }
-
-// function addQuestionReceptionTemplate(data) {
-//   var questionTemplate = document.getElementById("questionReception_template").innerHTML;
-//   var templateFn = _.template(questionTemplate);
-//   var templateHTML = templateFn(data);
-
-//   $("#question_reception_" + data.temp_id).append(templateHTML);
-// }
-
-// function addWorkGroupTemplateByIdentity(data) {
-//   var groupTemplate = document.getElementById("flowgroup_template").innerHTML;
-//   var templateFn = _.template(groupTemplate);
-//   var templateHTML = templateFn(data);
-
-//   $("#flowdivider_by_identification").append(templateHTML);
-// }
-
-// function addWorkGroupTemplateByManual(data) {
-//   var groupTemplate = document.getElementById("group_content_manual_template").innerHTML;
-//   var templateFn = _.template(groupTemplate);
-//   var templateHTML = templateFn(data);
-
-//   $("#flowdivider_manual_groups").append(templateHTML);
-// }
-
-// function addFlowDividerTemplate() {
-//   var dividerTemplate = document.getElementById("flowdivider_options_template").innerHTML;
-//   var templateFn = _.template(dividerTemplate);
-//   var templateHTML = templateFn();
-
-//   $("#flow_divider_options").append(templateHTML);
-// }
-// Initial Data and Config
-
-
 function loadCustomers(customers) {
   $.each(customers, function (i, item) {
     $('#customer_select').append($('<option>', {
@@ -582,15 +511,6 @@ function loadFixtatives(fixtatives) {
     }));
   });
 }
-
-// function loadEntryFormType(entryform_types) {
-//   $.each(entryform_types, function (i, item) {
-//     $('#entryform_type_select').append($('<option>', {
-//       value: item.id,
-//       text: item.name
-//     }));
-//   });
-// }
 
 function loadSpecies(species) {
   $.each(species, function (i, item) {

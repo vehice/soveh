@@ -38,7 +38,9 @@
         </div>
       </div>
       <div class="col-sm-12 mt-3">
-        <table class="table table-bordered table-condensed" id="samples_table" style="font-size:13px;">
+        <button type="button" class="btn btn-sm btn-light" onclick="selectAllChecks(1)"><i class="fa fa-check-square-o"></i> Seleccionar todos</button>
+        <button type="button" class="btn btn-sm btn-light" onclick="selectAllChecks(0)"><i class="fa fa-square-o"></i> Deseleccionar todos</button>
+        <table class="table table-bordered table-condensed mt-1" id="samples_table" style="font-size:13px;">
           <thead>
             <tr>
               <th style="width:5%">Selección</th>
@@ -48,6 +50,7 @@
               <th style="width:25%">{{request.lang.analysis}} / Tinción</th>
               <th style="width:30%">{{request.lang.organs}} a Analizar</th>
               <th style="width:10%">Estado</th>
+              <th style="width:5%"></th>
             </tr>
           </thead>
           <tbody>
@@ -90,6 +93,9 @@
     <!-- Status -->
     <td class="delete-<%= sample.id %>">
     </td>
+    <!-- Opt -->
+    <td class="delete-<%= sample.id %>">
+    </td>
   </tr> 
   
 </script>
@@ -113,6 +119,9 @@
   </td>
   <td>
     <h3><div class="badge bg-blue"><%= status %></div></h3>
+  </td>
+  <td>
+    <button type="button" class="btn btn-danger" onclick="forceRemoveService('<%= sampleId %>', 'analisis-<%= sampleId %>-<%= examId %>-<%= stain.id %>')"> <i class="fa fa-trash"></i></button>
   </td>
 </tr>
 </script>

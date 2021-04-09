@@ -1,65 +1,5 @@
 {% extends 'layout.html' %}
 {% load static %}
-{% block stylesheets %}
-
-<style>
-  .steps {
-    pointer-events: none;
-  }
-  .form-section {
-    color: #404E67;
-    line-height: 3rem;
-    margin-bottom: 20px;
-    border-bottom: 1px solid #404E67;
-  }
-  .multiple-action > .swal-footer{
-    display: grid;
-    text-align: center;
-  }
-
-  span > .info {
-    color: blue !important;
-  }
-
-  .bootstrap-duallistbox-container label {
-    font-size: 18px !important;
-    color: black !important;
-  }
-
-  #identifications_wrapper, #workflow_form-p-0{
-    padding: 0 !important;
-  }
-  #identifications td{
-    padding: 5px !important;
-  }
- 
-  .table-unit{
-    margin-bottom: 40px;
-  }
-  .details-control{
-    width: 10px !important;
-    padding: 4px !important;
-    vertical-align: middle !important;
-  }
-  .form-control-table{
-    padding: 5px 2px;
-    width: 90%;
-  }
-  .correlative-text{
-    vertical-align: middle !important;
-  }
-  .checkbox-1x {
-    transform: scale(1.5);
-    -webkit-transform: scale(1.5);
-  }
-  .checkbox-2x {
-    transform: scale(2);
-    -webkit-transform: scale(2);
-  }
-
-</style>
-
-{% endblock stylesheets %}
 {% block content_header %}
 <div class="content-header row">
   <div class="content-header-left col-md-6 col-12 mb-2">
@@ -97,7 +37,7 @@
           data-closed="{% if form.form_closed or form.cancelled %}1{% else %}0{% endif %}" data-editable="{% if edit_case %}1{% else %}0{% endif %}"><i class="fa fa-list fa-fx"></i> {{request.lang.summary_case}}</button>
           <button class="btn btn-secondary square showShareBtn hidden" onclick="shareChoice()"><i class="fa fa-paper-plane fa-fx"></i> {{request.lang.send_case}}</button>
           <button class="btn btn-secondary square showLogBtn hidden" onclick="logModal()"><i class="fa fa-list fa-fx"></i> {{request.lang.shipment_record}}</button>
-          <button class="btn btn-secondary square showAttachedFilesBtn hidden" onclick="receptionFileModal({{form.content_object.id}})"><i class="fa fa-clipboard fa-fx"></i> {{request.lang.reception_receive}} </button>
+          <button class="btn btn-secondary square showReceptionFileBtn hidden" onclick="receptionFileModal({{form.content_object.id}})"><i class="fa fa-clipboard fa-fx"></i> {{request.lang.reception_receive}} </button>
           <button class="btn btn-secondary square showAttachedFilesBtn hidden" onclick='showAttachedFilesModal({{form.content_object.id}}, {{closed}})'><i class="fa fa-cloud-upload fa-fx"></i> {{request.lang.attachment_documents}}</button>
         </center>
       </div>
@@ -364,7 +304,6 @@ function confirmExit(event) {
 var form = $("#workflow_form");
 var summary_edited = false;
 var finalizar = "{{request.lang.finalize}}";
-var volver =  "{{request.lang.back}}";
 var continuar =  "{{request.lang.next}}";
 
 {% if not reception_finished %}
@@ -376,7 +315,6 @@ var continuar =  "{{request.lang.next}}";
       titleTemplate: '<span class="step">#index#</span> #title#',
       enablePagination: {{closed}} == 0 && {{edit}} == 1,
       labels: {
-          previous: volver,
           next: continuar,
           finish: finalizar
       },
@@ -437,7 +375,6 @@ var continuar =  "{{request.lang.next}}";
           var id_next_step = $("#step_" + newIndex).children("#step_id").val();
           //if(currentIndex == 1 || currentIndex == 2){
 
-          console.log("FORM DATA", form_data);
           var response;
           $.ajax({
             type: "POST",
@@ -499,11 +436,7 @@ var continuar =  "{{request.lang.next}}";
       onStepChanged:function (event, currentIndex, prevIndex){
         lockScreen(0);
 
-        if (currentIndex == 1){
-          $('.actions > ul > li:first-child').attr('style', 'display:none');
-        } else {
-          $('.actions > ul > li:first-child').attr('style', '');
-        }
+        $('.actions > ul > li:first-child').attr('style', 'display:none');
 
         return true; 
       }, 
@@ -559,7 +492,11 @@ var continuar =  "{{request.lang.next}}";
                 .done(function (data) {
                   response = data;
                   if (response.ok) {
-                    toastr.success('', 'Se ha finalizado la repceión exitosamente.');
+                    toastr.success('', '{{request.lang.reception_done}}');
+                    var timer = setTimeout(function() {
+                      location.reload();
+                    }, 2000);
+
                   } else {
                     toastr.error('', 'No ha sido posible finalizar la recepción del caso.');
                   }
