@@ -377,7 +377,7 @@
             "width": "20%",
             "targets": 3, "orderable": false, "data": "extra_features_detail",
             "render": function (data, type, row, meta) {
-              return `<textarea style="resize:none;" name="extra_features_detail" class="form-control-table summary-ident-data" rows="3" >${data ? data : ""} </textarea>`;
+              return `<textarea style="resize:none;" name="extra_features_detail" class="form-control-table summary-ident-data" rows="1" >${data ? data : ""} </textarea>`;
             }
           },
           {
@@ -407,7 +407,7 @@
             "width": "20%",
             "targets": 7, "orderable": false, "data": "observation",
             "render": function (data, type, row, meta) {
-              return `<textarea name="observation" class="form-control-table summary-ident-data" rows="3">${data ? data : ""} </textarea>`;
+              return `<textarea name="observation" class="form-control-table summary-ident-data" rows="1">${data ? data : ""} </textarea>`;
             }
           },
           {
@@ -576,8 +576,6 @@
                   ident_data[v.name] = v.value
                 }
               });
-
-              console.log("ident_data", ident_data)
               
               let url = Urls.save_new_identification(ident_data.id)
               $.ajax({

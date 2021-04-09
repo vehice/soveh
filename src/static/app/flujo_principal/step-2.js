@@ -61,7 +61,7 @@ function init_step_2() {
         "width": "20%",
         "targets": 4, "orderable": false, "data": "extra_features_detail",
         "render": function (data, type, row, meta) {
-          return `<textarea style="resize:none;" name="extra_features_detail" class="form-control-table ident-data" rows="3" >${data ? data : ""} </textarea>`;
+          return `<textarea style="resize:none;" name="extra_features_detail" class="form-control-table ident-data" rows="1" >${data ? data : ""} </textarea>`;
         }
       },
       {
@@ -91,7 +91,7 @@ function init_step_2() {
         "width": "20%",
         "targets": 8, "orderable": false, "data": "observation",
         "render": function (data, type, row, meta) {
-          return `<textarea name="observation" class="form-control-table ident-data" rows="3">${data ? data : ""} </textarea>`;
+          return `<textarea name="observation" class="form-control-table ident-data" rows="1">${data ? data : ""} </textarea>`;
         }
       },
       {
