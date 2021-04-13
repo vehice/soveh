@@ -1,28 +1,31 @@
 import json
 import datetime
 
+from django.contrib import auth
 from django.test import Client, TestCase
 from django.urls import reverse
 from faker import Faker
 
 from lab.models import Case, Cassette
+from backend.models import Organ
 
 
 class CaseTest(TestCase):
     @classmethod
     def setUpTestData(cls):
         cls.client = Client()
-        cls.client.login(username="jmonagas", password="vehice1234")
         cls.fake = Faker()
 
     def test_detail_returns_template(self):
+        self.client.login(username="jmonagas", password="vehice1234")
         response = self.client.get(reverse("lab:case_detail", kwargs={"pk": 983}))
 
         self.assertTemplateUsed(
-            response, "cassettes/detail.html", "Response should use expected template."
+            response, "cases/detail.html", "Response should use expected template."
         )
 
     def test_detail_returns_case(self):
+        self.client.login(username="jmonagas", password="vehice1234")
         response = self.client.get(reverse("lab:case_detail", kwargs={"pk": 983}))
 
         self.assertTrue(
@@ -34,7 +37,6 @@ class CassetteBuildTest(TestCase):
     @classmethod
     def setUpTestData(cls):
         cls.client = Client()
-        cls.client.login(username="jmonagas", password="vehice1234")
         cls.fake = Faker()
 
     # CassetteBuildView GET
@@ -44,6 +46,7 @@ class CassetteBuildTest(TestCase):
         that it doesn't have any Cassette.
         """
 
+        self.client.login(username="jmonagas", password="vehice1234")
         response = self.client.get(reverse("lab:cassette_build"))
         self.assertIn(
             "cases", response.context, "Response context should contain Cases."
@@ -55,6 +58,7 @@ class CassetteBuildTest(TestCase):
         )
 
     def test_returns_json_when_ajax(self):
+        self.client.login(username="jmonagas", password="vehice1234")
         response = self.client.get(
             reverse("lab:cassette_build"), None, HTTP_X_REQUESTED_WITH="XMLHttpRequest"
         )
@@ -72,6 +76,7 @@ class CassetteBuildTest(TestCase):
         )
 
     def test_returns_template(self):
+        self.client.login(username="jmonagas", password="vehice1234")
         response = self.client.get(reverse("lab:cassette_build"))
 
         self.assertTemplateUsed(
@@ -82,20 +87,22 @@ class CassetteBuildTest(TestCase):
 
     # CassetteBuildView POST
     def test_create_with_data(self):
+        self.client.login(username="jmonagas", password="vehice1234")
         build_date = self.fake.date_time()
         response = self.client.post(
             reverse("lab:cassette_build"),
-            {
-                "build_at": build_date,
-                "units": json.dumps(
-                    [
+            json.dumps(
+                {
+                    "build_at": build_date.isoformat(),
+                    "units": [
                         {"id": 1, "correlative": 1, "organs": [49, 50, 51]},
                         {"id": 1, "correlative": 2, "organs": [49, 50, 51]},
                         {"id": 2, "correlative": 1, "organs": [49]},
                         {"id": 3, "correlative": 1, "organs": [49, 51]},
-                    ]
-                ),
-            },
+                    ],
+                }
+            ),
+            content_type="application/json",
         )
 
         self.assertTrue(response.json(), "Response should return a json.")
@@ -111,18 +118,20 @@ class CassetteBuildTest(TestCase):
             )
 
     def test_create_with_default_date(self):
+        self.client.login(username="jmonagas", password="vehice1234")
         response = self.client.post(
             reverse("lab:cassette_build"),
-            {
-                "units": json.dumps(
-                    [
+            json.dumps(
+                {
+                    "units": [
                         {"id": 1, "correlative": 1, "organs": [49, 50, 51]},
                         {"id": 1, "correlative": 2, "organs": [49, 50, 51]},
                         {"id": 2, "correlative": 1, "organs": [49]},
                         {"id": 3, "correlative": 1, "organs": [49, 51]},
                     ]
-                ),
-            },
+                }
+            ),
+            content_type="application/json",
         )
 
         self.assertTrue(response.json(), "Response should return a json.")
@@ -139,17 +148,18 @@ class CassetteBuildTest(TestCase):
 
         response = self.client.post(
             reverse("lab:cassette_build"),
-            {
-                "build_at": "not a datetime",
-                "units": json.dumps(
-                    [
+            json.dumps(
+                {
+                    "build_at": "not a datetime",
+                    "units": [
                         {"id": 1, "correlative": 1, "organs": [49, 50, 51]},
                         {"id": 1, "correlative": 2, "organs": [49, 50, 51]},
                         {"id": 2, "correlative": 1, "organs": [49]},
                         {"id": 3, "correlative": 1, "organs": [49, 51]},
-                    ]
-                ),
-            },
+                    ],
+                }
+            ),
+            content_type="application/json",
         )
 
         self.assertTrue(response.json(), "Response should return a json.")
@@ -165,20 +175,22 @@ class CassetteBuildTest(TestCase):
             )
 
     def test_create_no_correlative(self):
+        self.client.login(username="jmonagas", password="vehice1234")
         build_date = self.fake.date_time()
         response = self.client.post(
             reverse("lab:cassette_build"),
-            {
-                "build_at": build_date,
-                "units": json.dumps(
-                    [
+            json.dumps(
+                {
+                    "build_at": build_date.isoformat(),
+                    "units": [
                         {"id": 1, "correlative": 1, "organs": [49, 50, 51]},
                         {"id": 1, "organs": [49, 50, 51]},
                         {"id": 2, "correlative": None, "organs": [49]},
                         {"id": 3, "organs": [49, 51]},
-                    ]
-                ),
-            },
+                    ],
+                }
+            ),
+            content_type="application/json",
         )
 
         self.assertTrue(response.json(), "Response should return a json.")
@@ -199,9 +211,9 @@ class CassetteBuildTest(TestCase):
             )
 
     def test_no_data_error(self):
+        self.client.login(username="jmonagas", password="vehice1234")
         response = self.client.post(
-            reverse("lab:cassette_build"),
-            {},
+            reverse("lab:cassette_build"), {}, content_type="application/json"
         )
 
         self.assertEquals(
@@ -212,16 +224,18 @@ class CassetteBuildTest(TestCase):
         )
 
     def test_unit_not_found_error(self):
+        self.client.login(username="jmonagas", password="vehice1234")
         response = self.client.post(
             reverse("lab:cassette_build"),
-            {
-                "build_at": self.fake.date_time(),
-                "units": json.dumps(
-                    [
+            json.dumps(
+                {
+                    "build_at": self.fake.date_time().isoformat(),
+                    "units": [
                         {"id": 999999, "correlative": 1, "organs": [49, 50, 51]},
-                    ]
-                ),
-            },
+                    ],
+                }
+            ),
+            content_type="application/json",
         )
 
         self.assertEquals(
@@ -232,16 +246,18 @@ class CassetteBuildTest(TestCase):
         )
 
     def test_organ_not_found_error(self):
+        self.client.login(username="jmonagas", password="vehice1234")
         response = self.client.post(
             reverse("lab:cassette_build"),
-            {
-                "build_at": self.fake.date_time(),
-                "units": json.dumps(
-                    [
+            json.dumps(
+                {
+                    "build_at": self.fake.date_time().isoformat(),
+                    "units": [
                         {"id": 1, "correlative": 1, "organs": [9999999]},
-                    ]
-                ),
-            },
+                    ],
+                }
+            ),
+            content_type="application/json",
         )
 
         self.assertEquals(
@@ -265,10 +281,10 @@ class CassettePrebuildTest(TestCase):
     @classmethod
     def setUpTestData(cls):
         cls.client = Client()
-        cls.client.login(username="jmonagas", password="vehice1234")
         cls.fake = Faker()
 
     def test_no_rules(self):
+        self.client.login(username="jmonagas", password="vehice1234")
         response = self.client.generic(
             "GET",
             reverse("lab:cassette_prebuild"),
@@ -311,6 +327,7 @@ class CassettePrebuildTest(TestCase):
         )
 
     def test_rule_unique(self):
+        self.client.login(username="jmonagas", password="vehice1234")
         response = self.client.generic(
             "GET",
             reverse("lab:cassette_prebuild"),
@@ -329,6 +346,7 @@ class CassettePrebuildTest(TestCase):
         )
 
     def test_rule_groups(self):
+        self.client.login(username="jmonagas", password="vehice1234")
         response = self.client.generic(
             "GET",
             reverse("lab:cassette_prebuild"),
@@ -347,6 +365,7 @@ class CassettePrebuildTest(TestCase):
         )
 
     def test_rule_max(self):
+        self.client.login(username="jmonagas", password="vehice1234")
         response = self.client.generic(
             "GET",
             reverse("lab:cassette_prebuild"),
@@ -365,6 +384,7 @@ class CassettePrebuildTest(TestCase):
         )
 
     def test_rule_all(self):
+        self.client.login(username="jmonagas", password="vehice1234")
         response = self.client.generic(
             "GET",
             reverse("lab:cassette_prebuild"),
@@ -395,143 +415,42 @@ class CassettePrebuildTest(TestCase):
         )
 
 
-class CassetteProcessTest(TestCase):
+class CassetteIndexTest(TestCase):
     @classmethod
     def setUpTestData(cls):
         cls.client = Client()
-        cls.client.login(username="jmonagas", password="vehice1234")
         cls.fake = Faker()
 
-        build_date = cls.fake.date_time()
-        response = cls.client.post(
-            reverse("lab:cassette_build"),
-            {
-                "build_at": build_date,
-                "units": json.dumps(
-                    [
-                        {"id": 1, "correlative": 1, "organs": [49, 50, 51]},
-                        {"id": 1, "correlative": 2, "organs": [49, 50, 51]},
-                        {"id": 2, "correlative": 1, "organs": [49]},
-                        {"id": 3, "correlative": 1, "organs": [49, 51]},
-                    ]
-                ),
-            },
-        )
-
-        cls.cassettes = Cassette.objects.all()
-
-    # CassetteProcessView GET
-    def test_shows_correct_cassettes(self):
-        response = self.client.get(reverse("lab:cassette_process"))
-
-        cassettes = response.context["cassettes"]
-
-        self.assertGreaterEqual(
-            4,
-            Cassette.objects.filter(processed_at__isnull=False).count(),
-            "Response context should contain expected Cassettes",
-        )
-
-    def test_returns_json_when_ajax(self):
-        response = self.client.get(
-            reverse("lab:cassette_process"),
-            None,
-            HTTP_X_REQUESTED_WITH="XMLHttpRequest",
-        )
-
-        cassettes = json.loads(response.json())
-
-        self.assertTemplateNotUsed(
-            response,
-            "cassette/process.html",
-            "Response should not use template.",
-        )
-
-        self.assertGreaterEqual(
-            len(cassettes), 0, "Response should contain a JSON with cassette list."
-        )
-
-        self.assertEqual(
-            len(cassettes),
-            Cassette.objects.filter(processed_at__isnull=True).count(),
-            "Response should contain a JSON with cassette list.",
-        )
-
-    def test_returns_expected_template(self):
-        response = self.client.get(reverse("lab:cassette_process"))
+    def test_expected_template(self):
+        self.client.login(username="jmonagas", password="vehice1234")
+        response = self.client.get(reverse("lab:cassette_index"))
 
         self.assertTemplateUsed(
-            response, "cassette/process.html", "Response should use expected template."
+            response, "cassettes/index.html", "Response should use expected template."
         )
 
-    # CassetteProcessView POST
-    def test_updates_with_data(self):
-        process_date = self.fake.date_time()
-        response = self.client.post(
-            reverse("lab:cassette_process"),
-            {
-                "process_date": process_date,
-                "cassettes": json.dumps(
-                    [cassette.id for cassette in self.cassettes[1:]]
-                ),
-            },
-        )
-
-        cassettes = response.json()
+    def test_expected_data(self):
+        self.client.login(username="jmonagas", password="vehice1234")
+        response = self.client.get(reverse("lab:cassette_index"))
+        cassette = Cassette.objects.all()
 
         self.assertEqual(
-            "DONE",
-            cassettes["status"],
-            "Cassettes updated must have the expected processed_at date.",
+            len(cassette),
+            len(response.context["object_list"]),
+            "Response should contain as many Cassettes as expected.",
         )
 
-    def test_updates_with_default(self):
-        response = self.client.post(
-            reverse("lab:cassette_process"),
-            {
-                "cassettes": json.dumps(
-                    [cassette.id for cassette in self.cassettes[1:]]
-                ),
-            },
-        )
 
-        cassettes = response.json()
+class VariantTest(TestCase):
+    """Includes test that don't fit into any particular class"""
 
-        now = datetime.datetime.now().isoformat(timespec="seconds")
-        self.assertEqual(
-            "DONE",
-            cassettes["status"],
-            "Cassettes updated must have the expected processed_at date.",
-        )
+    @classmethod
+    def setUpTestData(cls):
+        cls.client = Client()
+        cls.fake = Faker()
 
-        response = self.client.post(
-            reverse("lab:cassette_process"),
-            {
-                "process_date": "not a date",
-                "cassettes": json.dumps(
-                    [cassette.id for cassette in self.cassettes[1:]]
-                ),
-            },
-        )
+    def test_organ_list_no_id(self):
+        self.client.login(username="jmonagas", password="vehice1234")
+        response = self.client.get(reverse("lab:organ_index"))
 
-        cassettes = response.json()
-
-        now = datetime.datetime.now().isoformat(timespec="seconds")
-        self.assertEqual(
-            "DONE",
-            cassettes["status"],
-            "Cassettes updated must have the expected processed_at date.",
-        )
-
-    def test_no_data_error(self):
-        response = self.client.post(
-            reverse("lab:cassette_process"),
-            {},
-        )
-
-        self.assertEquals(
-            400, response.status_code, "Response status code should be as expected."
-        )
-        self.assertDictContainsSubset(
-            {"status": "ERROR"}, response.json(), "Response JSON should be as expected."
-        )
+        self.assertEquals(Organ.objects.all().count(), len(response.json()))

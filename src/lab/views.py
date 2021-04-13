@@ -2,6 +2,7 @@ import json
 from datetime import datetime
 
 from dateutil.parser import ParserError, parse
+from django.contrib.auth.decorators import login_required
 from django.core import serializers
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.paginator import InvalidPage, Paginator
@@ -10,21 +11,45 @@ from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render
 from django.utils.decorators import method_decorator
 from django.views import View
-from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.vary import vary_on_headers
-from django.views.generic.detail import DetailView
+from django.views.generic import DetailView, ListView
 
 from backend.models import Organ, Unit
 from lab.models import Case, Cassette
 
+# Case related views
 
+
+@method_decorator(login_required, name="dispatch")
 class CaseDetail(DetailView):
+    """Displays detailed data of a Case.
+    Data is displayed in a boilerplate template that can be
+    embeded using javascript anywhere in a page as needed.
+    """
+
     model = Case
-    template_name = "cassettes/detail.html"
+    template_name = "cases/detail.html"
+
+
+# Organ related views
+def organ_list(request):
+    cassette_id = request.GET.get("pk")
+    if cassette_id:
+        cassette = Cassette.objects.get(pk=cassette_id)
+        organs = cassette.organs.all()
+    else:
+        organs = Organ.objects.all()
+
+    return HttpResponse(
+        serializers.serialize("json", organs), content_type="application/json"
+    )
+
+
+# Cassette related views
 
 
 class CassetteBuild(View):
-    @method_decorator(vary_on_headers("X-Requested-With"))
+    @method_decorator([vary_on_headers("X-Requested-With"), login_required])
     def get(self, request):
         """
         Displays list of available :model:`lab.Cassette` to build,
@@ -57,6 +82,7 @@ class CassetteBuild(View):
             request, "cassettes/build.html", {"cases": cases, "organs": organs}
         )
 
+    @method_decorator(login_required)
     def post(self, request):
         """
         Creates a new Cassette storing build_at date and their correlative
@@ -64,21 +90,18 @@ class CassetteBuild(View):
         """
 
         form_request = json.loads(request.body)
-        build_at = form_request["build_at"]
-        units = form_request["units"]
 
-        if not units:
+        if "units" not in form_request or not form_request["units"]:
             return JsonResponse(
                 {"status": "ERROR", "message": "units is empty"}, status=400
             )
 
-        if not build_at:
+        units = form_request["units"]
+
+        try:
+            build_at = parse(form_request["build_at"])
+        except (KeyError, ParserError):
             build_at = datetime.now()
-        else:
-            try:
-                build_at = parse(build_at)
-            except ParserError:
-                build_at = datetime.now()
 
         created = []
         errors = []
@@ -124,60 +147,7 @@ class CassetteBuild(View):
         )
 
 
-class CassetteProcess(View):
-    @method_decorator(vary_on_headers("X-Requested-With"))
-    def get(self, request):
-        """
-        Displays a list of all :model:`lab.Cassette` that
-        do not have a processed_at date set.
-
-        **Context**
-
-        ``cassettes``
-            A list of :model:`lab.Cassette`.
-
-        **Template**
-            :template:`lab/cassette/process.html`.
-        """
-        cassettes = Cassette.objects.filter(processed_at__isnull=True)
-
-        if request.is_ajax():
-            return JsonResponse(serializers.serialize("json", cassettes), safe=False)
-
-        return render(request, "cassettes/build.html", {"cassettes": cassettes})
-
-    def post(self, request):
-        """
-        Updates all given :model:`lab.Cassette` with the
-        parameter ``process_date``, if no ``process_date`` is
-        given then it defaults to current datetime.
-        """
-        processed_at = request.POST.get("processed_at")
-        cassettes = request.POST.get("cassettes")
-
-        if not cassettes:
-            return JsonResponse(
-                {"status": "ERROR", "message": "cassettes is empty"}, status=400
-            )
-        else:
-            cassettes = json.loads(cassettes)
-
-        if not processed_at:
-            processed_at = datetime.now()
-        else:
-            try:
-                processed_at = parse(processed_at)
-            except ParserError:
-                processed_at = datetime.now()
-
-        updated = Cassette.objects.filter(pk__in=cassettes).update(
-            processed_at=processed_at
-        )
-
-        return JsonResponse({"status": "DONE", "message": "%d rows updated" % updated})
-
-
-@csrf_exempt
+@login_required
 def cassette_prebuild(request):
     """
     Receives a JSON with 2 keys: `selected` which is an array of unit ids;
@@ -260,3 +230,15 @@ def cassette_prebuild(request):
             response.append(response_format(unit, organs, cassette_count))
 
     return HttpResponse(json.dumps(response), content_type="application/json")
+
+
+@method_decorator(login_required, name="dispatch")
+class CassetteIndex(ListView):
+    """Displays a list of Cassettes.
+    Render a template list with all Cassettes including access to edit and reprocess
+    buttons.
+    """
+
+    queryset = Cassette.objects.all().prefetch_related("organs")
+    template_name = "cassettes/index.html"
+    context_object_name = "cassettes"
