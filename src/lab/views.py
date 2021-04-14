@@ -242,3 +242,22 @@ class CassetteIndex(ListView):
     queryset = Cassette.objects.all().prefetch_related("organs")
     template_name = "cassettes/index.html"
     context_object_name = "cassettes"
+
+
+class CassetteDetail(DetailView):
+    model = Cassette
+    context_object_name = "cassette"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["organs"] = self.object.organs.all()
+        return context
+
+    def get(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        context = self.get_context_data(object=self.object)
+        data = {
+            "cassette": serializers.serialize("json", [context["cassette"]]),
+            "organs": serializers.serialize("json", context["organs"]),
+        }
+        return HttpResponse(json.dumps(data), content_type="application/json")

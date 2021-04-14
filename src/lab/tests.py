@@ -454,3 +454,20 @@ class VariantTest(TestCase):
         response = self.client.get(reverse("lab:organ_index"))
 
         self.assertEquals(Organ.objects.all().count(), len(response.json()))
+
+
+class CassetteDetailTest(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.client = Client()
+        cls.fake = Faker()
+
+    def test_detail_returns_json(self):
+        self.client.login(username="jmonagas", password="vehice1234")
+
+        response = self.client.get(reverse("lab:cassette_detail", kwargs={"pk": 1}))
+
+        self.assertIn("cassette", response.json(), "Response should contain Cassette.")
+        self.assertIn(
+            "organs", response.json(), "Response should contain Cassette's organs."
+        )
