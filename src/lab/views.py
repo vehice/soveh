@@ -7,8 +7,8 @@ from django.core import serializers
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.paginator import InvalidPage, Paginator
 from django.db.utils import IntegrityError
-from django.http import HttpResponse, JsonResponse
-from django.shortcuts import render
+from django.http import Http404, HttpResponse, JsonResponse
+from django.shortcuts import render, get_object_or_404
 from django.utils.decorators import method_decorator
 from django.views import View
 from django.views.decorators.vary import vary_on_headers
@@ -33,12 +33,8 @@ class CaseDetail(DetailView):
 
 # Organ related views
 def organ_list(request):
-    cassette_id = request.GET.get("pk")
-    if cassette_id:
-        cassette = Cassette.objects.get(pk=cassette_id)
-        organs = cassette.organs.all()
-    else:
-        organs = Organ.objects.all()
+    """Returns a list of all :model:`backend.Organ`"""
+    organs = Organ.objects.all()
 
     return HttpResponse(
         serializers.serialize("json", organs), content_type="application/json"
@@ -89,17 +85,17 @@ class CassetteBuild(View):
         according to their :model:`backend.Unit` and :model:`backend.EntryForm`
         """
 
-        form_request = json.loads(request.body)
+        request_input = json.loads(request.body)
 
-        if "units" not in form_request or not form_request["units"]:
+        if "units" not in request_input or not request_input["units"]:
             return JsonResponse(
                 {"status": "ERROR", "message": "units is empty"}, status=400
             )
 
-        units = form_request["units"]
+        units = request_input["units"]
 
         try:
-            build_at = parse(form_request["build_at"])
+            build_at = parse(request_input["build_at"])
         except (KeyError, ParserError):
             build_at = datetime.now()
 
@@ -237,27 +233,86 @@ class CassetteIndex(ListView):
     """Displays a list of Cassettes.
     Render a template list with all Cassettes including access to edit and reprocess
     buttons.
+
+        **Context**
+        ``cassettes``
+            A list of :model:`lab.Cassette`
+            with prefetched :model:`backend.Organ`
+
+        **Template**
+        ``lab/cassettes/index.html``
+
     """
 
     queryset = Cassette.objects.all().prefetch_related("organs")
     template_name = "cassettes/index.html"
     context_object_name = "cassettes"
 
-
-class CassetteDetail(DetailView):
-    model = Cassette
-    context_object_name = "cassette"
-
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["organs"] = self.object.organs.all()
+        context["cases"] = Case.objects.units
         return context
 
-    def get(self, request, *args, **kwargs):
-        self.object = self.get_object()
-        context = self.get_context_data(object=self.object)
-        data = {
-            "cassette": serializers.serialize("json", [context["cassette"]]),
-            "organs": serializers.serialize("json", context["organs"]),
+
+class CassetteDetail(View):
+    def serialize_data(self, cassette):
+        return {
+            "cassette": serializers.serialize("json", [cassette]),
+            "organs": serializers.serialize("json", cassette.organs.all()),
         }
+
+    def get(self, request, *args, **kwargs):
+        """Returns a JSON detailing Cassette.
+
+        **CONTEXT**
+
+        ``cassette``
+            Detailed data for the requested :model:`lab.Cassette`
+        ``organs``
+            List of :model:`backend.Organ` that belongs to requested Cassette.
+
+        """
+        cassette = get_object_or_404(Cassette, pk=kwargs["pk"])
+        data = self.serialize_data(cassette)
+        return HttpResponse(json.dumps(data), content_type="application/json")
+
+    def post(self, request, *args, **kwargs):
+        """Updates a Cassette.
+        Returns serialized data of the updated Cassette.
+
+        **REQUEST**
+
+            ``build_at``
+                Updated build_at date. Optional.
+            ``correlative``
+                Updated correlative. Optional.
+            ``organs``
+                List of :model:`backend.Organ`. This will set the current
+                organs for this Cassette. Optional.
+
+        """
+        cassette = get_object_or_404(Cassette, pk=kwargs["pk"])
+
+        request_input = json.loads(request.body)
+
+        if "build_at" in request_input:
+            try:
+                build_at = parse(request_input["build_at"])
+            except (ParserError):
+                build_at = cassette.build_at
+            else:
+                cassette.build_at = build_at
+        if "correlative" in request_input:
+            cassette.correlative = request_input["correlative"]
+        if "organs" in request_input:
+            try:
+                cassette.organs.set(request_input["organs"])
+            except IntegrityError:
+                raise Http404("Organ not found.")
+
+        if "build_at" in request_input or "correlative" in request_input:
+            cassette.save()
+
+        data = self.serialize_data(cassette)
+
         return HttpResponse(json.dumps(data), content_type="application/json")
