@@ -471,3 +471,80 @@ class CassetteDetailTest(TestCase):
         self.assertIn(
             "organs", response.json(), "Response should contain Cassette's organs."
         )
+
+    def test_detail_updates_cassette(self):
+        self.client.login(username="jmonagas", password="vehice1234")
+
+        response = self.client.post(
+            reverse("lab:cassette_detail", kwargs={"pk": 1}),
+            json.dumps(
+                {
+                    "build_at": self.fake.date_time().isoformat(),
+                    "correlative": self.fake.pyint(),
+                    "organs": [49, 50],
+                }
+            ),
+            content_type="application/json",
+        )
+
+        self.assertIn("cassette", response.json(), "Response should contain Cassette.")
+        self.assertIn(
+            "organs", response.json(), "Response should contain Cassette's organs."
+        )
+
+    def test_detail_updates_no_build_at(self):
+        self.client.login(username="jmonagas", password="vehice1234")
+
+        response = self.client.post(
+            reverse("lab:cassette_detail", kwargs={"pk": 1}),
+            json.dumps(
+                {
+                    "correlative": self.fake.pyint(),
+                    "organs": [49, 50],
+                }
+            ),
+            content_type="application/json",
+        )
+
+        self.assertIn("cassette", response.json(), "Response should contain Cassette.")
+        self.assertIn(
+            "organs", response.json(), "Response should contain Cassette's organs."
+        )
+
+    def test_detail_updates_no_correlative(self):
+        self.client.login(username="jmonagas", password="vehice1234")
+
+        response = self.client.post(
+            reverse("lab:cassette_detail", kwargs={"pk": 1}),
+            json.dumps(
+                {
+                    "build_at": self.fake.date_time().isoformat(),
+                    "organs": [49, 50],
+                }
+            ),
+            content_type="application/json",
+        )
+
+        self.assertIn("cassette", response.json(), "Response should contain Cassette.")
+        self.assertIn(
+            "organs", response.json(), "Response should contain Cassette's organs."
+        )
+
+    def test_detail_no_organs(self):
+        self.client.login(username="jmonagas", password="vehice1234")
+
+        response = self.client.post(
+            reverse("lab:cassette_detail", kwargs={"pk": 1}),
+            json.dumps(
+                {
+                    "build_at": self.fake.date_time().isoformat(),
+                    "correlative": self.fake.pyint(),
+                }
+            ),
+            content_type="application/json",
+        )
+
+        self.assertIn("cassette", response.json(), "Response should contain Cassette.")
+        self.assertIn(
+            "organs", response.json(), "Response should contain Cassette's organs."
+        )
