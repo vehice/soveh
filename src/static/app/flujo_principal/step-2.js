@@ -297,7 +297,7 @@ function init_step_2() {
             });
         }
         else {
-          current_correlative--;
+          current_correlative = current_correlative - 1;
           table.rows().every(function (rowIdx, tableLoop, rowLoop) {
             var d = this.data();
             if (remove_correlative < d.correlative) {
@@ -667,29 +667,58 @@ function formatResultData(data) {
 
 function validate_step_2() {
   let sucess = 1;
-  $.each($('input[name=no_container]'), function (i, v) {
-    if ($(v).val() <= 0) {
-      sucess = 0;
 
-    }
-  });
-  if (!sucess) {
+  if( $('#identifications').DataTable().data().rows().count() == 0){
     toastr.error(
-      'Para continuar todas las cantidades deben ser mayores a 0.',
-      'Ups!',
+      'Para continuar debe ingresar las identificaciones.',
+      'Error',
       { positionClass: 'toast-top-full-width', containerId: 'toast-bottom-full-width' }
     );
+    return false
   }
+  
+  let amounts_greather_than_zero = true
+  $(".amount").each(function(_, e){ 
+    if (e.value == 0){
+      amounts_greather_than_zero = false
+      return false
+    } 
+  });
+
+  if (!amounts_greather_than_zero){
+    toastr.error(
+      'Para continuar la cantidad de unidades en las identificaciones ingresadas deben ser mayor a 0.',
+      'Error',
+      { positionClass: 'toast-top-full-width', containerId: 'toast-bottom-full-width' }
+    );
+    return false
+  }
+
+  let organs_more_than_zero = true
+  $(".organs").each(function(_, e){ 
+    if ( $(this).val().length == 0 ){
+      organs_more_than_zero = false
+      return false
+    }
+  });
+
+  if (!organs_more_than_zero){
+    toastr.error(
+      'Para continuar es requerido que seleccione órganos en cada unidad declarada.',
+      'Error',
+      { positionClass: 'toast-top-full-width', containerId: 'toast-bottom-full-width' }
+    );
+    return false
+  }
+
   return sucess;
 }
 
-function openOrgansKeypad(ident_id, index){
+function openOrgansKeypad(){
   var organs_keypad_template = document.getElementById("organs_keypad").innerHTML;
   var templateFn = _.template(organs_keypad_template);
 
   var data = {
-    'ident_id': ident_id,
-    'index': index,
     'organs': organs
   }
 
@@ -698,7 +727,17 @@ function openOrgansKeypad(ident_id, index){
   $("#organ_table_keypad").modal("show");
 }
 
-function AddOrgansFromKeypadToSelect(ident_id, index){
+var waitForEl = function(selector, callback) {
+  if ($(selector).length) {
+    callback();
+  } else {
+    setTimeout(function() {
+      waitForEl(selector, callback);
+    }, 500);
+  }
+};
+
+function AddOrgansFromKeypadToSelect(){
   
   let organs_selected_from_keypad = [];
   $('input[name="organs-keypad-checkbox[]"]').each(function (e) {
@@ -707,13 +746,31 @@ function AddOrgansFromKeypadToSelect(ident_id, index){
     }   
   });
 
-  let organs_selector = '#select-'+ident_id+'-'+index;
+  $.each( $("#identifications .table-idents tr"), function (i, tr) {
 
-  $.each(organs_selected_from_keypad, function(index, value){
-    selectOrgansWithConditions(value[0], value[1], ident_id, $(organs_selector))
+    var row = $('#identifications').DataTable().row(tr)
+
+    if (!row.child.isShown()) {
+      $(tr).find('.details-control').first().click()
+      $(tr).addClass('shown')
+    }
+
+    let ident_id = $(tr).attr("id");
+    let units_tbody_trs = "units-table-"+ident_id+" tr";
+
+    waitForEl("#"+units_tbody_trs, function() {
+      $("#"+units_tbody_trs).each(function(_, s_tr){
+        let unit_tr_id = $(s_tr).attr("id")
+        let unit_id = unit_tr_id.split("-")[2]
+        $.each(organs_selected_from_keypad, function(index, value){
+          selectOrgansWithConditions(value[0], value[1], ident_id, $('#select-'+ident_id+'-'+unit_id))
+        });
+      });
+    });
+
+    saveUnitsByIdentification(ident_id)
+
   });
-
-  saveUnitsByIdentification(ident_id)
 
   $("#organ_table_keypad").modal("hide");
   

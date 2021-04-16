@@ -4,6 +4,11 @@
     <input type="hidden" id="step_tag" name="step_tag" value="{{step_tag}}">
     <input type="hidden" id="form_id" name="form_id" value="{{form_id}}">
     <input type="hidden" id="entryform_id" name="entryform_id" value="{{entryform_id}}">
+    <div class="mt-2">
+      <center>
+        <button type="button" class="btn btn-warning" onclick="openOrgansKeypad()"><i class="fa fa-th"></i> Botonera de Órganos</button>
+      </center>
+    </div>
     <div class="table-responsive">
       <table id="identifications" class="table table-xs table-bordered table-condensed table-ident" cellpadding="0" cellspacing="0">
         <thead>
@@ -21,7 +26,7 @@
             <th>{{request.lang.options|safe}}</th>
           </tr>
         </thead>
-        <tbody class="text-center">
+        <tbody class="text-center table-idents">
         </tbody>
       </table>
     </div>
@@ -45,9 +50,6 @@
             <option value="<%= organ.id %>"><%= organ.name %></option>
           <% }); %>
         </select>
-        <div class="input-group-append">
-          <button type="button" class="btn btn-warning" onclick="openOrgansKeypad('<%= ident_id %>', '<%= id %>')"><i class="fa fa-th"></i></button>
-        </div>
       </div>
     </td>
     <td><button class="btn btn-danger unit-delete" type="button" data-ident="<%= ident_id %>" data-id="<%= id %>"><i class="fa fa-trash fa-fx"></i></button></td>
@@ -68,6 +70,6 @@
       </label>
     <% }); %>
   </div>
-  <button type="button" class="btn btn-primary btn-block" onclick="AddOrgansFromKeypadToSelect('<%= data.ident_id %>','<%= data.index %>' )"> Presione para agregar órganos a la unidad</button>
+  <button type="button" class="btn btn-primary btn-block" onclick="AddOrgansFromKeypadToSelect()"> Presione para agregar órganos a las unidades</button>
 
 </script>
