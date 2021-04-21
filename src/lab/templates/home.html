@@ -1,0 +1,184 @@
+{% extends 'layout.html' %}
+{% load static %}
+
+{% block content %}
+<!-- MAIN -->
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <header class="card-header">
+                <h1 class="card-title">DASHBOARD</h1>
+            </header>
+            <main class="card-body">
+                <section class="row">
+                    <div class="col-md-12 d-flex justify-content-center">
+                        <main class="btn-group">
+                            <button id="btnCassette" type="button" class="btn btn-primary">
+                                Armado de Cassettes ({{cassettes|length}})
+                                <i class="iconify" data-icon="mdi:chevron-down"></i>
+                            </button>
+                            <button type="button" class="btn btn-light">
+                                Procesado de Cassettes (S/I)
+                                <i class="iconify" data-icon="mdi:chevron-down"></i>
+                            </button>
+                            <button type="button" class="btn btn-warning">
+                                Bloque (S/I)
+                                <i class="iconify" data-icon="mdi:chevron-down"></i>
+                            </button>
+                            <button type="button" class="btn btn-info">
+                                Corte (S/I)
+                                <i class="iconify" data-icon="mdi:chevron-down"></i>
+                            </button>
+                            <button type="button" class="btn btn-danger">
+                                Tincion (S/I)
+                                <i class="iconify" data-icon="mdi:chevron-down"></i>
+                            </button>
+                            <button type="button" class="btn btn-success">
+                                Liberación (S/I)
+                                <i class="iconify" data-icon="mdi:chevron-down"></i>
+                            </button>
+                        </main>
+                    </div>
+
+                </section>
+                <section class="row d-flex justify-content-center mt-2">
+                    <div class="col-md-6 offset-md-1">
+                        <!-- CASSETTE ACCORDION -->
+                        <div class="accordion">
+                            <div class="card border rounded shadow-lg">
+
+                                <div id="tableAccordion" class="collapse">
+                                    <div class="card-body overflow-auto d-flex flex-column" style="max-height: 38rem;">
+                                        <table class="table table-sm zero-configuration compact table-bordered">
+                                            <thead>
+                                                <tr>
+                                                    <th scope="col" class="text-right">Caso</th>
+                                                    <th scope="col" class="text-right">Identificacion</th>
+                                                    <th scope="col" class="text-right">Unidad</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {% for cassette in cassettes %}
+                                                <tr>
+                                                    <td class="text-right">
+                                                        {{cassette.case.no_caso}}
+                                                    </td>
+                                                    <td class="text-right">
+                                                        {{cassette.identification.cage}}
+                                                    </td>
+                                                    <td class="text-right">
+                                                        {{cassette.unit.correlative}}
+                                                    </td>
+                                                </tr>
+                                                {% endfor %}
+                                            </tbody>
+
+                                        </table>
+                                    </div>
+                                    <div class="card-footer text-right">
+                                        <a href="{% url "lab:cassette_build" %}">
+                                            Ir a armar cassettes
+                                            <span class="iconify" data-icon="mdi:chevron-right" data-inline="false"></span>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- END ACCORDION -->
+                    </div>
+
+                    <div class="col-md-5">
+                        <div id="container" style="width: 100%; height:20rem;"></div>
+                    </div>
+                </section>
+            </main>
+        </div>
+    </div>
+</div>
+
+<!-- END MAIN -->
+
+{% endblock content %}
+{% block scripts %}
+<script src="https://code.iconify.design/1/1.0.7/iconify.min.js" defer></script>
+<!--[if lt IE 9]>
+    <script src="https://code.highcharts.com/modules/oldie-polyfills.js"></script>
+<![endif]-->
+<script src="https://code.highcharts.com/highcharts.js" defer></script>
+<!--[if lt IE 9]>
+    <script src="https://code.highcharts.com/modules/oldie.js"></script>
+<![endif]-->
+<script type="text/javascript" defer>
+ $(document).ready(() => {
+     $(".zero-configuration").DataTable({
+         oLanguage: {
+             sUrl: "https://cdn.datatables.net/plug-ins/1.10.16/i18n/Spanish.json",
+         },
+
+         rowsGroup: [0, 1],
+     });
+
+     const listGroupCases = $("#listGroupCases");
+
+     const cases = listGroupCases.children();
+
+     const cassette_count = {{cassettes|length}}
+
+
+     const chart = Highcharts.chart("container", {
+         chart: {
+             type: "pie"
+         },
+
+         title: {
+             text: "Carga de trabajo"
+         },
+
+         tooltip: {
+             pointFormat: '{series.name}: <b>{point.y} ({point.percentage:.1f}%)</b>'
+         },
+
+         series: [{
+             name: "Lab",
+             data: [
+                 { name: 'Armado Cassette', y: cassette_count },
+                 { name: 'Proceso Cassette', y: 1 },
+                 { name: 'Armado Bloque', y: 1 },
+                 { name: 'Realizado Corte', y: 1 },
+                 { name: 'Corte Teñido', y: 1 },
+                 { name: 'Slide Liberado', y: 1 },
+             ],
+         }],
+     });
+
+     let timeout = null
+
+     /* END VARIABLES */
+
+     /* FUNCTIONS */
+
+     /* END FUNCTIONS */
+
+
+     /* EVENTS */
+
+     $("#btnCassette").click(() => $("#tableAccordion").collapse("toggle"));
+
+     $("#filterCase").on("input", (e) => {
+         const filter = e.target.value;
+         clearTimeout(timeout)
+         timeout = setTimeout(() => {
+             const items = cases.filter((item) => 
+                 cases[item].innerText.includes(filter)
+             );
+             listGroupCases.empty()
+             listGroupCases.append(items)
+         }, 1000);
+     });
+
+     /* END EVENTS */
+
+ });
+</script>
+
+{% endblock scripts %}
