@@ -44,7 +44,7 @@ $(document).ready(function () {
       sUrl: "https://cdn.datatables.net/plug-ins/1.10.16/i18n/Spanish.json",
     },
 
-    rowsGroup: [1, 2, 3],
+    rowsGroup: [0, 1, 2],
   });
 
   /* END VARIABLES */
