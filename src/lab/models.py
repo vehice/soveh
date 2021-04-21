@@ -4,7 +4,7 @@ from django.db import models
 from django.urls import reverse
 from numpy import busday_count
 
-from backend.models import EntryForm, Organ, Unit
+from backend.models import EntryForm, Organ, Unit, Identification, Stain
 
 
 class CaseManager(models.Manager):
@@ -17,22 +17,34 @@ class CaseManager(models.Manager):
     def get_queryset(self):
         return super().get_queryset().filter(forms__cancelled=0, forms__form_closed=0)
 
-    def identifications(self, **kwargs):
+    def identifications(self, kwargs_filter={}, kwargs_identifications={}):
         return (
             self.get_queryset()
-            .filter(**kwargs)
+            .filter(**kwargs_filter)
             .prefetch_related(
-                models.Prefetch("identification_set", to_attr="identifications")
+                models.Prefetch(
+                    "identification_set",
+                    Identification.objects.filter(**kwargs_identifications),
+                    to_attr="identifications",
+                )
             )
         )
 
-    def units(self, **kwargs):
+    def units(self, kwargs_filter={}, kwargs_identifications={}, kwargs_units={}):
         return (
             self.get_queryset()
-            .filter(**kwargs)
+            .filter(**kwargs_filter)
             .prefetch_related(
-                models.Prefetch("identification_set", to_attr="identifications"),
-                models.Prefetch("identifications__unit_set", to_attr="units"),
+                models.Prefetch(
+                    "identification_set",
+                    Identification.objects.filter(**kwargs_identifications),
+                    to_attr="identifications",
+                ),
+                models.Prefetch(
+                    "identifications__unit_set",
+                    Unit.objects.filter(**kwargs_units),
+                    to_attr="units",
+                ),
             )
         )
 
@@ -77,6 +89,28 @@ class Cassette(models.Model):
     correlative = models.PositiveIntegerField(verbose_name="correlative")
     organs = models.ManyToManyField(Organ, related_name="cassettes")
     unit = models.ForeignKey(Unit, on_delete=models.CASCADE, related_name="cassettes")
+    build_at = models.DateTimeField(null=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+
+class Slide(models.Model):
+    """
+    A Slide contains a cut after it's stained, it can be
+    digitalized using a scanner or delivered in a folder to
+    pathologists.
+
+    Either way, the system must be able to locate the digital version
+    which is located in a different database connection["dsstore"],
+    and is search for using the :model:`backend.EntryForm`.no_caso,
+    and the Slide's stain and correlative.
+    """
+
+    cassette = models.ForeignKey(
+        Cassette, on_delete=models.CASCADE, related_name="slides"
+    )
+    stain = models.ForeignKey(Stain, on_delete=models.CASCADE, related_name="slides")
     build_at = models.DateTimeField(null=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
