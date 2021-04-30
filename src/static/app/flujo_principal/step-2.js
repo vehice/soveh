@@ -765,7 +765,10 @@ function AddOrgansFromKeypadToSelect(){
         $.each(organs_selected_from_keypad, function(index, value){
           selectOrgansWithConditions(value[0], value[1], ident_id, $('#select-'+ident_id+'-'+unit_id))
         });
-      });
+        if ($('#organs-'+ident_id).is(":checked")){
+          return false
+        }
+      })
     });
 
     saveUnitsByIdentification(ident_id)
