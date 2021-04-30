@@ -6,18 +6,71 @@ from django.contrib.auth.decorators import login_required
 from django.core import serializers
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.paginator import InvalidPage, Paginator
+from django.db.models.query_utils import Q
 from django.db.utils import IntegrityError
-from django.http import Http404, HttpResponse, JsonResponse
-from django.shortcuts import render, get_object_or_404
+from django.http import FileResponse, Http404, HttpResponse, JsonResponse
+from django.shortcuts import get_object_or_404, render
 from django.utils.decorators import method_decorator
 from django.views import View
-from django.views.decorators.vary import vary_on_headers
 from django.views.generic import DetailView, ListView
 
-from backend.models import Organ, Unit
-from lab.models import Case, Cassette
+from backend.models import Organ, Stain, Unit
+from lab.models import Case, Cassette, Slide
+from django.template import loader
+
+
+def home(request):
+    cases = Case.objects.all()
+    cassette_cases = Case.objects.units(
+        kwargs_filter={"entry_format__in": [1, 2, 6, 7]}
+    )
+    cassettes = []
+    for case in cassette_cases:
+        for identification in case.identifications:
+            for unit in identification.units:
+
+                if unit.cassettes.count() > 0:
+                    continue
+
+                cassettes.append(
+                    {
+                        "case": case,
+                        "identification": identification,
+                        "unit": unit,
+                    }
+                )
+    context = {"cassettes": cassettes, "cases": cases}
+    return render(request, "home.html", context)
+
+
+# TODO obtain details from the current lab progress of any Case by their pk
+def home_detail(request, pk):
+    case = get_object_or_404(Case, id=pk)
+
+    data = serializers.serialize("json", [case])
+
+    return JsonResponse(data, safe=False)
+
 
 # Case related views
+
+
+@method_decorator(login_required, name="dispatch")
+class CaseReadSheet(DetailView):
+    """Displays format for a :model:`lab.Case` read sheet.
+    A read sheet contains information for a Case's :model:`lab.Slide`
+    including that slide's :model:`backend.Organ` and :model:`backend.Stain`
+    """
+
+    model = Case
+    template_name = "cases/read_sheet.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        units = Unit.objects.filter(Q(identification__entryform=self.get_object()))
+        slides = Slide.objects.filter(unit__in=units).order_by("correlative")
+        context["slides"] = slides
+        return context
 
 
 @method_decorator(login_required, name="dispatch")
@@ -32,6 +85,7 @@ class CaseDetail(DetailView):
 
 
 # Organ related views
+@login_required
 def organ_list(request):
     """Returns a list of all :model:`backend.Organ`"""
     organs = Organ.objects.all()
@@ -41,11 +95,22 @@ def organ_list(request):
     )
 
 
+# Stain related views
+@login_required
+def stain_list(request):
+    """Returns a list of all :model:`backend.Stain`"""
+    stains = Stain.objects.all()
+
+    return HttpResponse(
+        serializers.serialize("json", stains), content_type="application/json"
+    )
+
+
 # Cassette related views
 
 
 class CassetteBuild(View):
-    @method_decorator([vary_on_headers("X-Requested-With"), login_required])
+    @method_decorator(login_required)
     def get(self, request):
         """
         Displays list of available :model:`lab.Cassette` to build,
@@ -65,14 +130,11 @@ class CassetteBuild(View):
         ``lab/cassettes/build.html``
         """
 
-        cases = Case.objects.units(entry_format__in=[1, 2, 6, 7])
+        query_filter = {"entry_format__in": [1, 2, 6, 7]}
+        unit_filter = {"cassettes": None}
+        cases = Case.objects.units(kwargs_filter=query_filter, kwargs_units=unit_filter)
 
         organs = serializers.serialize("json", Organ.objects.all())
-
-        if request.is_ajax():
-            return HttpResponse(
-                serializers.serialize("json", cases), content_type="application/json"
-            )
 
         return render(
             request, "cassettes/build.html", {"cases": cases, "organs": organs}
@@ -316,3 +378,277 @@ class CassetteDetail(View):
         data = self.serialize_data(cassette)
 
         return HttpResponse(json.dumps(data), content_type="application/json")
+
+
+# Slide related views
+
+
+class SlideBuild(View):
+    @method_decorator(login_required)
+    def get(self, request):
+        """
+        Displays list of available :model:`lab.Slide` to build,
+        from :model:`lab.Cassettte` where they don't already
+        have at least one slide built.
+
+        **Context**
+        ``cassettes``
+            A list of :model:`lab.Cassette`
+
+        **Template**
+        ``lab/slides/build.html``
+        """
+
+        query_filter = {"entry_format__in": [5]}
+        cases = Case.objects.units(kwargs_filter=query_filter)
+        cassettes = Cassette.objects.filter(slides=None).select_related(
+            "unit__identification__entryform"
+        )
+        stains = Stain.objects.all()
+
+        slides = []
+
+        if cases.count() > 0:
+            for case in cases:
+                for identification in case.identifications.all():
+                    for unit in identification.units.all():
+                        serialize_case = serializers.serialize("json", [case])
+                        serialize_identification = serializers.serialize(
+                            "json", [identification]
+                        )
+                        serialize_unit = serializers.serialize("json", [unit])
+                        slides.append(
+                            {
+                                "case": serialize_case,
+                                "identification": serialize_identification,
+                                "unit": serialize_unit,
+                            }
+                        )
+
+        if cassettes.count() > 0:
+            for cassette in cassettes:
+                serialize_case = serializers.serialize(
+                    "json", [cassette.unit.identification.entryform]
+                )
+                serialize_identification = serializers.serialize(
+                    "json", [cassette.unit.identification]
+                )
+                serialize_unit = serializers.serialize("json", [cassette.unit])
+                serialize_cassette = serializers.serialize("json", [cassette])
+                slides.append(
+                    {
+                        "case": serialize_case,
+                        "identification": serialize_identification,
+                        "unit": serialize_unit,
+                        "cassette": serialize_cassette,
+                    }
+                )
+
+        return render(
+            request, "slides/build.html", {"slides": slides, "stains": stains}
+        )
+
+    @method_decorator(login_required)
+    def post(self, request):
+        """
+        Creates a new Slide storing build_at date and their correlative
+        according to their :model:`backend.Unit` and :model:`backend.EntryForm`
+        """
+
+        request_input = json.loads(request.body)
+
+        if not "slides" in request_input or not request_input["slides"]:
+            return JsonResponse(
+                {"status": "ERROR", "message": "slides is empty"}, status=400
+            )
+
+        slides = request_input["slides"]
+
+        try:
+            build_at = parse(request_input["build_at"])
+        except (KeyError, ParserError):
+            build_at = datetime.now()
+
+        created = []
+        errors = []
+
+        for slide in slides:
+            parameters = {}
+
+            if "stain_id" not in slide:
+                return JsonResponse(
+                    {"status": "ERROR", "message": "Stain not found"},
+                    status=400,
+                )
+            else:
+                try:
+                    stain = Stain.objects.get(pk=slide["stain_id"])
+                except Stain.DoesNotExist:
+                    return JsonResponse(
+                        {"status": "ERROR", "message": "Stain not found"},
+                        status=400,
+                    )
+
+            # If not unit is received use the Cassette's unit,
+            # if neither Cassette nor Unit is given return error
+            if "unit_id" not in slide:
+                if "cassette_id" not in slide:
+                    return JsonResponse(
+                        {"status": "ERROR", "message": "Unit/Cassette not found"},
+                        status=400,
+                    )
+                else:
+                    try:
+                        cassette = Cassette.objects.get(pk=slide["cassette_id"])
+                    except Cassette.DoesNotExist:
+                        return JsonResponse(
+                            {"status": "ERROR", "message": "Cassette not found"},
+                            status=400,
+                        )
+                    else:
+                        unit = cassette.unit
+                        parameters["cassette"] = cassette
+            else:
+                try:
+                    unit = Unit.objects.get(pk=slide["unit_id"])
+                except Unit.DoesNotExist:
+                    if "cassette" not in parameters:
+                        return JsonResponse(
+                            {"status": "ERROR", "message": "Unit not found"},
+                            status=400,
+                        )
+                    else:
+                        unit = cassette.unit
+
+            parameters = {
+                "unit": unit,
+                "stain": stain,
+                "build_at": build_at,
+            }
+
+            if "correlative" in slide:
+                parameters["correlative"] = slide["correlative"]
+            else:
+                case = unit.identification.entryform
+                units = Unit.objects.filter(Q(identification__entryform=case))
+                slides = Slide.objects.filter(unit__in=units)
+                parameters["correlative"] = slides.count() + 1
+
+            if "cassette_id" in slide and "cassette" not in parameters:
+                try:
+                    cassette = Cassette.objects.get(pk=slide["cassette_id"])
+                except Cassette.DoesNotExist:
+                    return JsonResponse(
+                        {"status": "ERROR", "message": "Cassette not found"},
+                        status=400,
+                    )
+                parameters["cassette"] = cassette
+
+            try:
+                slide = Slide.objects.create(**parameters)
+            except IntegrityError:
+                errors.append(parameters)
+            else:
+                created.append(slide)
+
+        return JsonResponse(
+            {"created": serializers.serialize("json", created), "errors": errors},
+            safe=False,
+        )
+
+
+@method_decorator(login_required, name="dispatch")
+class SlideIndex(ListView):
+    """Displays a list of Slides.
+    Render a template list with all Slides including access to edit and reprocess
+    buttons.
+
+        **Context**
+        ``slides``
+            A list of :model:`lab.Slide`
+
+        **Template**
+        ``lab/slides/index.html``
+
+    """
+
+    queryset = Slide.objects.all().select_related(
+        "cassette__unit__identification__entryform"
+    )
+    template_name = "slides/index.html"
+    context_object_name = "slides"
+
+    def get_context_data(self, *, object_list=None, **kwargs):
+        query_filter = {"entry_format__in": [5]}
+        cases = Case.objects.units()
+        cassettes = Cassette.objects.all().select_related(
+            "unit__identification__entryform"
+        )
+
+        context = super().get_context_data(**kwargs)
+        context["cases"] = cases
+        context["cassettes"] = cassettes
+
+        return context
+
+
+class SlideDetail(View):
+    @method_decorator(login_required)
+    def get(self, request, *args, **kwargs):
+        """Returns a JSON detailing Slide.
+
+        **CONTEXT**
+
+        ``slide``
+            Detailed data for the requested :model:`lab.Slide`
+        ``organs``
+            List of :model:`backend.Organ` that belongs to requested Slide.
+
+        """
+        slide = get_object_or_404(Slide, pk=kwargs["pk"])
+
+        return HttpResponse(
+            serializers.serialize("json", [slide]), content_type="application/json"
+        )
+
+    @method_decorator(login_required)
+    def post(self, request, *args, **kwargs):
+        """Updates a Slide.
+        Returns serialized data of the updated Slide.
+
+        **REQUEST**
+
+            ``build_at``
+                Updated build_at date. Optional.
+            ``correlative``
+                Updated correlative. Optional.
+            ``stain``
+                Related :model:`backend.Stain`.
+
+        """
+        slide = get_object_or_404(Slide, pk=kwargs["pk"])
+
+        request_input = json.loads(request.body)
+
+        if "build_at" in request_input:
+            try:
+                build_at = parse(request_input["build_at"])
+            except (ParserError):
+                build_at = slide.build_at
+            else:
+                slide.build_at = build_at
+        if "correlative" in request_input:
+            slide.correlative = request_input["correlative"]
+        if "stain_id" in request_input:
+            slide.stain_id = request_input["stain_id"]
+
+        try:
+            slide.save()
+        except IntegrityError:
+            return JsonResponse(
+                {"status": "ERROR", "message": "Couldn't save Slide"}, status=400
+            )
+
+        return HttpResponse(
+            serializers.serialize("json", [slide]), content_type="application/json"
+        )

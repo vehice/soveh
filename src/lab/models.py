@@ -82,11 +82,10 @@ class Cassette(models.Model):
     A Cassette is a plastic unit where organs are put and
     processed in formalin to later be converted to blocks.
 
-    A Cassette is turned into one :models:`lab.Block`.
-    It's related to :models:`backend.EntryForm` through :models:`backend.Unit`
+    It's related to :model:`backend.Entryform` through :model:`backend.Unit`
     """
 
-    correlative = models.PositiveIntegerField(verbose_name="correlative")
+    correlative = models.PositiveIntegerField()
     organs = models.ManyToManyField(Organ, related_name="cassettes")
     unit = models.ForeignKey(Unit, on_delete=models.CASCADE, related_name="cassettes")
     build_at = models.DateTimeField(null=True)
@@ -108,9 +107,11 @@ class Slide(models.Model):
     """
 
     cassette = models.ForeignKey(
-        Cassette, on_delete=models.CASCADE, related_name="slides"
+        Cassette, on_delete=models.CASCADE, related_name="slides", null=True
     )
+    unit = models.ForeignKey(Unit, on_delete=models.CASCADE, related_name="slides")
     stain = models.ForeignKey(Stain, on_delete=models.CASCADE, related_name="slides")
+    correlative = models.PositiveIntegerField()
     build_at = models.DateTimeField(null=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
