@@ -1,0 +1,63 @@
+{% extends 'layout.html' %}
+{% load static %}
+
+{% block content %}
+<!-- MAIN -->
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <header class="card-header">
+                <h4 class="card-title">Hoja lectura</h4>
+            </header>
+            <main class="card-body container">
+                <section class="row">
+                    <div class="col-md-12 table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Slide</th>
+                                    <th scope="col">Identificacion / Unidad</th>
+                                    <th scope="col">Organos</th>
+                                    <th scope="col">Tincion</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for slide in slides %}
+                                <tr>
+                                    <th scope="row">{{ slide.correlative }}</th>
+                                    <td>{{ slide.unit.identification.cage }} / {{ slide.unit.correlative }}</td>
+                                    <td>{{ slide.cassette.organs.all|join:", " }}</td>
+                                    <td>{{ slide.stain }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+            </main>
+        </div>
+    </div>
+</div>
+
+<!-- END MAIN -->
+
+{% endblock content %}
+{% block scripts %}
+<script
+    type="text/javascript"
+    src="https://cdn.datatables.net/buttons/1.7.0/js/dataTables.buttons.min.js"
+    defer>
+</script>
+
+<script
+    type="text/javascript"
+    src="//cdn.jsdelivr.net/npm/sweetalert2@10"
+    defer>
+</script>
+
+<script type="text/javascript"
+        src="{% static 'lab/js/slide-index.js' %}"
+        defer>
+</script>
+
+{% endblock scripts %}
