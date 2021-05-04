@@ -24,22 +24,25 @@ def home(request):
     cassette_cases = Case.objects.units(
         kwargs_filter={"entry_format__in": [1, 2, 6, 7]}
     )
+    slide_cases = Case.objects.units(kwargs_filter={"entry_format__in": [5]})
+    slide_cassettes = Cassette.objects.filter(slides__isnull=True)
+
     cassettes = []
+    slides = []
     for case in cassette_cases:
-        for identification in case.identifications:
-            for unit in identification.units:
+        identifications = case.identifications
+        units_count = Unit.objects.filter(identification__in=identifications).count()
+        cassettes.append({"case": case, "count": units_count})
 
-                if unit.cassettes.count() > 0:
-                    continue
+    for case in slide_cases:
+        identifications = case.identifications
+        units_count = Unit.objects.filter(identification__in=identifications).count()
+        slides.append({"case": case, "count": units_count})
 
-                cassettes.append(
-                    {
-                        "case": case,
-                        "identification": identification,
-                        "unit": unit,
-                    }
-                )
-    context = {"cassettes": cassettes, "cases": cases}
+    for case in slide_cassettes:
+        slides.append({"case": case, "count": units_count})
+
+    context = {"cassettes": cassettes, "slides": slides, "cases": cases}
     return render(request, "home.html", context)
 
 
@@ -555,6 +558,23 @@ class SlideBuild(View):
             {"created": serializers.serialize("json", created), "errors": errors},
             safe=False,
         )
+
+
+def slide_prebuild(request):
+    """
+    Returns an array of slides grouped by :model:`lab.Case`
+    """
+    items = json.loads(request.body)
+    cases = items["cases"]
+
+    cases = Case.objects.filter(pk__in=cases).select_related("analysisform")
+
+    slides = []
+
+    for case in cases:
+        correlative = 1
+        for service in case.analysisform.all():
+            pass
 
 
 @method_decorator(login_required, name="dispatch")
