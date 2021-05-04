@@ -883,3 +883,116 @@ class SlideBuildTest(TestCase):
         self.assertIn("status", response.json(), "Response must contain expected item.")
 
 
+class SlideIndexTest(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.client = Client()
+        cls.fake = Faker()
+
+    def test_expected_template(self):
+        self.client.login(username="jmonagas", password="vehice1234")
+        response = self.client.get(reverse("lab:slide_index"))
+
+        self.assertTemplateUsed(
+            response, "slides/index.html", "Response must use expected template."
+        )
+
+    def test_expected_data(self):
+        self.client.login(username="jmonagas", password="vehice1234")
+        response = self.client.get(reverse("lab:slide_index"))
+        slides = Slide.objects.all()
+
+        self.assertEqual(
+            len(slides),
+            len(response.context["object_list"]),
+            "Response must contain as many Slide as expected.",
+        )
+
+
+class SlideDetailTest(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.client = Client()
+        cls.fake = Faker()
+
+    def test_detail_returns_json(self):
+        self.client.login(username="jmonagas", password="vehice1234")
+
+        response = self.client.get(reverse("lab:slide_detail", kwargs={"pk": 1}))
+
+        self.assertTrue(
+            response.json()[0]["pk"] == 1, "Response should contain expected Slide."
+        )
+
+    def test_detail_updates_slide(self):
+        self.client.login(username="jmonagas", password="vehice1234")
+
+        response = self.client.post(
+            reverse("lab:slide_detail", kwargs={"pk": 1}),
+            json.dumps(
+                {
+                    "build_at": self.fake.date_time().isoformat(),
+                    "correlative": self.fake.pyint(),
+                    "stain_id": 1,
+                }
+            ),
+            content_type="application/json",
+        )
+
+        self.assertTrue(
+            response.json()[0]["pk"] == 1, "Response should contain expected Slide."
+        )
+
+    def test_detail_updates_no_build_at(self):
+        self.client.login(username="jmonagas", password="vehice1234")
+
+        response = self.client.post(
+            reverse("lab:slide_detail", kwargs={"pk": 1}),
+            json.dumps(
+                {
+                    "correlative": self.fake.pyint(),
+                    "stain_id": 1,
+                }
+            ),
+            content_type="application/json",
+        )
+
+        self.assertTrue(
+            response.json()[0]["pk"] == 1, "Response should contain expected Slide."
+        )
+
+    def test_detail_updates_no_correlative(self):
+        self.client.login(username="jmonagas", password="vehice1234")
+
+        response = self.client.post(
+            reverse("lab:slide_detail", kwargs={"pk": 1}),
+            json.dumps(
+                {
+                    "build_at": self.fake.date_time().isoformat(),
+                    "stain_id": 1,
+                }
+            ),
+            content_type="application/json",
+        )
+
+        self.assertTrue(
+            response.json()[0]["pk"] == 1, "Response should contain expected Slide."
+        )
+
+    def test_detail_no_stain(self):
+        self.client.login(username="jmonagas", password="vehice1234")
+
+        response = self.client.post(
+            reverse("lab:slide_detail", kwargs={"pk": 1}),
+            json.dumps(
+                {
+                    "build_at": self.fake.date_time().isoformat(),
+                    "correlative": self.fake.pyint(),
+                }
+            ),
+            content_type="application/json",
+        )
+
+        self.assertTrue(
+            response.json()[0]["pk"] == 1, "Response should contain expected Slide."
+        )
