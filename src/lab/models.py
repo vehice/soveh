@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from django.db import models
+from django.db import models, connections
 from django.urls import reverse
 from numpy import busday_count
 
@@ -93,6 +93,9 @@ class Cassette(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    def __str__(self):
+        return f"{self.correlative}"
+
 
 class Slide(models.Model):
     """
@@ -116,3 +119,30 @@ class Slide(models.Model):
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.correlative}"
+
+    @property
+    def tag(self):
+        no_caso = self.unit.identification.entryform.no_caso[1::]
+        stain = self.stain.abbreviation.replace(" ", ",").replace("+", ",").upper()
+        correlative = str(self.correlative).zfill(3)
+
+        return f"{no_caso},{stain},{correlative}"
+
+    def get_absolute_url(self):
+        tag = self.tag
+
+        with connections["dsstore"].cursor() as cursor:
+            cursor.execute(
+                "SELECT ds.id FROM DSStore_Slide ds WHERE ds.Name LIKE %s", [tag]
+            )
+
+            row = cursor.fetchone()
+
+        if row:
+            slide_id = row[0]
+
+            return f"http://vehice.net/DSStore/HtmlViewer.aspx?Id=${slide_id}"
+        return row
