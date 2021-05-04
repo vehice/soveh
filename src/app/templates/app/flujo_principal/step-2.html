@@ -4,10 +4,10 @@
     <input type="hidden" id="step_tag" name="step_tag" value="{{step_tag}}">
     <input type="hidden" id="form_id" name="form_id" value="{{form_id}}">
     <input type="hidden" id="entryform_id" name="entryform_id" value="{{entryform_id}}">
-    <div class="mt-2">
-      <center>
-        <button type="button" class="btn btn-warning" onclick="openOrgansKeypad()"><i class="fa fa-th"></i> Botonera de Órganos</button>
-      </center>
+    <div class="mt-12">
+      <button type="button" class="btn btn-sm btn-light" onclick="selectAllUnits(1)"><i class="fa fa-check-square-o"></i> {{request.lang.select_all_units}}</button>
+      <button type="button" class="btn btn-sm btn-light" onclick="selectAllUnits(0)"><i class="fa fa-square-o"></i> {{request.lang.deselect_all_units}}</button>
+      <button type="button" class="btn btn-sm btn-warning" onclick="openOrgansKeypad()"><i class="fa fa-th"></i> {{request.lang.add_organs_to_selection|safe}}</button>
     </div>
     <div class="table-responsive">
       <table id="identifications" class="table table-xs table-bordered table-condensed table-ident" cellpadding="0" cellspacing="0">
@@ -39,6 +39,7 @@
 
 <script id="unit_template" type="text/x-lodash-template">
   <tr id="unit-<%= ident_id %>-<%= id %>">
+    <td><input type="checkbox" class="unit-select"></td>
     <td><input id="input-<%= ident_id %>-<%= id %>" class="form-control-table unit-correlative" value="<%= unit_correlative %>"></td>
     <td>
       <input type="text" class="form-control-table" disabled value="<%= entry_format %>" />
@@ -63,13 +64,25 @@
 </script>
 
 <script id="organs_keypad" type="text/x-lodash-template">
-  <div data-toggle="buttons">
-    <% _.each(data.organs, function (organ) { %>
-      <label class="btn btn-light">
-        <input type="checkbox" name="organs-keypad-checkbox[]" data-id="<%= organ.id %>" data-name="<%= organ.name %>" class="hidden" autocomplete="off"> <%= organ.abbreviation %>
-      </label>
-    <% }); %>
-  </div>
-  <button type="button" class="btn btn-primary btn-block" onclick="AddOrgansFromKeypadToSelect()"> Presione para agregar órganos a las unidades</button>
+  <div class="row">
+    <div class="col-sm-12 text-center mb-2">
+      <center><h3>¿Desea aumentar o disminuir la cantidad de órganos al presionar?</h3></center>
+      <input type="checkbox" id="switch_keypad" checked data-off-active-cls="btn-danger" data-on-active-cls="btn-blue" data-on-label="Aumentar" data-off-label="Disminuir">
+    </div>
 
+    <div class="col-sm-12">
+      <% _.each(data.organs, function (organ) { %>
+        <button type="button" data-id="<%= organ.id %>" data-name="<%= organ.name %>" class="btn btn-light keypad-organ-selector" style="margin:0.5% !important;"> 
+          <%= organ.abbreviation %> <span class="badge badge-sm badge-secondary organ_counter">0</span>
+        </button>
+      <% }); %>
+    </div>
+
+    <div class="col-sm-12 text-center mt-2">
+      <div class="btn-group" role="group" aria-label="">
+        <button type="button" class="btn btn-blue" onclick="AddOrgansFromKeypadToUnits(1)"> Agregar órganos a unidades</button>
+        <button type="button" class="btn btn-danger" onclick="AddOrgansFromKeypadToUnits(0)"> Quitar órganos a unidades</button>
+      </div>
+    </div>
+  </div>
 </script>

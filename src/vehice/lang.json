@@ -608,12 +608,28 @@
         "en":"Selection"
     },
     "select_all":{
-        "es":"Seleccionar todos",
+        "es":"Seleccionar",
         "en":"Select All"
     },
     "deselect_all":{
-        "es":"Deseleccionar todos",
+        "es":"Deseleccionar",
         "en":"Deselect All"
+    },
+    "select_all_units":{
+        "es":"Seleccionar todas las unidades",
+        "en":"Select All Units"
+    },
+    "deselect_all_units":{
+        "es":"Deseleccionar todas las unidades",
+        "en":"Deselect All Units"
+    },
+    "select_all_units_by_ident":{
+        "es":"Seleccionar todas las unidades de la identificación",
+        "en":"Select all units from current identification"
+    },
+    "deselect_all_units_by_ident":{
+        "es":"Deseleccionar todas las unidades de la identificación",
+        "en":"Deselect all units from current identification"
     },
     "add":{
         "es":"Ingresar",
@@ -622,5 +638,13 @@
     "remove":{
         "es":"Eliminar",
         "en":"Remove"
+    },
+    "add_organs_to_selection":{
+        "es": "Agregar o quitar órganos a selección",
+        "en": "Add or remove organs to selection"
+    },
+    "organs_to_every_units":{
+        "es": "Órganos para todas las unidades",
+        "en": "Organs to every units"
     }
 }

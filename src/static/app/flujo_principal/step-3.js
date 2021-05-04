@@ -91,8 +91,14 @@ function loadSamples(samples){
   $('.sampleOrgansSelect').select2();
 }
 
+function loadIdentifications(idents){
+  $.each(idents, function(i, v){
+    $('.select-identifications').append("<option value='"+v.id+"'>"+v.cage+"-"+v.group+"</option> ")
+  });
+}
 // Load prev samples and exams
 function initialData(data) {
+  loadIdentifications(data.identifications)
   loadSamples(data.samples);
   loadExams(data.exams);
   loadStains(data.stains);
@@ -341,14 +347,30 @@ function addServiceRow(analisis, sampleId, examId, stain, organs, status) {
 }
 
 function selectAllChecks(opt){
-  console.log("llegue")
+  let ident_select = $('.select-identifications').val()
   if (opt == 1){
-    $('#samples_table input[type=checkbox]').each(function (_, input) {
-      input.checked = true;
-    });
+    if ( ident_select == "-"){
+      $('#samples_table input[type=checkbox]').each(function (_, input) {
+        input.checked = true;
+      });
+    } else {
+      $('#samples_table input[type=checkbox]').each(function (_, input) {
+        if ($(input).data("ident") == ident_select) {
+          input.checked = true;
+        }
+      });
+    }
   } else {
-    $('#samples_table input[type=checkbox]').each(function (_, input) {
-      input.checked = false;
-    });
+    if ( ident_select == "-"){
+      $('#samples_table input[type=checkbox]').each(function (_, input) {
+        input.checked = false;
+      });
+    } else {
+      $('#samples_table input[type=checkbox]').each(function (_, input) {
+        if ($(input).data("ident") == ident_select) {
+          input.checked = false;
+        }
+      });
+    }
   }
 }

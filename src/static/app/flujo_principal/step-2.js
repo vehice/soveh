@@ -150,15 +150,23 @@ function init_step_2() {
       <div class="row justify-content-center">
         <div class="form-group pl-2 pt-2">
           <input type="checkbox" id="organs-${id}" class="switch2" />
-          <label for="organs-${id}" class="font-medium-1 text-bold-600 ml-1">Organos para todas las unidades</label>
+          <label for="organs-${id}" class="font-medium-1 text-bold-600 ml-1">Órganos para todas las unidades</label>
         </div>
         <div class="switch-div form-group pl-2 pt-2">
           <input type="checkbox" id="correlative-${id}" class="switch2 correlative" ${correlative_checked} />
           <label for="correlative-${id}" class="font-medium-1 text-bold-600 ml-1">Correlativos</label>
         </div>
       </div>
+      <div class="row pull-left">
+        <div class="pl-0 col-sm-12">
+          <button type="button" class="btn btn-sm btn-light" onclick="selectAllUnitsByIdentification(${id}, 1)"><i class="fa fa-check-square-o"></i> Seleccionar unidades</button>
+          <button type="button" class="btn btn-sm btn-light" onclick="selectAllUnitsByIdentification(${id}, 0)"><i class="fa fa-square-o"></i> Deseleccionar unidades</button>
+        </div>
+      </div>
+      
       <table class='table w-100 table-unit' id="main-${table_id}">
-      <thead> 
+      <thead>
+      <th style="width:5%"></th> 
       <th style="width:5%">#</th> 
       <th>Tipo</th> 
       <th style="width: 65%">Órganos</th> 
@@ -174,7 +182,7 @@ function init_step_2() {
     var url = Urls.list_units(id);
     $.ajax({
       type: "GET",
-      url: url
+      url: url,
     })
     .done(function (response) {
       $(`#${table_id}_loading`).remove();
@@ -233,6 +241,11 @@ function init_step_2() {
       icon.removeClass('fa-chevron-right');
       icon.addClass('fa-chevron-down');
       tr.addClass('shown');
+      let ident_id = tr.attr("id")
+
+      waitForEl('.organs-'+ident_id, function() {
+        $('#organs-'+ident_id).trigger("click")
+      });
     }
   });
 
@@ -725,6 +738,7 @@ function openOrgansKeypad(){
   var templateHTML = templateFn({ data });
   $("#organ_table_keypad_body").html(templateHTML);
   $("#organ_table_keypad").modal("show");
+  $('#switch_keypad').checkboxpicker();
 }
 
 var waitForEl = function(selector, callback) {
@@ -737,43 +751,78 @@ var waitForEl = function(selector, callback) {
   }
 };
 
-function AddOrgansFromKeypadToSelect(){
+function AddOrgansFromKeypadToUnits(add){
   
   let organs_selected_from_keypad = [];
-  $('input[name="organs-keypad-checkbox[]"]').each(function (e) {
-    if ($(this).is(":checked")) {
-      organs_selected_from_keypad.push([$(this).data("id"), $(this).data("name")])
-    }   
-  });
+  $('.keypad-organ-selector').each(function (e) {
+    let span = $(this).find(".organ_counter")[0]
+    let organ_id = $(this).data("id")
+    let organ_name = $(this).data("name")
+    let organ_amount = parseInt($(span).text())
 
-  $.each( $("#identifications .table-idents tr"), function (i, tr) {
-
-    var row = $('#identifications').DataTable().row(tr)
-
-    if (!row.child.isShown()) {
-      $(tr).find('.details-control').first().click()
-      $(tr).addClass('shown')
+    if (organ_amount > 0){
+      for (let i = 0; i < organ_amount; i++) {
+        organs_selected_from_keypad.push([organ_id, organ_name])
+      }
     }
-
-    let ident_id = $(tr).attr("id");
-    let units_tbody_trs = "units-table-"+ident_id+" tr";
-
-    waitForEl("#"+units_tbody_trs, function() {
-      $("#"+units_tbody_trs).each(function(_, s_tr){
-        let unit_tr_id = $(s_tr).attr("id")
-        let unit_id = unit_tr_id.split("-")[2]
-        $.each(organs_selected_from_keypad, function(index, value){
-          selectOrgansWithConditions(value[0], value[1], ident_id, $('#select-'+ident_id+'-'+unit_id))
-        });
-        if ($('#organs-'+ident_id).is(":checked")){
-          return false
-        }
-      })
-    });
-
-    saveUnitsByIdentification(ident_id)
-
   });
+
+  if (organs_selected_from_keypad.length > 0){
+    $.each( $("#identifications .table-idents tr"), function (i, tr) {
+
+      let row = $('#identifications').DataTable().row(tr)
+
+      if (!row.child.isShown()) {
+        $(tr).find('.details-control').first().click()
+        $(tr).addClass('shown')
+      }
+
+      let ident_id = $(tr).attr("id");
+      let units_tbody_trs = "units-table-"+ident_id+" tr"
+      let units_edited = false
+
+      waitForEl("#"+units_tbody_trs, function() {
+        $("#"+units_tbody_trs).each(function(_, s_tr){
+          let unit_tr_id = $(s_tr).attr("id")
+          let unit_id = unit_tr_id.split("-")[2]
+          let unit_selection = $(s_tr).find(".unit-select")[0]
+
+          if ($(unit_selection).is(":checked")){
+            units_edited = true
+            if (add){
+              $.each(organs_selected_from_keypad, function(index, value){
+                selectOrgansWithConditions(value[0], value[1], ident_id, $('#select-'+ident_id+'-'+unit_id))
+              });
+
+              if ($('#organs-'+ident_id).is(":checked")){
+                return false
+              }
+            } else {
+              $.each(organs_selected_from_keypad, function(index, value){
+                let aux_val = $('#select-'+ident_id+'-'+unit_id).val()
+                let new_values = []
+                let deleted = false
+                for (let org of aux_val) {
+                  if (!org.startsWith(value[0])){
+                    new_values.push(org)
+                  } else if (org.startsWith(value[0]) && deleted){
+                    new_values.push(org)
+                  } else if (org.startsWith(value[0]) && !deleted){
+                    deleted = true
+                  }
+                }
+                $('#select-'+ident_id+'-'+unit_id).val(new_values).trigger("change")
+              });
+            }
+          }
+        })
+      });
+
+      if (units_edited){
+        saveUnitsByIdentification(ident_id)
+      }
+    });
+  }
 
   $("#organ_table_keypad").modal("hide");
   
@@ -863,3 +912,71 @@ function getUnits(ident_id){
   })
   return response
 }
+
+function selectAllUnits(opt){
+  if (opt == 1){
+    $.each( $("#identifications .table-idents tr"), function (i, tr) {
+
+      var row = $('#identifications').DataTable().row(tr)
+
+      if (!row.child.isShown()) {
+        $(tr).find('.details-control').first().click()
+        $(tr).addClass('shown')
+      }
+
+      let ident_id = $(tr).attr("id")
+      let units_tbody_trs = "units-table-"+ident_id+" tr"
+
+      waitForEl("#"+units_tbody_trs, function() {
+        $('#'+units_tbody_trs+' .unit-select').prop("checked", true)
+      });
+    });
+  } else {
+    $.each( $("#identifications .table-idents tr"), function (i, tr) {
+
+      var row = $('#identifications').DataTable().row(tr)
+
+      if (!row.child.isShown()) {
+        $(tr).find('.details-control').first().click()
+        $(tr).addClass('shown')
+      }
+
+      let ident_id = $(tr).attr("id")
+      let units_tbody_trs = "units-table-"+ident_id+" tr"
+
+      waitForEl("#"+units_tbody_trs, function() {
+        $('#'+units_tbody_trs+' .unit-select').prop("checked", false)
+      });
+    });
+  }
+}
+
+function selectAllUnitsByIdentification(id, opt){
+  let units_tbody_trs = "units-table-"+id+" tr"
+  if (opt == 1){
+
+    waitForEl("#"+units_tbody_trs, function() {
+      $('#'+units_tbody_trs+' .unit-select').prop("checked", true)
+    });
+  } else {
+    let units_tbody_trs = "units-table-"+id+" tr"
+
+    waitForEl("#"+units_tbody_trs, function() {
+      $('#'+units_tbody_trs+' .unit-select').prop("checked", false)
+    });
+  }
+}
+
+$(document).on("click", ".keypad-organ-selector", function(){
+  let span = $(this).find("span")[0]
+  let current_value = parseInt($(span).text())
+  
+  if ( $("#switch_keypad").is(":checked") ) {
+    $(span).text(current_value + 1)
+  } else {
+    if (current_value > 0){
+      $(span).text(current_value - 1)
+    }
+  }
+
+});
