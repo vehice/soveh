@@ -19,5 +19,6 @@ urlpatterns = [
     # Slide Routes
     path("slides", views.SlideIndex.as_view(), name="slide_index"),
     path("slides/<int:pk>", views.SlideDetail.as_view(), name="slide_detail"),
+    path("slides/prebuild", views.slide_prebuild, name="slide_prebuild"),
     path("slides/build", views.SlideBuild.as_view(), name="slide_build"),
 ]
