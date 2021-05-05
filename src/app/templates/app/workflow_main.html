@@ -1,5 +1,33 @@
 {% extends 'layout.html' %}
 {% load static %}
+{% block stylesheets %}
+
+<style>
+  .steps {
+    pointer-events: none;
+  }
+  .form-section {
+    color: #404E67;
+    line-height: 3rem;
+    margin-bottom: 20px;
+    border-bottom: 1px solid #404E67;
+  }
+  .multiple-action > .swal-footer{
+    display: grid;
+    text-align: center;
+  }
+
+  span > .info {
+    color: blue !important;
+  }
+
+  .bootstrap-duallistbox-container label {
+    font-size: 18px !important;
+    color: black !important;
+  }
+</style>
+
+{% endblock stylesheets %}
 {% block content_header %}
 <div class="content-header row">
   <div class="content-header-left col-md-6 col-12 mb-2">
