@@ -1091,12 +1091,8 @@ class WORKFLOW(View):
         id_next_step = var_post.get("id_next_step", None)
         previous_step = strtobool(var_post.get("previous_step", "false"))
 
-        print("id_next_step", id_next_step)
-        print("previous_step", previous_step)
-
         if not id_next_step:
             form_closed = True
-        print("form_closed", form_closed)
         if not form_closed:
             next_step_permission = False
             process_response = False
@@ -1106,13 +1102,10 @@ class WORKFLOW(View):
             next_state = None
 
             if id_next_step:
-                print("si entre")
                 next_step = Step.objects.get(pk=id_next_step)
 
-                print("next_step", next_step)
                 for actor in next_step.actors.all():
                     if actor.profile == up.profile:
-                        print("actor.profile == up.profile", actor.profile, up.profile)
                         actor_user = actor
                         if previous_step:
                             next_state = Permission.objects.get(
@@ -2591,7 +2584,6 @@ def step_4_entryform(request):
 
 
 def step_5_entryform(request):
-    print("step_4")
     return True
 
 
@@ -3721,8 +3713,6 @@ def force_form_to_step(request, form, step):
     try:
         form = Form.objects.get(pk=form)
 
-        print("form", form.pk)
-        print("step to", step)
         if form.reception_finished and int(step) in (2, 3):
             form.reception_finished = False
             form.reception_finished_at = None
