@@ -1,3 +1,4 @@
+import json
 import random
 import string
 from datetime import datetime
@@ -97,105 +98,59 @@ class ENTRYFORM(View):
 
             entryform = EntryForm.objects.values().get(pk=id)
             entryform_object = EntryForm.objects.get(pk=id)
-            subflow = entryform_object.get_subflow
-            entryform["subflow"] = subflow
             identifications = list(
                 Identification.objects.filter(entryform=entryform["id"]).values()
             )
 
             samples = Sample.objects.filter(entryform=entryform["id"]).order_by(
-                "index", "identification_id"
+                "identification_id", "index"
             )
 
             samples_as_dict = []
             for s in samples:
                 s_dict = model_to_dict(
-                    s,
-                    exclude=[
-                        "organs",
-                        "sampleexams",
-                        "exams",
-                        "identification",
-                        "organs_before_validations",
-                    ],
+                    s, exclude=["organs", "sampleexams", "identification"]
                 )
                 organs = []
-                sampleexams = s.sampleexams_set.all()
-                sampleExa = {}
-                for sE in sampleexams:
-                    try:
-                        a_form = (
-                            entryform_object.analysisform_set.filter(exam_id=sE.exam_id)
-                            .first()
-                            .forms.get()
-                        )
-                        is_cancelled = a_form.cancelled
-                        is_closed = a_form.form_closed
-                    except:
-                        is_cancelled = False
-                        is_closed = False
 
-                    if not is_cancelled:
-                        try:
-                            sampleExa[sE.exam_id]["organ_id"].append(
-                                {"name": sE.organ.name, "id": sE.organ.id}
-                            )
-                        except:
-                            sampleExa[sE.exam_id] = {
-                                "exam_id": sE.exam_id,
-                                "exam_name": sE.exam.name,
-                                "exam_type": sE.exam.service_id,
-                                "exam_stain_id": sE.exam.stain_id,
-                                "sample_exam_stain_id": sE.stain_id,
-                                "sample_stain_abbr": sE.stain.abbreviation.upper()
-                                if sE.stain
-                                else "N/A",
-                                "sample_id": sE.sample_id,
-                                "organ_id": [
-                                    {"name": sE.organ.name, "id": sE.organ.id}
-                                ],
-                                "is_closed": is_closed,
-                            }
-                        if sE.exam.service_id in [1, 2, 3]:
-                            organs_before_validation = (
-                                s.identification.organs_before_validations.all()
-                            )
-                            if sE.organ in organs_before_validation:
-                                try:
-                                    organs.index(model_to_dict(sE.organ))
-                                except:
-                                    organs.append(model_to_dict(sE.organ))
-                            else:
-                                for org in organs_before_validation:
-                                    if org.organ_type == 2:
-                                        try:
-                                            organs.index(model_to_dict(org))
-                                        except:
-                                            organs.append(model_to_dict(org))
-                cassettes = Cassette.objects.filter(samples__in=[s])
+                for org in s.organs.all():
+                    organs.append(model_to_dict(org))
                 s_dict["organs_set"] = organs
+
+                sampleexams = s.sampleexams_set.all()
+
+                sampleExa = {}
+
+                for sE in sampleexams:
+                    analysis_form = entryform_object.analysisform_set.filter(
+                        exam_id=sE.exam_id, stain_id=sE.stain_id
+                    ).first()
+
+                    a_form = analysis_form.forms.get()
+
+                    is_cancelled = a_form.cancelled
+                    is_closed = a_form.form_closed
+
+                    exam_stain_tuple = str(sE.exam_id) + "-" + str(sE.stain_id)
+
+                    sE_dict = {
+                        "organ_name": sE.organ.name,
+                        "organ_id": sE.organ.id,
+                        "stain_id": sE.stain_id,
+                        "stain_abbr": sE.stain.abbreviation,
+                        "exam_id": sE.exam_id,
+                        "exam_name": sE.exam.name,
+                        "analysis_status": analysis_form.status,
+                    }
+
+                    if exam_stain_tuple in sampleExa.keys():
+                        sampleExa[exam_stain_tuple].append(sE_dict)
+                    else:
+                        sampleExa[exam_stain_tuple] = [sE_dict]
+
                 s_dict["sample_exams_set"] = sampleExa
-                cassettes_set = []
-                for c in cassettes:
-                    cassettes_set.append(
-                        {
-                            "cassette_name": c.cassette_name,
-                            "entryform_id": c.entryform_id,
-                            "id": c.id,
-                            "index": c.index,
-                            "sample_id": s.id,
-                            "organs_set": list(c.organs.values()),
-                        }
-                    )
-                s_dict["cassettes_set"] = cassettes_set
                 s_dict["identification"] = model_to_dict(
                     s.identification, exclude=["organs", "organs_before_validations"]
-                )
-                s_dict["identification"]["organs"] = list(
-                    s.identification.organs.all().values()
-                )
-                s_dict["identification"]["organs_bv"] = list(
-                    s.identification.organs_before_validations.all().values()
                 )
                 samples_as_dict.append(s_dict)
 
@@ -204,12 +159,17 @@ class ENTRYFORM(View):
             entryform["identifications"] = []
             for ident in entryform_object.identification_set.all():
                 ident_json = model_to_dict(
-                    ident, exclude=["organs", "organs_before_validations"]
+                    ident,
+                    exclude=[
+                        "organs",
+                        "organs_before_validations",
+                        "no_fish",
+                        "no_container",
+                        "temp_id",
+                    ],
                 )
-                ident_json["organs_set"] = list(ident.organs.all().values())
-                ident_json["organs_bv_set"] = list(
-                    ident.organs_before_validations.all().values()
-                )
+                # ident_json['organs_set'] = list(ident.organs.all().values())
+                # ident_json['organs_bv_set'] = list(ident.organs_before_validations.all().values())
                 entryform["identifications"].append(ident_json)
 
             # entryform["analyses"] = list(
@@ -273,7 +233,8 @@ class ENTRYFORM(View):
 
                 entryform["analyses"].append(aux)
 
-            entryform["cassettes"] = list(entryform_object.cassette_set.all().values())
+            # entryform["cassettes"] = list(
+            # entryform_object.cassette_set.all().values())
             entryform["customer"] = (
                 model_to_dict(entryform_object.customer)
                 if entryform_object.customer
@@ -303,6 +264,10 @@ class ENTRYFORM(View):
                 model_to_dict(entryform_object.specie)
                 if entryform_object.specie
                 else None
+            )
+            entryform["entry_format"] = (
+                entryform_object.entry_format,
+                entryform_object.get_entry_format_display(),
             )
 
             exams_set = list(Exam.objects.all().values())
@@ -954,16 +919,11 @@ class WORKFLOW(View):
         if not step_tag:
             step_tag = form.state.step.tag
         object_form_id = form.content_object.id
-
         actor = Actor.objects.filter(
             profile_id=request.user.userprofile.profile_id
         ).first()
         if form.content_type.name == "entry form":
-            # Fix patch state id non-correlative from step_3 > id : 5
-            if step_tag == "step_3":
-                state_id = 5
-            else:
-                state_id = step_tag.split("_")[1]
+            state_id = step_tag.split("_")[1]
             permisos = actor.permission.filter(from_state_id=state_id)
             edit = 1 if permisos.filter(type_permission="w").first() else 0
             route = "app/workflow_main.html"
@@ -979,6 +939,7 @@ class WORKFLOW(View):
                     if not ch.form_closed and not ch.cancelled:
                         close_allowed = 0
                         break
+
             up = UserProfile.objects.filter(user=request.user).first()
             edit_case = not form.form_closed and (
                 up.profile.id in (1, 2, 3) or request.user.is_superuser
@@ -993,6 +954,7 @@ class WORKFLOW(View):
                 "closed": closed,
                 "close_allowed": close_allowed,
                 "edit_case": edit_case,
+                "reception_finished": form.reception_finished,
             }
 
         elif form.content_type.name == "analysis form":
@@ -1126,72 +1088,78 @@ class WORKFLOW(View):
         if var_post.get("form_closed"):
             form_closed = True
 
-        if not form_closed:
-            id_next_step = var_post.get("id_next_step")
-            previous_step = strtobool(var_post.get("previous_step"))
-            next_step = Step.objects.get(pk=id_next_step)
+        id_next_step = var_post.get("id_next_step", None)
+        previous_step = strtobool(var_post.get("previous_step", "false"))
 
+        print("id_next_step", id_next_step)
+        print("previous_step", previous_step)
+
+        if not id_next_step:
+            form_closed = True
+        print("form_closed", form_closed)
+        if not form_closed:
             next_step_permission = False
             process_response = False
             process_answer = True
 
-            next_state = next_step.state
+            actor_user = None
+            next_state = None
 
-            actor_user = next_step.actors.filter(profile=up.profile).first()
+            if id_next_step:
+                print("si entre")
+                next_step = Step.objects.get(pk=id_next_step)
+
+                print("next_step", next_step)
+                for actor in next_step.actors.all():
+                    if actor.profile == up.profile:
+                        print("actor.profile == up.profile", actor.profile, up.profile)
+                        actor_user = actor
+                        if previous_step:
+                            next_state = Permission.objects.get(
+                                to_state=form.state, type_permission="w"
+                            ).from_state
+                        else:
+                            next_state = actor.permission.get(
+                                from_state=form.state, type_permission="w"
+                            ).to_state
+                        break
 
             if not previous_step:
                 process_answer = call_process_method(form.content_type.model, request)
-                if actor_user:
-                    next_step_permission = (
-                        next_state.id != 1
-                        and len(
-                            actor_user.permission.filter(
-                                to_state=next_state, type_permission="w"
-                            )
+                if next_state:
+                    next_step_permission = next_state.id != 1 and not len(
+                        actor_user.permission.filter(
+                            to_state=next_state, type_permission="w"
                         )
-                        > 0
                     )
-                else:
-                    next_step_permission = False
             else:
-                if actor_user:
-                    next_step_permission = (
-                        next_state.id != 1
-                        and len(
-                            actor_user.permission.filter(
-                                from_state=next_state, type_permission="w"
-                            )
+                if next_state:
+                    next_step_permission = next_state.id != 1 and not len(
+                        actor_user.permission.filter(
+                            from_state=next_state, type_permission="w"
                         )
-                        > 0
                     )
-                else:
-                    next_step_permission = False
-
-                form.form_reopened = False
+                    form.form_reopened = False
 
             if process_answer and next_state:
                 current_state = form.state
                 form.state = next_state
                 form.save()
-
-                if not next_step_permission:
+                if next_step_permission:
                     return redirect(app_view.show_ingresos)
-
-                return JsonResponse(
-                    {
-                        "process_response": process_response,
-                        "next_step_permission": next_step_permission,
-                    }
-                )
+                next_step_permission = not next_step_permission
+                process_response = True
                 # sendEmailNotification(form, current_state, next_state)
             else:
-                return JsonResponse(
-                    {
-                        "process_response": False,
-                        "next_step_permission": next_step_permission,
-                    }
-                )
+                print("FALLO EL PROCESAMIENTO")
+                return redirect(app_view.show_ingresos)
 
+            return JsonResponse(
+                {
+                    "process_response": process_response,
+                    "next_step_permission": next_step_permission,
+                }
+            )
         else:
             process_answer = call_process_method(form.content_type.model, request)
 
@@ -2316,294 +2284,6 @@ def step_1_entryform(request):
 
     entryform.save()
 
-    optimals = [
-        v
-        for k, v in dict(var_post).items()
-        if k.startswith("identification[is_optimal]")
-    ]
-
-    organs = [
-        list(v)
-        for k, v in dict(var_post).items()
-        if k.startswith("identification[organs]")
-    ]
-    identification_cage = var_post.getlist("identification[cage]")
-    identification_group = var_post.getlist("identification[group]")
-    identification_no_container = var_post.getlist("identification[no_container]")
-    identification_no_fish = var_post.getlist("identification[no_fish]")
-    identification_id = var_post.getlist("identification[id]")
-    identification_weight = var_post.getlist("identification[weight]")
-    identification_extra_features_detail = var_post.getlist(
-        "identification[extra_features_detail]"
-    )
-    identification_is_optimal = optimals
-    identification_observations = var_post.getlist("identification[observations]")
-    identification_organs = organs
-
-    zip_identification = zip(
-        identification_cage,
-        identification_group,
-        identification_no_container,
-        identification_no_fish,
-        identification_id,
-        identification_weight,
-        identification_extra_features_detail,
-        identification_is_optimal,
-        identification_observations,
-        identification_organs,
-    )
-    zip_identification1 = zip(
-        identification_cage,
-        identification_group,
-        identification_no_container,
-        identification_no_fish,
-        identification_id,
-        identification_weight,
-        identification_extra_features_detail,
-        identification_is_optimal,
-        identification_observations,
-        identification_organs,
-    )
-
-    entryform_identification = entryform.identification_set.all()
-
-    change = change or checkIdentification(
-        entryform_identification, zip_identification1
-    )
-    if change:
-        changeCaseVersion(False, entryform.id, request.user.id)
-    # if strtobool(var_post.get('select_if_divide_flow')):
-    #     if var_post.get('flow_divide_option') == "1":
-    #         i = 0
-    #         for values in zip_identification:
-    #             # First identification is first subflow and it had some data saved before.
-    #             # Next iterations need to create an entire EntryForm based in the first one.
-    #             if i == 0:
-    #                 entryform_identification.delete()
-    #                 identificacion = Identification.objects.create(
-    #                     entryform_id=entryform.id,
-    #                     cage=values[0],
-    #                     group=values[1],
-    #                     no_container=values[2],
-    #                     no_fish=values[3],
-    #                     temp_id=values[4],
-    #                     weight=values[5],
-    #                     extra_features_detail=values[6],
-    #                     is_optimum = True if "si" in values[7] else False,
-    #                     observation = values[8]
-    #                 )
-    #                 organs_type2_count = Organ.objects.filter(id__in=values[9], organ_type=2).count()
-    #                 if organs_type2_count > 0:
-    #                     for org in Organ.objects.all():
-    #                         identificacion.organs.add(org)
-    #                 else:
-    #                     for org in values[9]:
-    #                         identificacion.organs.add(org)
-
-    #                 for org in values[9]:
-    #                     identificacion.organs_before_validations.add(org)
-
-    #                 sample_index = 1
-    #                 for i in range(int(values[3])):
-    #                     sample = Sample.objects.create(
-    #                         entryform_id=entryform.id,
-    #                         index=sample_index,
-    #                         identification=identificacion
-    #                     )
-    #                     sample_index += 1
-    #             else:
-    #                 flow_aux = Flow.objects.get(pk=1)
-    #                 entryform_aux = EntryForm.objects.create(created_by=request.user)
-    #                 form_aux = Form.objects.create(
-    #                     content_object=entryform_aux, flow=flow_aux, state=flow_aux.step_set.all()[1:2].first().state, parent_id=entryform.forms.first().id)
-    #                 entryform_aux.specie_id = var_post.get('specie')
-    #                 entryform_aux.watersource_id = var_post.get('watersource')
-    #                 entryform_aux.fixative_id = var_post.get('fixative')
-    #                 entryform_aux.larvalstage_id = var_post.get('larvalstage')
-    #                 entryform_aux.observation = var_post.get('observation')
-    #                 entryform_aux.customer_id = var_post.get('customer')
-    #                 entryform_aux.no_order = var_post.get('no_order')
-    #                 entryform_aux.created_at = datetime.strptime(var_post.get('created_at'), '%d/%m/%Y %H:%M')
-    #                 entryform_aux.sampled_at = datetime.strptime(var_post.get('sampled_at'), '%d/%m/%Y %H:%M')
-    #                 entryform_aux.center = var_post.get('center')
-    #                 entryform_aux.no_caso = entryform.no_caso
-
-    #                 entryform_aux.save()
-
-    #                 entryform_aux.identification_set.all().delete()
-    #                 identificacion = Identification.objects.create(
-    #                     entryform_id=entryform_aux.id,
-    #                     cage=values[0],
-    #                     group=values[1],
-    #                     no_container=values[2],
-    #                     no_fish=values[3],
-    #                     temp_id=values[4],
-    #                     weight=values[5],
-    #                     extra_features_detail=values[6],
-    #                     is_optimum = True if "si" in values[7] else False,
-    #                     observation = values[8]
-    #                 )
-
-    #                 organs_type2_count = Organ.objects.filter(id__in=values[9], organ_type=2).count()
-    #                 if organs_type2_count > 0:
-    #                     for org in Organ.objects.all():
-    #                         identificacion.organs.add(org)
-    #                 else:
-    #                     for org in values[9]:
-    #                         identificacion.organs.add(org)
-
-    #                 for org in values[9]:
-    #                     identificacion.organs_before_validations.add(org)
-
-    #                 sample_index = 1
-    #                 for i in range(int(values[3])):
-    #                     sample = Sample.objects.create(
-    #                         entryform_id=entryform_aux.id,
-    #                         index=sample_index,
-    #                         identification=identificacion
-    #                     )
-    #                     sample_index += 1
-    #             i += 1
-    #     elif var_post.get('flow_divide_option') == "2":
-    #         subflow_groups = [
-    #             var_post.getlist(k) for k, v in var_post.items()
-    #             if k.startswith("subflow_select[group]")
-    #         ]
-    #         zip_identification_list = list(zip_identification)
-    #         for i in range(len(subflow_groups)):
-    #             if i == 0:
-    #                 total_no_fish = 0
-    #                 entryform_identification.delete()
-    #                 for values in zip_identification_list:
-    #                     new_no_fish = 0
-    #                     for item in subflow_groups[i]:
-    #                         if item.split("_")[0] == values[4]:
-    #                             new_no_fish += 1
-    #                     if new_no_fish:
-    #                         identificacion = Identification.objects.create(
-    #                             entryform_id=entryform.id,
-    #                             cage=values[0],
-    #                             group=values[1],
-    #                             no_container=values[2],
-    #                             no_fish=new_no_fish,
-    #                             temp_id=values[4],
-    #                             weight=values[5],
-    #                             extra_features_detail=values[6],
-    #                             is_optimum = True if "si" in values[7] else False,
-    #                             observation = values[8]
-    #                         )
-
-    #                         organs_type2_count = Organ.objects.filter(id__in=values[9], organ_type=2).count()
-    #                         if organs_type2_count > 0:
-    #                             for org in Organ.objects.all():
-    #                                 identificacion.organs.add(org)
-    #                         else:
-    #                             for org in values[9]:
-    #                                 identificacion.organs.add(org)
-
-    #                         for org in values[9]:
-    #                             identificacion.organs_before_validations.add(org)
-
-    #                         sample_index = 1
-    #                         for k in range(int(new_no_fish)):
-    #                             sample = Sample.objects.create(
-    #                                 entryform_id=entryform.id,
-    #                                 index=sample_index,
-    #                                 identification=identificacion
-    #                             )
-    #                             sample_index += 1
-
-    #             else:
-    #                 flow_aux = Flow.objects.get(pk=1)
-    #                 entryform_aux = EntryForm.objects.create(created_by=request.user)
-    #                 form_aux = Form.objects.create(
-    #                     content_object=entryform_aux, flow=flow_aux, state=flow_aux.step_set.all()[1:2].first().state, parent_id=entryform.forms.first().id)
-    #                 entryform_aux.specie_id = var_post.get('specie')
-    #                 entryform_aux.watersource_id = var_post.get('watersource')
-    #                 entryform_aux.fixative_id = var_post.get('fixative')
-    #                 entryform_aux.larvalstage_id = var_post.get('larvalstage')
-    #                 entryform_aux.observation = var_post.get('observation')
-    #                 entryform_aux.customer_id = var_post.get('customer')
-    #                 entryform_aux.no_order = var_post.get('no_order')
-    #                 entryform_aux.created_at = datetime.strptime(var_post.get('created_at'), '%d/%m/%Y %H:%M')
-    #                 entryform_aux.sampled_at = datetime.strptime(var_post.get('sampled_at'), '%d/%m/%Y %H:%M')
-    #                 entryform_aux.center = var_post.get('center')
-    #                 entryform_aux.no_caso = entryform.no_caso
-
-    #                 entryform_aux.save()
-
-    #                 for values in zip_identification_list:
-    #                     new_no_fish = 0
-    #                     for item in subflow_groups[i]:
-    #                         if item.split("_")[0] == values[4]:
-    #                             new_no_fish += 1
-    #                     if new_no_fish:
-    #                         identificacion = Identification.objects.create(
-    #                             entryform_id=entryform_aux.id,
-    #                             cage=values[0],
-    #                             group=values[1],
-    #                             no_container=values[2],
-    #                             no_fish=new_no_fish,
-    #                             temp_id=values[4],
-    #                             weight=values[5],
-    #                             extra_features_detail=values[6],
-    #                             is_optimum = True if "si" in values[7] else False,
-    #                             observation = values[8]
-    #                         )
-
-    #                         for org in values[9]:
-    #                             identificacion.organs.add(org)
-
-    #                         sample_index = 1
-    #                         for k in range(int(new_no_fish)):
-    #                             sample = Sample.objects.create(
-    #                                 entryform_id=entryform_aux.id,
-    #                                 index=sample_index,
-    #                                 identification=identificacion
-    #                             )
-    #                             sample_index += 1
-
-    # else:
-    entryform_identification.delete()
-    entryform.sample_set.all().delete()
-    sample_index = 1
-
-    for values in zip_identification:
-        # print (values)
-        identificacion = Identification.objects.create(
-            entryform_id=entryform.id,
-            cage=values[0],
-            group=values[1],
-            no_container=values[2],
-            no_fish=values[3],
-            temp_id=values[4],
-            weight=values[5],
-            extra_features_detail=values[6],
-            is_optimum=True if "si" in values[7] else False,
-            observation=values[8],
-        )
-
-        organs_type2_count = Organ.objects.filter(
-            id__in=values[9], organ_type=2
-        ).count()
-        if organs_type2_count > 0:
-            for org in Organ.objects.all():
-                identificacion.organs.add(org)
-        else:
-            for org in values[9]:
-                identificacion.organs.add(org)
-
-        for org in values[9]:
-            identificacion.organs_before_validations.add(org)
-
-        for i in range(int(values[3])):
-            sample = Sample.objects.create(
-                entryform_id=entryform.id,
-                index=sample_index,
-                identification=identificacion,
-            )
-            sample_index += 1
-
     return True
 
 
@@ -2638,84 +2318,179 @@ def checkIdentification(olds, news):
 
 def step_2_entryform(request):
     var_post = request.POST.copy()
-
     entryform = EntryForm.objects.get(pk=var_post.get("entryform_id"))
-    Cassette.objects.filter(entryform=entryform).delete()
-    exams_to_do = var_post.getlist("analysis")
-    analyses_qs = entryform.analysisform_set.all()
+
+    identifications = Identification.objects.filter(entryform=entryform)
+
+    index = 1
+    for ident in identifications:
+
+        # Deleting previous samples
+
+        # Sample.objects.filter(
+        #     identification=ident,
+        # ).delete()
+
+        units = Unit.objects.filter(identification=ident)
+        if ident.samples_are_correlative:
+            unit_by_correlative = {}
+            for unit in units:
+                if unit.correlative in unit_by_correlative.keys():
+                    unit_by_correlative[unit.correlative].append(unit)
+                else:
+                    unit_by_correlative[unit.correlative] = [unit]
+
+            for k, v in unit_by_correlative.items():
+
+                sample = Sample.objects.filter(
+                    entryform=entryform, index=index, identification=ident
+                ).first()
+
+                if not sample:
+                    sample = Sample.objects.create(
+                        entryform=entryform, index=index, identification=ident
+                    )
+
+                sample.organs.clear()
+                for ou in OrganUnit.objects.filter(unit__in=map(lambda x: x.pk, v)):
+                    sample.organs.add(ou.organ)
+
+                index += 1
+        else:
+            organs = [
+                ou.organ.pk
+                for ou in OrganUnit.objects.filter(unit__in=map(lambda x: x.pk, units))
+            ]
+            organs_copy = organs[:]
+
+            samples_from_organs = []
+            for i in range(len(organs)):
+                if (organs[i]) in organs_copy:
+                    new_comb = [organs[i]]
+                    organs_copy.remove(organs[i])
+                    for j in organs_copy:
+                        if j not in new_comb:
+                            new_comb.append(j)
+                            organs_copy.remove(j)
+                    samples_from_organs.append(new_comb)
+
+            for s in samples_from_organs:
+                sample = Sample.objects.filter(
+                    entryform=entryform, index=index, identification=ident
+                ).first()
+
+                if not sample:
+                    sample = Sample.objects.create(
+                        entryform=entryform, index=index, identification=ident
+                    )
+                sample.organs.clear()
+                for org in s:
+                    sample.organs.add(Organ.objects.get(pk=org))
+
+                index += 1
+
+    return True
+
+
+def checkSampleExams(olds, news):
+    if len(olds) != len(news):
+        return True
+    for s in news:
+        if not olds.filter(
+            sample_id=s.sample_id, exam_id=s.exam_id, organ_id=s.organ_id
+        ).first():
+            return True
+    return False
+
+
+def step_3_entryform(request):
+    var_post = request.POST.copy()
+    entryform = EntryForm.objects.get(pk=var_post.get("entryform_id"))
     change = False
-
-    exam_stains = {}
-
     sample_id = [v for k, v in var_post.items() if k.startswith("sample[id]")]
 
-    for values in sample_id:
-        sample = Sample.objects.get(pk=int(values))
-        # sample.cassette_set.all().delete()
+    general_exam_stains = {}
+
+    for samp in sample_id:
+        sample = Sample.objects.get(pk=int(samp))
 
         sample_exams = [
             v[0]
             for k, v in dict(var_post).items()
-            if k.startswith("sample[exams][" + values)
+            if k.startswith("sample[exams][" + samp)
         ]
+        sample_stains = [
+            v[0]
+            for k, v in dict(var_post).items()
+            if k.startswith("sample[stain][" + samp)
+        ]
+
+        sample_exams_stains = list(zip(sample_exams, sample_stains))
+
         sample_organs = []
         bulk_data = []
 
         for se in SampleExams.objects.filter(sample=sample):
-            if se.exam_id not in sample_exams:
+            exists = False
+            for elem in sample_exams_stains:
+                exams_stain = list(elem)
+                if se.exam_id == exams_stain[0] and se.stain_id == exams_stain[1]:
+                    exists = True
+                    break
+            if not exists:
                 se.delete()
 
-        for exam in sample_exams:
+        for exam_stain in sample_exams_stains:
+            if exam_stain[0] in general_exam_stains.keys():
+                general_exam_stains[exam_stain[0]].append(exam_stain[1])
+            else:
+                general_exam_stains[exam_stain[0]] = [exam_stain[1]]
 
             sample_organs = [
                 v
                 for k, v in dict(var_post).items()
-                if k.startswith("sample[organs][" + values + "][" + exam)
+                if k.startswith(
+                    "sample[organs]["
+                    + samp
+                    + "]["
+                    + exam_stain[0]
+                    + "]["
+                    + exam_stain[1]
+                    + "]"
+                )
             ]
 
-            sample_stain = [
-                v
-                for k, v in dict(var_post).items()
-                if k.startswith("sample[stain][" + values + "][" + exam)
-            ]
-
-            # Saving Services or AnalysisForm based on exam and stains
-            if exam in exam_stains:
-                exam_stains[exam].append(sample_stain[0][0])
-            else:
-                exam_stains[exam] = [sample_stain[0][0]]
-
-            for se in SampleExams.objects.filter(sample=sample, exam_id=exam):
+            for se in SampleExams.objects.filter(
+                sample=sample, exam_id=exam_stain[0], stain_id=exam_stain[1]
+            ):
                 if se.organ_id not in sample_organs[0]:
                     se.delete()
-                else:
-                    se.stain_id = sample_stain[0][0] if sample_stain else None
-                    se.save()
 
             for organ in sample_organs[0]:
                 if (
                     SampleExams.objects.filter(
-                        sample=sample, exam_id=exam, organ_id=organ
+                        sample=sample,
+                        exam_id=exam_stain[0],
+                        stain_id=exam_stain[1],
+                        organ_id=organ,
                     ).count()
                     == 0
                 ):
                     bulk_data.append(
                         SampleExams(
                             sample_id=sample.pk,
-                            exam_id=exam,
+                            exam_id=exam_stain[0],
                             organ_id=organ,
-                            stain_id=sample_stain[0][0] if sample_stain else None,
+                            stain_id=exam_stain[1],
                         )
                     )
+
         change = change or checkSampleExams(sample.sampleexams_set.all(), bulk_data)
         SampleExams.objects.bulk_create(bulk_data)
         sample.save()
 
-    # AnalysisForm.objects.filter(entryform_id=entryform.id).exclude(exam_id__in=exam_stains.keys()).delete()
-
     services = []
-    for key, value in exam_stains.items():
-        # AnalysisForm.objects.filter(entryform_id=entryform.id, exam_id=key).exclude(stain_id__in=value).delete()
+    for key, value in general_exam_stains.items():
         for item in value:
             services.append((key, item))
 
@@ -2762,115 +2537,8 @@ def step_2_entryform(request):
                 AFS_list[0].save()
     if change:
         changeCaseVersion(True, entryform.id, request.user.id)
-    return True
 
-
-def checkSampleExams(olds, news):
-    if len(olds) != len(news):
-        return True
-    for s in news:
-        if not olds.filter(
-            sample_id=s.sample_id, exam_id=s.exam_id, organ_id=s.organ_id
-        ).first():
-            return True
-    return False
-
-
-def step_3_entryform(request):
-    var_post = request.POST.copy()
-
-    entryform = EntryForm.objects.get(pk=var_post.get("entryform_id"))
-
-    processor_loaded_at = None
-    try:
-        processor_loaded_at = datetime.strptime(
-            var_post.get("processor_loaded_at"), "%d/%m/%Y %H:%M"
-        )
-    except:
-        pass
-
-    cassette_sample_id = [
-        v for k, v in var_post.items() if k.startswith("cassette[sample_id]")
-    ]
-    cassette_name = [
-        v for k, v in var_post.items() if k.startswith("cassette[cassette_name]")
-    ]
-
-    cassette_organs = [
-        var_post.getlist(k)
-        for k, v in var_post.items()
-        if k.startswith("cassette[organ]")
-    ]
-
-    zip_cassettes = zip(cassette_sample_id, cassette_name, cassette_organs)
-
-    entryform.cassette_set.all().delete()
-    entryform.slice_set.all().delete()
-    count = 1
-    for values in zip_cassettes:
-        sample = Sample.objects.get(pk=values[0])
-        prev_cassettes = Cassette.objects.filter(
-            entryform_id=entryform.id, cassette_name=values[1].strip()
-        )
-
-        if prev_cassettes.count() > 0:
-            cassette = prev_cassettes.first()
-            cassette.samples.add(sample)
-            for org in values[2]:
-                if not cassette.organs.filter(pk=org).exists():
-                    cassette.organs.add(org)
-        else:
-            cassette = Cassette.objects.create(
-                entryform_id=entryform.id,
-                processor_loaded_at=processor_loaded_at,
-                cassette_name=values[1],
-                index=count,
-                # sample=sample
-            )
-            cassette.samples.add(sample)
-            cassette.organs.set(values[2])
-            count += 1
-        cassette.save()
-
-    for cassette in Cassette.objects.filter(entryform_id=entryform.id):
-        exams_final = []
-        for sample in cassette.samples.all():
-            exams = [
-                sampleexam.exam
-                for sampleexam in sample.sampleexams_set.all()
-                if sampleexam.exam.service_id in [1, 2, 3]
-            ]
-            exams_final = exams_final + exams
-
-        exams_uniques = []
-        _exams = []
-
-        for item in exams_final:
-            if item.pk not in exams_uniques:
-                exams_uniques.append(item.pk)
-                _exams.append(item)
-
-        slice_index = 0
-
-        for index, val in enumerate(_exams):
-            slice_index = index + 1
-            slice_name = cassette.cassette_name + "-S" + str(slice_index)
-
-            analysis_form = AnalysisForm.objects.filter(
-                entryform_id=entryform.id,
-                exam_id=val.id,
-            ).first()
-
-            slice_new = Slice.objects.create(
-                entryform_id=entryform.id,
-                slice_name=slice_name,
-                index=slice_index,
-                cassette=cassette,
-                analysis=analysis_form,
-            )
-            slice_new.save()
-
-    return True
+    return 1
 
 
 def step_4_entryform(request):
@@ -3321,7 +2989,76 @@ def save_identification(request, id):
     return JsonResponse({})
 
 
-def new_empty_identification(request, entryform_id):
+def list_identification(request, entryform_id):
+    # try:
+    organs = list(Organ.objects.all().values())
+
+    ident = []
+    for i in Identification.objects.filter(entryform_id=entryform_id):
+        ident_as_dict = model_to_dict(
+            i,
+            exclude=[
+                "organs",
+                "organs_before_validations",
+                "no_fish",
+                "no_container",
+                "temp_id",
+            ],
+        )
+        ident.append(ident_as_dict)
+
+    data = {
+        "ident": ident,
+        "organs": organs,
+    }
+    return JsonResponse({"ok": 1, "data": data})
+    # except :
+    #     return JsonResponse({'ok': 0})
+
+
+def list_units(request, identification_id):
+    try:
+        units = []
+        for u in Unit.objects.filter(identification_id=identification_id):
+            unit = model_to_dict(u)
+            unit["organs"] = []
+            for ou in OrganUnit.objects.filter(unit=u):
+                unit["organs"].append(model_to_dict(ou.organ))
+            units.append(unit)
+
+        return JsonResponse({"ok": 1, "units": units})
+    except:
+        return JsonResponse({"ok": 0})
+
+
+def create_unit(request, identification_id, correlative):
+    unit = Unit.objects.create(
+        identification_id=identification_id, correlative=correlative
+    )
+    return JsonResponse({"ok": 1, "unit": model_to_dict(unit)})
+
+
+def save_units(request):
+    units = json.loads(request.POST.get("units"))
+    for unit in units:
+        unit_obj = Unit.objects.get(pk=unit["id"])
+        unit_obj.correlative = unit["correlative"]
+        unit_obj.save()
+
+        organs_fmt = list(map(lambda x: int(x.split("-")[0]), unit["organs"]))
+        OrganUnit.objects.filter(unit=unit_obj).delete()
+        for org in organs_fmt:
+            OrganUnit.objects.create(unit=unit_obj, organ_id=org)
+
+    return JsonResponse({"ok": 1})
+
+
+def remove_unit(request, id):
+    Unit.objects.get(pk=id).delete()
+    return JsonResponse({"ok": 1})
+
+
+def new_empty_identification(request, entryform_id, correlative):
     try:
         ident = Identification.objects.create(
             entryform_id=entryform_id,
@@ -3329,10 +3066,71 @@ def new_empty_identification(request, entryform_id):
                 random.choices(string.ascii_uppercase + string.digits, k=11)
             ),
             removable=True,
+            correlative=correlative,
         )
-        return JsonResponse({"ok": 1, "id": ident.id})
+        return JsonResponse({"ok": 1, "id": ident.id, "obj": model_to_dict(ident)})
     except:
         return JsonResponse({"ok": 0})
+
+
+def save_new_identification(request, id):
+    var_post = request.POST.copy()
+    change = False
+    ident = Identification.objects.get(pk=id)
+
+    if ident.cage != var_post["cage"]:
+        change = True
+        ident.cage = var_post["cage"]
+
+    if ident.group != var_post["group"]:
+        change = True
+        ident.group = var_post["group"]
+
+    if (
+        ident.weight != var_post["weight"]
+        and var_post["weight"]
+        and var_post["weight"].strip() != ""
+    ):
+        change = True
+        ident.weight = var_post["weight"]
+
+    if ident.extra_features_detail != var_post["extra_features_detail"]:
+        change = True
+        ident.extra_features_detail = var_post["extra_features_detail"].strip()
+
+    if ident.observation != var_post["observation"]:
+        change = True
+        ident.observation = var_post["observation"].strip()
+
+    if ident.is_optimum != (True if "1" == var_post["is_optimum"] else False):
+        change = True
+        ident.is_optimum = True if "1" == var_post["is_optimum"] else False
+
+    if ident.client_case_number != var_post["client_case_number"]:
+        change = True
+        ident.client_case_number = var_post["client_case_number"].strip()
+
+    if ident.quantity != var_post["quantity"]:
+        change = True
+        ident.quantity = int(var_post["quantity"])
+
+    if ident.correlative != var_post["correlative"]:
+        change = True
+        ident.correlative = int(var_post["correlative"])
+
+    if ident.samples_are_correlative != (
+        True if "1" == var_post["samples_are_correlative"] else False
+    ):
+        change = True
+        ident.samples_are_correlative = var_post["samples_are_correlative"]
+
+    ident.save()
+
+    if change:
+        ident.removable = False
+        ident.save()
+        changeCaseVersion(True, ident.entryform.id, request.user.id)
+    return JsonResponse({"ok": 1})
 
 
 def remove_identification(request, id):
@@ -3475,6 +3273,14 @@ def completeForm(request, form_id):
     form = Form.objects.get(pk=form_id)
     form.form_closed = True
     form.closet_at = datetime.now()
+    form.save()
+    return JsonResponse({"ok": True})
+
+
+def finishReception(request, form_id):
+    form = Form.objects.get(pk=form_id)
+    form.reception_finished = True
+    form.reception_finished_at = datetime.now()
     form.save()
     return JsonResponse({"ok": True})
 
@@ -3908,4 +3714,21 @@ def get_research_metadata(request, id):
         return JsonResponse({"ok": True, "research": r_json})
     except Exception as e:
         print(e)
+        return JsonResponse({"ok": False})
+
+
+def force_form_to_step(request, form, step):
+    try:
+        form = Form.objects.get(pk=form)
+
+        print("form", form.pk)
+        print("step to", step)
+        if form.reception_finished and int(step) in (2, 3):
+            form.reception_finished = False
+            form.reception_finished_at = None
+        form.state_id = step
+        form.save()
+
+        return JsonResponse({"ok": True})
+    except:
         return JsonResponse({"ok": False})

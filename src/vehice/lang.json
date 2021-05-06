@@ -128,7 +128,7 @@
         "en": "Summary case"
     },
     "general_info":{
-        "es":"Iformación general",
+        "es":"Información general",
         "en":"General information"
     },
     "company":{
@@ -183,13 +183,37 @@
         "es":"Agregar identificación",
         "en":"Add identification"
     },
+    "edit_units":{
+        "es":"Editar Unidades/Identificación",
+        "en":"Edit Units"
+    },
+    "edit_services":{
+        "es":"Editar Servicios",
+        "en":"Edit Services"
+    },
     "cage":{
-        "es":"Estanque/Jaula",
-        "en":"Tank/Cage"
+        "es":"Estanque/<br>Jaula",
+        "en":"Tank/<br>Cage"
     },
     "group_client":{
         "es":"Grupo/Nro Caso Cliente",
         "en":"Group/Client's case"
+    },
+    "group":{
+        "es":"Grupo",
+        "en":"Group"
+    },
+    "case_client":{
+        "es":"Nro Caso<br> Cliente",
+        "en":"Client <br> Case"
+    },
+    "amount_identifications_units":{
+        "es":"Cantidad<br>Unidades",
+        "en":"Units<br>Amount"
+    },
+    "amount_identifications":{
+        "es":"Cantidad",
+        "en":"Amount"
     },
     "fishes":{
         "es":"Peces",
@@ -200,7 +224,7 @@
         "en":"No. containers"
     },
     "weight":{
-        "es":"Peso (gramos)",
+        "es":"Peso (gr)",
         "en":"Weight (g)"
     },
     "optimum":{
@@ -208,8 +232,8 @@
         "en":"Optimum?"
     },
     "extra_features":{
-        "es":"Características Extras",
-        "en":"Extra features"
+        "es":"Característica<br> Extra",
+        "en":"Extra <br>feature"
     },
     "observations":{
         "es":"Observaciones",
@@ -240,7 +264,7 @@
         "en":"Samples"
     },
     "no_sample":{
-        "es":"Pez",
+        "es":"No. muestra",
         "en":"No. sample"
     },
     "analysis":{
@@ -436,8 +460,8 @@
         "en":"We are sorry, services are still open. These must be closed or cancelled before closing the case."
     },
     "close_case_text":{
-        "es":"¿Está seguro que desea finalizar el caso?",
-        "en":"Are you sure you want to close the case?"
+        "es":"¿Está seguro que desea finalizar la recepción del caso?",
+        "en":"Are you sure you want to finish the case reception?"
     },
     "confirm_case":{
         "es":"Sí!",
@@ -468,8 +492,8 @@
         "en":"Sample Detail"
     },
     "optimus_condition":{
-        "es":"¿Condiciones óptimas?",
-        "en":"Optimum conditions?"
+        "es":"¿Óptimo?",
+        "en":"Optimum?"
     },
     "change_language":{
         "es":"¿Cambiar idioma?",
@@ -574,6 +598,54 @@
     "reception_receive_question":{
         "es":"¿Deseas descargar el comprobante de recepción?",
         "en":"Do you want to download the receipt? "
+    },
+    "reception_done":{
+        "es":"La recepción ha finalizado exitosamente",
+        "en":"Reception done successfully"
+    },
+    "selection":{
+        "es":"Selección",
+        "en":"Selection"
+    },
+    "select_all":{
+        "es":"Seleccionar",
+        "en":"Select All"
+    },
+    "deselect_all":{
+        "es":"Deseleccionar",
+        "en":"Deselect All"
+    },
+    "select_all_units":{
+        "es":"Seleccionar todas las unidades",
+        "en":"Select All Units"
+    },
+    "deselect_all_units":{
+        "es":"Deseleccionar todas las unidades",
+        "en":"Deselect All Units"
+    },
+    "select_all_units_by_ident":{
+        "es":"Seleccionar todas las unidades de la identificación",
+        "en":"Select all units from current identification"
+    },
+    "deselect_all_units_by_ident":{
+        "es":"Deseleccionar todas las unidades de la identificación",
+        "en":"Deselect all units from current identification"
+    },
+    "add":{
+        "es":"Ingresar",
+        "en":"Add"
+    },
+    "remove":{
+        "es":"Eliminar",
+        "en":"Remove"
+    },
+    "add_organs_to_selection":{
+        "es": "Agregar o quitar órganos a selección",
+        "en": "Add or remove organs to selection"
+    },
+    "organs_to_every_units":{
+        "es": "Órganos para todas las unidades",
+        "en": "Organs to every units"
     },
     "yes":{
         "es":"Si",

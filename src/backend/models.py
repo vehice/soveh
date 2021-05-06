@@ -417,23 +417,52 @@ class Identification(models.Model):
     """
 
     entryform = models.ForeignKey(EntryForm, null=True, on_delete=models.SET_NULL)
+    correlative = models.IntegerField(default=1, null=True, blank=True)
     cage = models.CharField(max_length=250, default="", null=True, blank=True)
-    no_fish = models.IntegerField(default="0", null=True, blank=True)
-    no_container = models.IntegerField(default="0", null=True, blank=True)
+    quantity = models.IntegerField(default="0", null=True, blank=True)
+    client_case_number = models.CharField(
+        max_length=250, default="", null=True, blank=True
+    )
     weight = models.FloatField(default="0", null=True, blank=True)
     extra_features_detail = models.TextField(default="", null=True, blank=True)
     is_optimum = models.NullBooleanField()
     observation = models.TextField(default="", null=True, blank=True)
     group = models.CharField(default="", max_length=250, null=True, blank=True)
+    removable = models.BooleanField(default=False)
+    deleted = models.BooleanField(default=False)
+    samples_are_correlative = models.BooleanField(default=False)
+
+    # deprecated attr
     temp_id = models.CharField(default="", max_length=250, null=True, blank=True)
+    no_fish = models.IntegerField(default="0", null=True, blank=True)
+    no_container = models.IntegerField(default="0", null=True, blank=True)
     organs = models.ManyToManyField(Organ)
     organs_before_validations = models.ManyToManyField(
         Organ, related_name="organs_before_validations"
     )
-    removable = models.BooleanField(default=False)
 
     def __str__(self):
         return str(self.pk)
+
+
+class Unit(models.Model):
+    correlative = models.IntegerField(default=1, null=True, blank=True)
+    organs = models.ManyToManyField("Organ", through="OrganUnit")
+    identification = models.ForeignKey(
+        Identification, null=True, on_delete=models.SET_NULL
+    )
+    # samples = models.ManyToManyField("Sample")
+
+    def __str__(self):
+        return str(self.correlative)
+
+
+class OrganUnit(models.Model):
+    unit = models.ForeignKey(Unit, on_delete=models.CASCADE)
+    organ = models.ForeignKey(Organ, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return self.unit.correlative
 
 
 class ServiceComment(models.Model):
@@ -523,7 +552,8 @@ class Sample(models.Model):
     """
 
     entryform = models.ForeignKey(EntryForm, null=True, on_delete=models.SET_NULL)
-    index = models.IntegerField(null=True, blank=True)
+    index = models.IntegerField(null=True, blank=True)  # correlative
+    organs = models.ManyToManyField(Organ)
     identification = models.ForeignKey(
         Identification, null=True, on_delete=models.SET_NULL
     )

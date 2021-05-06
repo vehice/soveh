@@ -1,584 +1,982 @@
-var data_step_2;
-var patologos_list;
-var previous_data_exists = false;
+var bd_correlative = 0;
+var current_correlative = 0;
+var organs;
+var entryform;
 
 function init_step_2() {
   var entryform_id = $('#entryform_id').val();
-  var url = Urls.entryform_id(entryform_id);
 
+  var url = Urls.entryform_id(entryform_id);
   $.ajax({
     type: "GET",
     url: url,
-    async: false,
   })
   .done(function (data) {
-    data_step_2 = data
+    $('#identification_group_list').html('');
+    entryform = data.entryform;
+
     $('.showSummaryBtn').removeClass("hidden");
+    $('.showReceptionFileBtn').removeClass("hidden");
     $('.showAttachedFilesBtn').removeClass("hidden");
-    $('.showShareBtn').addClass("hidden");
-    $('.showLogBtn').addClass("hidden");
-    $('.newAnalysisBtn').addClass("hidden");
-    $('.newAnalysisBtn5').addClass("hidden");
-     // fillSummary(data);
-    if (data.entryform.analyses.length > 0){
-      previous_data_exists = true;
-    }
-    initialData(data);
-    loadData(data);
   })
   .fail(function () {
+    console.log("Fail")
+  });
+
+  var table = $('#identifications').DataTable({
+    "rowId": "id",
+    "columnDefs": [
+      {
+        "width": "3%",
+        "targets": 0,
+        "className": 'details-control',
+        "orderable": false,
+        "data": null,
+        "render": function (data, type, row, meta) {
+          return `<i class="fa fa-chevron-right fa-fx fa-2x control-table" data-ident="${row.id}"></i>`;
+        }
+      },
+      {
+        "width": "3%",
+        "targets": 1, "orderable": false, "data": "correlative", "className": 'correlative-text',
+        "render": function (data, type, row, meta) {
+          return `${data ? data : ""}`;
+        }
+      },
+      {
+        "width": "15%",
+        "targets": 2, "orderable": false, "data": "cage",
+        "render": function (data, type, row, meta) {
+          return `<input name="cage" class="form-control-table ident-data" value="${data ? data : ""}" >`;
+        }
+      },
+      {
+        "width": "15%",
+        "targets": 3, "orderable": false, "data": "group",
+        "render": function (data, type, row, meta) {
+          return `<input name="group" class="form-control-table ident-data" value="${data ? data : ""}" >`;
+        }
+      },
+      {
+        "width": "20%",
+        "targets": 4, "orderable": false, "data": "extra_features_detail",
+        "render": function (data, type, row, meta) {
+          return `<textarea style="resize:none;" name="extra_features_detail" class="form-control-table ident-data" rows="1" >${data ? data : ""} </textarea>`;
+        }
+      },
+      {
+        "width": "8%",
+        "targets": 5, "orderable": false, "data": "client_case_number",
+        "render": function (data, type, row, meta) {
+          return `<input name="client_case_number" class="form-control-table ident-data" value="${data ? data : ""}" >`;
+        }
+      },
+      {
+        "width": "5%",
+        "targets": 6, "orderable": false, "data": "weight",
+        "render": function (data, type, row, meta) {
+          return `<input name="weight" class="form-control-table ident-data" type="number" step="0.1" min="0" value="${data ? data : "0"}" >`;
+        }
+      },
+      {
+        "width": "3%",
+        "targets": 7, "orderable": false, "data": "is_optimum",
+        "render": function (data, type, row, meta) {
+          return `
+          <input type="checkbox" style="margin-top:10%" name="is_optimum" class="form-control-table ident-data checkbox-2x" ${data ? 'checked' : ''}>
+          `;
+        }
+      },
+      {
+        "width": "20%",
+        "targets": 8, "orderable": false, "data": "observation",
+        "render": function (data, type, row, meta) {
+          return `<textarea name="observation" class="form-control-table ident-data" rows="1">${data ? data : ""} </textarea>`;
+        }
+      },
+      {
+        "width": "3%",
+        "targets": 9, "orderable": false, "data": "quantity",
+        "render": function (data, type, row, meta) {
+          return `<input id="amount_${row.id}" name="quantity" class="form-control-table amount" type="number" data-ident="${row.id}" value="${data ? data : "0"}" min="${data ? data : ""}">`;
+        }
+      },
+      {
+        "width": "3%",
+        "targets": 10, "orderable": false, "data": null,
+        "render": function (data, type, row, meta) {
+          return `<button class="btn btn-danger deleteIdent" type="button" data-ident="${row.id}"><i class="fa fa-trash fa-fx"></i></button>`
+        }
+      },
+    ],
+    "info": false,
+    "paging": false,
+    "searching": false,
+    "order": [[1, 'asc']],
+    "autoWidth": false,
+    "fixedHeader": {
+        "header": false,
+        "footer": false
+    },
+  });
+
+  var url = Urls.list_identification(entryform_id);
+  $.ajax({
+    type: "GET",
+    url: url,
+  })
+  .done(function (data) {
+    organs = data.data.organs;
+    data.data.ident.forEach(element => {
+      if (!element.deleted){
+        addRow(element);
+      }
+      current_correlative = Math.max(element.correlative, current_correlative)
+    });
+    bd_correlative = current_correlative;
+  })
+  .fail(function () {
+    console.log("Fail")
+  });
+
+  function format(dataRow) {
+    let data = retrieveDataRow(dataRow)
+    var id = data.id;
+    var table_id = `units-table-${id}`
+    var correlative_checked = ""
+    if (data.samples_are_correlative)
+      correlative_checked = "checked"
+    var table_template = `
+      <div class="row justify-content-center">
+        <div class="form-group pl-2 pt-2">
+          <input type="checkbox" id="organs-${id}" class="switch2" />
+          <label for="organs-${id}" class="font-medium-1 text-bold-600 ml-1">Órganos para todas las unidades</label>
+        </div>
+        <div class="switch-div form-group pl-2 pt-2">
+          <input type="checkbox" id="correlative-${id}" class="switch2 correlative" ${correlative_checked} />
+          <label for="correlative-${id}" class="font-medium-1 text-bold-600 ml-1">Correlativos</label>
+        </div>
+      </div>
+      <div class="row pull-left">
+        <div class="pl-0 col-sm-12">
+          <button type="button" class="btn btn-sm btn-light" onclick="selectAllUnitsByIdentification(${id}, 1)"><i class="fa fa-check-square-o"></i> Seleccionar unidades</button>
+          <button type="button" class="btn btn-sm btn-light" onclick="selectAllUnitsByIdentification(${id}, 0)"><i class="fa fa-square-o"></i> Deseleccionar unidades</button>
+        </div>
+      </div>
+      
+      <table class='table w-100 table-unit' id="main-${table_id}">
+      <thead>
+      <th style="width:5%"></th> 
+      <th style="width:5%">#</th> 
+      <th>Tipo</th> 
+      <th style="width: 65%">Órganos</th> 
+      <th>Eliminar</th> 
+      </thead>
+      <div id="${table_id}_loading" class="text-center">
+      Cargando ...
+      </div>
+      <tbody id="${table_id}">
+      </tbody>
+      </table>
+    `
+    var url = Urls.list_units(id);
+    $.ajax({
+      type: "GET",
+      url: url,
+    })
+    .done(function (response) {
+      $(`#${table_id}_loading`).remove();
+      $('.switchery').remove();
+      var elems = $('.switch2');
+      $.each(elems, function (key, value) {
+        new Switchery($(this)[0], { className: 'switch2 switchery switchery-default' });
+      });
+      $.each(response.units, function(_, unit){
+        let rows = addUnitTemplate({
+          ident_id: id,
+          id: unit.id,
+          entry_format: entryform.entry_format[1],
+          organs: organs,
+          unit_correlative: unit.correlative
+        });
+        $(`#${table_id}`).append(rows);
+        $(`#select-${id}-${unit.id}`).select2({
+          templateResult: formatResultData,
+          tags: true
+        });
+        $.each(unit.organs, function(_, org){
+          selectOrgansWithConditions(org.id, org.name, id, $(`#select-${id}-${unit.id}`));
+        });
+      });
+    })
+    .fail(function () {
+      console.log("Fail")
+    });
+    return table_template;    
+  }
+
+  function addRow(data) {
+    let index = table.rows()[0].length;
+    table.row.add(data).draw()
+  }
+
+  // Add event listener for opening and closing details
+  $('#identifications tbody').on('click', 'td.details-control', function () {
+    var tr = $(this).closest('tr');
+    var icon = $($(this).children()[0]);
+    var row = table.row(tr);
+
+    if (row.child.isShown()) {
+      // This row is already open - close it
+      row.child.hide();
+
+      icon.removeClass('fa-chevron-down');
+      icon.addClass('fa-chevron-right');
+      tr.removeClass('shown');
+    }
+    else {
+      // Open this row
+      row.child(format(row)).show();
+
+      icon.removeClass('fa-chevron-right');
+      icon.addClass('fa-chevron-down');
+      tr.addClass('shown');
+      let ident_id = tr.attr("id")
+
+      waitForEl('.organs-'+ident_id, function() {
+        $('#organs-'+ident_id).trigger("click")
+      });
+    }
+  });
+
+  $('#addIdent').on('click', function () {
+    current_correlative += 1;
+    var url = Urls.new_identification(entryform_id, current_correlative);
+    let response
+    $.ajax({
+      type: "POST",
+      url: url,
+      async: false,
+    })
+    .done(function (data) {
+      addRow({
+        id: data.obj.id,
+        correlative: data.obj.correlative
+      });
+    })
+    .fail(function () {
+      return false
+    });
+  });
+
+  $(document).on('click', '.deleteIdent', function () {
+    var row = table.row($(this).parents('tr'));
+    var url = Urls.remove_identification($(this).data('ident'));
+    swal({
+      title: "Desea eliminar la identificación?",
+      text: "Esta acción es permanente!",
+      icon: "warning",
+      showCancelButton: true,
+      buttons: {
+        cancel: {
+          // text: "{{request.lang.cancel_case}}",
+          value: null,
+          visible: true,
+          className: "btn-danger",
+          closeModal: true,
+        },
+        confirm: {
+          // text: "{{request.lang.next}}",
+          value: true,
+          visible: true,
+          className: "",
+          closeModal: true,
+        }
+      }
+    }).then(isConfirm => {
+      if (isConfirm) {
+        remove_correlative = row.data().correlative;
+        row.remove().draw();
+        if (remove_correlative <= bd_correlative) {
+          // OCULTAR EN BD ===> deleted = True
+          $.ajax({
+            type: "GET",
+            url: url,
+          })
+            .done(function (data) {
+            })
+            .fail(function () {
+              console.log("Fail")
+            });
+        }
+        else {
+          current_correlative = current_correlative - 1;
+          table.rows().every(function (rowIdx, tableLoop, rowLoop) {
+            var d = this.data();
+            if (remove_correlative < d.correlative) {
+              let data = retrieveDataRow(this);
+              data.correlative--;
+              this
+                .data(data)
+                .draw();
+            }
+          });
+        }
+      }
+    });
+
+  });
+
+  $(document).on('click', '.unit-delete', function (e) {
+    let id = $(this).data('id')
+    let ident_id = $(this).data('ident')
+    swal({
+      title: "Desea eliminar la unidad?",
+      text: "Esta acción es permanente!",
+      icon: "warning",
+      showCancelButton: true,
+      buttons: {
+        cancel: {
+          // text: "{{request.lang.cancel_case}}",
+          value: null,
+          visible: true,
+          className: "btn-danger",
+          closeModal: true,
+        },
+        confirm: {
+          // text: "{{request.lang.next}}",
+          value: true,
+          visible: true,
+          className: "",
+          closeModal: true,
+        }
+      }
+    }).then(isConfirm => {
+      if (isConfirm) {
+        let url = Urls.remove_unit(id)
+        $.ajax({
+          type: "POST",
+          url: url,
+          async: false,
+        })
+        .done(function (data) {
+          if (data.ok){
+            let amount_control = $(`#amount_${ident_id}`)
+            let new_value = amount_control.val() - 1
+            amount_control[0].min = new_value
+            amount_control[0].defaultValue = new_value
+            amount_control.val(new_value)
+            saveIdentification(ident_id)
+            $("#unit-"+ident_id+"-"+id).remove()
+            toastr.success(
+              'Unidad eliminada exitosamente.',
+              'Listo!',
+            )
+        } else {
+            toastr.error(
+              'No ha sido posible eliminar la unidad, intente nuevamente.',
+              'Ups!',
+            )
+          }
+        })
+        .fail(function () {
+          toastr.error(
+            'No ha sido posible eliminar la unidad, intente nuevamente.',
+            'Ups!',
+          )
+        })
+      }
+    })
   })
 
-  if ($('#exam_select').hasClass("select2-hidden-accessible")) {
-    $('#exam_select').select2('destroy');
-    $('#exam_select').off('select2:select');
-    $('#exam_select').off('select2:unselect');
-  }
+  $(document).on('change', '.form-control-table.amount', function (e, param1) {
+    lockScreen(1);
+    if (this.defaultValue == this.value)
+      return;
 
-  $('#exam_select').select2();
-  
-  $('#exam_select').on("select2:select", function (e) {
-    var data = e.params.data;
-    addExamToSamples(data);
-    // addPatologoRow(data);
-  });
+    var direction = parseInt(this.defaultValue) < parseInt(this.value)
 
-  $('#exam_select').on("select2:unselect", function (e) {
-    var data = e.params.data;
-    removeExamFromSamples(data);
-    // removePatologoRow(data.id);
-  });
-
-  $('#exam_select').on("select2:unselecting", function (e) {
-    if (e.params.args.originalEvent) {
-      e.params.args.originalEvent.stopPropagation();
-    }
-  });
-
-  $('.switchery').remove();
-  var elems = $('.switch2');
-  $.each(elems, function (key, value) {
-    new Switchery($(this)[0]);
-  });
-}
-
-function loadExams(exams) {
-  $("#exam_select").html("");
-  $.each(exams, function (i, item) {
-    var html = '<option data-service="'+item.service_id+'" value="'+item.id+'">'+item.name+'</option>';
-    $('#exam_select').append($(html));
-  });
-}
-
-function loadSamples(samples){
-  $("#samples_table tbody").html("");
-  var exams = [];
-  $.each(samples, function(i, v){
-    addSampleRow(v);
-    $.each(v.sample_exams_set, function(j,item){
-      exams.push(item.exam_id);
-      $('.delete-'+v.id).hide();
-      var html = addServiceRow(
-        item.exam_name, 
-        item.service_id, 
-        v.id, 
-        item.exam_id, 
-        data_step_2.stains,
-        v.identification.organs,
-        v.id+"-"+($('#sampleNro-'+v.id)[0].rowSpan + 1), 
-        true,
-        item.is_closed
-      );
-      $('#sampleNro-'+v.id)[0].rowSpan = $('#sampleNro-'+v.id)[0].rowSpan + 1; 
-      $('#sampleIden-'+v.id)[0].rowSpan = $('#sampleIden-'+v.id)[0].rowSpan + 1; 
-      $("#sample-"+v.id).after(html);
+    var id = $(this).data('ident');
+    let table_id = `units-table-${id}`;
+    if (direction) {
+      let data_saved = false
       
-      var values = [];
-      $.each(item.organ_id, function(j,w){
-        values.push(w.id);
-      });
-      $('#organs-'+v.id+"-"+$('#sampleNro-'+v.id)[0].rowSpan).val(values).trigger('change');
-
-      if (item.sample_exam_stain_id){
-        $('#stain-'+v.id+"-"+$('#sampleNro-'+v.id)[0].rowSpan).val(item.sample_exam_stain_id).trigger("change");
-      } else {
-        $('#stain-'+v.id+"-"+$('#sampleNro-'+v.id)[0].rowSpan).val(item.exam_stain_id).trigger("change");
-      }
-
-    });
-  });
- 
-  // $.each($.unique(exams), function(i, item){
-  //   $('.organs-select-'+ item).select2();
-  //   $('.stain-select-'+ item).select2();
-    
-    // $('.organs-select-'+ item).on('select2:select', function(e){
-    //   var values = e.params.data.id;
-    //   var target_id = $(e.target).parent().parent()[0].classList[1].split("-")[2];
-      
-    //   if ( $('#switchery2')[0].checked ){
-    //     $.each($('.organs-select-'+ item), function(i,v){
-    //         var old_values = $(v).val();
-    //         old_values.push(values);
-    //         $(v).val(old_values);
-    //         $(v).trigger('change');
-    //     });
-    //   } else {
-    //     $.each(data_step_2.samples, function(i, item2){
-    //       if (target_id == item2.id){
-    //         $.each($('.analis-row-'+item2.id+' .organs-select-'+ item), function(i,v){
-    //             var old_values = $(v).val();
-    //             old_values.push(values);
-    //             $(v).val(old_values);
-    //             $(v).trigger('change');
-    //         });
-    //       }
-    //     });  
-    //   }
-    // });
-
-    // $('.stain-select-'+ item).on('select2:select', function(e){
-    //   var values = e.params.data.id;
-    //   var target_id = $(e.target).parent().parent()[0].classList[1].split("-")[2];
-      
-    //   if ( $('#switchery3')[0].checked ){
-    //     $.each($('.stain-select-'+ item), function(i,v){
-    //         $(v).val(values);
-    //         $(v).trigger('change');
-    //     });
-    //   } else {
-    //     $.each(data_step_2.samples, function(i, item2){
-    //       if (target_id == item2.id){
-    //         $.each($('.analis-row-'+item2.id+' .stain-select-'+ item), function(i,v){
-    //             $(v).val(values);
-    //             $(v).trigger('change');
-    //         });
-    //       }
-    //     });  
-    //   }
-    // });
-
-
-  $('.organs-select').select2();
-  $('.stain-select').select2();
-  $('.organs-select').on('select2:select', function(e){
-    var values = e.params.data.id;
-    var target_id = $(e.target).parent().parent()[0].classList[1].split("-")[2];
-    var exam_id = $(e.target).parent().parent().data('sampleid');
-    
-    if ( $('#switchery2')[0].checked ){
-      $.each($('.organs-select-'+exam_id), function(i,v){
-          var old_values = $(v).val();
-          old_values.push(values);
-          $(v).val(old_values);
-          $(v).trigger('change');
-      });
-    } else {
-      $.each(data_step_2.samples, function(i, item2){
-        if (target_id == item2.id){
-          $.each($('.analis-row-'+item2.id+' .organs-select'), function(i,v){
-              var old_values = $(v).val();
-              old_values.push(values);
-              $(v).val(old_values);
-              $(v).trigger('change');
-          });
-        }
-      });  
-    }
-  });
-
-  $('.stain-select').on('select2:select', function(e){
-    var values = e.params.data.id;
-    var target_id = $(e.target).parent().parent()[0].classList[1].split("-")[2];
-    var exam_id = $(e.target).parent().parent().data('sampleid');
-
-    if ( $('#switchery3')[0].checked ){
-      $.each($('.stain-select-'+ exam_id), function(i,v){
-          $(v).val(values);
-          $(v).trigger('change');
-      });
-    } else {
-      $.each(data_step_2.samples, function(i, item2){
-        if (target_id == item2.id){
-          $.each($('.analis-row-'+item2.id+' .stain-select-'+ item), function(i,v){
-              $(v).val(values);
-              $(v).trigger('change');
-          });
-        }
-      });  
-    }
-  });
-
-  // $('.samples_exams').select2();
-
-  // $('.samples_exams').on("select2:unselecting", function (e) {
-  //   if (e.params.args.originalEvent) {
-  //     e.params.args.originalEvent.stopPropagation();
-  //   }
-  // });
-  
-}
-
-// Load prev samples and exams
-function initialData(data) {
-  patologos_list = data.patologos;
-  loadSamples(data.samples);
-  loadExams(data.exams);
-}
-
-function loadData(data){
-  // Fill analyses
-
-  if (data.entryform.analyses.length > 0){
-    $('#pre-selected-exams-list').html("");
-    $('#pre-selected-exams').show();
-  }
-  $.each(data.entryform.analyses, function(i, item){
-    $('#pre-selected-exams-list').append("<div class='col-md-12'><b>"+$('#exam_select option[value="'+item.exam_id+'"]').text()+"</b></div>");
-    //$('#exam_select option[value="'+item.exam_id+'"]').attr('disabled','disabled');
-  });
-
-  // Fill exams and organs per samples
-  $.each(data.samples, function(i, item){
-    $.each(item.exams_set, function(j, item2){
-      var selected_exam = new Option(item2.name, item2.id, true, true);
-      $('#sample-'+item.id+' .samples_exams').append(selected_exam).trigger('change');
-    });
-
-    $.each(item.organs_set, function(k, item3){
-      var selected_organ = new Option(item3.name, item3.id, true, true);
-      $('#sample-'+item.id+' .samples_organs').append(selected_organ).trigger('change');
-    });
-  });
-}
-
-function getSampleAvailableOrgans(sid){
-  var organs;
-  $.each(data_step_2.samples, function(index, value){
-    if (sid == value.id){
-      organs = value.identification.organs;
-      return false;
-    }
-  });
-  return organs;
-}
-
-function addExamToSamples(exam){
-    var exam_object = data_step_2.exams.find(x => x.id == exam.id);
-    $('#samples_table .samples_exams').each( function(i){
-      
-        if ( $('#switchery')[0].checked ){
-            // add exam to all but duplicated
-            var sampleId = $(this).data('index');
-            $.each(data_step_2.samples, function(i, item){
-
-                // add exam to empty samples
-                if ( item.id == sampleId && !item.sample_exams_set.hasOwnProperty(exam.id) ){
-                    $('.delete-'+sampleId).hide();
-                    $('#sampleNro-'+sampleId)[0].rowSpan = $('#sampleNro-'+sampleId)[0].rowSpan + 1; 
-                    $('#sampleIden-'+sampleId)[0].rowSpan = $('#sampleIden-'+sampleId)[0].rowSpan + 1; 
-                    // show organs options
-                    avail_organs = getSampleAvailableOrgans(sampleId);
-                    var html = addServiceRow(
-                      exam.text, 
-                      $(exam.element).data('service'), 
-                      sampleId, 
-                      exam.id, 
-                      data_step_2.stains,
-                      avail_organs,
-                      sampleId+"-"+($('#sampleNro-'+sampleId)[0].rowSpan),  
-                      false
-                    );
-                    $("#sample-"+sampleId).after(html);
-
-                    if (exam_object.stain_id){
-                      $('#stain-'+sampleId+"-"+$('#sampleNro-'+sampleId)[0].rowSpan ).val(exam_object.stain_id).trigger("change");
-                    }
-                    return false;
-                }
+      for (let i = parseInt(this.defaultValue) + 1; i <= parseInt(this.value); i++) {
+        let result_ident = saveIdentification(id)
+        
+        if (result_ident.ok){
+          let last_tr_pos = parseInt(this.defaultValue)-1          
+          let res = getUnits(id)
+          
+          if (res.ok){
+            let units_correlatives = []
+            res.units.forEach(function(u){
+              units_correlatives.push(u.correlative);
             });
-        } else {
-            var sampleId = $(this).data('index');
-            $.each(data_step_2.samples, function(i, item){
-                // add exam to empty samples
-                if (item.id == sampleId && _.isEmpty(item.sample_exams_set)){
-                    $('.delete-'+sampleId).hide();
-                    $('#sampleNro-'+sampleId)[0].rowSpan = $('#sampleNro-'+sampleId)[0].rowSpan + 1; 
-                    $('#sampleIden-'+sampleId)[0].rowSpan = $('#sampleIden-'+sampleId)[0].rowSpan + 1; 
-                    // show organs options
-                    avail_organs = getSampleAvailableOrgans(sampleId);
-                    var html = addServiceRow(
-                      exam.text, 
-                      $(exam.element).data('service'), 
-                      sampleId, 
-                      exam.id,
-                      data_step_2.stains, 
-                      avail_organs,
-                      sampleId+"-"+($('#sampleNro-'+sampleId)[0].rowSpan), 
-                      false
-                    ); 
-                    $("#sample-"+sampleId).after(html);
+            let max_corr = units_correlatives.length > 0 ? Math.max(...units_correlatives) : 0
+            let result_unit = createUnit(id, max_corr + 1)
+            
+            if (result_unit.ok) {
+              let unit = result_unit.unit
+              
+              let rows = addUnitTemplate({
+                ident_id: unit.identification,
+                id: unit.id,
+                entry_format: entryform.entry_format[1],
+                organs:organs,
+                unit_correlative: unit.correlative
+              });
 
-                    if (exam_object.stain_id){
-                      $('#stain-'+sampleId+"-"+$('#sampleNro-'+sampleId)[0].rowSpan).val(exam_object.stain_id).trigger("change");
-                    }
-                    return false;
-                }
-            });
-        }
+              $(`#${table_id}`).append(rows);
+              
+              $(`#select-${id}-${unit.id}`).select2({
+                templateResult: formatResultData,
+                tags: true
+              });
 
-
-    });
-
-    $('.organs-select-'+ exam.id).select2();
-    $('.stain-select-'+ exam.id).select2();
-    
-    $('.organs-select-'+ exam.id).on('select2:select', function(e){
-      var values = e.params.data.id;
-      var target_id = $(e.target).parent().parent()[0].classList[1].split("-")[2];
-      
-      if ( $('#switchery2')[0].checked ){
-        $.each($('.organs-select-'+ exam.id), function(i,v){
-            var old_values = $(v).val();
-            old_values.push(values);
-            $(v).val(old_values);
-            $(v).trigger('change');
-        });
-      } else {
-        $.each(data_step_2.samples, function(i, item2){
-          if (target_id == item2.id){
-            $.each($('.analis-row-'+item2.id+' .organs-select-'+ exam.id), function(i,v){
-                var old_values = $(v).val();
-                old_values.push(values);
-                $(v).val(old_values);
-                $(v).trigger('change');
-            });
-          }
-        });  
-      }
-    });
-
-    $('.stain-select-'+ exam.id).on('select2:select', function(e){
-      var values = e.params.data.id;
-      var target_id = $(e.target).parent().parent()[0].classList[1].split("-")[2];
-      
-      if ( $('#switchery3')[0].checked ){
-        $.each($('.stain-select-'+ exam.id), function(i,v){
-            $(v).val(values);
-            $(v).trigger('change');
-        });
-      } else {
-        $.each(data_step_2.samples, function(i, item2){
-          if (target_id == item2.id){
-            $.each($('.analis-row-'+item2.id+' .stain-select-'+ exam.id), function(i,v){
-                $(v).val(values);
-                $(v).trigger('change');
-            });
-          }
-        });  
-      }
-    });
-}
-
-function removeExamFromSamples(exam){
-
-  $('#samples_table .analis-row').each( function(i){
-    if($(this).data('sampleid') == exam.id){
-      console.log("prevdata", $(this).data('prevdata') );
-      if ( !$(this).data('prevdata') ) {
-        var sampleIndex = $(this).data('sampleindex');
-        $('#sampleNro-'+sampleIndex)[0].rowSpan = $('#sampleNro-'+sampleIndex)[0].rowSpan - 1; 
-        $('#sampleIden-'+sampleIndex)[0].rowSpan = $('#sampleIden-'+sampleIndex)[0].rowSpan - 1; 
-        $(this).remove();
-        if ( $('#sampleIden-'+sampleIndex)[0].rowSpan == 1 ) {
-          $('.delete-'+sampleIndex).show();
+              data_saved = true
+            }
+          }          
         }
       }
+      if (data_saved){
+        this.defaultValue = this.value
+      }
     }
-  }); 
-}
-
-function initialConf() {
-  $('#exam_select').select2();
-}
-
-function validate_step_2(){
-  // Validates sample exam assignation
-  var missing_exams_select = false;
-  $('#samples_table .samples_exams').each( function(i){
-    var id = $(this).data('index');
-    if ( $('.analis-row-'+id).length <= 0 ){
-      $(this).focus();
-      missing_exams_select = true;
-      return 0;
+    else {
+      this.value = this.defaultValue;
     }
+    lockScreen(0);
   });
 
-  if (missing_exams_select){
-    toastr.error(
-      'Para continuar debes asignar al menos un análisis a realizar por muestra.', 
-      'Ups!', 
-      {positionClass: 'toast-top-full-width', containerId: 'toast-bottom-full-width'}
-    );
-    return 0;
-  }
+  $(document).on("select2:selecting", ".organs", function (e) {
+    e.preventDefault();
 
-  // Validates sample organ assignation
-  var missing_organs_select = false;
-  $('#samples_table .organs-select').each( function(i){
-    if ( $(this).find(":selected").length <= 0 ){
-      $(this).focus();
-      missing_organs_select = true;
-      return 0;
-    }
+    let new_id = `${e.params.args.data.id}`;
+    let new_value = e.params.args.data.text;
+    let ident_id = e.target.id.split("-")[1];
+    let select = e.target
+
+    selectOrgansWithConditions(new_id, new_value, ident_id, $(select));
+    saveUnitsByIdentification(ident_id)
+
   });
 
-  if (missing_organs_select){
-    toastr.error(
-      'Para continuar es necesario definir el o los organos por muestra.', 
-      'Ups!', 
-      {positionClass: 'toast-top-full-width', containerId: 'toast-bottom-full-width'}
-    );
-    return 0;
-  }
-
-  // Validates exam selection
-  // if ( $('#exam_select :selected').length <= 0 ) {
-  //   toastr.error(
-  //     'Para continuar debes tener seleccionado al menos un análisis.', 
-  //     'Ups!', 
-  //     {positionClass: 'toast-top-full-width', containerId: 'toast-bottom-full-width'}
-  //   );
-  //   $('#exam_select').focus();
-  //   return 0;
-  // }
-
-  return 1;
-}
-
-
-function addAnalysisTemplate(data) {
-  var analysisTemplate = document.getElementById("analysis_template").innerHTML;
-
-  var templateFn = _.template(analysisTemplate);
-  var templateHTML = templateFn(data);
-
-  $("#exam_group").html(templateHTML)
-  $('.samples_organs').select2();
-  $('.samples_analysis').select2();
-
-  $('.samples_organs').on("select2:unselecting", function (e) {
-    if (e.params.args.originalEvent) {
-      e.params.args.originalEvent.stopPropagation();
+  $(document).on("select2:unselect", ".organs", function (e) {
+    if (e.params.data.id.search('-') != -1) {
+      e.params.data.element.remove();
     }
+    let ident_id = e.target.id.split("-")[1];
+    saveUnitsByIdentification(ident_id)
   });
 
-  $('.samples_analysis').on("select2:unselecting", function (e) {
-    if (e.params.args.originalEvent) {
-      e.params.args.originalEvent.stopPropagation();
-    }
-  });
-  
-}
-
-function addSampleRow(sample) {
-  var sampleRowTemplate = document.getElementById("sample_row").innerHTML;
-
-  var templateFn = _.template(sampleRowTemplate);
-  var templateHTML = templateFn({'sample': sample, 'organs': organs});
-
-  $("#samples_table tbody").append(templateHTML)
-}
-
-function addServiceRow(analisis, analisis_type, sampleId, sampleIndex, stains, organs, optionId = null, prevData = false, is_closed = false) {
-  var sampleRowTemplate = document.getElementById("add_analisis").innerHTML;
-
-  var templateFn = _.template(sampleRowTemplate);
-  var templateHTML = templateFn({'organs': organs, 'stains':stains, 'type': analisis_type, 'analisis': analisis, 'sampleId': sampleId, 'sampleIndex': sampleIndex, 'optionId': optionId, 'prevData': prevData, 'is_closed': is_closed});
-  return templateHTML;
-}
-
-function deleteAnalisis(sampleId, sampleIndex, active, prevData){
-  if(active)
-  {
-    if (prevData){
+  $(document).on("change", ".correlative", function (e) {
+    let id = e.target.id.split('-')[1];
+    if (e.target.checked) {
       swal({
-        title: "Confirmación",
-        text: "El servicio que desea eliminar de la muestra ha sido asignado previamente y es posible que ya se encuentre en proceso, por lo que podría estar perdiendo trabajo realizado. ¿Confirma que desea eliminar?",
+        title: "Organos en correlativos",
+        text: "Se eliminarán los órganos repetidos",
         icon: "warning",
         showCancelButton: true,
         buttons: {
           cancel: {
-              text: "Cancelar",
-              value: null,
-              visible: true,
-              className: "btn-warning",
-              closeModal: true,
+            value: null,
+            visible: true,
+            className: "btn-danger",
+            closeModal: true,
           },
           confirm: {
-              text: "Continuar",
-              value: true,
-              visible: true,
-              className: "",
-              closeModal: true,
+            value: true,
+            visible: true,
+            className: "",
+            closeModal: true,
           }
         }
       }).then(isConfirm => {
-        if (isConfirm) {
-          $('#analisis-'+sampleId+'-'+sampleIndex).remove();
-          $('#sampleNro-'+sampleId)[0].rowSpan = $('#sampleNro-'+sampleId)[0].rowSpan - 1; 
-          $('#sampleIden-'+sampleId)[0].rowSpan = $('#sampleIden-'+sampleId)[0].rowSpan - 1; 
-          if($('#sampleIden-'+sampleId)[0].rowSpan == 1)
-            $('.delete-'+sampleId).show();
-          var exist = 0;
-          $('#samples_table .analis-row').each( function(i){
-            if($(this).data('sampleid') == sampleIndex){
-              exist +=1;
-            }
-          }); 
-          if(!exist){
-            var old_values = $('#exam_select').val();
-            old_values.splice(old_values.indexOf(sampleIndex), 1);
-            $('#exam_select').val(old_values);
-            $('#exam_select').trigger('change');
-            $('#exam-'+sampleIndex).remove();
-          }
+        if (!isConfirm) {
+          e.target.click();
+          return;
         }
+        resetOrgansOptions(id, true);
       });
+    }
+    else {
+      resetOrgansOptions(id, false);
+    }
+    saveIdentification(id)
+    saveUnitsByIdentification(id)
+  });
+
+  $(document).on("blur", ".ident-data", function () {
+    let id = $(this).parent().parent().attr("id")
+    saveIdentification(id)
+  });
+
+  $(document).on("change", ".unit-correlative", function (e, param1) {
+    let correlative_input = this
+    let ident_id = $(correlative_input).attr("id").split("-")[1]
+    let current_unit_id = $(correlative_input).attr("id").split("-")[2]
+
+    let current_correlative_value = correlative_input.value
+    let current_default_value = correlative_input.defaultValue
+    
+    let correlative_switch_option = $('#correlative-'+ident_id).is(":checked")
+
+    if (correlative_switch_option){
+      if (checkDuplicatedOrgansInSameCorrelative(ident_id, current_unit_id)){
+        correlative_input.value = current_default_value
+        alertDuplicatedOrgansInSameCorrelative()
+      } else {
+        correlative_input.defaultValue = current_correlative_value
+        saveUnitsByIdentification(ident_id)
+      }
     } else {
-      $('#analisis-'+sampleId+'-'+sampleIndex).remove();
-      $('#sampleNro-'+sampleId)[0].rowSpan = $('#sampleNro-'+sampleId)[0].rowSpan - 1; 
-      $('#sampleIden-'+sampleId)[0].rowSpan = $('#sampleIden-'+sampleId)[0].rowSpan - 1; 
-      if($('#sampleIden-'+sampleId)[0].rowSpan == 1)
-        $('.delete-'+sampleId).show();
-      var exist = 0;
-      $('#samples_table .analis-row').each( function(i){
-        if($(this).data('sampleid') == sampleIndex){
-          exist +=1;
-        }
-      }); 
-      if(!exist){
-        var old_values = $('#exam_select').val();
-        old_values.splice(old_values.indexOf(sampleIndex), 1);
-        $('#exam_select').val(old_values);
-        $('#exam_select').trigger('change');
-        $('#exam-'+sampleIndex).remove();
+      correlative_input.defaultValue = current_correlative_value;
+      saveUnitsByIdentification(ident_id)
+    }
+  })
+}
+
+function alertDuplicatedOrgansInSameCorrelative(){
+  swal({
+    title: "Información",
+    text: "No ha sido posible realizar el cambio debido a que existe duplicidad de órganos en muestra correlativa.",
+    icon: "warning",
+    showCancelButton: false,
+  }); 
+}
+
+function checkDuplicatedOrgansInSameCorrelative(ident_id, unit_id, organs_selected=false){
+  let current_correlative = $("#input-"+ident_id+"-"+unit_id).val()
+  if (!organs_selected){
+    var organs_selected = $("#select-"+ident_id+"-"+unit_id).val()
+  }
+
+  let organs_validator = false;
+  $.each( $("#units-table-"+ident_id+" tr"), function (i, tr) {
+    let tr_unit_id = $(tr).attr("id").split("-")[2]
+    let tr_correlative_value = $(tr).find(".unit-correlative").val()
+    if (unit_id != tr_unit_id && current_correlative == tr_correlative_value){
+      let tr_organs_selected = $(tr).find(".organs").val()
+      if (organs_selected.some(r=> tr_organs_selected.indexOf(r) >= 0)){
+        organs_validator = true
+        return false
       }
     }
+  });
+  return organs_validator
+}
+
+function addUnitTemplate(data) {
+  var unitTemplate = document.getElementById("unit_template").innerHTML;
+
+  var templateFn = _.template(unitTemplate);
+  var templateHTML = templateFn(data);
+  return templateHTML;
+}
+
+function retrieveDataRow(row) {
+  var data = row.data();
+
+  $.each($(`#${data.id} .form-control-table`), function (i, v) {
+    if ( $(v).attr("type") == "checkbox" ){
+      data[v.name] = v.checked ? 1 : 0
+    } else {
+      data[v.name] = v.value
+    }
+  });
+
+  return data;
+}
+
+/*** Select organs based on switches values (organs for all and correlative samples) ***/
+function selectOrgansWithConditions(new_id, new_value, ident_id, select){
+  let organs_switch_option = $('#organs-'+ident_id).is(":checked")
+  let correlative_switch_option = $('#correlative-'+ident_id).is(":checked")
+
+  if ( organs_switch_option ) {
+    $.each( $("#units-table-"+ident_id+" .organs"), function (i, v) {
+      let select = $(v)
+      let unit_id = select.attr("id").split("-")[2]
+      let values = select.val()
+
+      if ( !correlative_switch_option ) {
+        new_id = `${new_id}-${Math.random()}`
+        select.append(`<option value="${new_id}">${new_value}</option>`)
+        values.push(new_id)
+        select.val(values)
+        select.trigger('change')
+      } else {
+        values.push(new_id)
+        if (!checkDuplicatedOrgansInSameCorrelative(ident_id, unit_id, values)){
+          select.val(values)
+          select.trigger('change')
+        } else {
+          alertDuplicatedOrgansInSameCorrelative()
+        }
+      }
+    })
+  } else {
+    let values = select.val();
+    let unit_id = select.attr("id").split("-")[2]
+    if ( !correlative_switch_option ) {
+      new_id = `${new_id}-${Math.random()}`;
+      select.append(`<option value="${new_id}">${new_value}</option>`);
+      values.push(new_id)
+      select.val(values)
+      select.trigger('change')
+    } else {
+      values.push(new_id)
+      if (!checkDuplicatedOrgansInSameCorrelative(ident_id, unit_id, values)){
+        select.val(values)
+        select.trigger('change')
+      } else {
+        alertDuplicatedOrgansInSameCorrelative()
+      }
     
+    }
   }
 }
 
-// function addPatologoRow(exam) {
-//   var sampleRowTemplate = document.getElementById("patologo_row").innerHTML;
+function resetOrgansOptions(id, correlative) {
+  var unitTemplate = document.getElementById("organos_options").innerHTML;
+  var templateFn = _.template(unitTemplate);
+  var templateHTML = templateFn({ organs });
 
-//   var templateFn = _.template(sampleRowTemplate);
-//   var templateHTML = templateFn({'exam': exam, 'patologos': patologos_list});
+  $.each($(`.organs-${id}`), function (i, v) {
+    let select = $(v)
+    let values = select.val()
+    let selected = []
 
-//   $("#patologo_table tbody").append(templateHTML)
-//   $('#patologos-select-'+exam.id).select2();
-// }
+    values.forEach(element => {
+      let x = element.split('-')[0];
+      if (selected.indexOf(x) == -1) {
+        selected.push(x);
+      }
+    });
 
-// function removePatologoRow(exam_id){
-//   $('#exam-'+exam_id).remove();
-// }
+    select.html(templateHTML)
+
+    if (correlative) {
+      select.val(selected).trigger('change')
+    } else {
+      let selected_unique = []
+      selected.forEach(element => {
+        let new_id = `${element}-${Math.random()}`;
+        let new_value = select.find("option[value='"+element+"']").text();
+        select.append(`<option value="${new_id}">${new_value}</option>`);
+        selected_unique.push(new_id);
+      });
+      select.val(selected_unique).trigger('change')
+    }
+  });
+}
+
+function formatResultData(data) {
+  if (!data.id) return data.text;
+  if (data.element.selected) return
+  return data.text;
+};
+
+function validate_step_2() {
+  let sucess = 1;
+
+  if( $('#identifications').DataTable().data().rows().count() == 0){
+    toastr.error(
+      'Para continuar debe ingresar las identificaciones.',
+      'Error',
+      { positionClass: 'toast-top-full-width', containerId: 'toast-bottom-full-width' }
+    );
+    return false
+  }
+  
+  let amounts_greather_than_zero = true
+  $(".amount").each(function(_, e){ 
+    if (e.value == 0){
+      amounts_greather_than_zero = false
+      return false
+    } 
+  });
+
+  if (!amounts_greather_than_zero){
+    toastr.error(
+      'Para continuar la cantidad de unidades en las identificaciones ingresadas deben ser mayor a 0.',
+      'Error',
+      { positionClass: 'toast-top-full-width', containerId: 'toast-bottom-full-width' }
+    );
+    return false
+  }
+
+  let organs_more_than_zero = true
+  $(".organs").each(function(_, e){ 
+    if ( $(this).val().length == 0 ){
+      organs_more_than_zero = false
+      return false
+    }
+  });
+
+  if (!organs_more_than_zero){
+    toastr.error(
+      'Para continuar es requerido que seleccione órganos en cada unidad declarada.',
+      'Error',
+      { positionClass: 'toast-top-full-width', containerId: 'toast-bottom-full-width' }
+    );
+    return false
+  }
+
+  return sucess;
+}
+
+function openOrgansKeypad(){
+  var organs_keypad_template = document.getElementById("organs_keypad").innerHTML;
+  var templateFn = _.template(organs_keypad_template);
+
+  var data = {
+    'organs': organs
+  }
+
+  var templateHTML = templateFn({ data });
+  $("#organ_table_keypad_body").html(templateHTML);
+  $("#organ_table_keypad").modal("show");
+  $('#switch_keypad').checkboxpicker();
+}
+
+var waitForEl = function(selector, callback) {
+  if ($(selector).length) {
+    callback();
+  } else {
+    setTimeout(function() {
+      waitForEl(selector, callback);
+    }, 500);
+  }
+};
+
+function AddOrgansFromKeypadToUnits(add){
+  
+  let organs_selected_from_keypad = [];
+  $('.keypad-organ-selector').each(function (e) {
+    let span = $(this).find(".organ_counter")[0]
+    let organ_id = $(this).data("id")
+    let organ_name = $(this).data("name")
+    let organ_amount = parseInt($(span).text())
+
+    if (organ_amount > 0){
+      for (let i = 0; i < organ_amount; i++) {
+        organs_selected_from_keypad.push([organ_id, organ_name])
+      }
+    }
+  });
+
+  if (organs_selected_from_keypad.length > 0){
+    $.each( $("#identifications .table-idents tr"), function (i, tr) {
+
+      let row = $('#identifications').DataTable().row(tr)
+
+      if (!row.child.isShown()) {
+        $(tr).find('.details-control').first().click()
+        $(tr).addClass('shown')
+      }
+
+      let ident_id = $(tr).attr("id");
+      let units_tbody_trs = "units-table-"+ident_id+" tr"
+      let units_edited = false
+
+      waitForEl("#"+units_tbody_trs, function() {
+        $("#"+units_tbody_trs).each(function(_, s_tr){
+          let unit_tr_id = $(s_tr).attr("id")
+          let unit_id = unit_tr_id.split("-")[2]
+          let unit_selection = $(s_tr).find(".unit-select")[0]
+
+          if ($(unit_selection).is(":checked")){
+            units_edited = true
+            if (add){
+              $.each(organs_selected_from_keypad, function(index, value){
+                selectOrgansWithConditions(value[0], value[1], ident_id, $('#select-'+ident_id+'-'+unit_id))
+              });
+
+              if ($('#organs-'+ident_id).is(":checked")){
+                return false
+              }
+            } else {
+              $.each(organs_selected_from_keypad, function(index, value){
+                let aux_val = $('#select-'+ident_id+'-'+unit_id).val()
+                let new_values = []
+                let deleted = false
+                for (let org of aux_val) {
+                  if (!org.startsWith(value[0])){
+                    new_values.push(org)
+                  } else if (org.startsWith(value[0]) && deleted){
+                    new_values.push(org)
+                  } else if (org.startsWith(value[0]) && !deleted){
+                    deleted = true
+                  }
+                }
+                $('#select-'+ident_id+'-'+unit_id).val(new_values).trigger("change")
+              });
+            }
+          }
+        })
+      });
+
+      if (units_edited){
+        saveUnitsByIdentification(ident_id)
+      }
+    });
+  }
+
+  $("#organ_table_keypad").modal("hide");
+  
+}
+
+function createUnit(identification_id, correlative){
+  let url = Urls.create_unit(identification_id, correlative)
+  let response
+  $.ajax({
+    type: "POST",
+    url: url,
+    async: false,
+  })
+  .done(function (data) {
+    response = data
+  })
+  .fail(function () {
+    reponse = {ok: 0}
+  });
+
+  return response; 
+}
+
+function saveIdentification(id){
+  let url = Urls.save_new_identification(id)
+  let ident = retrieveDataRow( $("#identifications").DataTable().row($('#'+id)))
+  ident["samples_are_correlative"] = $('#correlative-'+id).is(":checked") ? 1 : 0
+
+  let response
+  $.ajax({
+    type: "POST",
+    url: url,
+    async: false,
+    data: ident
+  })
+  .done(function (data) {
+    response = data
+  })
+  .fail(function () {
+    reponse = {ok: 0}
+  });
+  return response; 
+}
+
+function saveUnitsByIdentification(ident_id){
+  let units = []
+  $.each( $("#units-table-"+ident_id+" tr"), function (i, tr) {
+    let unit = {}
+    unit['id'] = $(tr).attr("id").split("-")[2]
+    unit['correlative'] = $("#input-"+ident_id+"-"+unit['id']).val()
+    unit['organs'] = $("#select-"+ident_id+"-"+unit['id']).val()
+    units.push(unit)
+  });
+
+  let url = Urls.save_units()
+  let response
+  $.ajax({
+    type: "POST",
+    url: url,
+    async: false,
+    data: {'units': JSON.stringify(units)}
+  })
+  .done(function (data) {
+    response = data
+  })
+  .fail(function () {
+    reponse = {ok: 0}
+  });
+  return response; 
+
+
+}
+
+function getUnits(ident_id){
+  let url = Urls.list_units(ident_id)
+  let response
+  $.ajax({
+    type: "GET",
+    url: url,
+    async: false
+  })
+  .done(function (data) {
+    response = data
+  })
+  .fail(function () {
+    response = {ok:0}
+  })
+  return response
+}
+
+function selectAllUnits(opt){
+  if (opt == 1){
+    $.each( $("#identifications .table-idents tr"), function (i, tr) {
+
+      var row = $('#identifications').DataTable().row(tr)
+
+      if (!row.child.isShown()) {
+        $(tr).find('.details-control').first().click()
+        $(tr).addClass('shown')
+      }
+
+      let ident_id = $(tr).attr("id")
+      let units_tbody_trs = "units-table-"+ident_id+" tr"
+
+      waitForEl("#"+units_tbody_trs, function() {
+        $('#'+units_tbody_trs+' .unit-select').prop("checked", true)
+      });
+    });
+  } else {
+    $.each( $("#identifications .table-idents tr"), function (i, tr) {
+
+      var row = $('#identifications').DataTable().row(tr)
+
+      if (!row.child.isShown()) {
+        $(tr).find('.details-control').first().click()
+        $(tr).addClass('shown')
+      }
+
+      let ident_id = $(tr).attr("id")
+      let units_tbody_trs = "units-table-"+ident_id+" tr"
+
+      waitForEl("#"+units_tbody_trs, function() {
+        $('#'+units_tbody_trs+' .unit-select').prop("checked", false)
+      });
+    });
+  }
+}
+
+function selectAllUnitsByIdentification(id, opt){
+  let units_tbody_trs = "units-table-"+id+" tr"
+  if (opt == 1){
+
+    waitForEl("#"+units_tbody_trs, function() {
+      $('#'+units_tbody_trs+' .unit-select').prop("checked", true)
+    });
+  } else {
+    let units_tbody_trs = "units-table-"+id+" tr"
+
+    waitForEl("#"+units_tbody_trs, function() {
+      $('#'+units_tbody_trs+' .unit-select').prop("checked", false)
+    });
+  }
+}
+
+$(document).on("click", ".keypad-organ-selector", function(){
+  let span = $(this).find("span")[0]
+  let current_value = parseInt($(span).text())
+  
+  if ( $("#switch_keypad").is(":checked") ) {
+    $(span).text(current_value + 1)
+  } else {
+    if (current_value > 0){
+      $(span).text(current_value - 1)
+    }
+  }
+
+});

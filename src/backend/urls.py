@@ -76,11 +76,7 @@ urlpatterns = [
     #     csrf_exempt(views.IMAGES.as_view()),
     #     'images_w_id'
     # ),
-    path(
-        'identification/<int:id>',
-        csrf_exempt(views.save_identification),
-        name="identification"
-    ),
+   
     path(
         'generalData/<int:id>',
         csrf_exempt(views.save_generalData),
@@ -92,6 +88,7 @@ urlpatterns = [
         name="sendNotification"
     ),
     path('workform/<int:form_id>/complete', csrf_exempt(views.completeForm), name='complete_form'),
+    path('workform/<int:form_id>/finish-reception', csrf_exempt(views.finishReception), name='finish_reception'),
 
     path('workform/<int:form_id>/save_step1', csrf_exempt(views.save_step1), name='save_step1'),
     path('service_assigment/', csrf_exempt(views.service_assignment), name='service_assignment'),
@@ -151,9 +148,44 @@ urlpatterns = [
         name="delete-sample"
     ),
     path(
-        'new-identification/<int:entryform_id>',
+        'list-identification/<int:entryform_id>',
+        csrf_exempt(views.list_identification),
+        name="list_identification"
+    ),
+    path(
+        'units/<int:identification_id>',
+        csrf_exempt(views.list_units),
+        name="list_units"
+    ),
+    path(
+        'unit/<int:identification_id>/<int:correlative>',
+        csrf_exempt(views.create_unit),
+        name="create_unit"
+    ),
+    path(
+        'remove-unit/<int:id>',
+        csrf_exempt(views.remove_unit),
+        name="remove_unit"
+    ),
+    path(
+        'save-units',
+        csrf_exempt(views.save_units),
+        name="save_units"
+    ),
+    path(
+        'identification/<int:id>',
+        csrf_exempt(views.save_identification),
+        name="identification"
+    ),
+    path(
+        'new-identification/<int:entryform_id>/<int:correlative>',
         csrf_exempt(views.new_empty_identification),
         name="new_identification"
+    ),
+    path(
+        'save-new-identification/<int:id>',
+        csrf_exempt(views.save_new_identification),
+        name="save_new_identification"
     ),
     path(
         'remove-identification/<int:id>',
@@ -167,4 +199,6 @@ urlpatterns = [
     path('get-scores/<int:id>', csrf_exempt(views.get_scores), name='get_scores'),
     path('research/<int:id>', csrf_exempt(views.RESEARCH.as_view()), name='research'),
     path('get-research/<int:id>', csrf_exempt(views.get_research_metadata), name='get_research'),
+    
+    path('force-step/<int:form>/<int:step>', csrf_exempt(views.force_form_to_step), name='force_form_to_step'),
 ]
