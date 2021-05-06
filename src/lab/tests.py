@@ -32,7 +32,6 @@ class HomeTest(TestCase):
         cls.fake = Faker()
 
     def test_home_template(self):
-        self.client.login(username="jmonagas", password="vehice1234")
         response = self.client.get(reverse("lab:home"))
 
         self.assertTemplateUsed(
@@ -40,7 +39,6 @@ class HomeTest(TestCase):
         )
 
     def test_home_context(self):
-        self.client.login(username="jmonagas", password="vehice1234")
         response = self.client.get(reverse("lab:home"))
 
         self.assertIn(
