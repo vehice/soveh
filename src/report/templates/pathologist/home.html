@@ -24,10 +24,18 @@
                     <div class="col-md-3 d-flex flex-column">
                         <b>Histopatólogo:</b>
                         <select id="pathologist" class="form-control">
+                            {% if current_user is not None %}
+                            <option value="{{ current_user.id }}">{{ current_user.first_name }} {{current_user.last_name}}</option>
+                            {% else %}
                             <option value="0">Todos</option>
                             {% for pathologist in pathologists %}
-                            <option value="{{ pathologist.id }}">{{ pathologist.first_name }} {{ pathologist.last_name }}</option>
+                            <option
+                                {% if user_id == pathologist.id  %} selected {% endif %}
+                                value="{{ pathologist.id }}">
+                                {{ pathologist.first_name }} {{ pathologist.last_name }}
+                            </option>
                             {% endfor %}
+                            {% endif %}
                         </select>
                     </div>
                     <div class="col-md-3 d-flex flex-column justify-content-center align-items-center">
