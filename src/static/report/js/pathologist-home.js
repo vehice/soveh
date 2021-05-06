@@ -111,11 +111,12 @@ $(document).ready(function () {
 
   function filterPending() {
     return data.filter((analysis) => {
-      const is_cancelled = analysis.workflow.fields.form_cancelled;
       const is_closed = analysis.workflow.fields.form_closed;
+      const is_cancelled = analysis.workflow.fields.form_cancelled;
+      const prereport_ended = analysis.report.fields.pre_report_ended;
       const is_assigned = analysis.report.fields.patologo != null;
 
-      return !(is_cancelled || is_closed) && is_assigned;
+      return !(is_closed || is_cancelled) && is_assigned && prereport_ended;
     });
   }
 
@@ -154,12 +155,24 @@ $(document).ready(function () {
           title: "Caso",
         },
         {
+          data: "exam.fields.name",
+          name: "exam",
+          type: "string",
+          title: "Servicio",
+        },
+        {
+          data: "stain.fields.abbreviation",
+          name: "stain",
+          type: "num",
+          title: "Tincion",
+        },
+        {
           data: "user.fields",
           name: "pathologist",
           type: "string",
           title: "Patologo",
           render: (data) => {
-            return `${data.first_name} ${data.last_name}`;
+            return `${data.first_name[0]}${data.last_name[0]}`;
           },
         },
         {
@@ -183,21 +196,22 @@ $(document).ready(function () {
           },
         },
         {
-          data: "stain.fields.abbreviation",
-          name: "stain",
-          type: "num",
-          title: "Tincion",
-        },
-        {
           data: "report.fields.assignment_deadline",
-          name: "stain",
+          name: "delay",
           type: "num",
           title: "Atraso",
           render: (data) => {
             const date = new Date(data);
             const currentDate = new Date();
-            const diffTime = Math.abs(currentDate - date);
-            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            const diffTime = currentDate - date;
+
+            if (diffTime < 0) {
+              return 0;
+            }
+
+            const diffDays = Math.ceil(
+              Math.abs(diffTime) / (1000 * 60 * 60 * 24)
+            );
             return diffDays;
           },
         },
@@ -228,6 +242,12 @@ $(document).ready(function () {
           name: "reportCode",
           type: "string",
           title: "Informe",
+        },
+        {
+          data: "exam.fields.name",
+          name: "service",
+          type: "string",
+          title: "Servicio",
         },
         {
           data: "case.fields.created_at",
@@ -344,6 +364,7 @@ $(document).ready(function () {
         data = JSON.parse(_data).map((row) => {
           return {
             report: JSON.parse(row.report)[0],
+            exam: JSON.parse(row.exam)[0],
             case: JSON.parse(row.case)[0],
             user: JSON.parse(row.user)[0],
             stain: JSON.parse(row.stain)[0],
