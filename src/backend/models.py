@@ -142,7 +142,7 @@ PRICING_UNIT = ((1, "Por órgano"), (2, "Por pez"))
 
 
 class Exam(models.Model):
-    """Stores basic information about a study done by a Pathologist."""
+    """Stores basic information about services done by the company."""
 
     name = models.CharField(
         max_length=250, null=True, blank=True, verbose_name="nombre"
