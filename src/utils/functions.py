@@ -99,7 +99,7 @@ from django.conf import settings
 import json
 def translation(lang='en'):
     translation = {}
-    with open(settings.LANG_FILE, 'r') as f:
+    with open(settings.LANG_FILE, 'r', encoding="utf-8") as f:
         load_lang = json.load(f)
         for key, value in load_lang.items():
             translation[str(key)] = value[lang]
