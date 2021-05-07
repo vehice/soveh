@@ -413,8 +413,8 @@ class SlideBuild(View):
 
         if cases.count() > 0:
             for case in cases:
-                for identification in case.identifications.all():
-                    for unit in identification.units.all():
+                for identification in case.identifications:
+                    for unit in identification.units:
                         serialize_case = serializers.serialize("json", [case])
                         serialize_identification = serializers.serialize(
                             "json", [identification]

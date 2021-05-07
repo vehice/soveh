@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     "backend",
     "app",
     "lab",
+    "report",
     "avatar",
 ]
 
@@ -97,7 +98,18 @@ DATABASES = {
         "PASSWORD": "",
         "HOST": "localhost",
         "PORT": "",
-    }
+    },
+    # "dsstore": {
+    #     "ENGINE": "sql_server.pyodbc",  # Requires unixODBC to be installed in unix systems
+    #     "NAME": "DSStoreData",
+    #     "USER": "josemonagas",
+    #     "PASSWORD": "Vehice1354.,",
+    #     "HOST": "vehice.net",
+    #     "PORT": "",
+    #     "OPTIONS": {
+    #         "driver": "ODBC Driver 17 for SQL Server",  # ("ODBC Driver 13 for SQL Server", "SQL Server Native Client 11.0", "FreeTDS")
+    #     },
+    # },
 }
 
 # Password validation
