@@ -2,8 +2,16 @@ $(document).ready(function () {
   const year = $("#year");
   const month = $("#month");
   const pathologist = $("#pathologist");
+
   const pendingNumber = $("#pendingNumber");
   const pendingTable = $("#pendingTable");
+
+  const currentNumber = $("#currentNumber");
+  const currentTable = $("#currentTable");
+
+  const unreviewNumber = $("#unreviewNumber");
+  const unreviewTable = $("#unreviewTable");
+
   const efficiencyTable = $("#efficiencyTable");
 
   let averageEfficiency = echarts.init(
@@ -108,14 +116,60 @@ $(document).ready(function () {
   getData();
 
   /* FUNCTIONS */
+  function dateDiff(a, b = null) {
+    const date = new Date(a);
+    const currentDate = b == null ? new Date() : new Date(b);
+    const diffTime = currentDate - date;
+
+    if (diffTime < 0) {
+      return 0;
+    }
+
+    return Math.ceil(Math.abs(diffTime) / (1000 * 60 * 60 * 24));
+  }
 
   function filterPending() {
     return data.filter((analysis) => {
-      const is_cancelled = analysis.workflow.fields.form_cancelled;
       const is_closed = analysis.workflow.fields.form_closed;
+      const is_cancelled = analysis.workflow.fields.form_cancelled;
+      const pre_report_started = analysis.report.fields.pre_report_started;
       const is_assigned = analysis.report.fields.patologo != null;
 
-      return !(is_cancelled || is_closed) && is_assigned;
+      return !(is_closed || is_cancelled) && is_assigned && !pre_report_started;
+    });
+  }
+
+  function filterCurrent() {
+    return data.filter((analysis) => {
+      const is_closed = analysis.workflow.fields.form_closed;
+      const is_cancelled = analysis.workflow.fields.form_cancelled;
+      const pre_report_started = analysis.report.fields.pre_report_started;
+      const pre_report_ended = analysis.report.fields.pre_report_ended;
+      const is_assigned = analysis.report.fields.patologo != null;
+
+      return (
+        !(is_closed || is_cancelled) &&
+        is_assigned &&
+        pre_report_started &&
+        !pre_report_ended
+      );
+    });
+  }
+
+  function filterUnreview() {
+    return data.filter((analysis) => {
+      const is_closed = analysis.workflow.fields.form_closed;
+      const is_cancelled = analysis.workflow.fields.form_cancelled;
+      const pre_report_started = analysis.report.fields.pre_report_started;
+      const pre_report_ended = analysis.report.fields.pre_report_ended;
+      const is_assigned = analysis.report.fields.patologo != null;
+
+      return (
+        !(is_closed || is_cancelled) &&
+        is_assigned &&
+        pre_report_started &&
+        pre_report_ended
+      );
     });
   }
 
@@ -136,13 +190,12 @@ $(document).ready(function () {
   }
 
   function updateView() {
-    const pending = filterPending();
-    pendingNumber.text(pending.length);
-
     if ($.fn.DataTable.isDataTable("#pendingTable")) {
       pendingTable.DataTable().clear().destroy();
     }
 
+    const pending = filterPending();
+    pendingNumber.text(pending.length);
     pendingTable.DataTable({
       data: pending,
 
@@ -154,12 +207,24 @@ $(document).ready(function () {
           title: "Caso",
         },
         {
+          data: "exam.fields.name",
+          name: "exam",
+          type: "string",
+          title: "Servicio",
+        },
+        {
+          data: "stain.fields.abbreviation",
+          name: "stain",
+          type: "num",
+          title: "Tincion",
+        },
+        {
           data: "user.fields",
           name: "pathologist",
           type: "string",
           title: "Patologo",
           render: (data) => {
-            return `${data.first_name} ${data.last_name}`;
+            return `${data.first_name[0]}${data.last_name[0]}`;
           },
         },
         {
@@ -183,22 +248,219 @@ $(document).ready(function () {
           },
         },
         {
+          data: "report.fields.assignment_deadline",
+          name: "derived_at",
+          type: "num",
+          title: "Plazo",
+          render: (data) => {
+            const date = new Date(data);
+            return date.toLocaleDateString();
+          },
+        },
+        {
+          data: "report.fields.assignment_deadline",
+          name: "delay",
+          type: "num",
+          title: "Atraso",
+          render: (data) => {
+            return dateDiff(data);
+          },
+        },
+      ],
+
+      oLanguage: {
+        sUrl: "https://cdn.datatables.net/plug-ins/1.10.16/i18n/Spanish.json",
+      },
+    });
+
+    if ($.fn.DataTable.isDataTable("#currentTable")) {
+      currentTable.DataTable().clear().destroy();
+    }
+
+    const current = filterCurrent();
+    currentNumber.text(current.length);
+    currentTable.DataTable({
+      data: current,
+
+      columns: [
+        {
+          data: "case.fields.no_caso",
+          name: "case",
+          type: "string",
+          title: "Caso",
+        },
+        {
+          data: "exam.fields.name",
+          name: "exam",
+          type: "string",
+          title: "Servicio",
+        },
+        {
           data: "stain.fields.abbreviation",
           name: "stain",
           type: "num",
           title: "Tincion",
         },
         {
+          data: "user.fields",
+          name: "pathologist",
+          type: "string",
+          title: "Patologo",
+          render: (data) => {
+            return `${data.first_name[0]}${data.last_name[0]}`;
+          },
+        },
+        {
+          data: "case.fields.created_at",
+          name: "entry_date",
+          type: "string",
+          title: "Ingreso",
+          render: (data) => {
+            const date = new Date(data);
+            return date.toLocaleDateString();
+          },
+        },
+        {
+          data: "report.fields.assignment_done_at",
+          name: "derived_at",
+          type: "num",
+          title: "Derivacion",
+          render: (data) => {
+            const date = new Date(data);
+            return date.toLocaleDateString();
+          },
+        },
+        {
           data: "report.fields.assignment_deadline",
-          name: "stain",
+          name: "derived_at",
+          type: "num",
+          title: "Plazo",
+          render: (data) => {
+            const date = new Date(data);
+            return date.toLocaleDateString();
+          },
+        },
+        {
+          data: "report.fields.pre_report_started_at",
+          name: "delay",
+          type: "num",
+          title: "Inicio lectura",
+          render: (data) => {
+            const date = new Date(data);
+            return date.toLocaleDateString();
+          },
+        },
+        {
+          data: "report.fields.assignment_deadline",
+          name: "delay",
           type: "num",
           title: "Atraso",
           render: (data) => {
+            return dateDiff(data);
+          },
+        },
+        {
+          data: "report.fields.pre_report_started_at",
+          name: "delay",
+          type: "num",
+          title: "En Lectura",
+          render: (data) => {
+            return dateDiff(data);
+          },
+        },
+      ],
+
+      oLanguage: {
+        sUrl: "https://cdn.datatables.net/plug-ins/1.10.16/i18n/Spanish.json",
+      },
+    });
+
+    if ($.fn.DataTable.isDataTable("#unreviewTable")) {
+      unreviewTable.DataTable().clear().destroy();
+    }
+
+    const unreview = filterUnreview();
+    unreviewNumber.text(unreview.length);
+    unreviewTable.DataTable({
+      data: unreview,
+
+      columns: [
+        {
+          data: "case.fields.no_caso",
+          name: "case",
+          type: "string",
+          title: "Caso",
+        },
+        {
+          data: "exam.fields.name",
+          name: "exam",
+          type: "string",
+          title: "Servicio",
+        },
+        {
+          data: "stain.fields.abbreviation",
+          name: "stain",
+          type: "num",
+          title: "Tincion",
+        },
+        {
+          data: "user.fields",
+          name: "pathologist",
+          type: "string",
+          title: "Patologo",
+          render: (data) => {
+            return `${data.first_name[0]}${data.last_name[0]}`;
+          },
+        },
+        {
+          data: "case.fields.created_at",
+          name: "entry_date",
+          type: "string",
+          title: "Ingreso",
+          render: (data) => {
             const date = new Date(data);
-            const currentDate = new Date();
-            const diffTime = Math.abs(currentDate - date);
-            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-            return diffDays;
+            return date.toLocaleDateString();
+          },
+        },
+        {
+          data: "report.fields.pre_report_started_at",
+          name: "delay",
+          type: "num",
+          title: "Inicio lectura",
+          render: (data) => {
+            const date = new Date(data);
+            return date.toLocaleDateString();
+          },
+        },
+        {
+          data: "report.fields.pre_report_ended_at",
+          name: "derived_at",
+          type: "num",
+          title: "Fin lectura",
+          render: (data) => {
+            const date = new Date(data);
+            return date.toLocaleDateString();
+          },
+        },
+        {
+          data: "report.fields",
+          name: "derived_at",
+          type: "num",
+          title: "Dias en lectura",
+          render: (data) => {
+            return dateDiff(
+              data.pre_report_started_at,
+              data.pre_report_ended_at
+            );
+          },
+        },
+        {
+          data: "report.fields.pre_report_ended_at",
+          name: "delay",
+          type: "num",
+          title: "En Revision",
+          render: (data) => {
+            return dateDiff(data);
           },
         },
       ],
@@ -228,6 +490,12 @@ $(document).ready(function () {
           name: "reportCode",
           type: "string",
           title: "Informe",
+        },
+        {
+          data: "exam.fields.name",
+          name: "service",
+          type: "string",
+          title: "Servicio",
         },
         {
           data: "case.fields.created_at",
@@ -344,6 +612,7 @@ $(document).ready(function () {
         data = JSON.parse(_data).map((row) => {
           return {
             report: JSON.parse(row.report)[0],
+            exam: JSON.parse(row.exam)[0],
             case: JSON.parse(row.case)[0],
             user: JSON.parse(row.user)[0],
             stain: JSON.parse(row.stain)[0],

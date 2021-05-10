@@ -1,0 +1,110 @@
+{% extends 'layout.html' %}
+{% load static %}
+
+{% block content %}
+<!-- MAIN -->
+
+<!-- PENDING JOBS -->
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <header class="card-header">
+                <h1 class="card-title">TRABAJO PENDIENTE</h1>
+            </header>
+            <main class="card-body container">
+                <section class="row">
+                    <div class="col-md-2 d-flex flex-column justify-content-center border-right">
+                        <h1 class="text-center">
+                            <b>Informes sin revisar:</b>
+                        </h1>
+                        <h3 class="text-center">
+                            <span id="pendingNumber"></span>
+                        </h3>
+                    </div>
+                    <div class="col-md-10 table-responsive" style="max-height: 24rem">
+                        <table id="pendingTable" class="table table-sm table-striped" style>
+                        </table>
+                    </div>
+                </section>
+            </main>
+        </div>
+    </div>
+</div>
+<!-- END PENDING JOBS -->
+
+<!-- UNASSIGNED JOBS -->
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <header class="card-header">
+                <h1 class="card-title">Asignacion de Casos</h1>
+            </header>
+            <main class="card-body container">
+                <section class="row">
+                    <div class="col-md-2 d-flex flex-column justify-content-center border-right">
+                        <h1 class="text-center">
+                            <b>Servicios sin derivar:</b>
+                        </h1>
+                        <h3 class="text-center">
+                            <span id="unassignedNumber"></span>
+                        </h3>
+                    </div>
+                    <div class="col-md-10 table-responsive" style="max-height: 24rem">
+                        <table id="unassignedTable" class="table table-sm table-striped" style>
+                        </table>
+                    </div>
+                </section>
+            </main>
+        </div>
+    </div>
+</div>
+<!-- END UNASSIGNED JOBS -->
+
+<!-- RESPONSE TIME -->
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <header class="card-header">
+                <h1 class="card-title">ANALISIS DE TIEMPOS DE RESPUESTA</h1>
+            </header>
+            <main class="card-body container">
+                <section class="row">
+                    <div class="col-md-4">
+                        <div id="avgTimeMonth" style="width: auto; height: 30rem">
+                            
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div id="avgTotal" style="width: auto; height: 30rem">
+                            
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div id="avgPercentMonth" style="width: auto; height: 30rem">
+                            
+                        </div>
+                    </div>
+                </section>
+            </main>
+        </div>
+    </div>
+</div>
+<!-- END RESPONSE TIME -->
+
+
+<!-- END MAIN -->
+
+{% endblock content %}
+{% block scripts %}
+<script
+    type="text/javascript"
+    src="//cdn.jsdelivr.net/npm/sweetalert2@10"
+    defer>
+</script>
+
+
+<script type="text/javascript"
+        src="{% static 'report/js/control-home.js' %}"
+        defer>
+</script>
+{% endblock scripts %}

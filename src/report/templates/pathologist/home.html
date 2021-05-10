@@ -24,10 +24,18 @@
                     <div class="col-md-3 d-flex flex-column">
                         <b>Histopatólogo:</b>
                         <select id="pathologist" class="form-control">
+                            {% if current_user is not None %}
+                            <option value="{{ current_user.id }}">{{ current_user.first_name }} {{current_user.last_name}}</option>
+                            {% else %}
                             <option value="0">Todos</option>
                             {% for pathologist in pathologists %}
-                            <option value="{{ pathologist.id }}">{{ pathologist.first_name }} {{ pathologist.last_name }}</option>
+                            <option
+                                {% if user_id == pathologist.id  %} selected {% endif %}
+                                value="{{ pathologist.id }}">
+                                {{ pathologist.first_name }} {{ pathologist.last_name }}
+                            </option>
                             {% endfor %}
+                            {% endif %}
                         </select>
                     </div>
                     <div class="col-md-3 d-flex flex-column justify-content-center align-items-center">
@@ -48,20 +56,49 @@
                 <h1 class="card-title">TRABAJO PENDIENTE</h1>
             </header>
             <main class="card-body container">
-                <section class="row">
-                    <div class="col-md-2 d-flex flex-column justify-content-center border-right">
-                        <h1 class="text-center">
-                            <b>Casos por revisar:</b>
-                        </h1>
-                        <h3 class="text-center">
-                            <span id="pendingNumber"></span>
-                        </h3>
+                <!-- Nav tabs -->
+                <ul class="nav nav-pill nav-fill" id="myTab" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <a class="nav-link active" id="pending-tab" data-toggle="tab" href="#pending" role="tab" aria-controls="pending" aria-selected="true">
+                            <h1>Servicios en espera:</h1>
+                            <h2>
+                                <span id="pendingNumber"></span>
+                            </h2>
+                        </a>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <a class="nav-link" id="current-tab" data-toggle="tab" href="#current" role="tab" aria-controls="current" aria-selected="false">
+                            <h1>Servicios en lectura:</h1>
+                            <h2>
+                                <span id="currentNumber"></span>
+                            </h2>
+                        </a>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <a class="nav-link" id="unreview-tab" data-toggle="tab" href="#unreview" role="tab" aria-controls="unreview" aria-selected="false">
+                            <h1>Servicios en revision:</h1>
+                            <h2>
+                                <span id="unreviewNumber"></span>
+                            </h2>
+                        </a>
+                    </li>
+                </ul>
+
+                <!-- Tab panes -->
+                <div class="tab-content mt-3">
+                    <div class="tab-pane active" id="pending" role="tabpanel" aria-labelledby="pending-tab">
+                        <h3 class="border-bottom">Servicios en espera</h3>
+                        <table id="pendingTable" class="table table-sm table-striped" style></table>
                     </div>
-                    <div class="col-md-10 table-responsive" style="max-height: 24rem">
-                        <table id="pendingTable" class="table table-sm table-striped" style>
-                        </table>
+                    <div class="tab-pane" id="current" role="tabpanel" aria-labelledby="current-tab">
+                        <h3 class="border-bottom">Servicios en lectura</h3>
+                        <table id="currentTable" class="table table-sm table-striped" style></table>
                     </div>
-                </section>
+                    <div class="tab-pane" id="unreview" role="tabpanel" aria-labelledby="unreview-tab">
+                        <h3 class="border-bottom">Servicios en revision</h3>
+                        <table id="unreviewTable" class="table table-sm table-striped"></table>
+                    </div>
+                </div>
             </main>
         </div>
     </div>
@@ -84,7 +121,7 @@
                 </section>
                 <div class="row">
                     <aside class="col-md-6 d-flex flex-column">
-                        <h3>Promedio Mensual</h3>
+                        <h3>Promedio por Periodo</h3>
                         <div id="averageEfficiency"  style="width: 100%; height:20rem;"></div>
                     </aside>
                     <aside class="col-md-6 d-flex flex-column">
