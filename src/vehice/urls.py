@@ -20,17 +20,18 @@ from django.conf.urls.static import static
 from django.views.decorators.cache import cache_page
 from django_js_reverse.views import urls_js
 
-admin.site.site_header = 'Administración de datos'
-admin.site.index_title = 'VEHICE'
-admin.site.site_title = 'DATOS'
+admin.site.site_header = "Administración de datos"
+admin.site.index_title = "VEHICE"
+admin.site.site_title = "DATOS"
 
 urlpatterns = [
-    url(r'^jet/', include('jet.urls', 'jet')),  # Django JET URLS
-    url(r'^admin/', admin.site.urls),
-    url(r'^accounts/', include('accounts.urls')),
-    url(r'^', include('app.urls')),
-    url(r'^', include('backend.urls')),
-    url('avatar/', include('avatar.urls')),
-    url(r'^jsreverse/$', urls_js, name='js_reverse'),
-] + static(
-    settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    url(r"^jet/", include("jet.urls", "jet")),  # Django JET URLS
+    url(r"^admin/doc/", include("django.contrib.admindocs.urls")),
+    url(r"^admin/", admin.site.urls),
+    url(r"^accounts/", include("accounts.urls")),
+    url(r"^", include("app.urls")),
+    url(r"^", include("backend.urls")),
+    url(r"report/", include("report.urls")),
+    url("avatar/", include("avatar.urls")),
+    url(r"^jsreverse/$", urls_js, name="js_reverse"),
+] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
