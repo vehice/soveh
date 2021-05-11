@@ -86,7 +86,9 @@ class Cassette(models.Model):
     """
 
     correlative = models.PositiveIntegerField()
-    organs = models.ManyToManyField(Organ, related_name="cassettes")
+    organs = models.ManyToManyField(
+        Organ, related_name="cassettes", through="CassetteOrgan"
+    )
     unit = models.ForeignKey(Unit, on_delete=models.CASCADE, related_name="cassettes")
     build_at = models.DateTimeField(null=True)
 
@@ -95,6 +97,19 @@ class Cassette(models.Model):
 
     def __str__(self):
         return f"{self.correlative}"
+
+
+class CassetteOrgan(models.Model):
+    """Middle table joining Cassette with multiple Organ.
+    As a :model:`lab.Cassette` may have multiple of the same :model:`backend.Organ`
+    a middle table is necessary.
+    """
+
+    cassette = models.ForeignKey(Cassette, on_delete=models.CASCADE)
+    organ = models.ForeignKey(Organ, on_delete=models.CASCADE)
+
+    class Meta:
+        db_table = "lab_cassette_organ"
 
 
 class Slide(models.Model):
