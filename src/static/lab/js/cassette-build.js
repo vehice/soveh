@@ -413,6 +413,7 @@ $(document).ready(function () {
           icon: "success",
           title: "Guardado",
         });
+        location.reload();
       },
       error: (xhr, textStatus, error) => {
         Swal.fire({
@@ -501,6 +502,37 @@ $(document).ready(function () {
         width: "80%",
       });
     });
+  });
+
+  $("#tableBuildDialog").on("select2:selecting", ".unitSelectOrgan", (e) => {
+    const organ = parseInt(e.target.value);
+    const unitId = e.target.id.split("C")[0].substring(1); //Selects contain an id made of U[Unit's pk]C[Cassette's correlative]
+    const availableOrganCount = getOrgansFromUnit(unitId).filter(
+      (row) => row.pk == organ
+    ).length;
+    const tableData = tableBuild
+      .rows()
+      .data()
+      .filter((row) => row.unit == unitId);
+
+    let currentCount = 0;
+
+    tableData.each((row) => {
+      const id = `U${row.unit}C${row.cassette}`;
+
+      const select = $(`#${id}`).select2("data")[0].id;
+      if (select == organ) currentCount++;
+    });
+
+    if (currentCount >= availableOrganCount) {
+      e.preventDefault();
+      Swal.fire({
+        title: "No se puede agregar organo",
+        icon: "error",
+        text: "Ese organo ya esta asignado a otro Cassette de la misma Unidad.",
+      });
+      return;
+    }
   });
 
   /* END EVENTS */
