@@ -34,7 +34,7 @@ class PathologistView(View):
 
         context = []
 
-        for report in reports:
+        for report in reports.iterator():
             user = (
                 serializers.serialize("json", [report.patologo])
                 if report.patologo is not None
@@ -95,7 +95,7 @@ class PathologistView(View):
 class ControlView(View):
     def serialize_data(self, queryset):
         context = []
-        for row in queryset:
+        for row in queryset.iterator():
             user = (
                 serializers.serialize("json", [row.patologo])
                 if row.patologo is not None
