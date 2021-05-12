@@ -1,0 +1,143 @@
+{% extends 'layout.html' %}
+{% load static %}
+
+{% block content %}
+<!-- MAIN -->
+
+<!-- FILTERS -->
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <header class="card-header">
+                <h1 class="card-title">revision servicios</h1>
+            </header>
+            <main class="card-body">
+                <section class="d-flex flex-row align-items-stretch justify-content-between">
+                    <section class="card m-0">
+                        <header class="card-header">
+                            <h2 class="card-title">En Espera</h2>
+                        </header>
+                        <ul id="waiting" class="state list-group p-1" style="background-color: #595959"></ul>
+                    </section>
+                    <section class="card m-0">
+                        <header class="card-header">
+                            <h2 class="card-title">Formato</h2>
+                        </header>
+                        <ul id="formating" class="state list-group p-1" style="background-color: #7f7f7f"></ul>
+                    </section>
+                    <section class="card">
+                        <header class="card-header">
+                            <h2 class="card-title">Revision Tecnica</h2>
+                        </header>
+                        <ul id="reviewing" class="state list-group p-1" style="background-color: #a5a5a5"></ul>
+                    </section>
+                    <section class="card">
+                        <header class="card-header">
+                            <h2 class="card-title">Para Enviar</h2>
+                        </header>
+                        <ul id="sending" class="state list-group p-1" style="background-color: #cccccc"></ul>
+                    </section>
+                    <section class="card">
+                        <header class="card-header">
+                            <h2 class="card-title">Finalizado</h2>
+                        </header>
+                        <ul id="finished" class="list-group p-1" style="background-color: #f2f2f2"></ul>
+                    </section>
+                </section>
+            </main>
+        </div>
+    </div>
+</div>
+<!-- END FILTERS -->
+
+<!-- END MAIN -->
+
+{% endblock content %}
+{% block scripts %}
+<script
+    type="text/javascript"
+    src="//cdn.jsdelivr.net/npm/sweetalert2@10"
+    defer>
+</script>
+
+
+<script type="text/javascript"
+        src="{% static 'assets/vendors/js/ui/jquery-ui.min.js' %}"
+        defer>
+</script>
+
+<script type="text/javascript">
+ $(document).ready(() => {
+     $("#waiting, #formating, #reviewing, #sending").sortable({
+         connectWith: ".state"
+     }).disableSelection();
+
+     let waiting;
+     let formating;
+     let reviewing;
+     let sending;
+     let finished;
+
+     Promise.all([getReviews(0), getReviews(1), getReviews(2), getReviews(3), getReviews(9)]).then(values => {
+         waiting = parseResponse(values[4])
+         formating = parseResponse(values[0])
+         reviewing = parseResponse(values[1])
+         sending = parseResponse(values[2])
+         finished = parseResponse(values[3])
+
+         populateList("#waiting", waiting)
+         populateList("#formating", formating)
+         populateList("#reviewing", reviewing)
+         populateList("#sending", sending)
+         populateList("#finished", finished)
+     })
+
+     /* FUNCTIONS */
+     async function getReviews(stage) {
+         let response = await fetch(Urls["review:stages"](stage));
+
+         if (!response.ok) {
+             throw new Error(`HTTP error! status: ${response.status}`)
+         }
+
+         return await response.json()
+     }
+
+     function parseResponse(response) {
+         return response.map((row) => {
+             return {
+                 analysis: JSON.parse(row.analysis)[0],
+                 exam: JSON.parse(row.exam)[0],
+                 case: JSON.parse(row.case)[0],
+             }
+         })
+     }
+
+
+     function populateList(id, array) {
+         const list = $(id);
+         list.empty();
+
+         for (const item of array) {
+             list.append(`<li class="list-group-item">
+                                <small>${item.case.fields.no_caso} - ${item.exam.fields.name} - ${item.case.fields.company}</small>
+                            </li>`)
+         }
+     }
+
+
+     /* EVENTS */
+
+     $(".state").on("sortout", (event, ui) => {
+         console.log({waiting})
+         console.log({event, ui})
+     })
+
+     $(".state").on("sortreceive", (event, ui) => {
+         console.log({event, ui})
+     })
+ })
+ 
+</script>
+
+{% endblock scripts %}
