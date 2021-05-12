@@ -51,23 +51,33 @@ def default_tree(user):
             "icon": "ft-book",
             "section_name": "Estudios" if language == 1 else "Studies",
         },
+    ]
+    reports = []
+
+    if user.userprofile.profile_id in (1, 2, 4, 5):
+        reports.append(
+            {
+                "path": reverse("report:pathologist"),
+                "section_name": "Histopatologos"
+                if language == 1
+                else "Histopathologists",
+            }
+        )
+    if user.userprofile.profile_id in (1, 2):
+        reports.append(
+            {
+                "path": reverse("report:control"),
+                "section_name": "Jefe Tecnico" if language == 1 else "Tech Lead",
+            }
+        )
+
+    menu.append(
         {
             "icon": "ft-pie-chart",
             "section_name": "Reportes" if language == 1 else "Reports",
-            "child_items": [
-                {
-                    "path": reverse("report:pathologist"),
-                    "section_name": "Histopatologos"
-                    if language == 1
-                    else "Histopathologists",
-                },
-                {
-                    "path": reverse("report:control"),
-                    "section_name": "Jefe Tecnico" if language == 1 else "Tech Lead",
-                },
-            ],
+            "child_items": reports,
         },
-    ]
+    )
     if user.userprofile.profile_id in (1, 2, 3, 4, 5):
         menu.append(
             {
