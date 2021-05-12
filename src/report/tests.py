@@ -6,6 +6,8 @@ from faker import Faker
 from datetime import date
 from dateutil.relativedelta import relativedelta
 
+from backend.models import AnalysisForm
+
 
 class PathologistsTest(TestCase):
     @classmethod
