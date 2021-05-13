@@ -1,6 +1,7 @@
 from django.test import TestCase, Client
 
-from review.models import Analysis
+from django.contrib.auth.models import User
+from review.models import Analysis, Stage
 from django.urls import reverse
 import json
 
@@ -14,23 +15,68 @@ class AnalysisTestCase(TestCase):
 
     def test_manager_stage(self):
         waiting = Analysis.objects.stage(0)
+        analysis = Analysis.objects.filter(stages__state=0)
 
         self.assertGreaterEqual(
-            len(waiting), 1, "Response should contain as expected or more results."
+            waiting.count(),
+            analysis.count(),
+            "Response should contain as expected or more results.",
         )
 
     def test_view_index(self):
         client = Client()
+        client.login(username="jmonagas", password="vehice1234")
         response = client.get(reverse("review:index"))
 
         self.assertTemplateUsed(
             response, "index.html", "Response must use expected template."
         )
 
-    def test_view_list(self):
+    def test_view_list_stage(self):
         client = Client()
-        response = client.get(reverse("review:stage", kwargs={"index": 0}))
+        client.login(username="jmonagas", password="vehice1234")
+        response = client.get(reverse("review:list", kwargs={"index": 0}))
+        analysis = Analysis.objects.stage(0)
 
-        self.assertIn(
-            "pk", json.loads(response.json())[0], "Response must contain expected data."
+        self.assertGreaterEqual(
+            len(json.dumps(response.json())),
+            analysis.count(),
+            "Response must contain expected data.",
+        )
+
+    def test_view_list_waiting(self):
+        client = Client()
+        client.login(username="jmonagas", password="vehice1234")
+        response = client.get(reverse("review:list", kwargs={"index": 9}))
+        analysis = Analysis.objects.pre_report_done()
+
+        self.assertGreaterEqual(
+            len(json.dumps(response.json())),
+            analysis.count(),
+            "Response must contain expected data.",
+        )
+
+    def test_update_stage(self):
+        client = Client()
+        client.login(username="jmonagas", password="vehice1234")
+
+        user = User.objects.get(pk=1)
+
+        stage = Stage.objects.create(
+            analysis=Analysis.objects.last(), state=0, created_by=user
+        )
+        response = client.post(
+            reverse("review:stage", kwargs={"pk": stage.id}),
+            json.dumps({"state": 1}),
+            content_type="application/json",
+        )
+
+        stage = json.loads(response.json())[0]
+
+        self.assertTrue(stage, "Response must contain create or updated Stage.")
+
+        self.assertDictContainsSubset(
+            {"model": "review.stage"},
+            stage,
+            "Response must contain created or updated Stage.",
         )
