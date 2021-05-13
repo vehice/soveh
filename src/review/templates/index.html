@@ -66,78 +66,9 @@
         defer>
 </script>
 
-<script type="text/javascript">
- $(document).ready(() => {
-     $("#waiting, #formating, #reviewing, #sending").sortable({
-         connectWith: ".state"
-     }).disableSelection();
-
-     let waiting;
-     let formating;
-     let reviewing;
-     let sending;
-     let finished;
-
-     Promise.all([getReviews(0), getReviews(1), getReviews(2), getReviews(3), getReviews(9)]).then(values => {
-         waiting = parseResponse(values[4])
-         formating = parseResponse(values[0])
-         reviewing = parseResponse(values[1])
-         sending = parseResponse(values[2])
-         finished = parseResponse(values[3])
-
-         populateList("#waiting", waiting)
-         populateList("#formating", formating)
-         populateList("#reviewing", reviewing)
-         populateList("#sending", sending)
-         populateList("#finished", finished)
-     })
-
-     /* FUNCTIONS */
-     async function getReviews(stage) {
-         let response = await fetch(Urls["review:stages"](stage));
-
-         if (!response.ok) {
-             throw new Error(`HTTP error! status: ${response.status}`)
-         }
-
-         return await response.json()
-     }
-
-     function parseResponse(response) {
-         return response.map((row) => {
-             return {
-                 analysis: JSON.parse(row.analysis)[0],
-                 exam: JSON.parse(row.exam)[0],
-                 case: JSON.parse(row.case)[0],
-             }
-         })
-     }
-
-
-     function populateList(id, array) {
-         const list = $(id);
-         list.empty();
-
-         for (const item of array) {
-             list.append(`<li class="list-group-item">
-                                <small>${item.case.fields.no_caso} - ${item.exam.fields.name} - ${item.case.fields.company}</small>
-                            </li>`)
-         }
-     }
-
-
-     /* EVENTS */
-
-     $(".state").on("sortout", (event, ui) => {
-         console.log({waiting})
-         console.log({event, ui})
-     })
-
-     $(".state").on("sortreceive", (event, ui) => {
-         console.log({event, ui})
-     })
- })
- 
+<script type="text/javascript"
+        src="{% static 'review/js/index.js' %}"
+        defer>
 </script>
 
 {% endblock scripts %}
