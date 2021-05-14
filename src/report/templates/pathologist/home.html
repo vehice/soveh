@@ -85,7 +85,7 @@
                 </ul>
 
                 <!-- Tab panes -->
-                <div class="tab-content mt-3">
+                <div class="tab-content mt-3 table-responsive">
                     <div class="tab-pane active" id="pending" role="tabpanel" aria-labelledby="pending-tab">
                         <h3 class="border-bottom">Servicios en espera</h3>
                         <table id="pendingTable" class="table table-sm table-striped" style></table>
@@ -119,7 +119,7 @@
                         </table>
                     </div>
                 </section>
-                <div class="row">
+                <div class="row mt-4">
                     <aside class="col-md-6 d-flex flex-column">
                         <h3>Promedio por Periodo</h3>
                         <div id="averageEfficiency"  style="width: 100%; height:20rem;"></div>
@@ -129,6 +129,19 @@
                         <div id="monthlyEfficiency"  style="width: 100%; height:20rem;"></div>
                     </aside>
                 </div>
+                <section class="row mt-4">
+                    <div class="col-md-12 table-responsive">
+                        <table id="serviceWeekTable" class="table table-sm table-striped">
+                            <thead>
+                                <tr id="weeks">
+                                </tr>
+                            </thead>
+                            <tbody id="serviceWeekTbody">
+                            </tbody>
+                            <tfooter id="serviceWeekTfooter"></tfooter>
+                        </table>
+                    </div>
+                </section>
             </main>
         </div>
     </div>

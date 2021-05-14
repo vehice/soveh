@@ -1,3 +1,42 @@
+/**
+ * Returns the week number for this date.  dowOffset is the day of week the week
+ * "starts" on for your locale - it can be from 0 to 6. If dowOffset is 1 (Monday),
+ * the week returned is the ISO 8601 week number.
+ * @param int dowOffset
+ * @return int
+ */
+Date.prototype.getWeek = function (dowOffset) {
+  /*getWeek() was developed by Nick Baicoianu at MeanFreePath: http://www.meanfreepath.com */
+
+  dowOffset = typeof dowOffset == "int" ? dowOffset : 0; //default dowOffset to zero
+  var newYear = new Date(this.getFullYear(), 0, 1);
+  var day = newYear.getDay() - dowOffset; //the day of week the year begins on
+  day = day >= 0 ? day : day + 7;
+  var daynum =
+    Math.floor(
+      (this.getTime() -
+        newYear.getTime() -
+        (this.getTimezoneOffset() - newYear.getTimezoneOffset()) * 60000) /
+        86400000
+    ) + 1;
+  var weeknum;
+  //if the year starts before the middle of a week
+  if (day < 4) {
+    weeknum = Math.floor((daynum + day - 1) / 7) + 1;
+    if (weeknum > 52) {
+      nYear = new Date(this.getFullYear() + 1, 0, 1);
+      nday = nYear.getDay() - dowOffset;
+      nday = nday >= 0 ? nday : nday + 7;
+      /*if the next year starts before the middle of
+              the week, it is week #1 of that year*/
+      weeknum = nday < 4 ? 1 : 53;
+    }
+  } else {
+    weeknum = Math.floor((daynum + day - 1) / 7);
+  }
+  return weeknum;
+};
+
 $(document).ready(function () {
   const year = $("#year");
   const month = $("#month");
@@ -130,25 +169,35 @@ $(document).ready(function () {
 
   function filterPending() {
     return data.filter((analysis) => {
-      const is_closed = analysis.workflow.fields.form_closed;
-      const is_cancelled = analysis.workflow.fields.form_cancelled;
+      const form_closed = analysis.workflow.fields.form_closed;
+      const form_cancelled = analysis.workflow.fields.form_cancelled;
+      const manual_cancelled =
+        analysis.report.fields.manual_cancelled_date != null;
+      const manual_closed = analysis.report.fields.manual_closing_date != null;
       const pre_report_started = analysis.report.fields.pre_report_started;
       const is_assigned = analysis.report.fields.patologo != null;
 
-      return !(is_closed || is_cancelled) && is_assigned && !pre_report_started;
+      return (
+        !(form_closed || form_cancelled || manual_cancelled || manual_closed) &&
+        is_assigned &&
+        !pre_report_started
+      );
     });
   }
 
   function filterCurrent() {
     return data.filter((analysis) => {
-      const is_closed = analysis.workflow.fields.form_closed;
-      const is_cancelled = analysis.workflow.fields.form_cancelled;
+      const form_closed = analysis.workflow.fields.form_closed;
+      const form_cancelled = analysis.workflow.fields.form_cancelled;
+      const manual_cancelled =
+        analysis.report.fields.manual_cancelled_date != null;
+      const manual_closed = analysis.report.fields.manual_closing_date != null;
       const pre_report_started = analysis.report.fields.pre_report_started;
       const pre_report_ended = analysis.report.fields.pre_report_ended;
       const is_assigned = analysis.report.fields.patologo != null;
 
       return (
-        !(is_closed || is_cancelled) &&
+        !(form_closed || form_cancelled || manual_cancelled || manual_closed) &&
         is_assigned &&
         pre_report_started &&
         !pre_report_ended
@@ -158,14 +207,17 @@ $(document).ready(function () {
 
   function filterUnreview() {
     return data.filter((analysis) => {
-      const is_closed = analysis.workflow.fields.form_closed;
-      const is_cancelled = analysis.workflow.fields.form_cancelled;
+      const form_closed = analysis.workflow.fields.form_closed;
+      const form_cancelled = analysis.workflow.fields.form_cancelled;
+      const manual_cancelled =
+        analysis.report.fields.manual_cancelled_date != null;
+      const manual_closed = analysis.report.fields.manual_closing_date != null;
       const pre_report_started = analysis.report.fields.pre_report_started;
       const pre_report_ended = analysis.report.fields.pre_report_ended;
       const is_assigned = analysis.report.fields.patologo != null;
 
       return (
-        !(is_closed || is_cancelled) &&
+        !(form_closed || form_cancelled || manual_cancelled || manual_closed) &&
         is_assigned &&
         pre_report_started &&
         pre_report_ended
@@ -176,9 +228,10 @@ $(document).ready(function () {
   function filterDone() {
     return data.filter((analysis) => {
       const is_closed = analysis.workflow.fields.form_closed;
+      const manual_closed = analysis.report.fields.manual_closing_date != null;
       const is_assigned = analysis.report.fields.patologo != null;
 
-      return is_closed && is_assigned;
+      return (is_closed || manual_closed) && is_assigned;
     });
   }
 
@@ -189,12 +242,13 @@ $(document).ready(function () {
     }, {});
   }
 
-  function updateView() {
+  function initializePending() {
+    const pending = filterPending();
+
     if ($.fn.DataTable.isDataTable("#pendingTable")) {
       pendingTable.DataTable().clear().destroy();
     }
 
-    const pending = filterPending();
     pendingNumber.text(pending.length);
     pendingTable.DataTable({
       data: pending,
@@ -226,6 +280,12 @@ $(document).ready(function () {
           render: (data) => {
             return `${data.first_name[0]}${data.last_name[0]}`;
           },
+        },
+        {
+          data: "samples",
+          name: "samples",
+          type: "number",
+          title: "Cant. Muestras",
         },
         {
           data: "case.fields.created_at",
@@ -272,7 +332,9 @@ $(document).ready(function () {
         sUrl: "https://cdn.datatables.net/plug-ins/1.10.16/i18n/Spanish.json",
       },
     });
+  }
 
+  function initializeCurrent() {
     if ($.fn.DataTable.isDataTable("#currentTable")) {
       currentTable.DataTable().clear().destroy();
     }
@@ -309,6 +371,12 @@ $(document).ready(function () {
           render: (data) => {
             return `${data.first_name[0]}${data.last_name[0]}`;
           },
+        },
+        {
+          data: "samples",
+          name: "samples",
+          type: "number",
+          title: "Cant. Muestras",
         },
         {
           data: "case.fields.created_at",
@@ -374,7 +442,9 @@ $(document).ready(function () {
         sUrl: "https://cdn.datatables.net/plug-ins/1.10.16/i18n/Spanish.json",
       },
     });
+  }
 
+  function initializeUnreview() {
     if ($.fn.DataTable.isDataTable("#unreviewTable")) {
       unreviewTable.DataTable().clear().destroy();
     }
@@ -411,6 +481,12 @@ $(document).ready(function () {
           render: (data) => {
             return `${data.first_name[0]}${data.last_name[0]}`;
           },
+        },
+        {
+          data: "samples",
+          name: "samples",
+          type: "number",
+          title: "Cant. Muestras",
         },
         {
           data: "case.fields.created_at",
@@ -469,12 +545,15 @@ $(document).ready(function () {
         sUrl: "https://cdn.datatables.net/plug-ins/1.10.16/i18n/Spanish.json",
       },
     });
+  }
 
+  function initializeEfficiency() {
     if ($.fn.DataTable.isDataTable("#efficiencyTable")) {
       efficiencyTable.DataTable().clear().destroy();
     }
 
     const efficiency = filterDone();
+
     efficiencyTable.DataTable({
       data: efficiency,
 
@@ -498,6 +577,34 @@ $(document).ready(function () {
           title: "Servicio",
         },
         {
+          data: "user.fields",
+          name: "user",
+          type: "num",
+          title: "Patólogo",
+          render: (data) => {
+            return `${data.first_name[0]}${data.last_name[0]}`;
+          },
+        },
+        {
+          data: "samples",
+          name: "samples",
+          type: "number",
+          title: "Cant. Muestras",
+        },
+        {
+          data: "report.fields.score_diagnostic",
+          name: "score",
+          type: "num",
+          title: "Calificación",
+          render: (data) => {
+            if (data > 0) {
+              return data;
+            } else {
+              return "S/I";
+            }
+          },
+        },
+        {
           data: "case.fields.created_at",
           name: "createdAt",
           type: "string",
@@ -517,27 +624,107 @@ $(document).ready(function () {
             return date.toLocaleDateString();
           },
         },
-        {
-          data: "user.fields",
-          name: "user",
-          type: "num",
-          title: "Patólogo",
-          render: (data) => {
-            return `${data.first_name[0]}${data.last_name[0]}`;
-          },
-        },
-        {
-          data: "report.fields.score_diagnostic",
-          name: "score",
-          type: "num",
-          title: "Calificación",
-        },
       ],
 
       oLanguage: {
         sUrl: "https://cdn.datatables.net/plug-ins/1.10.16/i18n/Spanish.json",
       },
     });
+  }
+
+  function initializeCharts() {
+    const efficiency = filterDone();
+
+    // Get the lowest and highest week number so we can
+    // loop in that range
+    const startWeekEntry = _.minBy(efficiency, (item) => {
+      const date = new Date(item.workflow.fields.closed_at);
+      return date.getWeek();
+    });
+
+    const endWeekEntry = _.maxBy(efficiency, (item) => {
+      const date = new Date(item.workflow.fields.closed_at);
+      return date.getWeek();
+    });
+
+    const startWeek = new Date(
+      startWeekEntry.workflow.fields.closed_at
+    ).getWeek();
+    const endWeek = new Date(endWeekEntry.workflow.fields.closed_at).getWeek();
+
+    const weekTr = $("#weeks");
+    weekTr.empty();
+    weekTr.append(`<th scope="col">Servicios</th>`);
+    for (let i = startWeek; i < endWeek + 1; i++) {
+      weekTr.append(`<th scope="col">${i}</th>`);
+    }
+    weekTr.append(`<th scope="col">Total</th>`);
+
+    let doneByService = _.groupBy(efficiency, (item) => {
+      return item.exam.fields.name;
+    });
+
+    $("#serviceWeekTbody").empty();
+
+    let serviceTotal = {};
+    for (const service in doneByService) {
+      const weekly = _.groupBy(doneByService[service], (item) => {
+        const date = new Date(item.workflow.fields.closed_at);
+        return date.getWeek();
+      });
+
+      let row = "<tr>";
+      row += `<td>${service}</td>`;
+
+      let rowTotal = 0;
+
+      for (let i = startWeek; i < endWeek + 1; i++) {
+        if (i in weekly) {
+          let totalSamples = 0;
+
+          for (const item of weekly[i]) {
+            totalSamples += parseInt(item.samples);
+          }
+
+          row += `<td>${totalSamples}</td>`;
+          rowTotal += totalSamples;
+          serviceTotal[i] =
+            parseInt(serviceTotal[i] || 0) + parseInt(totalSamples);
+        } else {
+          row += `<td>N/A</td>`;
+        }
+      }
+
+      if (isNaN(rowTotal)) {
+        row += `<td>N/A</td>`;
+      } else {
+        row += `<td class="table-primary">${rowTotal}</td>`;
+      }
+      row += "</tr>";
+
+      $("#serviceWeekTbody").append(row);
+    }
+
+    let row = "<tr class='table-primary'><td>Total</td>";
+    for (let i = startWeek; i < endWeek + 1; i++) {
+      if (isNaN(serviceTotal[i])) {
+        row += `<td>N/A</td>`;
+      } else {
+        row += `<td>${serviceTotal[i]}</td>`;
+      }
+    }
+    let grandTotal = Object.values(serviceTotal).reduce(
+      (acc, curr) => acc + curr
+    );
+
+    if (isNaN(grandTotal)) {
+      row += `<td>N/A</td>`;
+    } else {
+      row += `<td>${grandTotal}</td>`;
+    }
+    row += "</tr>";
+
+    $("#serviceWeekTbody").append(row);
 
     let sumEffValue = 0;
 
@@ -585,6 +772,13 @@ $(document).ready(function () {
     monthlyEfficiency.setOption(monthlyEffOptions, true);
   }
 
+  function updateView() {
+    initializePending();
+    initializeCurrent();
+    initializeUnreview();
+    initializeCharts();
+  }
+
   function getData() {
     const date_start = $("#dateStart").val();
     const date_end = $("#dateEnd").val();
@@ -616,6 +810,7 @@ $(document).ready(function () {
             case: JSON.parse(row.case)[0],
             user: JSON.parse(row.user)[0],
             stain: JSON.parse(row.stain)[0],
+            samples: JSON.parse(row.samples),
             workflow: JSON.parse(row.workflow)[0],
           };
         });
