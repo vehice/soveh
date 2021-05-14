@@ -13,19 +13,26 @@
             </header>
             <main class="card-body container">
                 <section class="row">
-                    <div class="col-md-2 d-flex flex-column justify-content-center border-right">
-                        <h1 class="text-center">
-                            <b>Informes sin revisar:</b>
+                    <div class="col-md-4">
+                        <b>Informes sin revisar:</b>
+                        <h1 id="pendingNumber">
                         </h1>
-                        <h3 class="text-center">
-                            <span id="pendingNumber"></span>
-                        </h3>
                     </div>
-                    <div class="col-md-10 table-responsive" style="max-height: 24rem">
+                    <div class="col-md-4">
+                        <b>Por Servicios:</b>
+                        <div id="pendingService" style="width: auto; height: 30rem"></div>
+                    </div>
+                    <div class="col-md-4">
+                        <b>Por Patologos:</b>
+                        <div id="pendingPathologist" style="width: auto; height: 30rem"></div>
+                    </div>
+                </section>
+                <div class="row mt-2">
+                    <div class="col-md-12 table-responsive">
                         <table id="pendingTable" class="table table-sm table-striped" style>
                         </table>
                     </div>
-                </section>
+                </div>
             </main>
         </div>
     </div>

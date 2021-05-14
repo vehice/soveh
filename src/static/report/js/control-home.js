@@ -115,6 +115,61 @@ $(document).ready(function () {
     ],
   };
 
+  let pendingPathologistOptions = {
+    tooltip: {
+      trigger: "item",
+      formatter: "{a} <br/>{b} : {c} ({d}%)",
+    },
+    series: [
+      {
+        name: "Informes por Patologos",
+        radius: ["40%", "70%"],
+        avoidLabelOverlap: false,
+        itemStyle: {
+          borderRadius: 10,
+          borderColor: "#fff",
+          borderWidth: 2,
+        },
+        type: "pie",
+        label: {
+          show: false,
+          position: "center",
+        },
+        emphasis: {
+          label: {
+            show: true,
+            fontSize: "40",
+            fontWeight: "bold",
+          },
+        },
+        data: [],
+      },
+    ],
+  };
+  let pendingServiceOptions = {
+    tooltip: {
+      trigger: "item",
+      formatter: "{a} <br/>{b} : {c} ({d}%)",
+    },
+    series: [
+      {
+        name: "Informes por Servicios",
+        radius: ["40%", "70%"],
+        avoidLabelOverlap: false,
+        itemStyle: {
+          borderRadius: 10,
+          borderColor: "#fff",
+          borderWidth: 2,
+        },
+        type: "pie",
+        label: {
+          show: false,
+        },
+        data: [],
+      },
+    ],
+  };
+
   let avgTimeMonth = echarts.init(document.getElementById("avgTimeMonth"));
   let avgTotal = echarts.init(document.getElementById("avgTotal"));
   let avgPercentMonth = echarts.init(
@@ -124,6 +179,14 @@ $(document).ready(function () {
   avgTimeMonth.setOption(avgTimeOptions);
   avgPercentMonth.setOption(avgPercentOptions);
   avgTotal.setOption(avgTotalOptions);
+
+  let pendingPathologist = echarts.init(
+    document.getElementById("pendingPathologist")
+  );
+  let pendingService = echarts.init(document.getElementById("pendingService"));
+
+  pendingPathologist.setOption(pendingPathologistOptions);
+  pendingService.setOption(pendingServiceOptions);
 
   getData();
 
@@ -135,6 +198,32 @@ $(document).ready(function () {
     if ($.fn.DataTable.isDataTable("#pendingTable")) {
       pendingTable.DataTable().clear().destroy();
     }
+
+    const pendingByService = _.groupBy(pending, (item) => {
+      return item.exam.fields.name;
+    });
+
+    const pendingByPathologist = _.groupBy(pending, (item) => {
+      const data = item.user.fields;
+      return `${data.first_name[0]}${data.last_name[0]}`;
+    });
+
+    for (const pathologist in pendingByPathologist) {
+      pendingPathologistOptions.series[0].data.push({
+        value: pendingByPathologist[pathologist].length,
+        name: pathologist,
+      });
+    }
+
+    for (const service in pendingByService) {
+      pendingServiceOptions.series[0].data.push({
+        value: pendingByService[service].length,
+        name: service,
+      });
+    }
+
+    pendingPathologist.setOption(pendingPathologistOptions, true);
+    pendingService.setOption(pendingServiceOptions, true);
 
     pendingTable.DataTable({
       data: pending,
@@ -188,10 +277,29 @@ $(document).ready(function () {
           },
         },
         {
-          data: "report.fields.assignment_deadline",
+          data: "report.fields.pre_report_ended_at",
+          name: "pre_report_done",
+          type: "num",
+          title: "Pre-Informe Terminado",
+          render: (data) => {
+            const date = new Date(data);
+            return date.toLocaleDateString();
+          },
+        },
+        {
+          data: "report.fields.pre_report_ended_at",
           name: "delay",
           type: "num",
-          title: "Atraso",
+          title: "En Espera",
+          render: (data) => {
+            return dateDiff(data);
+          },
+        },
+        {
+          data: "report.fields.created_at",
+          name: "delay",
+          type: "num",
+          title: "En Sistema",
           render: (data) => {
             return dateDiff(data);
           },
@@ -340,24 +448,34 @@ $(document).ready(function () {
 
     avgTotalOptions.series[0].data.length = 0;
 
+    let percentEtR = entryToRead.value.reduce(
+      (acc, current) => parseInt(acc) + parseInt(current)
+    );
+
+    let percentRtR = readToReview.value.reduce(
+      (acc, current) => parseInt(acc) + parseInt(current)
+    );
+
+    let percentRtS = reviewToSend.value.reduce(
+      (acc, current) => parseInt(acc) + parseInt(current)
+    );
+
+    percentEtR /= entryToRead.value.length;
+    percentRtR /= readToReview.value.length;
+    percentRtS /= reviewToSend.value.length;
+
     avgTotalOptions.series[0].data.push({
-      value: entryToRead.value.reduce(
-        (acc, current) => parseInt(acc) + parseInt(current)
-      ),
+      value: percentEtR,
       name: "Ingreso hasta Lectura",
     });
 
     avgTotalOptions.series[0].data.push({
-      value: readToReview.value.reduce(
-        (acc, current) => parseInt(acc) + parseInt(current)
-      ),
+      value: percentRtR,
       name: "Lectura hasta Pre-Informe",
     });
 
     avgTotalOptions.series[0].data.push({
-      value: reviewToSend.value.reduce(
-        (acc, current) => parseInt(acc) + parseInt(current)
-      ),
+      value: percentRtS,
       name: "Pre-Informe hasta Cierre",
     });
 

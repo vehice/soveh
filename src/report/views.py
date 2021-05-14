@@ -26,9 +26,7 @@ class PathologistView(View):
         date_end = (date.today()) if not date_end else date_end
 
         reports = AnalysisForm.objects.filter(
-            created_at__gte=date_start,
-            created_at__lte=date_end,
-            exam__pathologists_assignment=True,
+            created_at__gte=date_start, created_at__lte=date_end
         ).select_related("entryform", "patologo", "stain")
 
         if pathologist and pathologist > 0:
@@ -141,7 +139,6 @@ class ControlView(View):
         ).select_related("entryform", "patologo", "stain")
 
         unassigned = analysis.filter(
-            exam__pathologists_assignment=True,
             patologo__isnull=True,
             exam__service_id__in=(1, 4),
         ).select_related("entryform", "patologo", "stain")
