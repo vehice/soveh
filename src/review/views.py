@@ -39,7 +39,7 @@ def list(request, index):
     if index in (1, 2, 3, 4):
         analysis = Analysis.objects.stage(index)
     else:
-        analysis = Analysis.objects.pre_report_done().union(Analysis.objects.stage(0))
+        analysis = Analysis.objects.waiting()
 
     return JsonResponse(serialize_data(analysis), safe=False)
 
@@ -58,3 +58,14 @@ def update_stage(request, pk):
     )
 
     return JsonResponse(serializers.serialize("json", [stage[0]]), safe=False)
+
+
+@login_required
+def get_files(request, pk):
+    """
+    Returns a list of files that belong to a single :model:`review.Analysis`
+    """
+    analysis = get_object_or_404(Analysis, pk=pk)
+    files = analysis.external_reports.all()
+
+    return JsonResponse(serializers.serialize("json", files), safe=False)
