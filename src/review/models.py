@@ -2,6 +2,7 @@ from django.db import models
 
 from django.contrib.auth.models import User
 from backend.models import AnalysisForm
+from django.db.models import Q
 
 
 class AnalysisManager(models.Manager):
@@ -11,7 +12,7 @@ class AnalysisManager(models.Manager):
     functions.
     """
 
-    def pre_report_done(self):
+    def waiting(self):
         """
         Returns all :model:`backend.AnalysisForm` which a Pathologist
         has finished studying but hasn't being reviewed yet.
@@ -19,11 +20,15 @@ class AnalysisManager(models.Manager):
         return (
             self.get_queryset()
             .filter(
-                exam__pathologists_assignment=True,
-                pre_report_started=True,
-                pre_report_ended=True,
-                forms__form_closed=False,
-                forms__cancelled=False,
+                Q(
+                    exam__pathologists_assignment=True,
+                    pre_report_started=True,
+                    pre_report_ended=True,
+                    forms__form_closed=False,
+                    forms__cancelled=False,
+                    stages__isnull=True,
+                )
+                | Q(stages__state=0)
             )
             .select_related("entryform", "exam", "stain")
         )
