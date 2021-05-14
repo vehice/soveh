@@ -4,7 +4,6 @@
 {% block content %}
 <!-- MAIN -->
 
-<!-- FILTERS -->
 <div class="row">
     <div class="col-12">
         <div class="card">
@@ -48,9 +47,31 @@
         </div>
     </div>
 </div>
-<!-- END FILTERS -->
 
 <!-- END MAIN -->
+
+<!-- MODAL -->
+<div class="modal" tabindex="-1" id="fileDialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"></h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form action="/file-upload"
+                      class="dropzone"
+                      id="newFiles">
+                </form>
+                <ul class="list-group" id="fileList">
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- END MODAL -->
 
 {% endblock content %}
 {% block scripts %}
@@ -63,6 +84,11 @@
 
 <script type="text/javascript"
         src="{% static 'assets/vendors/js/ui/jquery-ui.min.js' %}"
+        defer>
+</script>
+
+<script type="text/javascript"
+        src="{% static 'assets/js/scripts/extensions/dropzone.min.js' %}"
         defer>
 </script>
 
