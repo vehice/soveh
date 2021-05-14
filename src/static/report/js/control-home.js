@@ -257,6 +257,19 @@ $(document).ready(function () {
           },
         },
         {
+          data: "samples",
+          name: "samples",
+          type: "string",
+          title: "Cant. Muestras",
+          render: (data) => {
+            if (isNaN(data)) {
+              return "N/A";
+            } else {
+              return data;
+            }
+          },
+        },
+        {
           data: "case.fields.created_at",
           name: "entry_date",
           type: "string",
@@ -332,6 +345,12 @@ $(document).ready(function () {
           name: "exam",
           type: "string",
           title: "Servicio",
+        },
+        {
+          data: "samples",
+          name: "samples",
+          type: "number",
+          title: "Cant. Muestras",
         },
         {
           data: "stain.fields.abbreviation",
@@ -492,6 +511,7 @@ $(document).ready(function () {
         case: JSON.parse(row.case)[0],
         user: JSON.parse(row.user)[0],
         stain: JSON.parse(row.stain)[0],
+        samples: JSON.parse(row.samples),
         workflow: JSON.parse(row.workflow)[0],
       };
     });
