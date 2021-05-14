@@ -48,7 +48,7 @@ class AnalysisTestCase(TestCase):
         client = Client()
         client.login(username="jmonagas", password="vehice1234")
         response = client.get(reverse("review:list", kwargs={"index": 9}))
-        analysis = Analysis.objects.pre_report_done()
+        analysis = Analysis.objects.waiting()
 
         self.assertGreaterEqual(
             len(json.dumps(response.json())),
@@ -79,4 +79,19 @@ class AnalysisTestCase(TestCase):
             {"model": "review.stage"},
             stage,
             "Response must contain created or updated Stage.",
+        )
+
+    def test_get_files(self):
+        client = Client()
+        client.login(username="jmonagas", password="vehice1234")
+
+        analysis = Analysis.objects.filter(external_reports__isnull=False).last()
+        files = analysis.external_reports.all()
+
+        response = client.get(reverse("review:files", kwargs={"pk": analysis.pk}))
+
+        self.assertGreaterEqual(
+            len(json.loads(response.json())),
+            files.count(),
+            "Response must contain expected result.",
         )
