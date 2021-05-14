@@ -40,16 +40,32 @@ class PathologistView(View):
                 if report.patologo is not None
                 else json.dumps([])
             )
-            context.append(
-                {
-                    "report": serializers.serialize("json", [report]),
-                    "case": serializers.serialize("json", [report.entryform]),
-                    "exam": serializers.serialize("json", [report.exam]),
-                    "user": user,
-                    "stain": serializers.serialize("json", [report.stain]),
-                    "workflow": serializers.serialize("json", report.forms.all()),
-                }
-            )
+            try:
+                context.append(
+                    {
+                        "report": serializers.serialize("json", [report]),
+                        "case": serializers.serialize("json", [report.entryform]),
+                        "exam": serializers.serialize("json", [report.exam]),
+                        "user": user,
+                        "stain": serializers.serialize("json", [report.stain]),
+                        "samples": report.exam.sampleexams_set.filter(
+                            sample__entryform_id=report.entryform_id
+                        ).count(),
+                        "workflow": serializers.serialize("json", report.forms.all()),
+                    }
+                )
+            except AttributeError:
+                context.append(
+                    {
+                        "report": serializers.serialize("json", [report]),
+                        "case": serializers.serialize("json", [report.entryform]),
+                        "exam": [],
+                        "user": [],
+                        "stain": [],
+                        "samples": 0,
+                        "workflow": [],
+                    }
+                )
 
         return json.dumps(context)
 
@@ -108,6 +124,9 @@ class ControlView(View):
                     "exam": serializers.serialize("json", [row.exam]),
                     "user": user,
                     "stain": serializers.serialize("json", [row.stain]),
+                    "samples": row.exam.sampleexams_set.filter(
+                        sample__entryform_id=row.entryform_id
+                    ).count(),
                     "workflow": serializers.serialize("json", row.forms.all()),
                 }
             )
@@ -130,6 +149,7 @@ class ControlView(View):
         analysis = AnalysisForm.objects.filter(
             created_at__gte=date_start,
             created_at__lte=date_end,
+            forms__cancelled=False,
         )
 
         pending = analysis.filter(
@@ -141,6 +161,7 @@ class ControlView(View):
         unassigned = analysis.filter(
             patologo__isnull=True,
             exam__service_id__in=(1, 4),
+            forms__form_closed=False,
         ).select_related("entryform", "patologo", "stain")
 
         finished = analysis.filter(
