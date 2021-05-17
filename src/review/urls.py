@@ -8,5 +8,6 @@ urlpatterns = [
     path("", views.index, name="index"),
     path("state/<int:index>", views.list, name="list"),
     path("stage/<int:pk>/", views.update_stage, name="stage"),
-    path("files/<int:pk>/", views.get_files, name="files"),
+    path("files/<int:pk>/", views.FileView.as_view(), name="files"),
+    path("download/<int:pk>", views.download_file, name="download_file"),
 ]

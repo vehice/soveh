@@ -14,31 +14,46 @@
                 <section class="d-flex flex-row align-items-stretch justify-content-between">
                     <section class="card m-0">
                         <header class="card-header">
-                            <h2 class="card-title">En Espera</h2>
+                            <h2 class="card-title">
+                                En Espera
+                                <small id="waitingCount"></small>
+                            </h2>
                         </header>
                         <ul id="waiting" class="state list-group p-1" style="background-color: #595959"></ul>
                     </section>
                     <section class="card m-0">
                         <header class="card-header">
-                            <h2 class="card-title">Formato</h2>
+                            <h2 class="card-title">
+                                Formato
+                                <small id="formatingCount"></small>
+                            </h2>
                         </header>
                         <ul id="formating" class="state list-group p-1" style="background-color: #7f7f7f"></ul>
                     </section>
                     <section class="card">
                         <header class="card-header">
-                            <h2 class="card-title">Revision Tecnica</h2>
+                            <h2 class="card-title">
+                                Revision Tecnica
+                                <small id="reviewingCount"></small>
+                            </h2>
                         </header>
                         <ul id="reviewing" class="state list-group p-1" style="background-color: #a5a5a5"></ul>
                     </section>
                     <section class="card">
                         <header class="card-header">
-                            <h2 class="card-title">Para Enviar</h2>
+                            <h2 class="card-title">
+                                Para Enviar
+                                <small id="sendingCount"></small>
+                            </h2>
                         </header>
                         <ul id="sending" class="state list-group p-1" style="background-color: #cccccc"></ul>
                     </section>
                     <section class="card">
                         <header class="card-header">
-                            <h2 class="card-title">Finalizado</h2>
+                            <h2 class="card-title">
+                                Finalizado
+                                <small id="finishedCount"></small>
+                            </h2>
                         </header>
                         <ul id="finished" class="list-group p-1" style="background-color: #f2f2f2"></ul>
                     </section>
@@ -61,11 +76,17 @@
                 </button>
             </div>
             <div class="modal-body">
-                <form action="/file-upload"
-                      class="dropzone"
+                <form action="/"
+                    class="dropzone"
                       id="newFiles">
                 </form>
-                <ul class="list-group" id="fileList">
+
+                <h4>Pre-Reportes</h4>
+                <ul class="list-group" id="prereportList">
+                </ul>
+
+                <h4>Revisiones</h4>
+                <ul class="list-group" id="reviewList">
                 </ul>
             </div>
         </div>

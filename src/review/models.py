@@ -12,6 +12,18 @@ class AnalysisManager(models.Manager):
     functions.
     """
 
+    def get_queryset(self):
+        return (
+            super()
+            .get_queryset()
+            .filter(
+                forms__form_closed=0,
+                forms__cancelled=0,
+                manual_cancelled_date__exact=None,
+                manual_closing_date__exact=None,
+            )
+        )
+
     def waiting(self):
         """
         Returns all :model:`backend.AnalysisForm` which a Pathologist
@@ -24,8 +36,6 @@ class AnalysisManager(models.Manager):
                     exam__pathologists_assignment=True,
                     pre_report_started=True,
                     pre_report_ended=True,
-                    forms__form_closed=False,
-                    forms__cancelled=False,
                     stages__isnull=True,
                 )
                 | Q(stages__state=0)
@@ -101,3 +111,23 @@ class Logbook(models.Model):
     )
 
     created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+
+
+class File(models.Model):
+    """Stores a single file path in the database alognside it's related :model:`review.Stage`"""
+
+    path = models.FileField("reviews/%Y_%m_%d/")
+    analysis = models.ForeignKey(
+        Analysis, on_delete=models.CASCADE, related_name="files"
+    )
+    state = models.CharField(max_length=1, choices=Stage.STATES)
+    user = models.ForeignKey(
+        User, on_delete=models.SET_NULL, related_name="files", null=True
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-created_at"]

@@ -1,10 +1,14 @@
+import json
+
+from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.core import serializers
-from django.http.response import JsonResponse
+from django.http.response import Http404, HttpResponse, JsonResponse, FileResponse
 from django.shortcuts import get_object_or_404, render
+from django.views import View
 
-from review.models import Analysis, Stage
-import json
+from review.models import Analysis, File, Stage
+import os
 
 
 @login_required
@@ -60,12 +64,46 @@ def update_stage(request, pk):
     return JsonResponse(serializers.serialize("json", [stage[0]]), safe=False)
 
 
-@login_required
-def get_files(request, pk):
-    """
-    Returns a list of files that belong to a single :model:`review.Analysis`
-    """
-    analysis = get_object_or_404(Analysis, pk=pk)
-    files = analysis.external_reports.all()
+class FileView(View):
+    def get(self, request, pk):
+        """
+        Returns a list of files that belong to a single :model:`review.Analysis`
+        """
+        analysis = get_object_or_404(Analysis, pk=pk)
+        prereport_files = analysis.external_reports.all()
+        review_files = File.objects.filter(analysis=analysis).select_related("user")
 
-    return JsonResponse(serializers.serialize("json", files), safe=False)
+        context = {
+            "prereports": serializers.serialize("json", prereport_files),
+            "reviews": serializers.serialize("json", review_files),
+        }
+
+        return JsonResponse(context)
+
+    def post(self, request, pk):
+        """
+        Stores a file resource and creates a :model:`review.File` to bind it to
+        an :model:`review.Stage`
+        """
+
+        analysis = get_object_or_404(Analysis, pk=pk)
+        stage = Stage.objects.filter(analysis=analysis).first()
+        review_file = File(
+            path=request.FILES.get("file"),
+            analysis=analysis,
+            state=stage.state if stage else 0,
+            user=request.user,
+        )
+
+        review_file.save()
+
+        return JsonResponse(serializers.serialize("json", [review_file]), safe=False)
+
+
+@login_required
+def download_file(request, pk):
+    review_file = get_object_or_404(File, pk=pk)
+    file_path = os.path.join(settings.MEDIA_ROOT, str(review_file.path))
+    if os.path.exists(file_path):
+        return FileResponse(open(file_path, "rb"))
+    raise Http404

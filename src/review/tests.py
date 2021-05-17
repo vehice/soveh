@@ -1,7 +1,7 @@
 from django.test import TestCase, Client
 
 from django.contrib.auth.models import User
-from review.models import Analysis, Stage
+from review.models import Analysis, File, Stage
 from django.urls import reverse
 import json
 
@@ -66,7 +66,7 @@ class AnalysisTestCase(TestCase):
             analysis=Analysis.objects.last(), state=0, created_by=user
         )
         response = client.post(
-            reverse("review:stage", kwargs={"pk": stage.id}),
+            reverse("review:stage", kwargs={"pk": stage.analysis.id}),
             json.dumps({"state": 1}),
             content_type="application/json",
         )
@@ -85,13 +85,35 @@ class AnalysisTestCase(TestCase):
         client = Client()
         client.login(username="jmonagas", password="vehice1234")
 
-        analysis = Analysis.objects.filter(external_reports__isnull=False).last()
+        analysis = Analysis.objects.all().last()
         files = analysis.external_reports.all()
+        review_files = File.objects.filter(analysis=analysis)
 
         response = client.get(reverse("review:files", kwargs={"pk": analysis.pk}))
 
+        prereports = json.loads(response.json()["prereports"])
+        reviews = json.loads(response.json()["reviews"])
+
         self.assertGreaterEqual(
-            len(json.loads(response.json())),
+            len(prereports),
             files.count(),
             "Response must contain expected result.",
         )
+
+        self.assertGreaterEqual(
+            len(reviews),
+            review_files.count(),
+            "Response must contain expected result.",
+        )
+
+    def test_file_download(self):
+        client = Client()
+        client.login(username="jmonagas", password="vehice1234")
+
+        review_file = File.objects.all().last()
+
+        response = client.get(
+            reverse("review:download_file", kwargs={"pk": review_file.id})
+        )
+
+        self.assertTrue(response.streaming_content)
