@@ -13,11 +13,19 @@ $(document).ready(() => {
     .disableSelection();
 
   $("#newFiles").dropzone({
+    previewsContainer: null,
     dictDefaultMessage: "Arrastre sus archivos aqui",
     acceptedFiles: ".csv, .doc, .docx, .ods, .odt, .pdf, .xls, .xlsx",
-  });
-  $("#newFiles").on("addedfile", (file) => {
-    console.log({ file });
+    headers: {
+      "X-CSRFToken": getCookie("csrftoken"),
+    },
+    init: function () {
+      this.on("processing", (file) => {
+        if (parseInt(analysis) > 0) {
+          this.options.url = Urls["review:files"](analysis);
+        }
+      });
+    },
   });
 
   let waiting;
@@ -25,6 +33,8 @@ $(document).ready(() => {
   let reviewing;
   let sending;
   let finished;
+
+  let analysis;
 
   Promise.all([
     getReviews(0),
@@ -91,11 +101,42 @@ $(document).ready(() => {
     for (const item of array) {
       list.append(`<li class="list-group-item">
                         <small>
-                            <a href="#" id="${item.analysis.pk}">
+                            <a href="#" class="serviceItem" id="${item.analysis.pk}">
                                 ${item.case.fields.no_caso} - ${item.exam.fields.name} - ${item.case.fields.company}
                             </a>
                         </small>
                     </li>`);
+    }
+
+    $(`${id}Count`).text(array.length);
+  }
+
+  function getCookie(name) {
+    var cookieValue = null;
+    if (document.cookie && document.cookie !== "") {
+      var cookies = document.cookie.split(";");
+      for (var i = 0; i < cookies.length; i++) {
+        var cookie = jQuery.trim(cookies[i]);
+        // Does this cookie string begin with the name we want?
+        if (cookie.substring(0, name.length + 1) === name + "=") {
+          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+          break;
+        }
+      }
+    }
+    return cookieValue;
+  }
+
+  function getStateName(state) {
+    switch (parseInt(state)) {
+      case 0:
+        return "En Espera";
+      case 1:
+        return "Formato";
+      case 2:
+        return "Revision";
+      case 3:
+        return "Por enviar";
     }
   }
 
@@ -123,7 +164,7 @@ $(document).ready(() => {
         break;
     }
 
-    const analysisId = ui.item[0].id;
+    const analysisId = ui.item[0].children[0].children[0].id;
 
     $.ajax(Urls["review:stage"](analysisId), {
       data: JSON.stringify({
@@ -153,24 +194,43 @@ $(document).ready(() => {
     });
   });
 
-  $("ul.list-group").on("click", "a", (e) => {
+  $("ul.list-group").on("click", ".serviceItem", (e) => {
     e.preventDefault();
     const title = `Archivos: ${e.target.innerText}`;
-    const analysisId = e.target.id;
+    analysis = e.target.id;
     $("#fileDialog h5.modal-title").text(title);
 
     $("#fileDialog").modal("show");
 
-    $.ajax(Urls["review:files"](analysisId), {
+    $.ajax(Urls["review:files"](analysis), {
       method: "GET",
 
       success: (data, textStatus) => {
-        const files = JSON.parse(data);
-        const fileList = $("#fileList");
-        fileList.empty();
+        const prereports = JSON.parse(data.prereports);
+        const prereportList = $("#prereportList");
+        prereportList.empty();
 
-        for (const file of files) {
-          fileList.append(`<li class="list-group-item">${file}</li>`);
+        for (const file of prereports) {
+          prereport.append(
+            `<li class="list-group-item">${file.fields.file}</li>`
+          );
+        }
+
+        const reviews = JSON.parse(data.reviews);
+        const reviewList = $("#reviewList");
+        reviewList.empty();
+
+        for (const file of reviews) {
+          const created = new Date(file.fields.created_at);
+          reviewList.append(
+            `<li class="list-group-item">
+              <a href="${Urls["review:download_file"](file.pk)}">
+                ${file.fields.path}
+                - ${getStateName(file.fields.state)}
+                - ${created.toLocaleString()}
+              </a>
+            </li>`
+          );
         }
       },
       error: (xhr, textStatus, error) => {
