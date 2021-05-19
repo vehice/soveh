@@ -9,6 +9,9 @@ from django.shortcuts import render
 from django.views import View
 
 from backend.models import AnalysisForm, Sample
+from django.db.models import Q
+from django.forms.models import model_to_dict
+from django.core.serializers.json import DjangoJSONEncoder
 
 
 class PathologistView(View):
@@ -26,7 +29,10 @@ class PathologistView(View):
         date_end = (date.today()) if not date_end else date_end
 
         reports = AnalysisForm.objects.filter(
-            created_at__gte=date_start, created_at__lte=date_end
+            created_at__gte=date_start,
+            created_at__lte=date_end,
+            manual_cancelled_date__isnull=True,
+            forms__cancelled=False,
         ).select_related("entryform", "patologo", "stain")
 
         if pathologist and pathologist > 0:
@@ -35,39 +41,62 @@ class PathologistView(View):
         context = []
 
         for report in reports:
-            user = (
-                serializers.serialize("json", [report.patologo])
-                if report.patologo is not None
-                else json.dumps([])
-            )
+            user = None
+            if report.patologo is not None:
+                user = report.patologo
+
             try:
                 context.append(
                     {
-                        "report": serializers.serialize("json", [report]),
-                        "case": serializers.serialize("json", [report.entryform]),
-                        "exam": serializers.serialize("json", [report.exam]),
-                        "user": user,
-                        "stain": serializers.serialize("json", [report.stain]),
+                        "report": model_to_dict(
+                            report,
+                            fields=[
+                                "assignment_deadline",
+                                "manual_cancelled_date",
+                                "manual_closing_date",
+                                "assignment_done_at",
+                                "pre_report_ended",
+                                "pre_report_ended_at",
+                                "pre_report_started",
+                                "pre_report_started_at",
+                                "report_code",
+                                "score_diagnostic",
+                                "score_report",
+                                "patologo",
+                            ],
+                        ),
+                        "case": model_to_dict(
+                            report.entryform,
+                            fields=[
+                                "created_at",
+                                "no_caso",
+                            ],
+                        ),
+                        "exam": model_to_dict(
+                            report.exam, fields=["name", "pathologist_assignment"]
+                        ),
+                        "user": model_to_dict(user, fields=["first_name", "last_name"]),
+                        "stain": model_to_dict(
+                            report.stain, fields=["name", "abbreviation"]
+                        ),
                         "samples": report.exam.sampleexams_set.filter(
                             sample__entryform_id=report.entryform_id
                         ).count(),
-                        "workflow": serializers.serialize("json", report.forms.all()),
+                        "workflow": model_to_dict(
+                            report.forms.all().first(),
+                            fields=[
+                                "form_closed",
+                                "cancelled",
+                                "closed_at",
+                                "cancelled_at",
+                            ],
+                        ),
                     }
                 )
             except AttributeError:
-                context.append(
-                    {
-                        "report": serializers.serialize("json", [report]),
-                        "case": serializers.serialize("json", [report.entryform]),
-                        "exam": [],
-                        "user": [],
-                        "stain": [],
-                        "samples": 0,
-                        "workflow": [],
-                    }
-                )
+                pass
 
-        return json.dumps(context)
+        return json.dumps(context, cls=DjangoJSONEncoder)
 
     def get(self, request):
         """Displays multiple tables and charts to generate reportability.
@@ -150,22 +179,23 @@ class ControlView(View):
             created_at__gte=date_start,
             created_at__lte=date_end,
             forms__cancelled=False,
+            manual_cancelled_date__isnull=True,
         )
 
         pending = analysis.filter(
+            Q(forms__form_closed=False) | Q(manual_closing_date__isnull=True),
             pre_report_started=True,
             pre_report_ended=True,
-            forms__form_closed=False,
         ).select_related("entryform", "patologo", "stain")
 
         unassigned = analysis.filter(
+            Q(forms__form_closed=False) | Q(manual_closing_date__isnull=True),
             patologo__isnull=True,
             exam__service_id__in=(1, 4),
-            forms__form_closed=False,
         ).select_related("entryform", "patologo", "stain")
 
         finished = analysis.filter(
-            forms__form_closed=True,
+            Q(forms__form_closed=True) | Q(manual_closing_date__isnull=False),
             pre_report_started=True,
             pre_report_ended=True,
         ).select_related("entryform", "patologo", "stain")
