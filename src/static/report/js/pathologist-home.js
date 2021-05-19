@@ -38,8 +38,6 @@ Date.prototype.getWeek = function (dowOffset) {
 };
 
 $(document).ready(function () {
-  const year = $("#year");
-  const month = $("#month");
   const pathologist = $("#pathologist");
 
   const pendingNumber = $("#pendingNumber");
@@ -111,7 +109,6 @@ $(document).ready(function () {
   let monthlyEffOptions = {
     xAxis: {
       type: "category",
-      data: [],
     },
     yAxis: {
       type: "value",
@@ -122,7 +119,6 @@ $(document).ready(function () {
         type: "line",
         label: {
           show: true,
-          formatter: (value) => value.value.toFixed(1),
         },
       },
     ],
@@ -142,7 +138,6 @@ $(document).ready(function () {
         type: "bar",
         label: {
           show: true,
-          formatter: (value) => value.value.toFixed(1),
         },
       },
     ],
@@ -169,13 +164,12 @@ $(document).ready(function () {
 
   function filterPending() {
     return data.filter((analysis) => {
-      const form_closed = analysis.workflow.fields.form_closed;
-      const form_cancelled = analysis.workflow.fields.form_cancelled;
-      const manual_cancelled =
-        analysis.report.fields.manual_cancelled_date != null;
-      const manual_closed = analysis.report.fields.manual_closing_date != null;
-      const pre_report_started = analysis.report.fields.pre_report_started;
-      const is_assigned = analysis.report.fields.patologo != null;
+      const form_closed = analysis.workflow.form_closed;
+      const form_cancelled = analysis.workflow.form_cancelled;
+      const manual_cancelled = analysis.report.manual_cancelled_date != null;
+      const manual_closed = analysis.report.manual_closing_date != null;
+      const pre_report_started = analysis.report.pre_report_started;
+      const is_assigned = analysis.report.patologo != null;
 
       return (
         !(form_closed || form_cancelled || manual_cancelled || manual_closed) &&
@@ -187,14 +181,13 @@ $(document).ready(function () {
 
   function filterCurrent() {
     return data.filter((analysis) => {
-      const form_closed = analysis.workflow.fields.form_closed;
-      const form_cancelled = analysis.workflow.fields.form_cancelled;
-      const manual_cancelled =
-        analysis.report.fields.manual_cancelled_date != null;
-      const manual_closed = analysis.report.fields.manual_closing_date != null;
-      const pre_report_started = analysis.report.fields.pre_report_started;
-      const pre_report_ended = analysis.report.fields.pre_report_ended;
-      const is_assigned = analysis.report.fields.patologo != null;
+      const form_closed = analysis.workflow.form_closed;
+      const form_cancelled = analysis.workflow.form_cancelled;
+      const manual_cancelled = analysis.report.manual_cancelled_date != null;
+      const manual_closed = analysis.report.manual_closing_date != null;
+      const pre_report_started = analysis.report.pre_report_started;
+      const pre_report_ended = analysis.report.pre_report_ended;
+      const is_assigned = analysis.report.patologo != null;
 
       return (
         !(form_closed || form_cancelled || manual_cancelled || manual_closed) &&
@@ -207,14 +200,13 @@ $(document).ready(function () {
 
   function filterUnreview() {
     return data.filter((analysis) => {
-      const form_closed = analysis.workflow.fields.form_closed;
-      const form_cancelled = analysis.workflow.fields.form_cancelled;
-      const manual_cancelled =
-        analysis.report.fields.manual_cancelled_date != null;
-      const manual_closed = analysis.report.fields.manual_closing_date != null;
-      const pre_report_started = analysis.report.fields.pre_report_started;
-      const pre_report_ended = analysis.report.fields.pre_report_ended;
-      const is_assigned = analysis.report.fields.patologo != null;
+      const form_closed = analysis.workflow.form_closed;
+      const form_cancelled = analysis.workflow.form_cancelled;
+      const manual_cancelled = analysis.report.manual_cancelled_date != null;
+      const manual_closed = analysis.report.manual_closing_date != null;
+      const pre_report_started = analysis.report.pre_report_started;
+      const pre_report_ended = analysis.report.pre_report_ended;
+      const is_assigned = analysis.report.patologo != null;
 
       return (
         !(form_closed || form_cancelled || manual_cancelled || manual_closed) &&
@@ -227,9 +219,9 @@ $(document).ready(function () {
 
   function filterDone() {
     return data.filter((analysis) => {
-      const is_closed = analysis.workflow.fields.form_closed;
-      const manual_closed = analysis.report.fields.manual_closing_date != null;
-      const is_assigned = analysis.report.fields.patologo != null;
+      const is_closed = analysis.workflow.form_closed;
+      const manual_closed = analysis.report.manual_closing_date != null;
+      const is_assigned = analysis.report.patologo != null;
 
       return (is_closed || manual_closed) && is_assigned;
     });
@@ -255,25 +247,25 @@ $(document).ready(function () {
 
       columns: [
         {
-          data: "case.fields.no_caso",
+          data: "case.no_caso",
           name: "case",
           type: "string",
           title: "Caso",
         },
         {
-          data: "exam.fields.name",
+          data: "exam.name",
           name: "exam",
           type: "string",
           title: "Servicio",
         },
         {
-          data: "stain.fields.abbreviation",
+          data: "stain.abbreviation",
           name: "stain",
           type: "num",
           title: "Tincion",
         },
         {
-          data: "user.fields",
+          data: "user",
           name: "pathologist",
           type: "string",
           title: "Patologo",
@@ -288,37 +280,46 @@ $(document).ready(function () {
           title: "Cant. Muestras",
         },
         {
-          data: "case.fields.created_at",
+          data: "case.created_at",
           name: "entry_date",
           type: "string",
           title: "Ingreso",
           render: (data) => {
+            if (data == null || data == undefined) {
+              return "";
+            }
             const date = new Date(data);
             return date.toLocaleDateString();
           },
         },
         {
-          data: "report.fields.assignment_done_at",
+          data: "report.assignment_done_at",
           name: "derived_at",
           type: "num",
           title: "Derivacion",
           render: (data) => {
+            if (data == null || data == undefined) {
+              return "";
+            }
             const date = new Date(data);
             return date.toLocaleDateString();
           },
         },
         {
-          data: "report.fields.assignment_deadline",
+          data: "report.assignment_deadline",
           name: "derived_at",
           type: "num",
           title: "Plazo",
           render: (data) => {
+            if (data == null || data == undefined) {
+              return "";
+            }
             const date = new Date(data);
             return date.toLocaleDateString();
           },
         },
         {
-          data: "report.fields.assignment_deadline",
+          data: "report.assignment_deadline",
           name: "delay",
           type: "num",
           title: "Atraso",
@@ -346,25 +347,25 @@ $(document).ready(function () {
 
       columns: [
         {
-          data: "case.fields.no_caso",
+          data: "case.no_caso",
           name: "case",
           type: "string",
           title: "Caso",
         },
         {
-          data: "exam.fields.name",
+          data: "exam.name",
           name: "exam",
           type: "string",
           title: "Servicio",
         },
         {
-          data: "stain.fields.abbreviation",
+          data: "stain.abbreviation",
           name: "stain",
           type: "num",
           title: "Tincion",
         },
         {
-          data: "user.fields",
+          data: "user",
           name: "pathologist",
           type: "string",
           title: "Patologo",
@@ -379,7 +380,7 @@ $(document).ready(function () {
           title: "Cant. Muestras",
         },
         {
-          data: "case.fields.created_at",
+          data: "case.created_at",
           name: "entry_date",
           type: "string",
           title: "Ingreso",
@@ -389,7 +390,7 @@ $(document).ready(function () {
           },
         },
         {
-          data: "report.fields.assignment_done_at",
+          data: "report.assignment_done_at",
           name: "derived_at",
           type: "num",
           title: "Derivacion",
@@ -399,7 +400,7 @@ $(document).ready(function () {
           },
         },
         {
-          data: "report.fields.assignment_deadline",
+          data: "report.assignment_deadline",
           name: "derived_at",
           type: "num",
           title: "Plazo",
@@ -409,7 +410,7 @@ $(document).ready(function () {
           },
         },
         {
-          data: "report.fields.pre_report_started_at",
+          data: "report.pre_report_started_at",
           name: "delay",
           type: "num",
           title: "Inicio lectura",
@@ -419,7 +420,7 @@ $(document).ready(function () {
           },
         },
         {
-          data: "report.fields.assignment_deadline",
+          data: "report.assignment_deadline",
           name: "delay",
           type: "num",
           title: "Atraso",
@@ -428,7 +429,7 @@ $(document).ready(function () {
           },
         },
         {
-          data: "report.fields.pre_report_started_at",
+          data: "report.pre_report_started_at",
           name: "delay",
           type: "num",
           title: "En Lectura",
@@ -456,25 +457,25 @@ $(document).ready(function () {
 
       columns: [
         {
-          data: "case.fields.no_caso",
+          data: "case.no_caso",
           name: "case",
           type: "string",
           title: "Caso",
         },
         {
-          data: "exam.fields.name",
+          data: "exam.name",
           name: "exam",
           type: "string",
           title: "Servicio",
         },
         {
-          data: "stain.fields.abbreviation",
+          data: "stain.abbreviation",
           name: "stain",
           type: "num",
           title: "Tincion",
         },
         {
-          data: "user.fields",
+          data: "user",
           name: "pathologist",
           type: "string",
           title: "Patologo",
@@ -489,7 +490,7 @@ $(document).ready(function () {
           title: "Cant. Muestras",
         },
         {
-          data: "case.fields.created_at",
+          data: "case.created_at",
           name: "entry_date",
           type: "string",
           title: "Ingreso",
@@ -499,7 +500,7 @@ $(document).ready(function () {
           },
         },
         {
-          data: "report.fields.pre_report_started_at",
+          data: "report.pre_report_started_at",
           name: "delay",
           type: "num",
           title: "Inicio lectura",
@@ -509,7 +510,7 @@ $(document).ready(function () {
           },
         },
         {
-          data: "report.fields.pre_report_ended_at",
+          data: "report.pre_report_ended_at",
           name: "derived_at",
           type: "num",
           title: "Fin lectura",
@@ -519,7 +520,7 @@ $(document).ready(function () {
           },
         },
         {
-          data: "report.fields",
+          data: "report",
           name: "derived_at",
           type: "num",
           title: "Dias en lectura",
@@ -531,7 +532,7 @@ $(document).ready(function () {
           },
         },
         {
-          data: "report.fields.pre_report_ended_at",
+          data: "report.pre_report_ended_at",
           name: "delay",
           type: "num",
           title: "En Revision",
@@ -559,25 +560,25 @@ $(document).ready(function () {
 
       columns: [
         {
-          data: "case.fields.no_caso",
+          data: "case.no_caso",
           name: "case",
           type: "string",
           title: "Caso",
         },
         {
-          data: "report.fields.report_code",
+          data: "report.report_code",
           name: "reportCode",
           type: "string",
           title: "Informe",
         },
         {
-          data: "exam.fields.name",
+          data: "exam.name",
           name: "service",
           type: "string",
           title: "Servicio",
         },
         {
-          data: "user.fields",
+          data: "user",
           name: "user",
           type: "num",
           title: "Patólogo",
@@ -592,7 +593,7 @@ $(document).ready(function () {
           title: "Cant. Muestras",
         },
         {
-          data: "report.fields.score_diagnostic",
+          data: "report.score_diagnostic",
           name: "score",
           type: "num",
           title: "Calificación",
@@ -605,7 +606,7 @@ $(document).ready(function () {
           },
         },
         {
-          data: "case.fields.created_at",
+          data: "case.created_at",
           name: "createdAt",
           type: "string",
           title: "Ingreso",
@@ -615,7 +616,7 @@ $(document).ready(function () {
           },
         },
         {
-          data: "workflow.fields.closed_at",
+          data: "workflow.closed_at",
           name: "closedAt",
           type: "num",
           title: "Emisión",
@@ -635,22 +636,22 @@ $(document).ready(function () {
   function initializeCharts() {
     const efficiency = filterDone();
 
+    // EFFICIENCY TABLE
+    //
     // Get the lowest and highest week number so we can
     // loop in that range
     const startWeekEntry = _.minBy(efficiency, (item) => {
-      const date = new Date(item.workflow.fields.closed_at);
+      const date = new Date(item.workflow.closed_at);
       return date.getWeek();
     });
 
     const endWeekEntry = _.maxBy(efficiency, (item) => {
-      const date = new Date(item.workflow.fields.closed_at);
+      const date = new Date(item.workflow.closed_at);
       return date.getWeek();
     });
 
-    const startWeek = new Date(
-      startWeekEntry.workflow.fields.closed_at
-    ).getWeek();
-    const endWeek = new Date(endWeekEntry.workflow.fields.closed_at).getWeek();
+    const startWeek = new Date(startWeekEntry.workflow.closed_at).getWeek();
+    const endWeek = new Date(endWeekEntry.workflow.closed_at).getWeek();
 
     const weekTr = $("#weeks");
     weekTr.empty();
@@ -661,7 +662,7 @@ $(document).ready(function () {
     weekTr.append(`<th scope="col">Total</th>`);
 
     let doneByService = _.groupBy(efficiency, (item) => {
-      return item.exam.fields.name;
+      return item.exam.name;
     });
 
     $("#serviceWeekTbody").empty();
@@ -669,7 +670,7 @@ $(document).ready(function () {
     let serviceTotal = {};
     for (const service in doneByService) {
       const weekly = _.groupBy(doneByService[service], (item) => {
-        const date = new Date(item.workflow.fields.closed_at);
+        const date = new Date(item.workflow.closed_at);
         return date.getWeek();
       });
 
@@ -726,15 +727,16 @@ $(document).ready(function () {
 
     $("#serviceWeekTbody").append(row);
 
+    // CHARTS
+
     let sumEffValue = 0;
 
     for (const row of efficiency) {
-      sumEffValue += row.report.fields.score_diagnostic;
+      sumEffValue += row.report.score_diagnostic;
     }
 
-    const length = efficiency.filter(
-      (row) => row.report.fields.score_diagnostic > 0
-    ).length;
+    const length = efficiency.filter((row) => row.report.score_diagnostic > 0)
+      .length;
 
     const avg = sumEffValue / length;
 
@@ -742,33 +744,32 @@ $(document).ready(function () {
     averageEfficiency.setOption(avgEffOptions, true);
 
     const monthlyGrouped = _.groupBy(efficiency, (row) => {
-      const date = new Date(row.workflow.fields.closed_at);
+      const date = new Date(row.workflow.closed_at);
       return `${date.getFullYear()}/${date.getMonth() + 1}`;
     });
 
-    xAxis = [];
     yAxis = [];
 
     for (const month in monthlyGrouped) {
       const group = monthlyGrouped[month];
 
-      const length = group.filter(
-        (row) => row.report.fields.score_diagnostic > 0
-      ).length;
+      const length = group.filter((row) => row.report.score_diagnostic > 0)
+        .length;
 
       let sumEffValue = 0;
 
       for (const row of group) {
-        sumEffValue += row.report.fields.score_diagnostic;
+        sumEffValue += row.report.score_diagnostic;
       }
 
-      xAxis.push(month);
-      yAxis.push(sumEffValue / length);
+      yAxis.push([month, (sumEffValue / length).toFixed(1)]);
     }
 
-    monthlyEffOptions.xAxis.data = xAxis;
-    monthlyEffOptions.series[0].data = yAxis;
-
+    monthlyEffOptions.series[0].data = yAxis.sort((a, b) => {
+      const dateA = new Date(a[0]);
+      const dateB = new Date(b[0]);
+      return dateA - dateB;
+    });
     monthlyEfficiency.setOption(monthlyEffOptions, true);
   }
 
@@ -802,18 +803,7 @@ $(document).ready(function () {
 
       success: (_data, textStatus) => {
         Swal.close();
-        // REFACTOR THIS IF DJANGO REST FRAMEWORK IS USED
-        data = JSON.parse(_data).map((row) => {
-          return {
-            report: JSON.parse(row.report)[0],
-            exam: JSON.parse(row.exam)[0],
-            case: JSON.parse(row.case)[0],
-            user: JSON.parse(row.user)[0],
-            stain: JSON.parse(row.stain)[0],
-            samples: JSON.parse(row.samples),
-            workflow: JSON.parse(row.workflow)[0],
-          };
-        });
+        data = JSON.parse(_data);
         updateView();
       },
       error: (xhr, textStatus, error) => {
