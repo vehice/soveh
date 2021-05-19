@@ -108,7 +108,7 @@ $(document).ready(() => {
                     </li>`);
     }
 
-    $(`${id}Count`).text(array.length);
+    $(`${id}Count`).text(`(${array.length})`);
   }
 
   function getCookie(name) {
@@ -180,16 +180,13 @@ $(document).ready(() => {
       contentType: "application/json; charset=utf-8",
 
       success: (data, textStatus) => {
-        Swal.fire({
-          icon: "success",
-          title: "Guardado",
-        });
+        toastr.success("Actualizado exitosamente");
       },
 
       error: (xhr, textStatus, error) => {
-        Swal.fire({
-          icon: "error",
-        });
+        toastr.success("Ocurrio un error");
+        console.error({ xhr, textStatus, error });
+        event.preventDefault();
       },
     });
   });
