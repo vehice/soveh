@@ -54,6 +54,13 @@ def update_stage(request, pk):
     Updates a :model:`review.Stage`, storing the change in :model:`review.Logbook`.
     """
     analysis = get_object_or_404(Analysis, pk=pk)
+
+    if analysis.report_code is None:
+        case = str(analysis.entryform.no_caso[1:]).zfill(5)
+        service = str(analysis.exam_id).zfill(3)
+        analysis.report_code = f"VHC-{case}-{service}"
+        analysis.save()
+
     post = json.loads(request.body)
     state = post["state"]
 
@@ -61,7 +68,7 @@ def update_stage(request, pk):
         analysis=analysis, defaults={"state": state, "created_by": request.user}
     )
 
-    return JsonResponse(serializers.serialize("json", [stage[0]]), safe=False)
+    return JsonResponse(serializers.serialize("json", [stage[0], analysis]), safe=False)
 
 
 class FileView(View):
