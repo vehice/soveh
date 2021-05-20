@@ -157,7 +157,20 @@ class MailList(models.Model):
     """
 
     name = models.CharField(max_length=255)
-    client = models.ForeignKey(
+    customer = models.ForeignKey(
         to=Customer, on_delete=models.CASCADE, related_name="mailing_lists"
     )
     recipients = models.ManyToManyField(to=Recipient, related_name="mailing_lists")
+    analysis = models.ManyToManyField(
+        to=Analysis, related_name="mailing_lists", through="AnalysisMailList"
+    )
+
+
+class AnalysisMailList(models.Model):
+    """
+    A :model:`review.Analysis` may contain multiple :model:`review.MailList` and vice-versa thus this model works
+    as a middle-man to join them.
+    """
+
+    analysis = models.ForeignKey(to=Analysis, on_delete=models.CASCADE)
+    mail_list = models.ForeignKey(to=MailList, on_delete=models.CASCADE)
