@@ -149,3 +149,15 @@ class Recipient(models.Model):
     @property
     def full_name(self):
         return f"{self.first_name} {self.last_name}"
+
+
+class MailList(models.Model):
+    """
+    Allows grouping multiple :model:`review.Recipient` under the same :model:`backend.Customer`
+    """
+
+    name = models.CharField(max_length=255)
+    client = models.ForeignKey(
+        to=Customer, on_delete=models.CASCADE, related_name="mailing_lists"
+    )
+    recipients = models.ManyToManyField(to=Recipient, related_name="mailing_lists")
