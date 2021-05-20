@@ -4,6 +4,8 @@ from django.contrib.auth.models import User
 from backend.models import AnalysisForm
 from django.db.models import Q
 
+from backend.models import Customer
+
 
 class AnalysisManager(models.Manager):
     """
@@ -131,3 +133,19 @@ class File(models.Model):
 
     class Meta:
         ordering = ["-created_at"]
+
+
+class Recipient(models.Model):
+    """
+    Stores a single resource which will receive an email with :model:`review.File` for it's related
+    :model:`review.Analysis` whenever this it's moved to a :model:`review.Stage` finished.
+    """
+
+    email = models.EmailField()
+    first_name = models.CharField(max_length=255)
+    last_name = models.CharField(max_length=255, blank=True)
+    role = models.CharField(max_length=255, blank=True)
+
+    @property
+    def full_name(self):
+        return f"{self.first_name} {self.last_name}"
