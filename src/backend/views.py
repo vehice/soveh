@@ -320,6 +320,7 @@ class ENTRYFORM(View):
             # entryform_types = list(EntryForm_Type.objects.all().values())
             researches = list(Research.objects.filter(status=True).values())
             stains_list = list(Stain.objects.values())
+            laboratories_list = list(Laboratory.objects.values())
 
             data = {
                 "species": species,
@@ -330,6 +331,7 @@ class ENTRYFORM(View):
                 "organs": organs,
                 "stains": stains_list,
                 "customers": customers,
+                "laboratories": laboratories_list,
                 # 'entryform_types': entryform_types,
                 "research_types_list": researches,
             }
@@ -2172,6 +2174,12 @@ def step_1_entryform(request):
     ):
         change = True
     entryform.fixative_id = var_post.get("fixative")
+
+    if str(entryform.laboratory_id) != var_post.get("laboratory") and (
+        entryform.laboratory_id == None and var_post.get("laboratory") != ""
+    ):
+        change = True
+    entryform.laboratory_id = var_post.get("laboratory")
 
     if str(entryform.larvalstage_id) != var_post.get("larvalstage") and (
         entryform.larvalstage_id == None and var_post.get("larvalstage") != ""

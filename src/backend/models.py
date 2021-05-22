@@ -309,6 +309,21 @@ class Customer(models.Model):
     class Meta:
         verbose_name = "cliente"
 
+class Laboratory(models.Model):
+    """
+    Entrance Laboratory for Entryform.
+    """
+
+    name = models.CharField(
+        max_length=250, null=True, blank=True, verbose_name="nombre"
+    )
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        verbose_name = "Laboratorio de Ingreso"
+
 
 class EntryForm_Type(models.Model):
     """
@@ -365,6 +380,11 @@ class EntryForm(models.Model):
     )
     fixative = models.ForeignKey(
         Fixative,
+        null=True,
+        on_delete=models.SET_NULL,
+    )
+    laboratory = models.ForeignKey(
+        Laboratory,
         null=True,
         on_delete=models.SET_NULL,
     )

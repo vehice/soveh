@@ -155,6 +155,10 @@
         "es":"Fijador",
         "en":"Fixative"
     },
+    "laboratory":{
+        "es":"Laboratorio de Ingreso",
+        "en":"Entrance Laboratory"
+    },
     "type_case":{
         "es":"Tipo de ingreso",
         "en":"Type of case"

@@ -135,6 +135,12 @@
           <label for="phoneNumber3">Anamnesis :</label>
           <textarea id="anamnesis_input" name="anamnesis" row="2" class="form-control" {% if not edit %}disabled{% endif %} ></textarea>
         </div>
+        <div class="form-group">
+          <label for="phoneNumber3">{{request.lang.laboratory}} :</label>
+          <select class="select2 form-control" id="laboratory_select" name="laboratory"
+            {% if not edit %}disabled{% endif %}>
+          </select>
+        </div>
       </div>
     </div>
     <h4 class="form-section">
