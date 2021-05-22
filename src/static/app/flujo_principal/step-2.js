@@ -368,10 +368,18 @@ function init_step_2() {
             amount_control.val(new_value)
             saveIdentification(ident_id)
             $("#unit-"+ident_id+"-"+id).remove()
+            let id_unit = "";
             $(`#units-table-${ident_id} .unit-correlative`).each(function(index, value){
-              $(this).val(index + 1);
-              $(this).trigger("change");
+              let indice = '' + (index + 1);
+              console.log(indice);
+              if ($(this).val() != indice){
+                $(this).val(indice);
+                id_unit = $(this).attr('id');
+              }
             });
+            if (id_unit != ""){
+              $(`#${id_unit}`).trigger("change");
+            }
             toastr.success(
               'Unidad eliminada exitosamente.',
               'Listo!',
