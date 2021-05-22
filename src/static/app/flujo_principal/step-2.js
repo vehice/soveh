@@ -661,7 +661,8 @@ function resetOrgansOptions(id, correlative) {
       select.val(selected).trigger('change')
     } else {
       let selected_unique = []
-      selected.forEach(element => {
+      values.forEach(x => {
+        element = x.split('-')[0];
         let new_id = `${element}-${Math.random()}`;
         let new_value = select.find("option[value='"+element+"']").text();
         select.append(`<option value="${new_id}">${new_value}</option>`);
