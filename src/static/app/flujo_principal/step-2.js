@@ -368,6 +368,10 @@ function init_step_2() {
             amount_control.val(new_value)
             saveIdentification(ident_id)
             $("#unit-"+ident_id+"-"+id).remove()
+            $(`#units-table-${ident_id} .unit-correlative`).each(function(index, value){
+              $(this).val(index + 1);
+              $(this).trigger("change");
+            });
             toastr.success(
               'Unidad eliminada exitosamente.',
               'Listo!',
