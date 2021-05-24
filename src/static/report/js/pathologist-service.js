@@ -8,7 +8,7 @@
 Date.prototype.getWeek = function (dowOffset) {
   /*getWeek() was developed by Nick Baicoianu at MeanFreePath: http://www.meanfreepath.com */
 
-  dowOffset = typeof dowOffset == "int" ? dowOffset : 0; //default dowOffset to zero
+  dowOffset = typeof dowOffset == "number" ? dowOffset : 0; //default dowOffset to zero
   var newYear = new Date(this.getFullYear(), 0, 1);
   var day = newYear.getDay() - dowOffset; //the day of week the year begins on
   day = day >= 0 ? day : day + 7;
@@ -49,103 +49,14 @@ $(document).ready(function () {
   const unreviewNumber = $("#unreviewNumber");
   const unreviewTable = $("#unreviewTable");
 
-  const efficiencyTable = $("#efficiencyTable");
-
-  let averageEfficiency = echarts.init(
-    document.getElementById("averageEfficiency")
-  );
-
-  let avgEffOptions = {
-    tooltip: {
-      formatter: "{a} <br/>{b} : {c}%",
-    },
-    series: [
-      {
-        type: "gauge",
-        detail: { formatter: "{value}" },
-        startAngle: 180,
-        endAngle: 0,
-        min: 0,
-        max: 7,
-        splitNumber: 1,
-        data: [{ value: 0, name: "Promedio Mensual" }],
-        axisLine: {
-          lineStyle: {
-            color: [
-              [0.57, "#FF6E76"],
-              [0.7, "#58D9F9"],
-              [1, "#7CFFB2"],
-            ],
-          },
-        },
-        splitLine: {
-          show: false,
-        },
-        axisTick: {
-          show: false,
-        },
-        axisLabel: {
-          show: false,
-        },
-        title: {
-          show: false,
-        },
-        detail: {
-          formatter: (value) => value.toFixed(1),
-        },
-        tooltip: {
-          formatter: "{b}: {c}",
-        },
-      },
-    ],
-  };
-
-  averageEfficiency.setOption(avgEffOptions);
-
-  let monthlyEfficiency = echarts.init(
-    document.getElementById("monthlyEfficiency")
-  );
-
-  let monthlyEffOptions = {
-    xAxis: {
-      type: "category",
-    },
-    yAxis: {
-      type: "value",
-    },
-    series: [
-      {
-        data: [],
-        type: "line",
-        label: {
-          show: true,
-        },
-      },
-    ],
-  };
-
-  let barOptions = {
-    xAxis: {
-      type: "category",
-      data: [],
-    },
-    yAxis: {
-      type: "value",
-    },
-    series: [
-      {
-        data: [],
-        type: "bar",
-        label: {
-          show: true,
-        },
-      },
-    ],
-  };
-
-  monthlyEfficiency.setOption(monthlyEffOptions);
-
   let data;
+
+  let dateEnd = new Date().toLocaleDateString();
+  $("#labelDateEnd").text(`Fecha por defecto: ${dateEnd}`);
+  let dateStart = new Date();
+  dateStart.setMonth(dateStart.getMonth() - 3);
+  dateStart = dateStart.toLocaleDateString();
+  $("#labelDateStart").text(`Fecha por defecto: ${dateStart}`);
 
   getData();
 
@@ -214,16 +125,6 @@ $(document).ready(function () {
         pre_report_started &&
         pre_report_ended
       );
-    });
-  }
-
-  function filterDone() {
-    return data.filter((analysis) => {
-      const is_closed = analysis.workflow.form_closed;
-      const manual_closed = analysis.report.manual_closing_date != null;
-      const is_assigned = analysis.report.patologo != null;
-
-      return (is_closed || manual_closed) && is_assigned;
     });
   }
 
@@ -620,6 +521,7 @@ $(document).ready(function () {
           name: "closedAt",
           type: "num",
           title: "Emisión",
+
           render: (data) => {
             const date = new Date(data);
             return date.toLocaleDateString();
@@ -633,151 +535,10 @@ $(document).ready(function () {
     });
   }
 
-  function initializeCharts() {
-    const efficiency = filterDone();
-
-    // EFFICIENCY TABLE
-    //
-    // Get the lowest and highest week number so we can
-    // loop in that range
-    const startWeekEntry = _.minBy(efficiency, (item) => {
-      const date = new Date(item.workflow.closed_at);
-      return date.getWeek();
-    });
-
-    const endWeekEntry = _.maxBy(efficiency, (item) => {
-      const date = new Date(item.workflow.closed_at);
-      return date.getWeek();
-    });
-
-    const startWeek = new Date(startWeekEntry.workflow.closed_at).getWeek();
-    const endWeek = new Date(endWeekEntry.workflow.closed_at).getWeek();
-
-    const weekTr = $("#weeks");
-    weekTr.empty();
-    weekTr.append(`<th scope="col">Servicios</th>`);
-    for (let i = startWeek; i < endWeek + 1; i++) {
-      weekTr.append(`<th scope="col">${i}</th>`);
-    }
-    weekTr.append(`<th scope="col">Total</th>`);
-
-    let doneByService = _.groupBy(efficiency, (item) => {
-      return item.exam.name;
-    });
-
-    $("#serviceWeekTbody").empty();
-
-    let serviceTotal = {};
-    for (const service in doneByService) {
-      const weekly = _.groupBy(doneByService[service], (item) => {
-        const date = new Date(item.workflow.closed_at);
-        return date.getWeek();
-      });
-
-      let row = "<tr>";
-      row += `<td>${service}</td>`;
-
-      let rowTotal = 0;
-
-      for (let i = startWeek; i < endWeek + 1; i++) {
-        if (i in weekly) {
-          let totalSamples = 0;
-
-          for (const item of weekly[i]) {
-            totalSamples += parseInt(item.samples);
-          }
-
-          row += `<td>${totalSamples}</td>`;
-          rowTotal += totalSamples;
-          serviceTotal[i] =
-            parseInt(serviceTotal[i] || 0) + parseInt(totalSamples);
-        } else {
-          row += `<td>N/A</td>`;
-        }
-      }
-
-      if (isNaN(rowTotal)) {
-        row += `<td>N/A</td>`;
-      } else {
-        row += `<td class="table-primary">${rowTotal}</td>`;
-      }
-      row += "</tr>";
-
-      $("#serviceWeekTbody").append(row);
-    }
-
-    let row = "<tr class='table-primary'><td>Total</td>";
-    for (let i = startWeek; i < endWeek + 1; i++) {
-      if (isNaN(serviceTotal[i])) {
-        row += `<td>N/A</td>`;
-      } else {
-        row += `<td>${serviceTotal[i]}</td>`;
-      }
-    }
-    let grandTotal = Object.values(serviceTotal).reduce(
-      (acc, curr) => acc + curr
-    );
-
-    if (isNaN(grandTotal)) {
-      row += `<td>N/A</td>`;
-    } else {
-      row += `<td>${grandTotal}</td>`;
-    }
-    row += "</tr>";
-
-    $("#serviceWeekTbody").append(row);
-
-    // CHARTS
-
-    let sumEffValue = 0;
-
-    for (const row of efficiency) {
-      sumEffValue += row.report.score_diagnostic;
-    }
-
-    const length = efficiency.filter((row) => row.report.score_diagnostic > 0)
-      .length;
-
-    const avg = sumEffValue / length;
-
-    avgEffOptions.series[0].data[0].value = avg;
-    averageEfficiency.setOption(avgEffOptions, true);
-
-    const monthlyGrouped = _.groupBy(efficiency, (row) => {
-      const date = new Date(row.workflow.closed_at);
-      return `${date.getFullYear()}/${date.getMonth() + 1}`;
-    });
-
-    yAxis = [];
-
-    for (const month in monthlyGrouped) {
-      const group = monthlyGrouped[month];
-
-      const length = group.filter((row) => row.report.score_diagnostic > 0)
-        .length;
-
-      let sumEffValue = 0;
-
-      for (const row of group) {
-        sumEffValue += row.report.score_diagnostic;
-      }
-
-      yAxis.push([month, (sumEffValue / length).toFixed(1)]);
-    }
-
-    monthlyEffOptions.series[0].data = yAxis.sort((a, b) => {
-      const dateA = new Date(a[0]);
-      const dateB = new Date(b[0]);
-      return dateA - dateB;
-    });
-    monthlyEfficiency.setOption(monthlyEffOptions, true);
-  }
-
   function updateView() {
     initializePending();
     initializeCurrent();
     initializeUnreview();
-    initializeCharts();
   }
 
   function getData() {
@@ -790,7 +551,7 @@ $(document).ready(function () {
     });
     Swal.showLoading();
 
-    $.ajax(Urls["report:pathologist"](), {
+    $.ajax(Urls["report:service"](), {
       data: JSON.stringify({ date_start, date_end, user_id }),
 
       method: "POST",
@@ -803,7 +564,7 @@ $(document).ready(function () {
 
       success: (_data, textStatus) => {
         Swal.close();
-        data = JSON.parse(_data);
+        data = _data;
         updateView();
       },
       error: (xhr, textStatus, error) => {

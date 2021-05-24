@@ -57,11 +57,15 @@ def default_tree(user):
     if user.userprofile.profile_id in (1, 2, 4, 5):
         reports.append(
             {
-                "path": reverse("report:pathologist"),
-                "section_name": "Histopatologos"
-                if language == 1
-                else "Histopathologists",
+                "path": reverse("report:service"),
+                "section_name": "Servicios" if language == 1 else "Services",
             }
+        )
+        reports.append(
+            {
+                "path": reverse("report:efficiency"),
+                "section_name": "Rendimiento" if language == 1 else "Efficiency",
+            },
         )
     if user.userprofile.profile_id in (1, 2):
         reports.append(

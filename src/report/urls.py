@@ -5,6 +5,7 @@ from report import views
 
 app_name = "report"
 urlpatterns = [
-    path("pathologist", views.PathologistView.as_view(), name="pathologist"),
+    path("service", views.ServiceView.as_view(), name="service"),
+    path("efficiency", views.EfficiencyView.as_view(), name="efficiency"),
     path("control", views.ControlView.as_view(), name="control"),
 ]
