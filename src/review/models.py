@@ -150,6 +150,9 @@ class Recipient(models.Model):
     def full_name(self):
         return f"{self.first_name} {self.last_name}"
 
+    def __str__(self):
+        return self.full_name
+
 
 class MailList(models.Model):
     """
@@ -164,6 +167,9 @@ class MailList(models.Model):
     analysis = models.ManyToManyField(
         to=Analysis, related_name="mailing_lists", through="AnalysisMailList"
     )
+
+    def __str__(self):
+        return self.name
 
 
 class AnalysisMailList(models.Model):
