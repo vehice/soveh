@@ -28,6 +28,15 @@ $(document).ready(() => {
     },
   });
 
+  const selectRecipients = $("#selectRecipients");
+
+  const dlgNewRecipient = new bootstrap.Modal(
+    document.getElementById("dlgRecipient")
+  );
+  const dlgFileList = new bootstrap.Modal(
+    document.getElementById("fileDialog")
+  );
+
   let waiting;
   let formating;
   let reviewing;
@@ -197,7 +206,33 @@ $(document).ready(() => {
     analysis = e.target.id;
     $("#fileDialog h5.modal-title").text(title);
 
-    $("#fileDialog").modal("show");
+    dlgFileList.show();
+
+    $.get(Urls["review:mail_list"](analysis), (response) => {
+      const mailList = JSON.parse(response["mail_lists"]);
+
+      const selected = JSON.parse(response["current_lists"]);
+      if (mailList.length > 0) {
+        if (selectRecipients.hasClass("select2-hidden-accessible")) {
+          selectRecipients.select2("destroy");
+        }
+        const options = mailList.map((mail) => {
+          const isSelected = selected.some(
+            (item) => item.fields.mail_list == mail.pk
+          );
+          return {
+            id: mail.pk,
+            text: mail.fields.name,
+            selected: isSelected,
+          };
+        });
+        selectRecipients.select2({
+          data: options,
+          width: "100%",
+          multiple: true,
+        });
+      }
+    });
 
     $.ajax(Urls["review:files"](analysis), {
       method: "GET",
@@ -234,6 +269,25 @@ $(document).ready(() => {
         Swal.fire({
           icon: "error",
         });
+      },
+    });
+  });
+
+  selectRecipients.on("change", (e) => {
+    const selected = selectRecipients
+      .select2("data")
+      .map((selected) => parseInt(selected.id));
+
+    $.ajax(Urls["review:mail_list"](analysis), {
+      method: "POST",
+      data: JSON.stringify(selected),
+      headers: {
+        "X-CSRFToken": getCookie("csrftoken"),
+      },
+      contentType: "application/json; charset=utf-8",
+
+      success: () => {
+        toastr.success("Actualizado exitosamente");
       },
     });
   });

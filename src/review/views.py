@@ -1,14 +1,15 @@
 import json
+import os
 
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.core import serializers
-from django.http.response import Http404, HttpResponse, JsonResponse, FileResponse
+from django.http.response import FileResponse, Http404, JsonResponse
 from django.shortcuts import get_object_or_404, render
+from django.utils.decorators import method_decorator
 from django.views import View
 
-from review.models import Analysis, File, Stage
-import os
+from review.models import Analysis, AnalysisMailList, File, MailList, Stage
 
 
 @login_required
@@ -72,6 +73,7 @@ def update_stage(request, pk):
 
 
 class FileView(View):
+    @method_decorator(login_required)
     def get(self, request, pk):
         """
         Returns a list of files that belong to a single :model:`review.Analysis`
@@ -87,6 +89,7 @@ class FileView(View):
 
         return JsonResponse(context)
 
+    @method_decorator(login_required)
     def post(self, request, pk):
         """
         Stores a file resource and creates a :model:`review.File` to bind it to
@@ -109,8 +112,56 @@ class FileView(View):
 
 @login_required
 def download_file(request, pk):
+    """Returns a FileResponse from the given pk's :model:`review.File` """
     review_file = get_object_or_404(File, pk=pk)
     file_path = os.path.join(settings.MEDIA_ROOT, str(review_file.path))
     if os.path.exists(file_path):
         return FileResponse(open(file_path, "rb"))
     raise Http404
+
+
+class MailView(View):
+    @method_decorator(login_required)
+    def get(self, request, pk):
+        """
+        Returns a JSON containing a list of all :model:`review.MailList` for the given pk's
+        :model:`review.Analysis`'s entryform's customer, including as well the current selected
+        ones.
+        """
+        analysis = get_object_or_404(Analysis, pk=pk)
+        customer = analysis.entryform.customer
+        mail_lists = MailList.objects.filter(customer=customer)
+        current_lists = AnalysisMailList.objects.filter(analysis=analysis)
+        return JsonResponse(
+            {
+                "mail_lists": serializers.serialize("json", mail_lists),
+                "current_lists": serializers.serialize("json", current_lists),
+            }
+        )
+
+    @method_decorator(login_required)
+    def post(self, request, pk):
+        """
+        Updates the given pk's :model:`review.Analysis`'s related :model:`review.MailList`.
+        Returns a JSON containing the status between OK or ERR, in which case will also include
+        and array containing ids which caused the error.
+        """
+        analysis = get_object_or_404(Analysis, pk=pk)
+
+        mail_list_pk = json.loads(request.body)
+
+        AnalysisMailList.objects.filter(analysis=analysis).delete()
+
+        errors = []
+        for pk in mail_list_pk:
+            try:
+                mail_list = MailList.objects.get(pk=pk)
+            except MailList.DoesNotExist:
+                errors.append(pk)
+                continue
+            AnalysisMailList.objects.create(analysis=analysis, mail_list=mail_list)
+
+        if len(errors) > 0:
+            return JsonResponse({"status": "ERR", "errors": errors})
+
+        return JsonResponse({"status": "OK"})

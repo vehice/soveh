@@ -1,7 +1,7 @@
 from django.test import TestCase, Client
 
 from django.contrib.auth.models import User
-from review.models import Analysis, File, Stage
+from review.models import Analysis, File, MailList, Stage
 from django.urls import reverse
 import json
 
@@ -117,3 +117,59 @@ class AnalysisTestCase(TestCase):
         )
 
         self.assertTrue(response.streaming_content)
+
+    def test_mail_list_get(self):
+        client = Client()
+        client.login(username="jmonagas", password="vehice1234")
+
+        analysis = Analysis.objects.all().last()
+        customer = analysis.entryform.customer
+        mail_lists = MailList.objects.create(customer=customer, name="Test")
+
+        response = client.get(reverse("review:mail_list", kwargs={"pk": analysis.id}))
+
+        response_json = response.json()
+
+        self.assertDictContainsSubset(
+            {"model": "review.maillist"},
+            response_json["mail_lists"],
+            "Response must contain expected data.",
+        )
+
+    def test_mail_list_post(self):
+        client = Client()
+        client.login(username="jmonagas", password="vehice1234")
+
+        analysis = Analysis.objects.all().last()
+        customer = analysis.entryform.customer
+        MailList.objects.bulk_create(
+            [
+                MailList(customer=customer, name="Test1"),
+                MailList(customer=customer, name="Test2"),
+            ]
+        )
+        mail_lists = MailList.objects.all().only("id")
+
+        response = client.post(
+            reverse("review:mail_list", kwargs={"pk": analysis.id}),
+            json.dumps([mail_list.id for mail_list in mail_lists]),
+            content_type="application/json",
+        )
+
+        body = response.json()
+
+        self.assertDictContainsSubset(
+            {"status": "OK"}, body, "Response must contain expected data."
+        )
+
+        response = client.post(
+            reverse("review:mail_list", kwargs={"pk": analysis.id}),
+            json.dumps([999999]),
+            content_type="application/json",
+        )
+
+        body = response.json()
+
+        self.assertDictContainsSubset(
+            {"status": "ERR"}, body, "Response must contain expected data."
+        )
