@@ -66,6 +66,8 @@
 <!-- END MAIN -->
 
 <!-- MODAL -->
+
+<!-- DIALOG FILES -->
 <div class="modal" tabindex="-1" id="fileDialog">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -75,23 +77,41 @@
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
-            <div class="modal-body">
-                <form action="/"
-                    class="dropzone"
-                      id="newFiles">
-                </form>
-
-                <h4>Pre-Reportes</h4>
-                <ul class="list-group" id="prereportList">
-                </ul>
-
-                <h4>Revisiones</h4>
-                <ul class="list-group" id="reviewList">
-                </ul>
+            <div class="modal-body container-fluid">
+                <section class="row border-bottom pb-2 mb-2">
+                    <div class="col-md-12">
+                        <label for=""><h4>Destinatarios:</h4></label>
+                        <select id="selectRecipients"></select>
+                    </div>
+                </section>
+                <section class="row border-bottom pb-2 mb-2">
+                    <div class="col-md-12">
+                        <form action="/"
+                              class="dropzone"
+                              id="newFiles">
+                        </form>
+                    </div>
+                </section>
+                <section class="row border-bottom pb-2 mb-2">
+                    <div class="col-md-12">
+                        <h4>Pre-Reportes</h4>
+                        <ul class="list-group" id="prereportList">
+                        </ul>
+                    </div>
+                </section>
+                <section class="row">
+                    <div class="col-md-12">
+                        <h4>Revisiones</h4>
+                        <ul class="list-group" id="reviewList">
+                        </ul>
+                    </div>
+                </section>
             </div>
         </div>
     </div>
 </div>
+
+
 <!-- END MODAL -->
 
 {% endblock content %}
