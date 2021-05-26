@@ -117,7 +117,15 @@ $(document).ready(() => {
                     </li>`);
     }
 
-    $(`${id}Count`).text(`(${array.length})`);
+    updateCount(id);
+  }
+
+  function updateCount(id) {
+    if (!id.includes("#")) {
+      id = `#${id}`;
+    }
+    const count = $(`${id} li`).length;
+    $(`${id}Count`).text(`(${count})`);
   }
 
   function getCookie(name) {
@@ -152,10 +160,11 @@ $(document).ready(() => {
   /* EVENTS */
 
   $(".state").on("sortreceive", (event, ui) => {
-    const stateName = event.target.id;
+    const currentState = ui.sender[0].id;
+    const nextState = event.target.id;
     let state;
 
-    switch (stateName) {
+    switch (nextState) {
       case "waiting":
         state = 0;
         break;
@@ -172,6 +181,8 @@ $(document).ready(() => {
         state = 4;
         break;
     }
+    updateCount(currentState);
+    updateCount(nextState);
 
     const analysisId = ui.item[0].children[0].children[0].id;
 
@@ -189,13 +200,12 @@ $(document).ready(() => {
       contentType: "application/json; charset=utf-8",
 
       success: (data, textStatus) => {
-        toastr.success("Actualizado exitosamente");
+        toastr.success("Actualizado exitosamente.");
       },
 
       error: (xhr, textStatus, error) => {
-        toastr.success("Ocurrio un error");
-        console.error({ xhr, textStatus, error });
-        event.preventDefault();
+        toastr.error("Ocurrió un error.");
+        location.reload();
       },
     });
   });
@@ -266,9 +276,7 @@ $(document).ready(() => {
         }
       },
       error: (xhr, textStatus, error) => {
-        Swal.fire({
-          icon: "error",
-        });
+        toastr.error(error);
       },
     });
   });
@@ -289,6 +297,65 @@ $(document).ready(() => {
       success: () => {
         toastr.success("Actualizado exitosamente");
       },
+    });
+  });
+
+  $("#finished").on("sortreceive", (e, ui) => {
+    const analysisId = ui.item[0].children[0].children[0].id;
+    $.get(Urls["review:analysis_emails"](analysisId), (response) => {
+      let data = JSON.parse(response);
+      let text = "";
+      for (const mailList of data) {
+        text += `<b>${mailList.name}:</b>`;
+        for (const recipient of JSON.parse(mailList.recipients)) {
+          text += `<p>${recipient.fields.first_name} (${recipient.fields.email})<p>`;
+        }
+      }
+      Swal.fire({
+        title: "Se enviara un correo a los siguientes contactos, ¿esta seguro?",
+        html: text,
+        input: "select",
+        inputOptions: {
+          1: "ESP",
+          0: "ENG",
+        },
+        inputPlaceholder: "Seleccione idioma para el correo",
+        showCancelButton: true,
+        cancelButtonText: "Cancelar",
+      }).then((result) => {
+        if (result.isConfirmed) {
+          toastr.info("Enviando correos...");
+          $.ajax(Urls["review:send_email"](analysisId), {
+            method: "PUT",
+            data: JSON.stringify(result.value),
+            headers: {
+              "X-CSRFToken": getCookie("csrftoken"),
+            },
+            contentType: "application/json; charset=utf-8",
+
+            success: (response) => {
+              if (response.status === "OK") {
+                toastr.success("Correo enviado.");
+              } else {
+                toastr.error("Ocurrió un error.");
+                switch (response.code) {
+                  case 0:
+                    toastr.info(
+                      "No se encontró archivo en estado `Para Enviar` disponible."
+                    );
+                    break;
+                  case 1:
+                    toastr.info("Ocurrio un error enviando el correo.");
+                    break;
+                }
+              }
+            },
+          });
+        } else {
+          toastr.info("Operacion cancelada.");
+          setTimeout(location.reload, 1500);
+        }
+      });
     });
   });
 });
