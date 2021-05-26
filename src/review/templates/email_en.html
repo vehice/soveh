@@ -1,0 +1,76 @@
+{% load static %}
+<!doctype html>
+<html class="no-js" lang="es">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="x-ua-compatible" content="ie=edge">
+        <title>Email Template</title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <style type="text/css" media="screen">
+         @media only screen and (max-width: 768px) {
+             .container {
+                 margin: 0.25rem;
+                 padding: 1rem;
+                 background-color: #f1f1f1;
+             }
+         }
+         @media only screen and (min-width: 769px) {
+             .container {
+                 margin: 3rem;
+                 padding: 2rem;
+                 background-color: #f1f1f1;
+             }
+         }
+
+         .title {
+             text-align: center;
+             border-bottom: 1px gray solid;
+         }
+
+         .text {
+             text-align: justify;
+             background-color: white;
+             padding: 1rem;
+         }
+
+         .link {
+             text-decoration: none;
+             color: orange;
+         }
+         
+        </style>
+
+    </head>
+    <body>
+        <div class="container">
+            <h3 class="title">
+                Report {{ analysis.report_code }}
+            </h3>
+            <p class="text">
+                <b>Greetings,</b>
+                <br />
+                Attached you can find our report {{ analysis.report_code }} of <b>{{ analysis.exam.name }}</b> for the center
+                <b>{{ analysis.entryform.center }}</b> of <b>{{ analysis.entryform.company }}</b>.
+                
+            </p>
+            <p
+                <b style="color: royalblue">VeHiCe R&D Team</b>
+                <br />
+                For Technical inquires you can reach out for us <a class="link" href="mailto:carlos.sandoval@vehice.com">here.</a>
+                <br />
+                For Invoices, Quotes and other financial questions you can reach out for us <a class="link" href="mailto:hector.diaz@vehice.com">here.</a>
+                <br />
+                For any other inquires you may have you can reach us <a class='link' href="">here.</a>
+                <br />
+                <img
+                    src="https://vehice.com/home/wp-content/uploads/2019/04/logo-vehice-layer-1024x347-copy.png" />
+            </p>
+            <br />
+            <a style="text-decoration:none; color: royalblue;" href="https://fishhistopathology.com/home/">
+                Check out our
+                <b style="color: orange">blog</b>
+            </a>
+        </div>
+    </body>
+</html>
