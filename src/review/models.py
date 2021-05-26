@@ -1,10 +1,8 @@
-from django.db import models
-
 from django.contrib.auth.models import User
-from backend.models import AnalysisForm
+from django.db import models
 from django.db.models import Q
 
-from backend.models import Customer
+from backend.models import AnalysisForm, Customer
 
 
 class AnalysisManager(models.Manager):
@@ -21,8 +19,8 @@ class AnalysisManager(models.Manager):
             .filter(
                 forms__form_closed=0,
                 forms__cancelled=0,
-                manual_cancelled_date__exact=None,
-                manual_closing_date__exact=None,
+                manual_cancelled_date__isnull=True,
+                manual_closing_date__isnull=True,
             )
         )
 
@@ -34,13 +32,10 @@ class AnalysisManager(models.Manager):
         return (
             self.get_queryset()
             .filter(
-                Q(
-                    exam__pathologists_assignment=True,
-                    pre_report_started=True,
-                    pre_report_ended=True,
-                    stages__isnull=True,
-                )
-                | Q(stages__state=0)
+                Q(stages__isnull=True) | Q(stages__state=0),
+                exam__pathologists_assignment=True,
+                pre_report_started=True,
+                pre_report_ended=True,
             )
             .select_related("entryform", "exam", "stain")
         )
@@ -66,6 +61,46 @@ class Analysis(AnalysisForm):
     """
 
     objects = AnalysisManager()
+
+    @property
+    def email_subject(self):
+        """Returns a string of key data for an email's subject"""
+        subject = []
+        case = self.entryform
+
+        if case.company:
+            subject.append(case.company)
+
+        if case.center:
+            subject.append(case.center)
+
+        subject.append(self.exam.name)
+        subject.append(self.report_code)
+
+        return "/".join(subject)
+
+    def set_report_code(self):
+        """Stores a report code following the format VHC-00000-000"""
+        case = str(self.entryform.no_caso[1:]).zfill(5)
+        service = str(self.exam_id).zfill(3)
+        self.report_code = f"VHC-{case}-{service}"
+        self.save()
+
+    def get_recipients(self):
+        """Returns a list of all emails from self's MailLists."""
+        recipients = []
+        for mails in self.mailing_lists.all():
+            recipients.extend(mails.recipients_email)
+        return recipients
+
+    def get_sendable_file(self):
+        """Returns self's :model:`review.File` which is available to be send."""
+        sendable = None
+        try:
+            sendable = File.objects.filter(analysis=self, state=3).latest("created_at")
+        except File.DoesNotExist:
+            pass
+        return sendable
 
     class Meta:
         proxy = True
@@ -167,6 +202,11 @@ class MailList(models.Model):
     analysis = models.ManyToManyField(
         to=Analysis, related_name="mailing_lists", through="AnalysisMailList"
     )
+
+    @property
+    def recipients_email(self):
+        """Returns a list of email for all Recipients."""
+        return [recipient.email for recipient in self.recipients.all()]
 
     def __str__(self):
         return self.name
