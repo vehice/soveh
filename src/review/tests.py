@@ -1,9 +1,11 @@
-from django.test import TestCase, Client
+import json
 
 from django.contrib.auth.models import User
-from review.models import Analysis, File, MailList, Stage
+from django.test import Client, TestCase
 from django.urls import reverse
-import json
+
+from backend.models import Customer
+from review.models import Analysis, AnalysisMailList, File, MailList, Recipient, Stage
 
 
 class AnalysisTestCase(TestCase):
@@ -118,6 +120,14 @@ class AnalysisTestCase(TestCase):
 
         self.assertTrue(response.streaming_content)
 
+
+class MailListTestCase(TestCase):
+    def setUp(self):
+        Analysis.objects.create(pre_report_started=True, exam_id=66)
+        Analysis.objects.create(
+            pre_report_started=True, pre_report_ended=True, exam_id=66
+        )
+
     def test_mail_list_get(self):
         client = Client()
         client.login(username="jmonagas", password="vehice1234")
@@ -132,7 +142,7 @@ class AnalysisTestCase(TestCase):
 
         self.assertDictContainsSubset(
             {"model": "review.maillist"},
-            response_json["mail_lists"],
+            json.loads(json.dumps(response_json))["mail_lists"],
             "Response must contain expected data.",
         )
 
@@ -172,4 +182,73 @@ class AnalysisTestCase(TestCase):
 
         self.assertDictContainsSubset(
             {"status": "ERR"}, body, "Response must contain expected data."
+        )
+
+    def test_recipients_email(self):
+        Recipient.objects.bulk_create(
+            [
+                Recipient(email="test1@mail.cl", first_name="Lacreo1"),
+                Recipient(email="test2@mail.cl", first_name="Lacreo2"),
+                Recipient(email="test3@mail.cl", first_name="Lacreo3"),
+            ]
+        )
+        customer = Customer.objects.all().last()
+        analysis = Analysis.objects.all().last()
+        mail_list = MailList.objects.create(name="Lacreo", customer=customer)
+
+        mail_list.recipients.set(Recipient.objects.all())
+        AnalysisMailList.objects.create(analysis=analysis, mail_list=mail_list)
+
+        self.assertGreaterEqual(
+            len(mail_list.recipients_email), 3, "Response must contain expected data."
+        )
+
+    def test_current_email(self):
+        Recipient.objects.bulk_create(
+            [
+                Recipient(email="test1@mail.cl", first_name="Lacreo1"),
+                Recipient(email="test2@mail.cl", first_name="Lacreo2"),
+                Recipient(email="test3@mail.cl", first_name="Lacreo3"),
+            ]
+        )
+        customer = Customer.objects.all().last()
+        analysis = Analysis.objects.all().last()
+        mail_list = MailList.objects.create(name="Lacreo", customer=customer)
+
+        mail_list.recipients.set(Recipient.objects.all())
+        AnalysisMailList.objects.create(analysis=analysis, mail_list=mail_list)
+
+        client = Client()
+        client.login(username="jmonagas", password="vehice1234")
+
+        response = client.get(
+            reverse("review:current_email", kwargs={"pk": analysis.id})
+        )
+
+        self.assertDictContainsSubset(
+            {"name": "Lacreo"}, response.json(), "Response must contain expected data."
+        )
+
+    def test_send_email(self):
+        Recipient.objects.bulk_create(
+            [
+                Recipient(email="test1@mail.cl", first_name="Lacreo1"),
+                Recipient(email="test2@mail.cl", first_name="Lacreo2"),
+                Recipient(email="test3@mail.cl", first_name="Lacreo3"),
+            ]
+        )
+        customer = Customer.objects.all().last()
+        analysis = Analysis.objects.all().last()
+        mail_list = MailList.objects.create(name="Lacreo", customer=customer)
+
+        mail_list.recipients.set(Recipient.objects.all())
+        AnalysisMailList.objects.create(analysis=analysis, mail_list=mail_list)
+
+        client = Client()
+        client.login(username="jmonagas", password="vehice1234")
+
+        response = client.post(reverse("review:send_email", kwargs={"pk": analysis.id}))
+
+        self.assertDictContainsSubset(
+            {"status": "OK"}, response.json(), "Response must contain expected data."
         )
