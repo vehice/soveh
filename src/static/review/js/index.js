@@ -13,9 +13,9 @@ $(document).ready(() => {
     .disableSelection();
 
   $("#newFiles").dropzone({
-    previewsContainer: null,
     dictDefaultMessage: "Arrastre sus archivos aqui",
     acceptedFiles: ".csv, .doc, .docx, .ods, .odt, .pdf, .xls, .xlsx",
+    createImageThumbnails: false,
     headers: {
       "X-CSRFToken": getCookie("csrftoken"),
     },
@@ -157,6 +157,34 @@ $(document).ready(() => {
     }
   }
 
+  function updateSelectRecipients() {
+    $.get(Urls["review:mail_list"](analysis), (response) => {
+      const mailList = JSON.parse(response["mail_lists"]);
+
+      const selected = JSON.parse(response["current_lists"]);
+      if (mailList.length > 0) {
+        if (selectRecipients.hasClass("select2-hidden-accessible")) {
+          selectRecipients.select2("destroy");
+        }
+        const options = mailList.map((mail) => {
+          const isSelected = selected.some(
+            (item) => item.fields.mail_list == mail.pk
+          );
+          return {
+            id: mail.pk,
+            text: mail.fields.name,
+            selected: isSelected,
+          };
+        });
+        selectRecipients.select2({
+          data: options,
+          width: "100%",
+          multiple: true,
+        });
+      }
+    });
+  }
+
   /* EVENTS */
 
   $(".state").on("sortreceive", (event, ui) => {
@@ -217,32 +245,6 @@ $(document).ready(() => {
     $("#fileDialog h5.modal-title").text(title);
 
     dlgFileList.show();
-
-    $.get(Urls["review:mail_list"](analysis), (response) => {
-      const mailList = JSON.parse(response["mail_lists"]);
-
-      const selected = JSON.parse(response["current_lists"]);
-      if (mailList.length > 0) {
-        if (selectRecipients.hasClass("select2-hidden-accessible")) {
-          selectRecipients.select2("destroy");
-        }
-        const options = mailList.map((mail) => {
-          const isSelected = selected.some(
-            (item) => item.fields.mail_list == mail.pk
-          );
-          return {
-            id: mail.pk,
-            text: mail.fields.name,
-            selected: isSelected,
-          };
-        });
-        selectRecipients.select2({
-          data: options,
-          width: "100%",
-          multiple: true,
-        });
-      }
-    });
 
     $.ajax(Urls["review:files"](analysis), {
       method: "GET",
@@ -357,5 +359,10 @@ $(document).ready(() => {
         }
       });
     });
+  });
+
+  $("#btnRefreshRecipient").click(() => {
+    toastr.info("Actualizando destinatarios...");
+    updateSelectRecipients();
   });
 });
