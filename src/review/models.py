@@ -60,7 +60,7 @@ class UndeletedManager(models.Manager):
     """
 
     def get_queryset(self):
-        return super().get_queryset().filter(deleted_at__isnull=True)
+        return super().get_queryset().filter(is_deleted=False)
 
 
 class Analysis(AnalysisForm):
@@ -187,6 +187,7 @@ class Recipient(models.Model):
     """
 
     objects = UndeletedManager()
+    items = models.Manager()
 
     email = models.EmailField()
     first_name = models.CharField(max_length=255)
@@ -195,7 +196,7 @@ class Recipient(models.Model):
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    deleted_at = models.DateTimeField(null=True)
+    is_deleted = models.BooleanField(default=False, verbose_name="Desactivado")
 
     @property
     def full_name(self):
@@ -211,6 +212,7 @@ class MailList(models.Model):
     """
 
     objects = UndeletedManager()
+    items = models.Manager()
 
     name = models.CharField(max_length=255)
     customer = models.ForeignKey(
@@ -223,7 +225,7 @@ class MailList(models.Model):
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    deleted_at = models.DateTimeField(null=True)
+    is_deleted = models.BooleanField(default=False, verbose_name="Desactivado")
 
     @property
     def recipients_email(self):
