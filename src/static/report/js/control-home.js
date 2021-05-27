@@ -27,7 +27,6 @@ $(document).ready(function () {
       {
         type: "category",
         boundaryGap: false,
-        data: [],
       },
     ],
     yAxis: [{ type: "value" }],
@@ -68,7 +67,6 @@ $(document).ready(function () {
     },
     xAxis: {
       type: "category",
-      data: [],
     },
     yAxis: {
       type: "value",
@@ -115,6 +113,61 @@ $(document).ready(function () {
     ],
   };
 
+  let pendingPathologistOptions = {
+    tooltip: {
+      trigger: "item",
+      formatter: "{a} <br/>{b} : {c} ({d}%)",
+    },
+    series: [
+      {
+        name: "Informes por Patologos",
+        radius: ["40%", "70%"],
+        avoidLabelOverlap: false,
+        itemStyle: {
+          borderRadius: 10,
+          borderColor: "#fff",
+          borderWidth: 2,
+        },
+        type: "pie",
+        label: {
+          show: false,
+          position: "center",
+        },
+        emphasis: {
+          label: {
+            show: true,
+            fontSize: "40",
+            fontWeight: "bold",
+          },
+        },
+        data: [],
+      },
+    ],
+  };
+  let pendingServiceOptions = {
+    tooltip: {
+      trigger: "item",
+      formatter: "{a} <br/>{b} : {c} ({d}%)",
+    },
+    series: [
+      {
+        name: "Informes por Servicios",
+        radius: ["40%", "70%"],
+        avoidLabelOverlap: false,
+        itemStyle: {
+          borderRadius: 10,
+          borderColor: "#fff",
+          borderWidth: 2,
+        },
+        type: "pie",
+        label: {
+          show: false,
+        },
+        data: [],
+      },
+    ],
+  };
+
   let avgTimeMonth = echarts.init(document.getElementById("avgTimeMonth"));
   let avgTotal = echarts.init(document.getElementById("avgTotal"));
   let avgPercentMonth = echarts.init(
@@ -125,11 +178,47 @@ $(document).ready(function () {
   avgPercentMonth.setOption(avgPercentOptions);
   avgTotal.setOption(avgTotalOptions);
 
+  let pendingPathologist = echarts.init(
+    document.getElementById("pendingPathologist")
+  );
+  let pendingService = echarts.init(document.getElementById("pendingService"));
+
+  pendingPathologist.setOption(pendingPathologistOptions);
+  pendingService.setOption(pendingServiceOptions);
+
   getData();
 
   /* FUNCTIONS */
 
-  function updateView() {
+  function initializeChart(data) {
+    let total = [0, 0, 0];
+    data.forEach((element, index) => {
+      avgTimeOptions.series[index].data = element.map((row) => [
+        row[0],
+        row[1],
+      ]);
+      avgPercentOptions.series[index].data = element.map((row) => [
+        row[0],
+        row[2],
+      ]);
+
+      let elementTotal = 0;
+
+      for (const month in element) {
+        elementTotal += element[month][1];
+      }
+
+      total[index] += elementTotal;
+    });
+
+    avgTotalOptions.series[0].data = total;
+
+    avgTimeMonth.setOption(avgTimeOptions, true);
+    avgPercentMonth.setOption(avgPercentOptions, true);
+    avgTotal.setOption(avgTotalOptions, true);
+  }
+
+  function initializePending() {
     pendingNumber.text(pending.length);
 
     if ($.fn.DataTable.isDataTable("#pendingTable")) {
@@ -168,6 +257,19 @@ $(document).ready(function () {
           },
         },
         {
+          data: "samples",
+          name: "samples",
+          type: "string",
+          title: "Cant. Muestras",
+          render: (data) => {
+            if (isNaN(data)) {
+              return "N/A";
+            } else {
+              return data;
+            }
+          },
+        },
+        {
           data: "case.fields.created_at",
           name: "entry_date",
           type: "string",
@@ -188,10 +290,29 @@ $(document).ready(function () {
           },
         },
         {
-          data: "report.fields.assignment_deadline",
+          data: "report.fields.pre_report_ended_at",
+          name: "pre_report_done",
+          type: "num",
+          title: "Pre-Informe Terminado",
+          render: (data) => {
+            const date = new Date(data);
+            return date.toLocaleDateString();
+          },
+        },
+        {
+          data: "report.fields.pre_report_ended_at",
           name: "delay",
           type: "num",
-          title: "Atraso",
+          title: "En Espera",
+          render: (data) => {
+            return dateDiff(data);
+          },
+        },
+        {
+          data: "report.fields.created_at",
+          name: "delay",
+          type: "num",
+          title: "En Sistema",
           render: (data) => {
             return dateDiff(data);
           },
@@ -203,6 +324,34 @@ $(document).ready(function () {
       },
     });
 
+    const pendingByService = _.groupBy(pending, (item) => {
+      return item.exam.fields.name;
+    });
+
+    const pendingByPathologist = _.groupBy(pending, (item) => {
+      const data = item.user.fields;
+      return `${data.first_name[0]}${data.last_name[0]}`;
+    });
+
+    for (const pathologist in pendingByPathologist) {
+      pendingPathologistOptions.series[0].data.push({
+        value: pendingByPathologist[pathologist].length,
+        name: pathologist,
+      });
+    }
+
+    for (const service in pendingByService) {
+      pendingServiceOptions.series[0].data.push({
+        value: pendingByService[service].length,
+        name: service,
+      });
+    }
+
+    pendingPathologist.setOption(pendingPathologistOptions, true);
+    pendingService.setOption(pendingServiceOptions, true);
+  }
+
+  function initializeUnassigned() {
     unassignedNumber.text(unassigned.length);
 
     if ($.fn.DataTable.isDataTable("#unassignedTable")) {
@@ -224,6 +373,12 @@ $(document).ready(function () {
           name: "exam",
           type: "string",
           title: "Servicio",
+        },
+        {
+          data: "samples",
+          name: "samples",
+          type: "number",
+          title: "Cant. Muestras",
         },
         {
           data: "stain.fields.abbreviation",
@@ -256,114 +411,88 @@ $(document).ready(function () {
         sUrl: "https://cdn.datatables.net/plug-ins/1.10.16/i18n/Spanish.json",
       },
     });
+  }
+
+  function getChartObject(grouped, startKeys, endKeys) {
+    let object = [];
+    for (const month in grouped) {
+      const group = grouped[month];
+      const length = group.length;
+
+      let monthValue = 0;
+      let monthPercent = 0;
+      for (const row of group) {
+        const value = parseInt(
+          dateDiff(
+            row[startKeys[0]].fields[startKeys[1]],
+            row[endKeys[0]].fields[endKeys[1]]
+          )
+        );
+        const total =
+          parseInt(
+            dateDiff(
+              row.case.fields.created_at,
+              row.report.fields.pre_report_started_at
+            )
+          ) +
+          parseInt(
+            dateDiff(
+              row.report.fields.pre_report_started_at,
+              row.report.fields.pre_report_ended_at
+            )
+          ) +
+          parseInt(
+            dateDiff(
+              row.report.fields.pre_report_ended_at,
+              row.workflow.fields.closed_at
+            )
+          );
+
+        monthValue += value;
+        monthPercent += (value / total) * 100;
+      }
+      object.push([
+        month,
+        parseInt((monthValue / length).toFixed(1)),
+        parseInt((monthPercent / length).toFixed(1)),
+      ]);
+    }
+
+    return object.sort((a, b) => {
+      const dateA = new Date(a[0]);
+      const dateB = new Date(b[0]);
+      return dateA - dateB;
+    });
+  }
+
+  function updateView() {
+    initializePending();
+    initializeUnassigned();
 
     const finishedByMonth = _.groupBy(finished, (row) => {
       const date = new Date(row.workflow.fields.closed_at);
       return `${date.getFullYear()}/${date.getMonth() + 1}`;
     });
 
-    let months = [];
-    let entryToRead = {
-      percent: [],
-      value: [],
-    };
-    let readToReview = {
-      percent: [],
-      value: [],
-    };
-    let reviewToSend = {
-      percent: [],
-      value: [],
-    };
-
-    for (const month in finishedByMonth) {
-      const group = finishedByMonth[month];
-      const length = group.length;
-
-      let currentEtR = 0;
-      let currentRtR = 0;
-      let currentRtS = 0;
-
-      let currentEtRPercent = 0;
-      let currentRtRPercent = 0;
-      let currentRtSPercent = 0;
-      for (const row of group) {
-        const rowEtR = parseInt(
-          dateDiff(
-            row.case.fields.created_at,
-            row.report.fields.pre_report_started_at
-          )
-        );
-        const rowRtR = parseInt(
-          dateDiff(
-            row.report.fields.pre_report_started_at,
-            row.report.fields.pre_report_ended_at
-          )
-        );
-        const rowRtS = parseInt(
-          dateDiff(
-            row.report.fields.pre_report_ended_at,
-            row.workflow.fields.closed_at
-          )
-        );
-        const rowTotal = rowEtR + rowRtR + rowRtS;
-
-        currentRtR += rowRtR;
-        currentEtR += rowEtR;
-        currentRtS += rowRtS;
-
-        currentRtRPercent += (rowRtR / rowTotal) * 100;
-        currentEtRPercent += (rowEtR / rowTotal) * 100;
-        currentRtSPercent += (rowRtS / rowTotal) * 100;
-      }
-
-      months.push(month);
-      entryToRead.percent.push((currentEtRPercent / length).toFixed(1));
-      readToReview.percent.push((currentRtRPercent / length).toFixed(1));
-      reviewToSend.percent.push((currentRtSPercent / length).toFixed(1));
-
-      entryToRead.value.push((currentEtR / length).toFixed(1));
-      readToReview.value.push((currentRtR / length).toFixed(1));
-      reviewToSend.value.push((currentRtS / length).toFixed(1));
-    }
-
-    avgTimeOptions.legend.data = months;
-    avgTimeOptions.xAxis[0].data = months;
-    avgTimeOptions.series[0].data = entryToRead.value;
-    avgTimeOptions.series[1].data = readToReview.value;
-    avgTimeOptions.series[2].data = reviewToSend.value;
-
-    avgPercentOptions.xAxis.data = months;
-    avgPercentOptions.series[0].data = entryToRead.percent;
-    avgPercentOptions.series[1].data = readToReview.percent;
-    avgPercentOptions.series[2].data = reviewToSend.percent;
-
-    avgTotalOptions.series[0].data.length = 0;
-
-    avgTotalOptions.series[0].data.push({
-      value: entryToRead.value.reduce(
-        (acc, current) => parseInt(acc) + parseInt(current)
+    let stages = [
+      getChartObject(
+        finishedByMonth,
+        ["case", "created_at"],
+        ["report", "pre_report_started_at"]
       ),
-      name: "Ingreso hasta Lectura",
-    });
-
-    avgTotalOptions.series[0].data.push({
-      value: readToReview.value.reduce(
-        (acc, current) => parseInt(acc) + parseInt(current)
+      getChartObject(
+        finishedByMonth,
+        ["report", "pre_report_started_at"],
+        ["report", "pre_report_ended_at"]
       ),
-      name: "Lectura hasta Pre-Informe",
-    });
-
-    avgTotalOptions.series[0].data.push({
-      value: reviewToSend.value.reduce(
-        (acc, current) => parseInt(acc) + parseInt(current)
+      getChartObject(
+        finishedByMonth,
+        ["report", "pre_report_ended_at"],
+        ["workflow", "closed_at"]
       ),
-      name: "Pre-Informe hasta Cierre",
-    });
+    ];
 
-    avgTimeMonth.setOption(avgTimeOptions, true);
-    avgPercentMonth.setOption(avgPercentOptions, true);
-    avgTotal.setOption(avgTotalOptions, true);
+    initializeChart(stages);
   }
 
   function mapData(data, key) {
@@ -374,6 +503,7 @@ $(document).ready(function () {
         case: JSON.parse(row.case)[0],
         user: JSON.parse(row.user)[0],
         stain: JSON.parse(row.stain)[0],
+        samples: JSON.parse(row.samples),
         workflow: JSON.parse(row.workflow)[0],
       };
     });
