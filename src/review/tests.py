@@ -189,7 +189,7 @@ class MailListTestCase(TestCase):
             [
                 Recipient(email="test1@mail.cl", first_name="Lacreo1"),
                 Recipient(email="test2@mail.cl", first_name="Lacreo2"),
-                Recipient(email="test3@mail.cl", first_name="Lacreo3"),
+                Recipient(email="test3@mail.cl", first_name="Lacreo3", is_deleted=True),
             ]
         )
         customer = Customer.objects.all().last()
@@ -200,7 +200,7 @@ class MailListTestCase(TestCase):
         AnalysisMailList.objects.create(analysis=analysis, mail_list=mail_list)
 
         self.assertGreaterEqual(
-            len(mail_list.recipients_email), 3, "Response must contain expected data."
+            len(mail_list.recipients_email), 2, "Response must contain expected data."
         )
 
     def test_current_email(self):
