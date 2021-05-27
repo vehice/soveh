@@ -53,6 +53,16 @@ class AnalysisManager(models.Manager):
         )
 
 
+class UndeletedManager(models.Manager):
+    """Custom manager for models with deleted_at fields.
+    It's main purpouse is to scope the queryset to all
+    instances that haven't been deleted.
+    """
+
+    def get_queryset(self):
+        return super().get_queryset().filter(deleted_at__isnull=True)
+
+
 class Analysis(AnalysisForm):
     """
     Proxy class for :model:`backend.AnalysisForm`, it's used in the Review app to filter
@@ -176,10 +186,16 @@ class Recipient(models.Model):
     :model:`review.Analysis` whenever this it's moved to a :model:`review.Stage` finished.
     """
 
+    objects = UndeletedManager()
+
     email = models.EmailField()
     first_name = models.CharField(max_length=255)
     last_name = models.CharField(max_length=255, blank=True)
     role = models.CharField(max_length=255, blank=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    deleted_at = models.DateTimeField(null=True)
 
     @property
     def full_name(self):
@@ -194,6 +210,8 @@ class MailList(models.Model):
     Allows grouping multiple :model:`review.Recipient` under the same :model:`backend.Customer`
     """
 
+    objects = UndeletedManager()
+
     name = models.CharField(max_length=255)
     customer = models.ForeignKey(
         to=Customer, on_delete=models.CASCADE, related_name="mailing_lists"
@@ -202,6 +220,10 @@ class MailList(models.Model):
     analysis = models.ManyToManyField(
         to=Analysis, related_name="mailing_lists", through="AnalysisMailList"
     )
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    deleted_at = models.DateTimeField(null=True)
 
     @property
     def recipients_email(self):
