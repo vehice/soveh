@@ -51,6 +51,11 @@ def default_tree(user):
             "icon": "ft-book",
             "section_name": "Estudios" if language == 1 else "Studies",
         },
+        {
+            "path": "/derivacion/0",
+            "icon": "ft-users",
+            "section_name": "Derivación" if language == 1 else "Derivation",
+        },
     ]
     reports = []
 
@@ -75,6 +80,15 @@ def default_tree(user):
             }
         )
 
+    if user.userprofile.profile_id in (1, 2) or user.userprofile.is_reviewer:
+        menu.append(
+            {
+                "icon": "ft-check-square",
+                "section_name": "Revisión" if language == 1 else "Review",
+                "path": reverse("review:index"),
+            },
+        )
+
     menu.append(
         {
             "icon": "ft-pie-chart",
@@ -90,6 +104,15 @@ def default_tree(user):
                 "section_name": "Derivación" if language == 1 else "Derivation",
             }
         )
+    if user.userprofile.profile_id == 1:
+        menu.append(
+            {
+                "path": "/admin",
+                "icon": "ft-settings",
+                "section_name": "Administración" if language == 1 else "Administration",
+            }
+        )
+
     if user.userprofile.profile_id == 1:
         menu.append(
             {
