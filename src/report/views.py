@@ -352,6 +352,7 @@ class ControlView(View):
         date_end = date.today()
 
         analysis = AnalysisForm.objects.filter(
+            Q(manual_cancelled_date__isnull=True) | Q(forms__cancelled=False),
             Q(forms__form_closed=False) | Q(manual_closing_date__isnull=True),
         )
 
