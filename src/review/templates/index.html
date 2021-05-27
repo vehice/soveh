@@ -78,10 +78,15 @@
                 </button>
             </div>
             <div class="modal-body container-fluid">
-                <section class="row border-bottom pb-2 mb-2">
-                    <div class="col-md-12">
+                <section class="row border-bottom pb-2 mb-2 align-items-center">
+                    <div class="col-md-10 form-group">
                         <label for=""><h4>Destinatarios:</h4></label>
-                        <select id="selectRecipients"></select>
+                        <select class="form-control" id="selectRecipients"></select>
+                    </div>
+                    <div class="col-md-2">
+                        <button class="btn btn-ouline-info" id="btnRefreshRecipients">
+                            <i class="ft-refresh-cw"></i>
+                        </button>
                     </div>
                 </section>
                 <section class="row border-bottom pb-2 mb-2">
