@@ -36,7 +36,7 @@ class AnalysisManager(models.Manager):
 
         return (
             self.get_queryset()
-            .filter(stages__state=Stage.STATES[state_index])
+            .filter(stages__state=state_index)
             .select_related("entryform", "exam", "stain")
         )
 
@@ -59,7 +59,13 @@ class Stage(models.Model):
     Details a single stage in which an :model:`review.Analysis` is currently at.
     """
 
-    STATES = ((0, "FORMATO"), (1, "REVISION"), (2, "ENVIO"), (3, "FINALIZADO"))
+    STATES = (
+        (0, "ESPERA"),
+        (1, "FORMATO"),
+        (2, "REVISION"),
+        (3, "ENVIO"),
+        (4, "FINALIZADO"),
+    )
 
     analysis = models.ForeignKey(
         AnalysisForm, on_delete=models.CASCADE, related_name="stages"
@@ -71,6 +77,10 @@ class Stage(models.Model):
     )
     created_at = models.DateTimeField(auto_now=True)
 
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        Logbook.objects.create(stage=self, state=self.state, user=self.created_by)
+
 
 class Logbook(models.Model):
     """
@@ -79,10 +89,8 @@ class Logbook(models.Model):
 
     stage = models.ForeignKey(Stage, on_delete=models.CASCADE, related_name="logbooks")
 
-    previous = models.CharField(max_length=1, choices=Stage.STATES)
-    current = models.CharField(max_length=1, choices=Stage.STATES)
+    state = models.CharField(max_length=1, choices=Stage.STATES)
 
-    date = models.DateTimeField()
     user = models.ForeignKey(
         User, on_delete=models.SET_NULL, related_name="logbooks", null=True
     )
