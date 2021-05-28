@@ -130,7 +130,7 @@ def send_email(request, pk):
     email = EmailMultiAlternatives(
         analysis.email_subject,
         message,
-        "from@example.com",
+        "report@vehice.com",
         analysis.get_recipients(),
     )
     email.content_subtype = "html"
