@@ -469,10 +469,21 @@ $(document).ready(function () {
     initializePending();
     initializeUnassigned();
 
-    const finishedByMonth = _.groupBy(finished, (row) => {
+    let finishedByMonth = _.groupBy(finished, (row) => {
       const date = new Date(row.workflow.fields.closed_at);
       return `${date.getFullYear()}/${date.getMonth() + 1}`;
     });
+
+    let date = new Date();
+    date.setMonth(date.getMonth() - 4);
+
+    for (const group in finishedByMonth) {
+      const groupDate = new Date(group);
+
+      if (date > groupDate) {
+        delete finishedByMonth[group];
+      }
+    }
 
     let stages = [
       getChartObject(
@@ -539,7 +550,6 @@ $(document).ready(function () {
 
       success: (_data, textStatus) => {
         Swal.close();
-        // REFACTOR THIS IF DJANGO REST FRAMEWORK IS USED
         pending = mapData(_data, "pending");
         unassigned = mapData(_data, "unassigned");
         finished = mapData(_data, "finished");

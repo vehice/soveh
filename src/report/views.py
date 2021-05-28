@@ -353,15 +353,16 @@ class ControlView(View):
 
         analysis = AnalysisForm.objects.filter(
             Q(manual_cancelled_date__isnull=True) | Q(forms__cancelled=False),
-            Q(forms__form_closed=False) | Q(manual_closing_date__isnull=True),
         )
 
         pending = analysis.filter(
+            Q(forms__form_closed=False) | Q(manual_closing_date__isnull=True),
             pre_report_started=True,
             pre_report_ended=True,
         ).select_related("entryform", "patologo", "stain")
 
         unassigned = analysis.filter(
+            Q(forms__form_closed=False) | Q(manual_closing_date__isnull=True),
             patologo__isnull=True,
             exam__service_id__in=(1, 4),
         ).select_related("entryform", "patologo", "stain")
