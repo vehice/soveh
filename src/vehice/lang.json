@@ -658,5 +658,9 @@
     "no":{
         "es":"No",
         "en":"No"
+    },
+    "individual":{
+        "es":"Individuo",
+        "en":"Individual"
     }
 }

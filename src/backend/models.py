@@ -574,6 +574,7 @@ class Sample(models.Model):
     entryform = models.ForeignKey(EntryForm, null=True, on_delete=models.SET_NULL)
     index = models.IntegerField(null=True, blank=True)  # correlative
     organs = models.ManyToManyField(Organ)
+    organsUnits = models.ManyToManyField(OrganUnit)
     identification = models.ForeignKey(
         Identification, null=True, on_delete=models.SET_NULL
     )
@@ -810,3 +811,21 @@ class DocumentResumeActionLog(models.Model):
     download_action = models.BooleanField(default=False)
     action_date = models.DateTimeField(auto_now_add=True)
     done_by = models.ForeignKey(User, null=True, on_delete=models.SET_NULL)
+
+class LogType(models.Model):
+    type = models.CharField(max_length=250, null=True, blank=True)
+    
+class Log(models.Model):
+    """
+    Logs
+    """
+
+    log_date = models.DateTimeField()
+    user = models.ForeignKey(
+        User, null=True, on_delete=models.PROTECT, verbose_name="Usuario"
+    )
+    log_type = models.ForeignKey(
+        LogType, null=True, on_delete=models.PROTECT, verbose_name="Tipo"
+    )
+    modelo = models.IntegerField(null=True, blank=True)
+    id_modelo = models.IntegerField(null=True, blank=True)

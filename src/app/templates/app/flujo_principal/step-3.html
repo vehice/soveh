@@ -48,7 +48,7 @@
           <thead>
             <tr>
               <th style="width:5%">{{request.lang.selection}}</th>
-              <th style="width:5%">{{request.lang.nro_sample}}</th>
+              <th style="width:5%">{{request.lang.individual}}</th>
               <th style="width:15%">{{request.lang.identification}}</th>
               <th style="width:25%">{{request.lang.organs}}</th>
               <th style="width:25%">{{request.lang.analysis}} / Tinción</th>
@@ -81,7 +81,7 @@
     <td id="sampleOrgans-<%= sample.id %>" rowspan="1">
       <select id="sampleOrgans-<%= sample.id %>" multiple class="form-control sampleOrgansSelect" style="width:100% !important;" disabled >
         <% _.each(sample.organs_set, function (organ) { %>
-          <option selected value="<%= organ.id %>"><%= organ.abbreviation %></option>
+          <option selected value="<%= organ.organ.id %>"><%= organ.organ.abbreviation %></option>
         <% }); %>
       </select>
     </td>
@@ -117,7 +117,7 @@
   <td>
     <select class="form-control organs-select organs-select-<%= sampleId %>-<%= examId %>" style="width:100% !important;" name="sample[organs][<%= sampleId %>][<%= examId %>][<%= stain.id %>]" multiple="multiple" disabled>
       <% _.each(organs, function (organ) { %>
-        <option value="<%= organ.id %>"> <%= organ.abbreviation %> </option>
+        <option value="<%= organ.organ.id %>"> <%= organ.organ.abbreviation %> </option>
       <% }); %>
     </select>
   </td>

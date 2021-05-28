@@ -153,7 +153,7 @@ function addExamToSamples(){
 
       for (let organ of organs_selected) {
         for (let elem of sample.organs_set){
-          if (organ == elem.id) {
+          if (organ == elem.organ.id) {
             organs_to_analize.push(elem)
           }
         }
@@ -181,14 +181,15 @@ function addExamToSamples(){
         $("#sample-"+sample.id).after(html)
         let analisis_tr = $("#analisis-"+sample.id+"-"+analysis_selected+"-"+stain_selected)
         let select_organs = analisis_tr.find(".organs-select").first()
+
         select_organs.select2();
-        select_organs.val(organs_to_analize.map(o => o.id)).trigger('change')
+        select_organs.val(organs_to_analize.map(o => o.organ.id)).trigger('change')
       
       } else if ( organs_to_analize.length > 0 && analisis_tr.length ) {
 
         let values = select_organs.val()
         for (let organ of organs_to_analize) {
-          values.push(organ.id)
+          values.push(organ.organ.id)
         }
         select_organs.val(values)
         select_organs.trigger('change')

@@ -109,12 +109,15 @@ class ENTRYFORM(View):
             samples_as_dict = []
             for s in samples:
                 s_dict = model_to_dict(
-                    s, exclude=["organs", "sampleexams", "identification"]
+                    s, exclude=["organs", "organsUnits", "sampleexams", "identification"]
                 )
                 organs = []
 
-                for org in s.organs.all():
-                    organs.append(model_to_dict(org))
+                for org in s.organsUnits.all():
+                    unit = model_to_dict(org.unit, exclude=["organs",])
+                    organ = model_to_dict(org.organ)
+                    organs.append({'unit': unit, 'organ': organ})
+
                 s_dict["organs_set"] = organs
 
                 sampleexams = s.sampleexams_set.all()
@@ -2354,7 +2357,7 @@ def step_2_entryform(request):
 
                 sample.organs.clear()
                 for ou in OrganUnit.objects.filter(unit__in=map(lambda x: x.pk, v)):
-                    sample.organs.add(ou.organ)
+                    sample.organsUnits.add(ou)
 
                 index += 1
         else:
@@ -3054,6 +3057,8 @@ def save_units(request):
 
 
 def remove_unit(request, id):
+    for OU in Unit.objects.get(pk=id).organs.all():
+        Sample.objects.filter(organsUnits__in=[OU.id]).delete()
     Unit.objects.get(pk=id).delete()
     return JsonResponse({"ok": 1})
 
@@ -3135,6 +3140,7 @@ def save_new_identification(request, id):
 
 def remove_identification(request, id):
     try:
+        Sample.objects.filter(identification_id=id).delete()
         Identification.objects.get(pk=id).delete()
         return JsonResponse({"ok": 1})
     except:
