@@ -236,6 +236,18 @@ $(document).ready(function () {
           title: "Caso",
         },
         {
+          data: "case.fields.company",
+          name: "company",
+          type: "string",
+          title: "Empresa",
+        },
+        {
+          data: "case.fields.center",
+          name: "center",
+          type: "string",
+          title: "Centro",
+        },
+        {
           data: "exam.fields.name",
           name: "exam",
           type: "string",
