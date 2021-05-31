@@ -7,36 +7,53 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('backend', '0118_auto_20210506_1124'),
-        ('review', '0004_auto_20210520_1115'),
+        ("backend", "0106_auto_20210115_2204"),
+        ("review", "0004_auto_20210520_1115"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='MailList',
+            name="MailList",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=255)),
-                ('client', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='mailing_lists', to='backend.Customer')),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("name", models.CharField(max_length=255)),
+                (
+                    "client",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="mailing_lists",
+                        to="backend.Customer",
+                    ),
+                ),
             ],
         ),
         migrations.RemoveField(
-            model_name='recipient',
-            name='company',
+            model_name="recipient",
+            name="company",
         ),
         migrations.AlterField(
-            model_name='recipient',
-            name='last_name',
+            model_name="recipient",
+            name="last_name",
             field=models.CharField(blank=True, max_length=255),
         ),
         migrations.AlterField(
-            model_name='recipient',
-            name='role',
+            model_name="recipient",
+            name="role",
             field=models.CharField(blank=True, max_length=255),
         ),
         migrations.AddField(
-            model_name='maillist',
-            name='recipients',
-            field=models.ManyToManyField(related_name='mailing_lists', to='review.Recipient'),
+            model_name="maillist",
+            name="recipients",
+            field=models.ManyToManyField(
+                related_name="mailing_lists", to="review.Recipient"
+            ),
         ),
     ]

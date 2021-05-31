@@ -11,36 +11,64 @@ class Migration(migrations.Migration):
 
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ('backend', '0118_auto_20210506_1124'),
+        ("backend", "0106_auto_20210115_2204"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='Stage',
+            name="Stage",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('state', models.CharField(choices=[(0, 'FORMATO'), (1, 'REVISION'), (2, 'ENVIO'), (3, 'FINALIZADO')], default=0, max_length=1)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "state",
+                    models.CharField(
+                        choices=[
+                            (0, "FORMATO"),
+                            (1, "REVISION"),
+                            (2, "ENVIO"),
+                            (3, "FINALIZADO"),
+                        ],
+                        default=0,
+                        max_length=1,
+                    ),
+                ),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
             ],
         ),
         migrations.CreateModel(
-            name='Analysis',
-            fields=[
-            ],
+            name="Analysis",
+            fields=[],
             options={
-                'proxy': True,
-                'indexes': [],
+                "proxy": True,
+                "indexes": [],
             },
-            bases=('backend.analysisform',),
+            bases=("backend.analysisform",),
         ),
         migrations.AddField(
-            model_name='stage',
-            name='analysis',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='stages', to='backend.AnalysisForm'),
+            model_name="stage",
+            name="analysis",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="stages",
+                to="backend.AnalysisForm",
+            ),
         ),
         migrations.AddField(
-            model_name='stage',
-            name='created_by',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='review_stages', to=settings.AUTH_USER_MODEL),
+            model_name="stage",
+            name="created_by",
+            field=models.ForeignKey(
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="review_stages",
+                to=settings.AUTH_USER_MODEL,
+            ),
         ),
     ]

@@ -487,7 +487,7 @@ $(document).ready(function () {
     });
 
     let date = new Date();
-    date.setMonth(date.getMonth() - 4);
+    date.setMonth(date.getMonth() - 6);
 
     for (const group in finishedByMonth) {
       const groupDate = new Date(group);
