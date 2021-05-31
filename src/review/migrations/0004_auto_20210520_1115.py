@@ -6,28 +6,41 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('backend', '0118_auto_20210506_1124'),
-        ('review', '0003_auto_20210517_1117'),
+        ("backend", "0106_auto_20210115_2204"),
+        ("review", "0003_auto_20210517_1117"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='Recipient',
+            name="Recipient",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('email', models.EmailField(max_length=254)),
-                ('first_name', models.CharField(max_length=255)),
-                ('last_name', models.CharField(max_length=255)),
-                ('role', models.CharField(max_length=255)),
-                ('company', models.ManyToManyField(related_name='recipients', to='backend.Customer')),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("email", models.EmailField(max_length=254)),
+                ("first_name", models.CharField(max_length=255)),
+                ("last_name", models.CharField(max_length=255)),
+                ("role", models.CharField(max_length=255)),
+                (
+                    "company",
+                    models.ManyToManyField(
+                        related_name="recipients", to="backend.Customer"
+                    ),
+                ),
             ],
         ),
         migrations.AlterModelOptions(
-            name='file',
-            options={'ordering': ['-created_at']},
+            name="file",
+            options={"ordering": ["-created_at"]},
         ),
         migrations.AlterModelOptions(
-            name='logbook',
-            options={'ordering': ['-created_at']},
+            name="logbook",
+            options={"ordering": ["-created_at"]},
         ),
     ]
