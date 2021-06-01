@@ -1,13 +1,11 @@
-import json
 import datetime
+import json
 
-from django.contrib import auth
 from django.test import Client, TestCase
 from django.urls import reverse
-from faker import Faker
 
+from backend.models import Identification, Organ, OrganUnit, Unit
 from lab.models import Case, Cassette, Slide
-from backend.models import Organ
 
 
 class VariantTest(TestCase):
@@ -16,7 +14,6 @@ class VariantTest(TestCase):
     @classmethod
     def setUpTestData(cls):
         cls.client = Client()
-        cls.fake = Faker()
 
     def test_organ_list_no_id(self):
         self.client.login(username="jmonagas", password="vehice1234")
@@ -29,9 +26,9 @@ class HomeTest(TestCase):
     @classmethod
     def setUpTestData(cls):
         cls.client = Client()
-        cls.fake = Faker()
 
     def test_home_template(self):
+        self.client.login(username="jmonagas", password="vehice1234")
         response = self.client.get(reverse("lab:home"))
 
         self.assertTemplateUsed(
@@ -39,6 +36,7 @@ class HomeTest(TestCase):
         )
 
     def test_home_context(self):
+        self.client.login(username="jmonagas", password="vehice1234")
         response = self.client.get(reverse("lab:home"))
 
         self.assertIn(
@@ -55,7 +53,8 @@ class HomeTest(TestCase):
 
     def test_home_detail(self):
         self.client.login(username="jmonagas", password="vehice1234")
-        response = self.client.get(reverse("lab:home_detail", kwargs={"pk": 973}))
+        case = Case.objects.all().last()
+        response = self.client.get(reverse("lab:home_detail", kwargs={"pk": case.id}))
 
         self.assertTrue(
             response.json(),
@@ -67,11 +66,11 @@ class CaseTest(TestCase):
     @classmethod
     def setUpTestData(cls):
         cls.client = Client()
-        cls.fake = Faker()
 
     def test_detail_returns_template(self):
         self.client.login(username="jmonagas", password="vehice1234")
-        response = self.client.get(reverse("lab:case_detail", kwargs={"pk": 983}))
+        case = Case.objects.all().last()
+        response = self.client.get(reverse("lab:case_detail", kwargs={"pk": case.id}))
 
         self.assertTemplateUsed(
             response, "cases/detail.html", "Response must use expected template."
@@ -79,24 +78,49 @@ class CaseTest(TestCase):
 
     def test_detail_returns_case(self):
         self.client.login(username="jmonagas", password="vehice1234")
-        response = self.client.get(reverse("lab:case_detail", kwargs={"pk": 983}))
+        case = Case.objects.all().last()
+        response = self.client.get(reverse("lab:case_detail", kwargs={"pk": case.id}))
 
         self.assertTrue(
-            response.context["case"].id == 983, "Response must return expected Case."
+            response.context["case"].id == case.id,
+            "Response must return expected Case.",
         )
 
     def test_generate_read_page(self):
         self.client.login(username="jmonagas", password="vehice1234")
-        response = self.client.get(reverse("lab:case_read_sheet", kwargs={"pk": 983}))
+        case = Case.objects.all().last()
+        response = self.client.get(
+            reverse("lab:case_read_sheet", kwargs={"pk": case.id})
+        )
 
-        self.assertEquals(response.get("Content-Disposition"), "attachment;")
+        self.assertTemplateUsed(
+            response, "cases/read_sheet.html", "Response should use expected template."
+        )
+        self.assertContains(response, case.no_caso)
 
 
 class CassetteBuildTest(TestCase):
     @classmethod
     def setUpTestData(cls):
         cls.client = Client()
-        cls.fake = Faker()
+        cls.cases = Case.objects.bulk_create(
+            [
+                Case(entry_format=1),
+                Case(entry_format=2),
+                Case(entry_format=3),
+                Case(entry_format=4),
+                Case(entry_format=5),
+            ]
+        )
+        cls.identifications = []
+
+        for case in cls.cases:
+            cls.identifications.append(Identification.objects.create())
+
+        cls.units = []
+
+        for identification in cls.identifications:
+            cls.units.append(Unit.objects.create())
 
     # CassetteBuildView GET
     def test_shows_correct_units(self):
@@ -127,17 +151,25 @@ class CassetteBuildTest(TestCase):
     # CassetteBuildView POST
     def test_create_with_data(self):
         self.client.login(username="jmonagas", password="vehice1234")
-        build_date = self.fake.date_time()
+        build_date = datetime.datetime.now()
         response = self.client.post(
             reverse("lab:cassette_build"),
             json.dumps(
                 {
                     "build_at": build_date.isoformat(),
                     "units": [
-                        {"id": 1, "correlative": 1, "organs": [49, 50, 51]},
-                        {"id": 1, "correlative": 2, "organs": [49, 50, 51]},
-                        {"id": 2, "correlative": 1, "organs": [49]},
-                        {"id": 3, "correlative": 1, "organs": [49, 51]},
+                        {
+                            "id": self.units[0].id,
+                            "correlative": 1,
+                            "organs": [49, 50, 51],
+                        },
+                        {
+                            "id": self.units[0].id,
+                            "correlative": 2,
+                            "organs": [49, 50, 51],
+                        },
+                        {"id": self.units[1].id, "correlative": 1, "organs": [49]},
+                        {"id": self.units[2].id, "correlative": 1, "organs": [49, 51]},
                     ],
                 }
             ),
@@ -152,7 +184,7 @@ class CassetteBuildTest(TestCase):
             self.assertGreaterEqual(cassette["pk"], 1, "All Cassettes must have a PK.")
             self.assertEqual(
                 build_date.strftime("%Y-%m-%dT%H:%M:%S"),
-                cassette["fields"]["build_at"],
+                cassette["fields"]["build_at"][:-4],
                 "All Cassettes must have the same build_date as expected.",
             )
 
@@ -163,10 +195,18 @@ class CassetteBuildTest(TestCase):
             json.dumps(
                 {
                     "units": [
-                        {"id": 1, "correlative": 1, "organs": [49, 50, 51]},
-                        {"id": 1, "correlative": 2, "organs": [49, 50, 51]},
-                        {"id": 2, "correlative": 1, "organs": [49]},
-                        {"id": 3, "correlative": 1, "organs": [49, 51]},
+                        {
+                            "id": self.units[0].id,
+                            "correlative": 1,
+                            "organs": [49, 50, 51],
+                        },
+                        {
+                            "id": self.units[0].id,
+                            "correlative": 2,
+                            "organs": [49, 50, 51],
+                        },
+                        {"id": self.units[1].id, "correlative": 1, "organs": [49]},
+                        {"id": self.units[2].id, "correlative": 1, "organs": [49, 51]},
                     ]
                 }
             ),
@@ -191,10 +231,18 @@ class CassetteBuildTest(TestCase):
                 {
                     "build_at": "not a datetime",
                     "units": [
-                        {"id": 1, "correlative": 1, "organs": [49, 50, 51]},
-                        {"id": 1, "correlative": 2, "organs": [49, 50, 51]},
-                        {"id": 2, "correlative": 1, "organs": [49]},
-                        {"id": 3, "correlative": 1, "organs": [49, 51]},
+                        {
+                            "id": self.units[0].id,
+                            "correlative": 1,
+                            "organs": [49, 50, 51],
+                        },
+                        {
+                            "id": self.units[0].id,
+                            "correlative": 2,
+                            "organs": [49, 50, 51],
+                        },
+                        {"id": self.units[1].id, "correlative": 1, "organs": [49]},
+                        {"id": self.units[2].id, "correlative": 1, "organs": [49, 51]},
                     ],
                 }
             ),
@@ -215,17 +263,21 @@ class CassetteBuildTest(TestCase):
 
     def test_create_no_correlative(self):
         self.client.login(username="jmonagas", password="vehice1234")
-        build_date = self.fake.date_time()
+        build_date = datetime.datetime.now()
         response = self.client.post(
             reverse("lab:cassette_build"),
             json.dumps(
                 {
                     "build_at": build_date.isoformat(),
                     "units": [
-                        {"id": 1, "correlative": 1, "organs": [49, 50, 51]},
-                        {"id": 1, "organs": [49, 50, 51]},
-                        {"id": 2, "correlative": None, "organs": [49]},
-                        {"id": 3, "organs": [49, 51]},
+                        {
+                            "id": self.units[0].id,
+                            "correlative": 1,
+                            "organs": [49, 50, 51],
+                        },
+                        {"id": self.units[0].id, "organs": [49, 50, 51]},
+                        {"id": self.units[1].id, "correlative": None, "organs": [49]},
+                        {"id": self.units[2].id, "organs": [49, 51]},
                     ],
                 }
             ),
@@ -240,7 +292,7 @@ class CassetteBuildTest(TestCase):
             self.assertGreaterEqual(cassette["pk"], 1, "All Cassettes must have a PK.")
             self.assertEqual(
                 build_date.strftime("%Y-%m-%dT%H:%M:%S"),
-                cassette["fields"]["build_at"],
+                cassette["fields"]["build_at"][:-4],
                 "All Cassettes must have the same build_date as expected.",
             )
             self.assertGreaterEqual(
@@ -268,7 +320,7 @@ class CassetteBuildTest(TestCase):
             reverse("lab:cassette_build"),
             json.dumps(
                 {
-                    "build_at": self.fake.date_time().isoformat(),
+                    "build_at": datetime.datetime.now().isoformat(),
                     "units": [
                         {"id": 999999, "correlative": 1, "organs": [49, 50, 51]},
                     ],
@@ -290,9 +342,9 @@ class CassetteBuildTest(TestCase):
             reverse("lab:cassette_build"),
             json.dumps(
                 {
-                    "build_at": self.fake.date_time().isoformat(),
+                    "build_at": datetime.datetime.now().isoformat(),
                     "units": [
-                        {"id": 1, "correlative": 1, "organs": [9999999]},
+                        {"id": self.units[0].id, "correlative": 1, "organs": [9999999]},
                     ],
                 }
             ),
@@ -320,7 +372,25 @@ class CassettePrebuildTest(TestCase):
     @classmethod
     def setUpTestData(cls):
         cls.client = Client()
-        cls.fake = Faker()
+        cls.cases = []
+        for entry in range(1, 5):
+            case = Case.objects.create(entry_format=entry, no_caso=f"V000{entry}")
+            cls.cases.append(case)
+
+        cls.identifications = []
+
+        for case in cls.cases:
+            identification = Identification.objects.create(entryform=case)
+            cls.identifications.append(identification)
+
+        cls.units = []
+
+        for identification in cls.identifications:
+            unit = Unit.objects.create(identification=identification)
+            cls.units.append(unit)
+
+            for organ in Organ.objects.filter(id__gt=46):
+                OrganUnit.objects.create(unit=unit, organ=organ)
 
     def test_no_rules(self):
         self.client.login(username="jmonagas", password="vehice1234")
@@ -329,7 +399,7 @@ class CassettePrebuildTest(TestCase):
             reverse("lab:cassette_prebuild"),
             json.dumps(
                 {
-                    "selected": [13, 12],
+                    "selected": [self.units[0].id, self.units[1].id],
                     "rules": {"uniques": [], "groups": [], "max": 0},
                 }
             ),
@@ -342,13 +412,13 @@ class CassettePrebuildTest(TestCase):
         )
 
         self.assertDictContainsSubset(
-            {"unit_id": 13},
+            {"unit_id": self.units[0].id},
             response.json()[0],
             "Response must contain expected data.",
         )
 
         self.assertDictContainsSubset(
-            {"unit_id": 12},
+            {"unit_id": self.units[1].id},
             response.json()[1],
             "Response must contain expected data.",
         )
@@ -359,12 +429,6 @@ class CassettePrebuildTest(TestCase):
             "Response must contain expected data.",
         )
 
-        self.assertEqual(
-            response.json()[0]["cassette_organs"],
-            response.json()[0]["organs"],
-            "Response must contain expected data.",
-        )
-
     def test_rule_unique(self):
         self.client.login(username="jmonagas", password="vehice1234")
         response = self.client.generic(
@@ -372,7 +436,7 @@ class CassettePrebuildTest(TestCase):
             reverse("lab:cassette_prebuild"),
             json.dumps(
                 {
-                    "selected": [2, 12],
+                    "selected": [self.units[0].id, self.units[1].id],
                     "rules": {"uniques": [59], "groups": [], "max": 0},
                 }
             ),
@@ -391,7 +455,7 @@ class CassettePrebuildTest(TestCase):
             reverse("lab:cassette_prebuild"),
             json.dumps(
                 {
-                    "selected": [2, 12],
+                    "selected": [self.units[0].id, self.units[1].id],
                     "rules": {"uniques": [], "groups": [[59, 57], [58, 56]], "max": 0},
                 }
             ),
@@ -410,7 +474,7 @@ class CassettePrebuildTest(TestCase):
             reverse("lab:cassette_prebuild"),
             json.dumps(
                 {
-                    "selected": [2, 12],
+                    "selected": [self.units[0].id, self.units[1].id],
                     "rules": {"uniques": [], "groups": [], "max": 2},
                 }
             ),
@@ -429,7 +493,7 @@ class CassettePrebuildTest(TestCase):
             reverse("lab:cassette_prebuild"),
             json.dumps(
                 {
-                    "selected": [2, 12],
+                    "selected": [self.units[0].id, self.units[1].id],
                     "rules": {"uniques": [55], "groups": [[56, 57]], "max": 2},
                 }
             ),
@@ -458,7 +522,6 @@ class CassetteIndexTest(TestCase):
     @classmethod
     def setUpTestData(cls):
         cls.client = Client()
-        cls.fake = Faker()
 
     def test_expected_template(self):
         self.client.login(username="jmonagas", password="vehice1234")
@@ -484,12 +547,17 @@ class CassetteDetailTest(TestCase):
     @classmethod
     def setUpTestData(cls):
         cls.client = Client()
-        cls.fake = Faker()
+        cls.case = Case.objects.create()
+        cls.identification = Identification.objects.create(entryform=cls.case)
+        cls.unit = Unit.objects.create(identification=cls.identification)
+        cls.cassette = Cassette.objects.create(unit=cls.unit, correlative=1)
 
     def test_detail_returns_json(self):
         self.client.login(username="jmonagas", password="vehice1234")
 
-        response = self.client.get(reverse("lab:cassette_detail", kwargs={"pk": 1}))
+        response = self.client.get(
+            reverse("lab:cassette_detail", kwargs={"pk": self.cassette.id})
+        )
 
         self.assertIn("cassette", response.json(), "Response must contain Cassette.")
         self.assertIn(
@@ -500,11 +568,11 @@ class CassetteDetailTest(TestCase):
         self.client.login(username="jmonagas", password="vehice1234")
 
         response = self.client.post(
-            reverse("lab:cassette_detail", kwargs={"pk": 1}),
+            reverse("lab:cassette_detail", kwargs={"pk": self.cassette.id}),
             json.dumps(
                 {
-                    "build_at": self.fake.date_time().isoformat(),
-                    "correlative": self.fake.pyint(),
+                    "build_at": datetime.datetime.now().isoformat(),
+                    "correlative": 1,
                     "organs": [49, 50],
                 }
             ),
@@ -520,10 +588,10 @@ class CassetteDetailTest(TestCase):
         self.client.login(username="jmonagas", password="vehice1234")
 
         response = self.client.post(
-            reverse("lab:cassette_detail", kwargs={"pk": 1}),
+            reverse("lab:cassette_detail", kwargs={"pk": self.cassette.id}),
             json.dumps(
                 {
-                    "correlative": self.fake.pyint(),
+                    "correlative": 1,
                     "organs": [49, 50],
                 }
             ),
@@ -539,10 +607,10 @@ class CassetteDetailTest(TestCase):
         self.client.login(username="jmonagas", password="vehice1234")
 
         response = self.client.post(
-            reverse("lab:cassette_detail", kwargs={"pk": 1}),
+            reverse("lab:cassette_detail", kwargs={"pk": self.cassette.id}),
             json.dumps(
                 {
-                    "build_at": self.fake.date_time().isoformat(),
+                    "build_at": datetime.datetime.now().isoformat(),
                     "organs": [49, 50],
                 }
             ),
@@ -558,11 +626,11 @@ class CassetteDetailTest(TestCase):
         self.client.login(username="jmonagas", password="vehice1234")
 
         response = self.client.post(
-            reverse("lab:cassette_detail", kwargs={"pk": 1}),
+            reverse("lab:cassette_detail", kwargs={"pk": self.cassette.id}),
             json.dumps(
                 {
-                    "build_at": self.fake.date_time().isoformat(),
-                    "correlative": self.fake.pyint(),
+                    "build_at": datetime.datetime.now().isoformat(),
+                    "correlative": 1,
                 }
             ),
             content_type="application/json",
@@ -578,7 +646,10 @@ class SlideBuildTest(TestCase):
     @classmethod
     def setUpTestData(cls):
         cls.client = Client()
-        cls.fake = Faker()
+        cls.case = Case.objects.create()
+        cls.identification = Identification.objects.create(entryform=cls.case)
+        cls.unit = Unit.objects.create(identification=cls.identification)
+        cls.cassette = Cassette.objects.create(unit=cls.unit, correlative=1)
 
     # SlideBuild GET
     def test_context_includes_slides(self):
@@ -610,19 +681,19 @@ class SlideBuildTest(TestCase):
                 {
                     "slides": [
                         {
-                            "cassette_id": 1,
-                            "unit_id": 14,
+                            "cassette_id": self.cassette.id,
+                            "unit_id": self.unit.id,
                             "stain_id": 1,
                             "correlative": 1,
                         },
                         {
-                            "cassette_id": 2,
-                            "unit_id": 7,
+                            "cassette_id": self.cassette.id,
+                            "unit_id": self.unit.id,
                             "stain_id": 1,
-                            "correlative": 1,
+                            "correlative": 2,
                         },
                     ],
-                    "build_at": self.fake.date_time().isoformat(),
+                    "build_at": datetime.datetime.now().isoformat(),
                 }
             ),
             content_type="application/json",
@@ -645,10 +716,10 @@ class SlideBuildTest(TestCase):
             json.dumps(
                 {
                     "slides": [
-                        {"unit_id": 14, "stain_id": 1, "correlative": 1},
-                        {"unit_id": 7, "stain_id": 1, "correlative": 1},
+                        {"unit_id": self.unit.id, "stain_id": 1, "correlative": 1},
+                        {"unit_id": self.unit.id, "stain_id": 1, "correlative": 2},
                     ],
-                    "build_at": self.fake.date_time().isoformat(),
+                    "build_at": datetime.datetime.now().isoformat(),
                 }
             ),
             content_type="application/json",
@@ -671,10 +742,18 @@ class SlideBuildTest(TestCase):
             json.dumps(
                 {
                     "slides": [
-                        {"cassette_id": 1, "stain_id": 1, "correlative": 1},
-                        {"cassette_id": 1, "stain_id": 1, "correlative": 1},
+                        {
+                            "cassette_id": self.cassette.id,
+                            "stain_id": 1,
+                            "correlative": 1,
+                        },
+                        {
+                            "cassette_id": self.cassette.id,
+                            "stain_id": 1,
+                            "correlative": 2,
+                        },
                     ],
-                    "build_at": self.fake.date_time().isoformat(),
+                    "build_at": datetime.datetime.now().isoformat(),
                 }
             ),
             content_type="application/json",
@@ -698,17 +777,17 @@ class SlideBuildTest(TestCase):
                 {
                     "slides": [
                         {
-                            "cassette_id": 1,
-                            "unit_id": 14,
+                            "cassette_id": self.cassette.id,
+                            "unit_id": self.unit.id,
                             "stain_id": 1,
                         },
                         {
-                            "cassette_id": 2,
-                            "unit_id": 7,
+                            "cassette_id": self.cassette.id,
+                            "unit_id": self.unit.id,
                             "stain_id": 1,
                         },
                     ],
-                    "build_at": self.fake.date_time().isoformat(),
+                    "build_at": datetime.datetime.now().isoformat(),
                 }
             ),
             content_type="application/json",
@@ -732,16 +811,16 @@ class SlideBuildTest(TestCase):
                 {
                     "slides": [
                         {
-                            "cassette_id": 1,
-                            "unit_id": 14,
+                            "cassette_id": self.cassette.id,
+                            "unit_id": self.unit.id,
                             "stain_id": 1,
                             "correlative": 1,
                         },
                         {
-                            "cassette_id": 2,
-                            "unit_id": 7,
+                            "cassette_id": self.cassette.id,
+                            "unit_id": self.unit.id,
                             "stain_id": 1,
-                            "correlative": 1,
+                            "correlative": 2,
                         },
                     ],
                     "build_at": "",
@@ -765,16 +844,16 @@ class SlideBuildTest(TestCase):
                 {
                     "slides": [
                         {
-                            "cassette_id": 1,
-                            "unit_id": 14,
+                            "cassette_id": self.cassette.id,
+                            "unit_id": self.unit.id,
                             "stain_id": 1,
                             "correlative": 1,
                         },
                         {
-                            "cassette_id": 2,
-                            "unit_id": 7,
+                            "cassette_id": self.cassette.id,
+                            "unit_id": self.unit.id,
                             "stain_id": 1,
-                            "correlative": 1,
+                            "correlative": 2,
                         },
                     ],
                     "build_at": "Not a date",
@@ -799,16 +878,16 @@ class SlideBuildTest(TestCase):
                 {
                     "slides": [
                         {
-                            "cassette_id": 1,
-                            "unit_id": 14,
+                            "cassette_id": self.cassette.id,
+                            "unit_id": self.unit.id,
                             "stain_id": 1,
                             "correlative": 1,
                         },
                         {
-                            "cassette_id": 2,
-                            "unit_id": 7,
+                            "cassette_id": self.cassette.id,
+                            "unit_id": self.unit.id,
                             "stain_id": 1,
-                            "correlative": 1,
+                            "correlative": 2,
                         },
                     ],
                 }
@@ -850,7 +929,7 @@ class SlideBuildTest(TestCase):
                             "correlative": 1,
                         }
                     ],
-                    "build_at": self.fake.date_time().isoformat(),
+                    "build_at": datetime.datetime.now().isoformat(),
                 }
             ),
             content_type="application/json",
@@ -872,7 +951,7 @@ class SlideBuildTest(TestCase):
                             "correlative": 1,
                         }
                     ],
-                    "build_at": self.fake.date_time().isoformat(),
+                    "build_at": datetime.datetime.now().isoformat(),
                 }
             ),
             content_type="application/json",
@@ -885,7 +964,6 @@ class SlideIndexTest(TestCase):
     @classmethod
     def setUpTestData(cls):
         cls.client = Client()
-        cls.fake = Faker()
 
     def test_expected_template(self):
         self.client.login(username="jmonagas", password="vehice1234")
@@ -911,26 +989,36 @@ class SlideDetailTest(TestCase):
     @classmethod
     def setUpTestData(cls):
         cls.client = Client()
-        cls.fake = Faker()
+        cls.client = Client()
+        cls.case = Case.objects.create()
+        cls.identification = Identification.objects.create(entryform=cls.case)
+        cls.unit = Unit.objects.create(identification=cls.identification)
+        cls.cassette = Cassette.objects.create(unit=cls.unit, correlative=1)
+        cls.slide = Slide.objects.create(
+            cassette=cls.cassette, unit=cls.unit, stain_id=1, correlative=1
+        )
 
     def test_detail_returns_json(self):
         self.client.login(username="jmonagas", password="vehice1234")
 
-        response = self.client.get(reverse("lab:slide_detail", kwargs={"pk": 1}))
+        response = self.client.get(
+            reverse("lab:slide_detail", kwargs={"pk": self.slide.id})
+        )
 
         self.assertTrue(
-            response.json()[0]["pk"] == 1, "Response should contain expected Slide."
+            response.json()[0]["pk"] == self.slide.id,
+            "Response should contain expected Slide.",
         )
 
     def test_detail_updates_slide(self):
         self.client.login(username="jmonagas", password="vehice1234")
 
         response = self.client.post(
-            reverse("lab:slide_detail", kwargs={"pk": 1}),
+            reverse("lab:slide_detail", kwargs={"pk": self.slide.id}),
             json.dumps(
                 {
-                    "build_at": self.fake.date_time().isoformat(),
-                    "correlative": self.fake.pyint(),
+                    "build_at": datetime.datetime.now().isoformat(),
+                    "correlative": 1,
                     "stain_id": 1,
                 }
             ),
@@ -938,17 +1026,18 @@ class SlideDetailTest(TestCase):
         )
 
         self.assertTrue(
-            response.json()[0]["pk"] == 1, "Response should contain expected Slide."
+            response.json()[0]["pk"] == self.slide.id,
+            "Response should contain expected Slide.",
         )
 
     def test_detail_updates_no_build_at(self):
         self.client.login(username="jmonagas", password="vehice1234")
 
         response = self.client.post(
-            reverse("lab:slide_detail", kwargs={"pk": 1}),
+            reverse("lab:slide_detail", kwargs={"pk": self.slide.id}),
             json.dumps(
                 {
-                    "correlative": self.fake.pyint(),
+                    "correlative": 2,
                     "stain_id": 1,
                 }
             ),
@@ -956,17 +1045,18 @@ class SlideDetailTest(TestCase):
         )
 
         self.assertTrue(
-            response.json()[0]["pk"] == 1, "Response should contain expected Slide."
+            response.json()[0]["pk"] == self.slide.id,
+            "Response should contain expected Slide.",
         )
 
     def test_detail_updates_no_correlative(self):
         self.client.login(username="jmonagas", password="vehice1234")
 
         response = self.client.post(
-            reverse("lab:slide_detail", kwargs={"pk": 1}),
+            reverse("lab:slide_detail", kwargs={"pk": self.slide.id}),
             json.dumps(
                 {
-                    "build_at": self.fake.date_time().isoformat(),
+                    "build_at": datetime.datetime.now().isoformat(),
                     "stain_id": 1,
                 }
             ),
@@ -974,23 +1064,25 @@ class SlideDetailTest(TestCase):
         )
 
         self.assertTrue(
-            response.json()[0]["pk"] == 1, "Response should contain expected Slide."
+            response.json()[0]["pk"] == self.slide.id,
+            "Response should contain expected Slide.",
         )
 
     def test_detail_no_stain(self):
         self.client.login(username="jmonagas", password="vehice1234")
 
         response = self.client.post(
-            reverse("lab:slide_detail", kwargs={"pk": 1}),
+            reverse("lab:slide_detail", kwargs={"pk": self.slide.id}),
             json.dumps(
                 {
-                    "build_at": self.fake.date_time().isoformat(),
-                    "correlative": self.fake.pyint(),
+                    "build_at": datetime.datetime.now().isoformat(),
+                    "correlative": 1,
                 }
             ),
             content_type="application/json",
         )
 
         self.assertTrue(
-            response.json()[0]["pk"] == 1, "Response should contain expected Slide."
+            response.json()[0]["pk"] == self.slide.id,
+            "Response should contain expected Slide.",
         )
