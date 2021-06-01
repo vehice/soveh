@@ -1,0 +1,52 @@
+{% extends 'layout.html' %}
+{% load static %}
+
+{% block content %}
+<!-- MAIN -->
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <header class="card-header">
+                <h4 class="card-title">Procesos</h4>
+                <span class="d-flex flex-row justify-content-between mt-md-1 align-items-center">
+                    <small class="card-subtitle">Indice</small>
+                </span>
+            </header>
+            <section class="card-body table-responsive">
+                <select id="selectProcess" class="form-control" onchange="onChangeProcess(event)">
+                    <option value="0">Procesador de Tejidos</option>
+                    <option value="1">Armado de Bloque</option>
+                    <option value="2">Corte</option>
+                    <option value="3">Tincion</option>
+                </select>
+                <table class="table table-bordered table-striped" id="tableProcess">
+                </table>
+            </section>
+        </div>
+    </div>
+</div>
+
+<!-- END MAIN -->
+
+
+
+{% endblock content %}
+{% block scripts %}
+<script
+    type="text/javascript"
+    src="https://cdn.datatables.net/buttons/1.7.0/js/dataTables.buttons.min.js"
+    defer>
+</script>
+
+<script
+    type="text/javascript"
+    src="//cdn.jsdelivr.net/npm/sweetalert2@10"
+    defer>
+</script>
+
+<script type="text/javascript"
+        src="{% static 'lab/js/process.js' %}"
+        defer>
+</script>
+
+{% endblock scripts %}

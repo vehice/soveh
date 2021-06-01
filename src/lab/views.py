@@ -15,7 +15,7 @@ from django.views import View
 from django.views.generic import DetailView, ListView
 
 from backend.models import Organ, Stain, Unit
-from lab.models import Case, Cassette, Slide
+from lab.models import Case, Cassette, CassetteOrgan, Slide
 from django.template import loader
 
 
@@ -188,17 +188,18 @@ class CassetteBuild(View):
                     build_at=build_at, correlative=correlative
                 )
 
-            for organ in row["organs"]:
+            for organ_id in row["organs"]:
                 try:
-                    cassette.organs.add(organ)
-                except IntegrityError:
+                    organ = Organ.objects.get(pk=organ_id)
+                except Organ.DoesNotExist:
                     errors.append(
                         {
                             "status": "ERROR",
-                            "message": "Organ id %d does not exists" % organ,
+                            "message": "Organ id %d does not exists" % organ_id,
                         }
                     )
                 else:
+                    CassetteOrgan.objects.create(organ=organ, cassette=cassette)
                     created.append(cassette)
 
         return JsonResponse(
@@ -326,6 +327,7 @@ class CassetteDetail(View):
             "organs": serializers.serialize("json", cassette.organs.all()),
         }
 
+    @method_decorator(login_required)
     def get(self, request, *args, **kwargs):
         """Returns a JSON detailing Cassette.
 
@@ -341,6 +343,7 @@ class CassetteDetail(View):
         data = self.serialize_data(cassette)
         return HttpResponse(json.dumps(data), content_type="application/json")
 
+    @method_decorator(login_required)
     def post(self, request, *args, **kwargs):
         """Updates a Cassette.
         Returns serialized data of the updated Cassette.
@@ -370,10 +373,12 @@ class CassetteDetail(View):
         if "correlative" in request_input:
             cassette.correlative = request_input["correlative"]
         if "organs" in request_input:
-            try:
-                cassette.organs.set(request_input["organs"])
-            except IntegrityError:
-                raise Http404("Organ not found.")
+            CassetteOrgan.objects.filter(cassette=cassette).delete()
+            for organ_id in request_input["organs"]:
+                try:
+                    CassetteOrgan.objects.create(cassette=cassette, organ_id=organ_id)
+                except IntegrityError:
+                    raise Http404("Organ not found.")
 
         if "build_at" in request_input or "correlative" in request_input:
             cassette.save()
@@ -560,23 +565,6 @@ class SlideBuild(View):
         )
 
 
-def slide_prebuild(request):
-    """
-    Returns an array of slides grouped by :model:`lab.Case`
-    """
-    items = json.loads(request.body)
-    cases = items["cases"]
-
-    cases = Case.objects.filter(pk__in=cases).select_related("analysisform")
-
-    slides = []
-
-    for case in cases:
-        correlative = 1
-        for service in case.analysisform.all():
-            pass
-
-
 @method_decorator(login_required, name="dispatch")
 class SlideIndex(ListView):
     """Displays a list of Slides.
@@ -672,3 +660,10 @@ class SlideDetail(View):
         return HttpResponse(
             serializers.serialize("json", [slide]), content_type="application/json"
         )
+
+
+# Process related views
+
+
+def process_template(request):
+    return render(request, "process/index.html")
