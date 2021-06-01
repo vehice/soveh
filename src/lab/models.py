@@ -161,3 +161,34 @@ class Slide(models.Model):
 
             return f"http://vehice.net/DSStore/HtmlViewer.aspx?Id=${slide_id}"
         return row
+
+
+class Laboratory(models.Model):
+    """A Physical unit, a building, in which processes are done.
+    Stores detailed information related to a single physical Laboratory unit.
+    """
+
+    name = models.CharField(max_length=255)
+    address = models.CharField(max_length=255)
+    city = models.CharField(max_length=255)
+    country = models.CharField(max_length=255)
+
+    internal = models.BooleanField("is internal", default=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    deleted_at = models.DateTimeField(null=True)
+
+
+class Process(models.Modal):
+    """
+    Stores detailed information related to a single lab Process.
+    """
+
+    name = models.CharField(max_length=255)
+
+    parent = models.ForeignKey("self", on_delete=models.CASCADE, null=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    deleted_at = models.DateTimeField(null=True)
