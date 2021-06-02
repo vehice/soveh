@@ -113,15 +113,6 @@ def default_tree(user):
             }
         )
 
-    if user.userprofile.profile_id == 1:
-        menu.append(
-            {
-                "path": "/admin",
-                "icon": "ft-settings",
-                "section_name": "Administración" if language == 1 else "Administration",
-            }
-        )
-
     return menu
 
 
