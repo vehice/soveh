@@ -5,7 +5,8 @@ from django.test import Client, TestCase
 from django.urls import reverse
 
 from backend.models import Identification, Organ, OrganUnit, Unit
-from lab.models import Case, Cassette, Slide
+from lab.models import Case, Cassette, Laboratory, Process, Slide
+from django.contrib.auth.models import User
 
 
 class VariantTest(TestCase):
@@ -1085,4 +1086,41 @@ class SlideDetailTest(TestCase):
         self.assertTrue(
             response.json()[0]["pk"] == self.slide.id,
             "Response should contain expected Slide.",
+        )
+
+
+class ProcessTest(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.client = Client()
+
+        user = User.objects.filter(username="jmonagas").first()
+
+        cls.lab = Laboratory.objects.create(
+            name="Test", address="Tu Corazón", city="Test", country="Test"
+        )
+        user.laboratories.add(cls.lab)
+        cls.process = Process.objects.create(name="Test")
+
+        cls.lab.processes.add(cls.process)
+
+        cls.case = Case.objects.create()
+        cls.identification = Identification.objects.create(entryform=cls.case)
+        cls.unit = Unit.objects.create(identification=cls.identification)
+        cls.cassette = Cassette.objects.create(unit=cls.unit, correlative=1)
+
+    def test_index_template(self):
+        self.client.login(username="jmonagas", password="vehice1234")
+        response = self.client.get(reverse("lab:process_index"))
+
+        self.assertIn(
+            "processes",
+            response.context,
+            "Response context must contain expected data.",
+        )
+
+        self.assertGreaterEqual(
+            len(response.context["processes"]),
+            1,
+            "Response context processes must contain all laboratories for the user.",
         )
