@@ -160,11 +160,16 @@ class FileView(View):
         Returns a list of files that belong to a single :model:`review.Analysis`
         """
         analysis = get_object_or_404(Analysis, pk=pk)
-        prereport_files = analysis.external_reports.all()
+        prereport_files = analysis.entryform.attached_files.all()
+        files = []
+        for prefile in prereport_files:
+            filename = prefile.file.name.split("/")
+            files.append({"name": filename[1], "download": prefile.file.url})
+
         review_files = File.objects.filter(analysis=analysis).select_related("user")
 
         context = {
-            "prereports": serializers.serialize("json", prereport_files),
+            "prereports": files,
             "reviews": serializers.serialize("json", review_files),
         }
 

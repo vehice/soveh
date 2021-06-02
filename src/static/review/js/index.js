@@ -244,19 +244,21 @@ $(document).ready(() => {
     analysis = e.target.id;
     $("#fileDialog h5.modal-title").text(title);
 
+    updateSelectRecipients();
+
     dlgFileList.show();
 
     $.ajax(Urls["review:files"](analysis), {
       method: "GET",
 
       success: (data, textStatus) => {
-        const prereports = JSON.parse(data.prereports);
+        const prereports = data.prereports;
         const prereportList = $("#prereportList");
         prereportList.empty();
 
         for (const file of prereports) {
-          prereport.append(
-            `<li class="list-group-item">${file.fields.file}</li>`
+          prereportList.append(
+            `<li class="list-group-item"><a href="${file.download}">${file.name}</a></li>`
           );
         }
 
@@ -361,7 +363,7 @@ $(document).ready(() => {
     });
   });
 
-  $("#btnRefreshRecipient").click(() => {
+  $("#btnRefreshRecipients").click(() => {
     toastr.info("Actualizando destinatarios...");
     updateSelectRecipients();
   });
