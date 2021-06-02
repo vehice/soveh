@@ -160,7 +160,7 @@ class FileView(View):
         Returns a list of files that belong to a single :model:`review.Analysis`
         """
         analysis = get_object_or_404(Analysis, pk=pk)
-        prereport_files = analysis.entryform.attached_files.all()
+        prereport_files = analysis.external_reports.all()
         files = []
         for prefile in prereport_files:
             filename = prefile.file.name.split("/")
