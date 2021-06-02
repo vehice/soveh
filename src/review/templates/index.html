@@ -46,7 +46,7 @@
                                 <small id="sendingCount"></small>
                             </h2>
                         </header>
-                        <ul id="sending" class="state list-group p-1" style="background-color: #cccccc"></ul>
+                        <ul id="sending" class="state list-group p-1 finishing" style="background-color: #cccccc"></ul>
                     </section>
                     {% if request.user.userprofile.profile_id == 1 or request.user.userprofile.profile_id == 2 %}
                     <section class="card">
@@ -56,7 +56,7 @@
                                 <small id="finishedCount"></small>
                             </h2>
                         </header>
-                        <ul id="finished" class="list-group p-1" style="background-color: #f2f2f2"></ul>
+                        <ul id="finished" class="list-group p-1 finishing" style="background-color: #f2f2f2"></ul>
                     </section>
                     {% endif %}
                 </section>

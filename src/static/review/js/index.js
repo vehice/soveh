@@ -8,7 +8,7 @@ $(document).ready(() => {
 
   $("#sending, #finished")
     .sortable({
-      connectWith: "#finished",
+      connectWith: ".finishing",
     })
     .disableSelection();
 
@@ -162,26 +162,25 @@ $(document).ready(() => {
       const mailList = JSON.parse(response["mail_lists"]);
 
       const selected = JSON.parse(response["current_lists"]);
-      if (mailList.length > 0) {
-        if (selectRecipients.hasClass("select2-hidden-accessible")) {
-          selectRecipients.select2("destroy");
-        }
-        const options = mailList.map((mail) => {
-          const isSelected = selected.some(
-            (item) => item.fields.mail_list == mail.pk
-          );
-          return {
-            id: mail.pk,
-            text: mail.fields.name,
-            selected: isSelected,
-          };
-        });
-        selectRecipients.select2({
-          data: options,
-          width: "100%",
-          multiple: true,
-        });
+
+      if (selectRecipients.hasClass("select2-hidden-accessible")) {
+        selectRecipients.select2("destroy");
       }
+      const options = mailList.map((mail) => {
+        const isSelected = selected.some(
+          (item) => item.fields.mail_list == mail.pk
+        );
+        return {
+          id: mail.pk,
+          text: mail.fields.name,
+          selected: isSelected,
+        };
+      });
+      selectRecipients.select2({
+        data: options,
+        width: "100%",
+        multiple: true,
+      });
     });
   }
 
