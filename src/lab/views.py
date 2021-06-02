@@ -8,15 +8,14 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.core.paginator import InvalidPage, Paginator
 from django.db.models.query_utils import Q
 from django.db.utils import IntegrityError
-from django.http import FileResponse, Http404, HttpResponse, JsonResponse
+from django.http import Http404, HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, render
 from django.utils.decorators import method_decorator
 from django.views import View
 from django.views.generic import DetailView, ListView
 
 from backend.models import Organ, Stain, Unit
-from lab.models import Case, Cassette, CassetteOrgan, Slide
-from django.template import loader
+from lab.models import Case, Cassette, CassetteOrgan, Process, Slide
 
 
 def home(request):
@@ -665,5 +664,24 @@ class SlideDetail(View):
 # Process related views
 
 
-def process_template(request):
-    return render(request, "process/index.html")
+class ProcessIndex(ListView):
+    """Displays a list of :model:`backend.Units` for each :model:`lab.Process`.
+    Render a template which allows the user to select a :model:`lab.Process`, this triggers
+    a request to gather all :model:`backend.Units` that can be processed in said Process.
+
+        **Context**
+        ``procesess``
+            A list of :model:`lab.Process` which are available to the current :model:`auth.User`
+
+        **Template**
+        ``process/index.html``
+
+    """
+
+    template_name = "process/index.html"
+    context_object_name = "processes"
+
+    def get_queryset(self):
+        laboratories_id = self.request.user.laboratories.values_list("id", flat=True)
+        processes = Process.objects.filter(laboratories__in=laboratories_id)
+        return processes
