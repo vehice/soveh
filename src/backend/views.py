@@ -295,6 +295,7 @@ class ENTRYFORM(View):
                 researches = []
 
             stains_list = list(Stain.objects.values())
+            laboratories_list = list(Laboratory.objects.values())
 
             data = {
                 "entryform": entryform,
@@ -308,6 +309,7 @@ class ENTRYFORM(View):
                 "fixtatives_list": fixtatives_list,
                 "waterSources_list": waterSources_list,
                 "customers_list": customers_list,
+                "laboratories": laboratories_list,
                 "patologos": patologos,
                 # 'entryform_types_list': entryform_types,
                 "research_types_list": researches,
@@ -3155,6 +3157,9 @@ def save_generalData(request, id):
     if entry.specie_id != int(var_post["specie"]):
         change = True
     entry.specie_id = int(var_post["specie"])
+    if entry.laboratory_id != int(var_post["laboratory"]):
+        change = True
+    entry.laboratory_id = int(var_post["laboratory"])
     if entry.watersource_id != int(var_post["watersource"]):
         change = True
     entry.watersource_id = int(var_post["watersource"])
