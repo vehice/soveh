@@ -143,15 +143,12 @@ function init_step_2() {
     let data = retrieveDataRow(dataRow)
     var id = data.id;
     var table_id = `units-table-${id}`
+    var contador_id = `contador-${id}`
     var correlative_checked = ""
     if (data.samples_are_correlative)
       correlative_checked = "checked"
     var table_template = `
       <div class="row justify-content-center">
-        <div class="form-group pl-2 pt-2">
-          <input type="checkbox" id="organs-${id}" class="switch2" />
-          <label for="organs-${id}" class="font-medium-1 text-bold-600 ml-1">Órganos para todas las unidades</label>
-        </div>
         <div class="switch-div form-group pl-2 pt-2">
           <input type="checkbox" id="correlative-${id}" class="switch2 correlative" ${correlative_checked} />
           <label for="correlative-${id}" class="font-medium-1 text-bold-600 ml-1">Correlativos</label>
@@ -161,6 +158,7 @@ function init_step_2() {
         <div class="pl-0 col-sm-12">
           <button type="button" class="btn btn-sm btn-light" onclick="selectAllUnitsByIdentification(${id}, 1)"><i class="fa fa-check-square-o"></i> Seleccionar unidades</button>
           <button type="button" class="btn btn-sm btn-light" onclick="selectAllUnitsByIdentification(${id}, 0)"><i class="fa fa-square-o"></i> Deseleccionar unidades</button>
+          <span class="badge badge-secondary contador_seleccion" id="${contador_id}">Tienes 0 unidades seleccionadas de 0 identificaciones</span>
         </div>
       </div>
       
@@ -243,9 +241,6 @@ function init_step_2() {
       tr.addClass('shown');
       let ident_id = tr.attr("id")
 
-      waitForEl('.organs-'+ident_id, function() {
-        $('#organs-'+ident_id).trigger("click")
-      });
     }
   });
 
@@ -549,6 +544,19 @@ function init_step_2() {
   })
 }
 
+$(document).on("change", '.unit-select', function(){
+  if($(".table-unit .unit-select:checked").length > 0) {
+    let table_ids = [];
+    $(".table-unit .unit-select:checked").each(function (i, v) {
+      let ident_id = $(this).closest('tr').attr("id").split("-")[1];
+      if(table_ids.indexOf(ident_id) == -1) {
+        table_ids.push(ident_id);
+      }
+    });
+    $(".contador_seleccion").html(`Tienes ${$(".table-unit .unit-select:checked").length} unidades seleccionadas de ${table_ids.length} identificaciones`);
+  }
+});
+
 function alertDuplicatedOrgansInSameCorrelative(){
   swal({
     title: "Información",
@@ -603,28 +611,35 @@ function retrieveDataRow(row) {
 
 /*** Select organs based on switches values (organs for all and correlative samples) ***/
 function selectOrgansWithConditions(new_id, new_value, ident_id, select){
-  let organs_switch_option = $('#organs-'+ident_id).is(":checked")
+  // let organs_switch_option = ($("#units-table-"+ident_id+" .unit-select:checked").length > 0) ? true : false
+  let organs_switch_option = ($(".table-unit .unit-select:checked").length > 0) ? true : false
   let correlative_switch_option = $('#correlative-'+ident_id).is(":checked")
 
   if ( organs_switch_option ) {
-    $.each( $("#units-table-"+ident_id+" .organs"), function (i, v) {
-      let select = $(v)
+    // $.each( $("#units-table-"+ident_id+" tr"), function (i, v) {
+    $.each( $(".table-unit .unit-select:checked"), function (i, v) {
+      let tr = $(this).closest('tr')
+      let checkbox = tr.find('.unit-select').is(":checked")
+      let select = tr.find('.organs')
       let unit_id = select.attr("id").split("-")[2]
+      let ident_id = select.attr("id").split("-")[1]
       let values = select.val()
 
-      if ( !correlative_switch_option ) {
-        new_id = `${new_id}-${Math.random()}`
-        select.append(`<option value="${new_id}">${new_value}</option>`)
-        values.push(new_id)
-        select.val(values)
-        select.trigger('change')
-      } else {
-        values.push(new_id)
-        if (!checkDuplicatedOrgansInSameCorrelative(ident_id, unit_id, values)){
+      if (checkbox) {
+        if ( !correlative_switch_option ) {
+          new_id = `${new_id}-${Math.random()}`
+          select.append(`<option value="${new_id}">${new_value}</option>`)
+          values.push(new_id)
           select.val(values)
           select.trigger('change')
         } else {
-          alertDuplicatedOrgansInSameCorrelative()
+          values.push(new_id)
+          if (!checkDuplicatedOrgansInSameCorrelative(ident_id, unit_id, values)){
+            select.val(values)
+            select.trigger('change')
+          } else {
+            alertDuplicatedOrgansInSameCorrelative()
+          }
         }
       }
     })
@@ -807,9 +822,6 @@ function AddOrgansFromKeypadToUnits(add){
                 selectOrgansWithConditions(value[0], value[1], ident_id, $('#select-'+ident_id+'-'+unit_id))
               });
 
-              if ($('#organs-'+ident_id).is(":checked")){
-                return false
-              }
             } else {
               $.each(organs_selected_from_keypad, function(index, value){
                 let aux_val = $('#select-'+ident_id+'-'+unit_id).val()
