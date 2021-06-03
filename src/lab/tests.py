@@ -1124,3 +1124,15 @@ class ProcessTest(TestCase):
             1,
             "Response context processes must contain all laboratories for the user.",
         )
+
+    def test_process_detail_returns_items(self):
+        self.client.login(username="jmonagas", password="vehice1234")
+        response = self.client.get(
+            reverse("lab:process_detail", kwargs={"pk": self.process.id})
+        )
+
+        self.assertGreaterEqual(
+            len(json.loads(response.json())),
+            1,
+            "Response should contain as many items as expected.",
+        )

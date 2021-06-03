@@ -6,6 +6,8 @@ from numpy import busday_count
 
 from backend.models import EntryForm, Organ, Unit, Identification, Stain
 from django.contrib.auth.models import User
+from django.contrib.contenttypes.models import ContentType
+from django.contrib.contenttypes.fields import GenericForeignKey
 
 
 class CaseManager(models.Manager):
@@ -220,3 +222,16 @@ class Process(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class ProcessItem(models.Model):
+    process = models.ForeignKey(
+        Process, on_delete=models.CASCADE, related_name="process_items"
+    )
+
+    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
+    object_id = models.PositiveIntegerField()
+    content_object = GenericForeignKey()
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
