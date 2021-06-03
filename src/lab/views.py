@@ -15,7 +15,7 @@ from django.views import View
 from django.views.generic import DetailView, ListView
 
 from backend.models import Organ, Stain, Unit
-from lab.models import Case, Cassette, CassetteOrgan, Process, Slide
+from lab.models import Case, Cassette, CassetteOrgan, Process, ProcessItem, Slide
 
 
 def home(request):
@@ -685,3 +685,22 @@ class ProcessIndex(ListView):
         laboratories_id = self.request.user.laboratories.values_list("id", flat=True)
         processes = Process.objects.filter(laboratories__in=laboratories_id)
         return processes
+
+
+class ProcessDetail(View):
+    """Returns a JSON array containing all items for that given :model:`lab.Process`'s workload.
+    Takes as a parameter the PK of a :model:`lab.Process` and returns an array containing :model:`backend.Unit`
+    and :model:`lab.Cassette` which can be processed in the given :model:`lab.Process`.
+    """
+
+    @method_decorator(login_required)
+    def get(self, request, *args, **kwargs):
+        """Returns a JSON detailing items for that :model:`lab.Process`.
+
+        **CONTEXT**
+
+        """
+        process = get_object_or_404(Process, pk=kwargs["pk"])
+
+        items = ProcessItem.objects.filter(process=process)
+        return JsonResponse(serializers.serialize("json", items), safe=False)

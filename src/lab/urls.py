@@ -28,4 +28,5 @@ urlpatterns = [
     # Process Routes
     #
     path("process", views.ProcessIndex.as_view(), name="process_index"),
+    path("process/<int:pk>", views.ProcessDetail.as_view(), name="process_detail"),
 ]
