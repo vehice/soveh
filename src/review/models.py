@@ -78,8 +78,8 @@ class Analysis(AnalysisForm):
         subject = []
         case = self.entryform
 
-        if case.company:
-            subject.append(case.company)
+        if case.customer:
+            subject.append(case.customer.name)
 
         if case.center:
             subject.append(case.center)
@@ -97,11 +97,14 @@ class Analysis(AnalysisForm):
         self.save()
 
     def get_recipients(self):
-        """Returns a list of all emails from self's MailLists."""
-        recipients = []
+        """Returns a dictionary containing all emails from self's MailLists, separated by To and CC."""
+        to = []
+        cc = []
         for mails in self.mailing_lists.all():
-            recipients.extend(mails.recipients_email)
-        return recipients
+            mail_dict = mails.recipients_email
+            to.extend(mail_dict["to"])
+            cc.extend(mail_dict["cc"])
+        return {"to": to, "cc": cc}
 
     def get_sendable_file(self):
         """Returns self's :model:`review.File` which is available to be send."""
@@ -218,7 +221,9 @@ class MailList(models.Model):
     customer = models.ForeignKey(
         to=Customer, on_delete=models.CASCADE, related_name="mailing_lists"
     )
-    recipients = models.ManyToManyField(to=Recipient, related_name="mailing_lists")
+    recipients = models.ManyToManyField(
+        to=Recipient, related_name="mailing_lists", through="RecipientMail"
+    )
     analysis = models.ManyToManyField(
         to=Analysis, related_name="mailing_lists", through="AnalysisMailList"
     )
@@ -230,10 +235,35 @@ class MailList(models.Model):
     @property
     def recipients_email(self):
         """Returns a list of email for all Recipients."""
-        return [recipient.email for recipient in self.recipients.all()]
+        to = []
+        cc = []
+
+        for entry in RecipientMail.objects.filter(mail_list=self, is_main=True):
+            to.append(entry.recipient.email)
+
+        for entry in RecipientMail.objects.filter(mail_list=self, is_main=False):
+            cc.append(entry.recipient.email)
+
+        return {"to": to, "cc": cc}
 
     def __str__(self):
         return self.name
+
+
+class RecipientMail(models.Model):
+    recipient = models.ForeignKey(
+        Recipient, on_delete=models.CASCADE, related_name="mail_lists"
+    )
+    mail_list = models.ForeignKey(
+        MailList, on_delete=models.CASCADE, related_name="recipients_emails"
+    )
+    is_main = models.BooleanField(default=False)
+
+    class Meta:
+        db_table = "review_recipient_mail"
+
+    def __str__(self):
+        return f"{self.mail_list.name} {self.recipient.first_name}"
 
 
 class AnalysisMailList(models.Model):
