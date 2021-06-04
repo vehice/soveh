@@ -1,13 +1,13 @@
 import json
 import mimetypes
-import os
 from smtplib import SMTPException
 
-from django.conf import settings
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import User
 from django.core import serializers
 from django.core.mail import BadHeaderError, EmailMultiAlternatives
-from django.http.response import FileResponse, Http404, JsonResponse
+from django.db.models import Q
+from django.http.response import JsonResponse
 from django.shortcuts import get_object_or_404, render
 from django.template.loader import get_template
 from django.utils.decorators import method_decorator
@@ -22,7 +22,11 @@ def index(request):
     Renders template which lists multiple :model:`review.Analysis` grouped by
     their state, allowing the user to move them accross multiple states as necessary.
     """
-    return render(request, "index.html")
+    pathologists = User.objects.filter(
+        Q(userprofile__profile_id__in=(4, 5)) | Q(userprofile__is_pathologist=True)
+    )
+
+    return render(request, "index.html", {"pathologists": pathologists})
 
 
 @login_required
@@ -37,11 +41,9 @@ def list(request, index):
         context = []
         for item in queryset:
             context.append(
-                {
-                    "analysis": serializers.serialize("json", [item]),
-                    "case": serializers.serialize("json", [item.entryform]),
-                    "exam": serializers.serialize("json", [item.exam]),
-                }
+                serializers.serialize(
+                    "json", [item, item.entryform, item.exam, item.entryform.customer]
+                )
             )
         return context
 
@@ -71,16 +73,6 @@ def update_stage(request, pk):
     )
 
     return JsonResponse(serializers.serialize("json", [stage[0], analysis]), safe=False)
-
-
-@login_required
-def download_file(request, pk):
-    """Returns a FileResponse from the given pk's :model:`review.File` """
-    review_file = get_object_or_404(File, pk=pk)
-    file_path = os.path.join(settings.MEDIA_ROOT, str(review_file.path))
-    if os.path.exists(file_path):
-        return FileResponse(open(file_path, "rb"))
-    raise Http404
 
 
 @login_required
@@ -130,7 +122,7 @@ def send_email(request, pk):
     email = EmailMultiAlternatives(
         analysis.email_subject,
         message,
-        "report@vehice.com",
+        "reports@vehice.com",
         analysis.get_recipients(),
     )
     email.content_subtype = "html"
@@ -160,17 +152,26 @@ class FileView(View):
         Returns a list of files that belong to a single :model:`review.Analysis`
         """
         analysis = get_object_or_404(Analysis, pk=pk)
-        prereport_files = analysis.external_reports.all()
-        files = []
-        for prefile in prereport_files:
-            filename = prefile.file.name.split("/")
-            files.append({"name": filename[1], "download": prefile.file.url})
 
-        review_files = File.objects.filter(analysis=analysis).select_related("user")
+        prereport_files = []
+        for prefile in analysis.external_reports.all():
+            filename = prefile.file.name.split("/")
+            prereport_files.append({"name": filename[1], "download": prefile.file.url})
+
+        review_files = []
+        for review in File.objects.filter(analysis=analysis):
+            review_files.append(
+                {
+                    "name": review.path.name,
+                    "download": review.path.url,
+                    "state": review.state,
+                    "created_at": review.created_at,
+                }
+            )
 
         context = {
-            "prereports": files,
-            "reviews": serializers.serialize("json", review_files),
+            "prereports": prereport_files,
+            "reviews": review_files,
         }
 
         return JsonResponse(context)

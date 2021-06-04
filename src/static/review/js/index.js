@@ -95,10 +95,12 @@ $(document).ready(() => {
 
   function parseResponse(response) {
     return response.map((row) => {
+      const data = JSON.parse(row);
       return {
-        analysis: JSON.parse(row.analysis)[0],
-        exam: JSON.parse(row.exam)[0],
-        case: JSON.parse(row.case)[0],
+        analysis: data[0],
+        case: data[1],
+        exam: data[2],
+        customer: data[3],
       };
     });
   }
@@ -111,7 +113,7 @@ $(document).ready(() => {
       list.append(`<li class="list-group-item">
                         <small>
                             <a href="#" class="serviceItem" id="${item.analysis.pk}">
-                                ${item.case.fields.no_caso} - ${item.exam.fields.name} - ${item.case.fields.company}
+                                ${item.case.fields.no_caso} - ${item.exam.fields.name} - ${item.customer.fields.name}
                             </a>
                         </small>
                     </li>`);
@@ -257,21 +259,22 @@ $(document).ready(() => {
 
         for (const file of prereports) {
           prereportList.append(
-            `<li class="list-group-item"><a href="${file.download}">${file.name}</a></li>`
+            `<li class="list-group-item"><a href="${file.download}" target="_BLANK">${file.name}</a></li>`
           );
         }
 
-        const reviews = JSON.parse(data.reviews);
+        const reviews = data.reviews;
         const reviewList = $("#reviewList");
         reviewList.empty();
 
         for (const file of reviews) {
-          const created = new Date(file.fields.created_at);
+          console.log({ file });
+          const created = new Date(file.created_at);
           reviewList.append(
             `<li class="list-group-item">
-              <a href="${Urls["review:download_file"](file.pk)}">
-                ${file.fields.path}
-                - ${getStateName(file.fields.state)}
+              <a href="${file.download}" target="_BLANK">
+                ${file.name}
+                - ${getStateName(file.state)}
                 - ${created.toLocaleString()}
               </a>
             </li>`
