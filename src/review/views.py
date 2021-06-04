@@ -119,11 +119,19 @@ def send_email(request, pk):
 
     message = get_template(template_name).render(context=context)
 
+    recipients = analysis.get_recipients()
+
     email = EmailMultiAlternatives(
-        analysis.email_subject,
-        message,
-        "reports@vehice.com",
-        analysis.get_recipients(),
+        subject=analysis.email_subject,
+        body=message,
+        from_email='"VeHiCe"<reports@vehice.com>',
+        to=recipients["to"],
+        cc=recipients["cc"],
+        bcc=[
+            "carlos.sandoval@vehice.com",
+            "felipe.fernandez@vehice.com",
+            "hector.diaz@vehice.com",
+        ],
     )
     email.content_subtype = "html"
 
