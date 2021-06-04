@@ -96,14 +96,6 @@ def default_tree(user):
             "child_items": reports,
         },
     )
-    if user.userprofile.profile_id in (1, 2, 3, 4, 5):
-        menu.append(
-            {
-                "path": "/derivacion/0",
-                "icon": "ft-users",
-                "section_name": "Derivación" if language == 1 else "Derivation",
-            }
-        )
     if user.userprofile.profile_id == 1:
         menu.append(
             {
