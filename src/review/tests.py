@@ -5,7 +5,16 @@ from django.test import Client, TestCase
 from django.urls import reverse
 
 from backend.models import Customer
-from review.models import Analysis, AnalysisMailList, File, MailList, Recipient, Stage
+from random import randint
+from review.models import (
+    Analysis,
+    AnalysisMailList,
+    File,
+    MailList,
+    Recipient,
+    RecipientMail,
+    Stage,
+)
 
 
 class AnalysisTestCase(TestCase):
@@ -93,8 +102,8 @@ class AnalysisTestCase(TestCase):
 
         response = client.get(reverse("review:files", kwargs={"pk": analysis.pk}))
 
-        prereports = json.loads(response.json()["prereports"])
-        reviews = json.loads(response.json()["reviews"])
+        prereports = response.json()["prereports"]
+        reviews = response.json()["reviews"]
 
         self.assertGreaterEqual(
             len(prereports),
@@ -107,18 +116,6 @@ class AnalysisTestCase(TestCase):
             review_files.count(),
             "Response must contain expected result.",
         )
-
-    def test_file_download(self):
-        client = Client()
-        client.login(username="jmonagas", password="vehice1234")
-
-        review_file = File.objects.all().last()
-
-        response = client.get(
-            reverse("review:download_file", kwargs={"pk": review_file.id})
-        )
-
-        self.assertTrue(response.streaming_content)
 
 
 class MailListTestCase(TestCase):
@@ -140,9 +137,8 @@ class MailListTestCase(TestCase):
 
         response_json = response.json()
 
-        self.assertDictContainsSubset(
-            {"model": "review.maillist"},
-            json.loads(json.dumps(response_json))["mail_lists"],
+        self.assertTrue(
+            "mail_lists" in str(response_json),
             "Response must contain expected data.",
         )
 
@@ -196,7 +192,11 @@ class MailListTestCase(TestCase):
         analysis = Analysis.objects.all().last()
         mail_list = MailList.objects.create(name="Lacreo", customer=customer)
 
-        mail_list.recipients.set(Recipient.objects.all())
+        for recipient in Recipient.objects.all():
+            RecipientMail.objects.create(
+                mail_list=mail_list, recipient=recipient, is_main=randint(0, 1)
+            )
+
         AnalysisMailList.objects.create(analysis=analysis, mail_list=mail_list)
 
         self.assertGreaterEqual(
@@ -215,18 +215,23 @@ class MailListTestCase(TestCase):
         analysis = Analysis.objects.all().last()
         mail_list = MailList.objects.create(name="Lacreo", customer=customer)
 
-        mail_list.recipients.set(Recipient.objects.all())
+        for recipient in Recipient.objects.all():
+            RecipientMail.objects.create(
+                mail_list=mail_list, recipient=recipient, is_main=randint(0, 1)
+            )
         AnalysisMailList.objects.create(analysis=analysis, mail_list=mail_list)
 
         client = Client()
         client.login(username="jmonagas", password="vehice1234")
 
         response = client.get(
-            reverse("review:current_email", kwargs={"pk": analysis.id})
+            reverse("review:analysis_emails", kwargs={"pk": analysis.id})
         )
 
         self.assertDictContainsSubset(
-            {"name": "Lacreo"}, response.json(), "Response must contain expected data."
+            {"name": "Lacreo"},
+            json.loads(response.json())[0],
+            "Response must contain expected data.",
         )
 
     def test_send_email(self):
@@ -241,7 +246,10 @@ class MailListTestCase(TestCase):
         analysis = Analysis.objects.all().last()
         mail_list = MailList.objects.create(name="Lacreo", customer=customer)
 
-        mail_list.recipients.set(Recipient.objects.all())
+        for recipient in Recipient.objects.all():
+            RecipientMail.objects.create(
+                mail_list=mail_list, recipient=recipient, is_main=randint(0, 1)
+            )
         AnalysisMailList.objects.create(analysis=analysis, mail_list=mail_list)
 
         client = Client()
@@ -251,4 +259,27 @@ class MailListTestCase(TestCase):
 
         self.assertDictContainsSubset(
             {"status": "OK"}, response.json(), "Response must contain expected data."
+        )
+
+    def test_analysis_recipients(self):
+        Recipient.objects.bulk_create(
+            [
+                Recipient(email="test1@mail.cl", first_name="Lacreo1"),
+                Recipient(email="test2@mail.cl", first_name="Lacreo2"),
+                Recipient(email="test3@mail.cl", first_name="Lacreo3", is_deleted=True),
+            ]
+        )
+        customer = Customer.objects.all().last()
+        analysis = Analysis.objects.all().last()
+        mail_list = MailList.objects.create(name="Lacreo", customer=customer)
+
+        for recipient in Recipient.objects.all():
+            RecipientMail.objects.create(
+                mail_list=mail_list, recipient=recipient, is_main=randint(0, 1)
+            )
+
+        AnalysisMailList.objects.create(analysis=analysis, mail_list=mail_list)
+
+        self.assertGreaterEqual(
+            len(mail_list.recipients_email), 2, "Response must contain expected data."
         )
