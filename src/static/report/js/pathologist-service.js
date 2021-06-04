@@ -163,13 +163,13 @@ $(document).ready(function () {
           data: "stain.abbreviation",
           name: "stain",
           type: "num",
-          title: "Tincion",
+          title: "Tinción",
         },
         {
           data: "user",
           name: "pathologist",
           type: "string",
-          title: "Patologo",
+          title: "Patólogo",
           render: (data) => {
             return `${data.first_name[0]}${data.last_name[0]}`;
           },
@@ -197,7 +197,7 @@ $(document).ready(function () {
           data: "report.assignment_done_at",
           name: "derived_at",
           type: "num",
-          title: "Derivacion",
+          title: "Derivación",
           render: (data) => {
             if (data == null || data == undefined) {
               return "";
@@ -263,13 +263,13 @@ $(document).ready(function () {
           data: "stain.abbreviation",
           name: "stain",
           type: "num",
-          title: "Tincion",
+          title: "Tinción",
         },
         {
           data: "user",
           name: "pathologist",
           type: "string",
-          title: "Patologo",
+          title: "Patólogo",
           render: (data) => {
             return `${data.first_name[0]}${data.last_name[0]}`;
           },
@@ -294,7 +294,7 @@ $(document).ready(function () {
           data: "report.assignment_done_at",
           name: "derived_at",
           type: "num",
-          title: "Derivacion",
+          title: "Derivación",
           render: (data) => {
             const date = new Date(data);
             return date.toLocaleDateString();
@@ -373,13 +373,13 @@ $(document).ready(function () {
           data: "stain.abbreviation",
           name: "stain",
           type: "num",
-          title: "Tincion",
+          title: "Tinción",
         },
         {
           data: "user",
           name: "pathologist",
           type: "string",
-          title: "Patologo",
+          title: "Patólogo",
           render: (data) => {
             return `${data.first_name[0]}${data.last_name[0]}`;
           },
@@ -436,7 +436,7 @@ $(document).ready(function () {
           data: "report.pre_report_ended_at",
           name: "delay",
           type: "num",
-          title: "En Revision",
+          title: "En Revisión",
           render: (data) => {
             return dateDiff(data);
           },

@@ -263,7 +263,7 @@ $(document).ready(function () {
           data: "user.fields",
           name: "pathologist",
           type: "string",
-          title: "Patologo",
+          title: "Patólogo",
           render: (data) => {
             return `${data.first_name[0]}${data.last_name[0]}`;
           },
@@ -295,7 +295,7 @@ $(document).ready(function () {
           data: "report.fields.assignment_done_at",
           name: "derived_at",
           type: "num",
-          title: "Derivacion",
+          title: "Derivación",
           render: (data) => {
             const date = new Date(data);
             return date.toLocaleDateString();
@@ -396,7 +396,7 @@ $(document).ready(function () {
           data: "stain.fields.abbreviation",
           name: "stain",
           type: "num",
-          title: "Tincion",
+          title: "Tinción",
         },
         {
           data: "case.fields.created_at",
