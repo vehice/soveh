@@ -184,6 +184,12 @@ $(document).ready(function () {
           title: "Caso",
         },
         {
+          data: "customer.name",
+          name: "customer",
+          type: "string",
+          title: "Empresa",
+        },
+        {
           data: "report.report_code",
           name: "reportCode",
           type: "string",

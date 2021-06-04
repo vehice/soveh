@@ -141,7 +141,6 @@ $(document).ready(function () {
     if ($.fn.DataTable.isDataTable("#pendingTable")) {
       pendingTable.DataTable().clear().destroy();
     }
-
     pendingNumber.text(pending.length);
     pendingTable.DataTable({
       data: pending,
@@ -152,6 +151,12 @@ $(document).ready(function () {
           name: "case",
           type: "string",
           title: "Caso",
+        },
+        {
+          data: "customer.name",
+          name: "customer",
+          type: "string",
+          title: "Empresa",
         },
         {
           data: "exam.name",
@@ -252,6 +257,12 @@ $(document).ready(function () {
           name: "case",
           type: "string",
           title: "Caso",
+        },
+        {
+          data: "customer.name",
+          name: "customer",
+          type: "string",
+          title: "Empresa",
         },
         {
           data: "exam.name",
@@ -364,6 +375,12 @@ $(document).ready(function () {
           title: "Caso",
         },
         {
+          data: "customer.name",
+          name: "customer",
+          type: "string",
+          title: "Empresa",
+        },
+        {
           data: "exam.name",
           name: "exam",
           type: "string",
@@ -439,92 +456,6 @@ $(document).ready(function () {
           title: "En Revisión",
           render: (data) => {
             return dateDiff(data);
-          },
-        },
-      ],
-
-      oLanguage: {
-        sUrl: "https://cdn.datatables.net/plug-ins/1.10.16/i18n/Spanish.json",
-      },
-    });
-  }
-
-  function initializeEfficiency() {
-    if ($.fn.DataTable.isDataTable("#efficiencyTable")) {
-      efficiencyTable.DataTable().clear().destroy();
-    }
-
-    const efficiency = filterDone();
-
-    efficiencyTable.DataTable({
-      data: efficiency,
-
-      columns: [
-        {
-          data: "case.no_caso",
-          name: "case",
-          type: "string",
-          title: "Caso",
-        },
-        {
-          data: "report.report_code",
-          name: "reportCode",
-          type: "string",
-          title: "Informe",
-        },
-        {
-          data: "exam.name",
-          name: "service",
-          type: "string",
-          title: "Servicio",
-        },
-        {
-          data: "user",
-          name: "user",
-          type: "num",
-          title: "Patólogo",
-          render: (data) => {
-            return `${data.first_name[0]}${data.last_name[0]}`;
-          },
-        },
-        {
-          data: "samples",
-          name: "samples",
-          type: "number",
-          title: "Cant. Muestras",
-        },
-        {
-          data: "report.score_diagnostic",
-          name: "score",
-          type: "num",
-          title: "Calificación",
-          render: (data) => {
-            if (data > 0) {
-              return data;
-            } else {
-              return "S/I";
-            }
-          },
-        },
-        {
-          data: "case.created_at",
-          name: "createdAt",
-          type: "string",
-          title: "Ingreso",
-          render: (data) => {
-            const date = new Date(data);
-            return date.toLocaleDateString();
-          },
-        },
-        {
-          data: "workflow.closed_at",
-          name: "closedAt",
-          type: "num",
-          title: "Emisión",
-
-          render: (data) => {
-            const date = new Date(data);
-            return date.toLocaleDateString();
           },
         },
       ],
