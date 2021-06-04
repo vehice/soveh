@@ -57,6 +57,12 @@ def serialize_data(queryset):
                         "no_caso",
                     ],
                 ),
+                "customer": model_to_dict(
+                    report.entryform.customer,
+                    fields=[
+                        "name",
+                    ],
+                ),
                 "exam": model_to_dict(
                     report.exam, fields=["name", "pathologist_assignment"]
                 ),
@@ -165,6 +171,12 @@ class ServiceView(View):
                             fields=[
                                 "created_at",
                                 "no_caso",
+                            ],
+                        ),
+                        "customer": model_to_dict(
+                            report.entryform.customer,
+                            fields=[
+                                "name",
                             ],
                         ),
                         "exam": model_to_dict(
@@ -284,6 +296,12 @@ class EfficiencyView(View):
                                 "no_caso",
                             ],
                         ),
+                        "customer": model_to_dict(
+                            report.entryform.customer,
+                            fields=[
+                                "name",
+                            ],
+                        ),
                         "exam": model_to_dict(
                             report.exam, fields=["name", "pathologist_assignment"]
                         ),
@@ -316,25 +334,66 @@ class EfficiencyView(View):
 class ControlView(View):
     def serialize_data(self, queryset):
         context = []
-        for row in queryset:
-            user = (
-                serializers.serialize("json", [row.patologo])
-                if row.patologo is not None
-                else json.dumps([])
-            )
-            context.append(
-                {
-                    "report": serializers.serialize("json", [row]),
-                    "case": serializers.serialize("json", [row.entryform]),
-                    "exam": serializers.serialize("json", [row.exam]),
-                    "user": user,
-                    "stain": serializers.serialize("json", [row.stain]),
-                    "samples": row.exam.sampleexams_set.filter(
-                        sample__entryform_id=row.entryform_id
-                    ).count(),
-                    "workflow": serializers.serialize("json", row.forms.all()),
-                }
-            )
+        for report in queryset:
+            user = report.patologo
+            try:
+                context.append(
+                    {
+                        "report": model_to_dict(
+                            report,
+                            fields=[
+                                "assignment_deadline",
+                                "manual_cancelled_date",
+                                "manual_closing_date",
+                                "assignment_done_at",
+                                "pre_report_ended",
+                                "pre_report_ended_at",
+                                "pre_report_started",
+                                "pre_report_started_at",
+                                "report_code",
+                                "score_diagnostic",
+                                "score_report",
+                                "patologo",
+                            ],
+                        ),
+                        "case": model_to_dict(
+                            report.entryform,
+                            fields=[
+                                "created_at",
+                                "center",
+                                "no_caso",
+                            ],
+                        ),
+                        "customer": model_to_dict(
+                            report.entryform.customer,
+                            fields=[
+                                "name",
+                            ],
+                        ),
+                        "exam": model_to_dict(
+                            report.exam, fields=["name", "pathologists_assignment"]
+                        ),
+                        "user": model_to_dict(user, fields=["first_name", "last_name"]),
+                        "stain": model_to_dict(
+                            report.stain, fields=["name", "abbreviation"]
+                        ),
+                        "samples": report.exam.sampleexams_set.filter(
+                            sample__entryform_id=report.entryform_id
+                        ).count(),
+                        "workflow": model_to_dict(
+                            report.forms.all().first(),
+                            fields=[
+                                "form_closed",
+                                "cancelled",
+                                "closed_at",
+                                "cancelled_at",
+                            ],
+                        ),
+                    }
+                )
+            except AttributeError:
+                continue
+
         return context
 
     def get(self, request):
@@ -352,34 +411,10 @@ class ControlView(View):
         date_end = date.today()
 
         analysis = AnalysisForm.objects.filter(
-            Q(manual_cancelled_date__isnull=True) | Q(forms__cancelled=False),
-        )
-
-        pending = analysis.filter(
-            Q(forms__form_closed=False) | Q(manual_closing_date__isnull=True),
-            pre_report_started=True,
-            pre_report_ended=True,
-        ).select_related("entryform", "patologo", "stain")
-
-        unassigned = analysis.filter(
-            Q(forms__form_closed=False) | Q(manual_closing_date__isnull=True),
-            patologo__isnull=True,
-            exam__service_id__in=(1, 4),
-        ).select_related("entryform", "patologo", "stain")
-
-        finished = analysis.filter(
-            Q(forms__form_closed=True) | Q(manual_closing_date__isnull=False),
-            pre_report_started=True,
-            pre_report_ended=True,
+            Q(manual_cancelled_date=None) | Q(forms__cancelled=False),
         ).select_related("entryform", "patologo", "stain")
 
         return HttpResponse(
-            json.dumps(
-                {
-                    "pending": self.serialize_data(pending),
-                    "unassigned": self.serialize_data(unassigned),
-                    "finished": self.serialize_data(finished),
-                }
-            ),
+            json.dumps(self.serialize_data(analysis), cls=DjangoJSONEncoder),
             content_type="application/json",
         )
