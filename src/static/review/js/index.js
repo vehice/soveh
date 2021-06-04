@@ -105,11 +105,31 @@ $(document).ready(() => {
     });
   }
 
-  function populateList(id, array) {
+  function populateList(id, array, filter = null) {
     const list = $(id);
     list.empty();
 
-    for (const item of array) {
+    let items = array;
+
+    if (filter != null) {
+      items = array.filter((item) => {
+        if (item.case.fields.no_caso.toLowerCase().includes(filter)) {
+          return true;
+        }
+
+        if (item.exam.fields.name.toLowerCase().includes(filter)) {
+          return true;
+        }
+
+        if (item.customer.fields.name.toLowerCase().includes(filter)) {
+          return true;
+        }
+
+        return false;
+      });
+    }
+
+    for (const item of items) {
       list.append(`<li class="list-group-item">
                         <small>
                             <a href="#" class="serviceItem" id="${item.analysis.pk}">
@@ -268,7 +288,6 @@ $(document).ready(() => {
         reviewList.empty();
 
         for (const file of reviews) {
-          console.log({ file });
           const created = new Date(file.created_at);
           reviewList.append(
             `<li class="list-group-item">
@@ -368,5 +387,15 @@ $(document).ready(() => {
   $("#btnRefreshRecipients").click(() => {
     toastr.info("Actualizando destinatarios...");
     updateSelectRecipients();
+  });
+
+  $("#search").on("input", (e) => {
+    const queryString = e.target.value.toLowerCase();
+
+    populateList("#waiting", waiting, queryString);
+    populateList("#formating", formating, queryString);
+    populateList("#reviewing", reviewing, queryString);
+    populateList("#sending", sending, queryString);
+    populateList("#finished", finished, queryString);
   });
 });
