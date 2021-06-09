@@ -1,13 +1,20 @@
 from datetime import datetime
 
-from django.db import models, connections
+from django.contrib.auth.models import User
+from django.contrib.contenttypes.fields import GenericForeignKey
+from django.contrib.contenttypes.models import ContentType
+from django.db import connections, models
 from django.urls import reverse
 from numpy import busday_count
 
-from backend.models import EntryForm, Organ, Unit, Identification, Stain
-from django.contrib.auth.models import User
-from django.contrib.contenttypes.models import ContentType
-from django.contrib.contenttypes.fields import GenericForeignKey
+from backend.models import (
+    ENTRY_FORMAT_OPTIONS,
+    EntryForm,
+    Identification,
+    Organ,
+    Stain,
+    Unit,
+)
 
 
 class CaseManager(models.Manager):
@@ -50,16 +57,6 @@ class CaseManager(models.Manager):
                 ),
             )
         )
-
-
-class UndeletedManager(models.Manager):
-    """Custom manager for models with deleted_at fields.
-    It's main purpouse is to scope the queryset to all
-    instances that haven't been deleted.
-    """
-
-    def get_queryset(self):
-        return super().get_queryset().filter(is_deleted=False)
 
 
 class Case(EntryForm):
@@ -174,64 +171,3 @@ class Slide(models.Model):
 
             return f"http://vehice.net/DSStore/HtmlViewer.aspx?Id=${slide_id}"
         return row
-
-
-class Laboratory(models.Model):
-    """A Physical unit, a building, in which processes are done.
-    Stores detailed information related to a single physical Laboratory unit.
-    """
-
-    objects = UndeletedManager()
-    items = models.Manager()
-
-    name = models.CharField(max_length=255)
-    address = models.CharField(max_length=255)
-    city = models.CharField(max_length=255)
-    country = models.CharField(max_length=255)
-
-    external = models.BooleanField(verbose_name="Externo", default=False)
-
-    users = models.ManyToManyField(User, related_name="laboratories")
-
-    is_deleted = models.BooleanField(verbose_name="Desactivado", default=False)
-
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
-    def __str__(self):
-        return self.name
-
-
-class Process(models.Model):
-    """
-    Stores detailed information related to a single lab Process.
-    """
-
-    objects = UndeletedManager()
-    items = models.Manager()
-
-    name = models.CharField(max_length=255)
-    laboratories = models.ManyToManyField(Laboratory, related_name="processes")
-
-    parent = models.ForeignKey("self", on_delete=models.CASCADE, null=True, blank=True)
-
-    is_deleted = models.BooleanField(verbose_name="Desactivado", default=False)
-
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
-    def __str__(self):
-        return self.name
-
-
-class ProcessItem(models.Model):
-    process = models.ForeignKey(
-        Process, on_delete=models.CASCADE, related_name="process_items"
-    )
-
-    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
-    object_id = models.PositiveIntegerField()
-    content_object = GenericForeignKey()
-
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)

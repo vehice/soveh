@@ -15,7 +15,7 @@ from django.views import View
 from django.views.generic import DetailView, ListView
 
 from backend.models import Organ, Stain, Unit
-from lab.models import Case, Cassette, CassetteOrgan, Process, ProcessItem, Slide
+from lab.models import Case, Cassette, CassetteOrgan, Slide
 
 
 def home(request):
@@ -659,48 +659,3 @@ class SlideDetail(View):
         return HttpResponse(
             serializers.serialize("json", [slide]), content_type="application/json"
         )
-
-
-# Process related views
-
-
-class ProcessIndex(ListView):
-    """Displays a list of :model:`backend.Units` for each :model:`lab.Process`.
-    Render a template which allows the user to select a :model:`lab.Process`, this triggers
-    a request to gather all :model:`backend.Units` that can be processed in said Process.
-
-        **Context**
-        ``procesess``
-            A list of :model:`lab.Process` which are available to the current :model:`auth.User`
-
-        **Template**
-        ``process/index.html``
-
-    """
-
-    template_name = "process/index.html"
-    context_object_name = "processes"
-
-    def get_queryset(self):
-        laboratories_id = self.request.user.laboratories.values_list("id", flat=True)
-        processes = Process.objects.filter(laboratories__in=laboratories_id)
-        return processes
-
-
-class ProcessDetail(View):
-    """Returns a JSON array containing all items for that given :model:`lab.Process`'s workload.
-    Takes as a parameter the PK of a :model:`lab.Process` and returns an array containing :model:`backend.Unit`
-    and :model:`lab.Cassette` which can be processed in the given :model:`lab.Process`.
-    """
-
-    @method_decorator(login_required)
-    def get(self, request, *args, **kwargs):
-        """Returns a JSON detailing items for that :model:`lab.Process`.
-
-        **CONTEXT**
-
-        """
-        process = get_object_or_404(Process, pk=kwargs["pk"])
-
-        items = ProcessItem.objects.filter(process=process)
-        return JsonResponse(serializers.serialize("json", items), safe=False)
