@@ -100,7 +100,9 @@ class Cassette(models.Model):
         Organ, related_name="cassettes", through="CassetteOrgan"
     )
     unit = models.ForeignKey(Unit, on_delete=models.CASCADE, related_name="cassettes")
+
     build_at = models.DateTimeField(null=True)
+    processed_at = models.DateTimeField(null=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
