@@ -315,9 +315,9 @@
         "es":"Volver",
         "en":"Back"
     },
-    "nro_sample":{
-        "es":"N° Muestra",
-        "en":"No. Sample"
+    "nro_individual":{
+        "es":"N° Individuo",
+        "en":"No. Individual"
     },
     "preselected_analysis":{
         "es":"Análisis pre-seleccionados",
@@ -662,5 +662,9 @@
     "individual":{
         "es":"Individuo",
         "en":"Individual"
+    },
+    "services_by_individual":{
+        "es": "Servicios por individuo",
+        "en": "Services by individual"
     }
 }

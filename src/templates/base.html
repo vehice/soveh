@@ -478,8 +478,8 @@
       tpl_exams += '</div>';
       $('.summaryExams').html(tpl_exams);
 
-      var tpl_samples = '<div class="col-sm-12"><h6 class="form-section mt-2"> <b>{{request.lang.samples}}</b></h6></br><table class="table table-bordered table-xs">';
-      tpl_samples += '<thead><tr><th>{{request.lang.nro_sample}}</th><th>{{request.lang.identification}}</th><th>{{request.lang.analysis}}</th><th>{{request.lang.stain}}</th><th>{{request.lang.organs}}</th></tr></thead><tbody>';
+      var tpl_samples = '<div class="col-sm-12"><h6 class="form-section mt-2"> <b>{{request.lang.services_by_individual}}</b></h6></br><table class="table table-bordered table-xs">';
+      tpl_samples += '<thead><tr><th>{{request.lang.nro_individual}}</th><th>{{request.lang.identification}}</th><th>{{request.lang.analysis}}</th><th>{{request.lang.stain}}</th><th>{{request.lang.organs}}</th></tr></thead><tbody>';
       var patologos = {};
       $.each(data.patologos, function(i, v){
         patologos[v.id]=v.first_name+' '+v.last_name;
