@@ -387,6 +387,15 @@ class CassetteDetail(View):
         return HttpResponse(json.dumps(data), content_type="application/json")
 
 
+class CassetteProcess(View):
+    @method_decorator(login_required)
+    def get(self, request):
+        cassettes = Cassette.objects.all().select_related(
+            "unit__identification__entryform"
+        )
+        return render(request, "cassettes/process.html", {"cassettes": cassettes})
+
+
 # Slide related views
 
 

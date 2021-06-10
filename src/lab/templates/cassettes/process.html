@@ -1,0 +1,125 @@
+{% extends 'layout.html' %}
+{% load static %}
+
+{% block stylesheets %}
+<link
+    rel="stylesheet"
+    href="https://cdn.datatables.net/select/1.3.3/css/select.dataTables.min.css"
+    type="text/css"
+    media="screen"
+/>
+{% endblock stylesheets %}
+
+{% block content %}
+<!-- Main Content -->
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <header class="card-header">
+                <h4 class="card-title">Cassettes</h4>
+                <span class="d-flex flex-row justify-content-between mt-md-1 align-items-center">
+                    <small class="card-subtitle">Disponibles para procesador de tejidos</small>
+                    <aside class="btn-group">
+                        <button type="button" class="btn btn-primary" id="btnProcess">
+                            Procesar
+                        </button>
+                    </aside>
+                </span>
+            </header>
+            <section class="card-body table-responsive">
+                <table class="table table-bordered table-striped" id="datatable">
+                    <thead>
+                        <tr>
+                            <th scope="col">Caso</th>
+                            <th scope="col">Est/Jau</th>
+                            <th scope="col">Grupo</th>
+                            <th scope="col"># Cassette</th>
+                            <th scope="col">Atraso</th>
+                            <th scope="col">Info.</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for cassette in cassettes %}
+                        <tr>
+                            <td>{{ cassette.unit.identification.entryform.no_caso|capfirst }}</td>
+                            <td>{{ cassette.unit.identification.cage }}</td>
+                            <td>{{ cassette.unit.identification.group }}</td>
+                            <td>{{ cassette.correlative }}</td>
+                            <td>{{ cassette.unit.identification.entryform.delay }}</td>
+                            <td><a href="{{ cassette.unit.identification.entryform.get_absolute_url }}" class="detailTrigger">Detalle</a></td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </section>
+        </div>
+    </div>
+</div>
+
+<!-- End Main Content -->
+
+<!-- Modal Dialogs -->
+
+<!-- CASSETTE BUILD MODAL -->
+
+<div class="modal fade" id="dlgProcess" tabindex="-1" aria-labelledby="btnProcess" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Procesar Cassettes</h5>
+                <button type="button" class="btn btn-warning btn-close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body container-fluid">
+                <form id="formProcess">
+                    <div class="row mb-3">
+                        <label for="processedAt" class="col-md-4 col-form-label text-right">Fecha armado:</label>
+                        <div class="col-md-2">
+                            <input type="datetime-local" class="form-control" id="buildAt">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary btn-close" data-bs-dismiss="modal">
+                    Cancelar
+                </button>
+                <button id="btnSave" type="button" class="btn btn-primary">Guardar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- End Modal Dialogs -->
+
+{% endblock content %}
+{% block scripts %}
+<script
+    type="text/javascript"
+    src="https://cdn.datatables.net/select/1.3.3/js/dataTables.select.min.js"
+    defer>
+</script>
+
+<script
+    type="text/javascript"
+    src="https://cdn.datatables.net/buttons/1.7.0/js/dataTables.buttons.min.js"
+    defer>
+</script>
+
+<script
+    type="text/javascript"
+    src="//cdn.jsdelivr.net/npm/sweetalert2@10"
+    defer>
+</script>
+
+<script type="text/javascript"
+        src="{% static 'lab/js/cassette-process.js' %}"
+        defer>
+</script>
+
+{% endblock scripts %}

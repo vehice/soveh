@@ -18,6 +18,7 @@ urlpatterns = [
     path("cassettes/<int:pk>", views.CassetteDetail.as_view(), name="cassette_detail"),
     path("cassettes/prebuild", views.cassette_prebuild, name="cassette_prebuild"),
     path("cassettes/build", views.CassetteBuild.as_view(), name="cassette_build"),
+    path("cassettes/process", views.CassetteProcess.as_view(), name="cassette_process"),
     #
     # Slide Routes
     #

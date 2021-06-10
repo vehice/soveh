@@ -642,6 +642,31 @@ class CassetteDetailTest(TestCase):
         )
 
 
+class CassetteProcessedAtTest(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.client = Client()
+        cls.case = Case.objects.create()
+        cls.identification = Identification.objects.create(entryform=cls.case)
+        cls.unit = Unit.objects.create(identification=cls.identification)
+        cls.cassette = Cassette.objects.create(unit=cls.unit, correlative=1)
+
+    def test_expected_template(self):
+        self.client.login(username="jmonagas", password="vehice1234")
+        response = self.client.get(reverse("lab:cassette_process"))
+
+        self.assertTemplateUsed(
+            response, "cassettes/process.html", "Response must use expected template."
+        )
+
+        cassettes = Cassette.objects.all()
+
+        self.assertTrue(
+            response.context["cassettes"].first() == cassettes.first(),
+            "Response must contain expected context.",
+        )
+
+
 class SlideBuildTest(TestCase):
     @classmethod
     def setUpTestData(cls):
