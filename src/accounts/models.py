@@ -1,4 +1,4 @@
-from django.contrib.auth.models import User, Group
+from django.contrib.auth.models import User
 from django.db import models
 
 
@@ -47,3 +47,20 @@ class UserProfile(models.Model):
     class Meta:
         verbose_name = "Perfil de Usuario"
         verbose_name_plural = "Perfiles de Usuario"
+
+
+class Area(models.Model):
+    name = models.CharField(max_length=255)
+
+    is_deleted = models.SmallIntegerField(verbose_name="desactivado", default=0)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+
+class UserArea(models.Model):
+    ROLES = [(0, "jefe"), (1, "miembro")]
+
+    area = models.ForeignKey(Area, on_delete=models.CASCADE, related_name="users")
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="areas")
+    role = models.SmallIntegerField(verbose_name="rol", choices=ROLES, default=ROLES[1])
