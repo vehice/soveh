@@ -1,24 +1,48 @@
 from django.contrib import admin
-from .models import UserProfile, Profile
-from django.contrib.auth.models import User, Group
 from django.contrib.auth.admin import UserAdmin
-from django import forms
+from django.contrib.auth.models import Group, User
+
+from accounts.models import UserProfile, Area, UserArea
+from django.contrib.admin import widgets
+from django.urls import resolve
 
 admin.site.unregister(Group)
+admin.site.unregister(User)
+
 
 class ProfileInline(admin.StackedInline):
     model = UserProfile
     can_delete = False
-    verbose_name_plural = 'Perfil de Usuario'
-    fk_name = 'user'
-    exclude = ('role', 'state', 'confirmation_code')
+    verbose_name_plural = "Perfil de Usuario"
+    fk_name = "user"
+    exclude = ("role", "state", "confirmation_code")
+
 
 class CustomUserProfile(UserAdmin):
-    inlines = (ProfileInline, )
+    inlines = (ProfileInline,)
     fieldsets = (
-            (None, {'fields': ('email', 'password', 'username', 'first_name', 'last_name', 'is_active')}),
-        )
-    list_display = ('username', 'email', 'first_name', 'last_name', 'is_active', 'userprofile')
+        (
+            None,
+            {
+                "fields": (
+                    "email",
+                    "password",
+                    "username",
+                    "first_name",
+                    "last_name",
+                    "is_active",
+                )
+            },
+        ),
+    )
+    list_display = (
+        "username",
+        "email",
+        "first_name",
+        "last_name",
+        "is_active",
+        "userprofile",
+    )
 
     def get_inline_instances(self, request, obj=None):
         if not obj:
@@ -28,5 +52,7 @@ class CustomUserProfile(UserAdmin):
     def save_model(self, request, obj, form, change):
         super(CustomUserProfile, self).save_model(request, obj, form, change)
 
-admin.site.unregister(User)
+
 admin.site.register(User, CustomUserProfile)
+admin.site.register(Area)
+admin.site.register(UserArea)
