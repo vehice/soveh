@@ -554,6 +554,8 @@ $(document).on("change", '.unit-select', function(){
       }
     });
     $(".contador_seleccion").html(`Tienes ${$(".table-unit .unit-select:checked").length} unidades seleccionadas de ${table_ids.length} identificaciones`);
+  } else {
+    $(".contador_seleccion").html(`Tienes 0 unidades seleccionadas de 0 identificaciones`);
   }
 });
 
@@ -953,7 +955,8 @@ function selectAllUnits(opt){
       let units_tbody_trs = "units-table-"+ident_id+" tr"
 
       waitForEl("#"+units_tbody_trs, function() {
-        $('#'+units_tbody_trs+' .unit-select').prop("checked", true)
+        $('#'+units_tbody_trs+' .unit-select').prop("checked", true);
+        $(".unit-select").trigger("change");
       });
     });
   } else {
@@ -970,26 +973,28 @@ function selectAllUnits(opt){
       let units_tbody_trs = "units-table-"+ident_id+" tr"
 
       waitForEl("#"+units_tbody_trs, function() {
-        $('#'+units_tbody_trs+' .unit-select').prop("checked", false)
+        $('#'+units_tbody_trs+' .unit-select').prop("checked", false);
+        $(".unit-select").trigger("change");
       });
     });
   }
 }
 
 function selectAllUnitsByIdentification(id, opt){
-  let units_tbody_trs = "units-table-"+id+" tr"
+  let units_tbody_trs = "units-table-"+id+" tr";
   if (opt == 1){
 
     waitForEl("#"+units_tbody_trs, function() {
-      $('#'+units_tbody_trs+' .unit-select').prop("checked", true)
+      $('#'+units_tbody_trs+' .unit-select').prop("checked", true);
     });
   } else {
-    let units_tbody_trs = "units-table-"+id+" tr"
+    let units_tbody_trs = "units-table-"+id+" tr";
 
     waitForEl("#"+units_tbody_trs, function() {
-      $('#'+units_tbody_trs+' .unit-select').prop("checked", false)
+      $('#'+units_tbody_trs+' .unit-select').prop("checked", false);
     });
   }
+  $(".unit-select").trigger("change");
 }
 
 $(document).on("click", ".keypad-organ-selector", function(){
