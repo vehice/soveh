@@ -14,6 +14,7 @@ from django.utils.decorators import method_decorator
 from django.views import View
 
 from backend.models import AnalysisForm
+from accounts.models import UserArea
 
 
 def serialize_data(queryset):
@@ -86,30 +87,39 @@ def serialize_data(queryset):
         return json.dumps(context, cls=DjangoJSONEncoder)
 
 
+def get_pathologists(user):
+    pathologists = User.objects.filter(
+        Q(userprofile__profile_id__in=(4, 5)) | Q(userprofile__is_pathologist=True)
+    )
+
+    if not user.userprofile.profile_id in (1, 2):
+        assigned_areas = UserArea.objects.filter(user=user)
+        pks = []
+
+        for user_area in assigned_areas:
+            if user_area.role == 0:
+                users = UserArea.objects.filter(area=user_area.area).values_list(
+                    "user", flat=True
+                )
+                pks.extend(users)
+
+        pathologists = pathologists.filter(pk__in=pks)
+
+    return pathologists
+
+
 class ServiceView(View):
     def get(self, request):
         """Displays multiple tables and charts to generate reportability.
         This is cattered for Pathologists Users, where they can see their
         pending work, and their efficiency.
         """
-        pathologists = User.objects.filter(
-            Q(userprofile__profile_id__in=(4, 5)) | Q(userprofile__is_pathologist=True)
-        )
-
-        user = None
-
-        if (
-            request.user.userprofile is not None
-            and request.user.userprofile.profile_id in (4, 5)
-        ):
-            user = request.user
 
         return render(
             request,
             "pathologist/service.html",
             {
-                "pathologists": pathologists,
-                "current_user": user,
+                "pathologists": get_pathologists(request.user),
             },
         )
 
@@ -138,6 +148,12 @@ class ServiceView(View):
 
         if pathologist and pathologist > 0:
             reports = reports.filter(patologo_id=pathologist)
+        else:
+            reports = reports.filter(
+                patologo_id__in=get_pathologists(request.user).values_list(
+                    "id", flat=True
+                )
+            )
 
         context = []
 
@@ -215,24 +231,12 @@ class EfficiencyView(View):
         Displays multiples tables detailing :model:`backend.AnalysisForm` grouped
         by their state.
         """
-        pathologists = User.objects.filter(
-            Q(userprofile__profile_id__in=(4, 5)) | Q(userprofile__is_pathologist=True)
-        )
-
-        user = None
-
-        if (
-            request.user.userprofile is not None
-            and request.user.userprofile.profile_id in (4, 5)
-        ):
-            user = request.user
 
         return render(
             request,
             "pathologist/efficiency.html",
             {
-                "pathologists": pathologists,
-                "current_user": user,
+                "pathologists": get_pathologists(request.user),
             },
         )
 
@@ -242,7 +246,11 @@ class EfficiencyView(View):
         filtered by request parameters of `date_start`, `date_end`, and `pathologist`.
         """
         body = json.loads(request.body)
-        pathologist = int(body["user_id"]) if str(body["user_id"]).isnumeric() else 0
+        pathologist = (
+            int(body["user_id"])
+            if str(body["user_id"]).isnumeric()
+            else get_pathologists(request.user).values_list("id", flat=True)
+        )
         date_start = body["date_start"]
         date_end = body["date_end"]
 
