@@ -74,9 +74,19 @@ function loadStains(stains) {
   });
 }
 
-function loadOrgans(organs) {
+function loadOrgans(samples) {
+  let organs = {}
+
+  $.each(samples, function(i, sample){
+    $.each(sample.organs_set, function(j, ou){
+      if (!organs.hasOwnProperty(ou.organ.id)) {
+        organs[ou.organ.id] = ou.organ
+      }
+    })
+  })
+
   $.each(organs, function (i, item) {
-    var html = '<option value="'+item.id+'">'+item.abbreviation+'</option>';
+    var html = '<option value="'+item.id+'">'+item.name+'</option>';
     $('#organs_select').append($(html));
   });
 }
@@ -102,7 +112,7 @@ function initialData(data) {
   loadSamples(data.samples);
   loadExams(data.exams);
   loadStains(data.stains);
-  loadOrgans(data.organs);
+  loadOrgans(data.samples);
 }
 
 function loadData(data){

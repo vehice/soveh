@@ -116,7 +116,11 @@ class ENTRYFORM(View):
                 for org in s.organsUnits.all():
                     unit = model_to_dict(org.unit, exclude=["organs",])
                     organ = model_to_dict(org.organ)
-                    organs.append({'unit': unit, 'organ': organ})
+                    organs.append({
+                        "unit": unit, 
+                        "organ": organ, 
+                        "organ_unit_id": org.id
+                    })
 
                 s_dict["organs_set"] = organs
 
