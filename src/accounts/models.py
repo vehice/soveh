@@ -52,15 +52,23 @@ class UserProfile(models.Model):
 class Area(models.Model):
     name = models.CharField(max_length=255)
 
-    is_deleted = models.SmallIntegerField(verbose_name="desactivado", default=0)
+    users = models.ManyToManyField(User, related_name="areas", through="UserArea")
+
+    is_deleted = models.BooleanField(verbose_name="desactivado", default=False)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return self.name
 
 
 class UserArea(models.Model):
     ROLES = [(0, "jefe"), (1, "miembro")]
 
-    area = models.ForeignKey(Area, on_delete=models.CASCADE, related_name="users")
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="areas")
+    area = models.ForeignKey(Area, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
     role = models.SmallIntegerField(verbose_name="rol", choices=ROLES, default=ROLES[1])
+
+    def __str__(self):
+        return f"{self.user} es {self.get_role_display()} de {self.area}"
