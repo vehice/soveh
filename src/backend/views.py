@@ -1868,7 +1868,7 @@ class RESEARCH(View):
             else:
                 parte = " (Parte " + parte + ")"
 
-            report_started = a["analysis"].pre_report_started_at
+            report_started = a.pre_report_started_at
 
             if report_started is not None:
                 report_started = report_started.strftime("%d/%m/%Y")
