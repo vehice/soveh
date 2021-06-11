@@ -13,12 +13,12 @@
             </header>
             <main class="card-body container">
                 <section class="row">
-                    <div class="col-md-3 d-flex flex-column">
+                    <div class="col-md-2 d-flex flex-column">
                         <b>Inicio:</b>
                         <input class="form-control" type="date" id="dateStart"/>
                         <small id="labelDateStart"></small>
                     </div>
-                    <div class="col-md-3 d-flex flex-column">
+                    <div class="col-md-2 d-flex flex-column">
                         <b>Fin:</b>
                         <input class="form-control" type="date" id="dateEnd"/>
                         <small id="labelDateEnd"></small>
@@ -26,6 +26,10 @@
                     <div class="col-md-3 d-flex flex-column">
                         <b>Histopatólogo:</b>
                         <select id="pathologist" class="form-control">
+                            <option
+                                value="0">
+                                Todos
+                            </option>
                             {% for pathologist in pathologists %}
                             <option
                                 {% if user_id == pathologist.id  %} selected {% endif %}
@@ -35,7 +39,16 @@
                             {% endfor %}
                         </select>
                     </div>
-                    <div class="col-md-3 d-flex flex-column justify-content-center align-items-center">
+                    <div class="col-md-3">
+                        <b>Area:</b>
+                        <select id="area" class="form-control">
+                            <option value="0">Todas</option>
+                            {% for area in areas %}
+                            <option value="{{ area.id }}">{{ area.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-2 d-flex flex-column justify-content-center align-items-center">
                         <button id="btnFilter" class="btn-outline-dark py-2 px-3 rounded shadow-box">Filtrar</button>
                     </div>
                 </section>

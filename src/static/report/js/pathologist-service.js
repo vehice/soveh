@@ -54,7 +54,7 @@ $(document).ready(function () {
   let dateEnd = new Date().toLocaleDateString();
   $("#labelDateEnd").text(`Fecha por defecto: ${dateEnd}`);
   let dateStart = new Date();
-  dateStart.setMonth(dateStart.getMonth() - 3);
+  dateStart.setMonth(dateStart.getMonth() - 5);
   dateStart = dateStart.toLocaleDateString();
   $("#labelDateStart").text(`Fecha por defecto: ${dateStart}`);
 
@@ -475,6 +475,7 @@ $(document).ready(function () {
   function getData() {
     const date_start = $("#dateStart").val();
     const date_end = $("#dateEnd").val();
+    const area_id = $("#area").val();
     const user_id = $("#pathologist").val();
     Swal.fire({
       title: "Cargando...",
@@ -483,7 +484,7 @@ $(document).ready(function () {
     Swal.showLoading();
 
     $.ajax(Urls["report:service"](), {
-      data: JSON.stringify({ date_start, date_end, user_id }),
+      data: JSON.stringify({ date_start, date_end, user_id, area_id }),
 
       method: "POST",
 

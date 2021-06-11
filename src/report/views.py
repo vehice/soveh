@@ -14,7 +14,7 @@ from django.utils.decorators import method_decorator
 from django.views import View
 
 from backend.models import AnalysisForm
-from accounts.models import UserArea
+from accounts.models import Area, UserArea
 
 
 def serialize_data(queryset):
@@ -88,20 +88,26 @@ def serialize_data(queryset):
 
 
 def get_pathologists(user):
+    """Returns a queryset of pathologists.
+    This queryset filter the User model according to it's profile, where a profile id of 4 and 5
+    indicates a Pathologist, the userprofile also includes a boolean check for wether that user is
+    pathologists, in cases where a user doesn't have the profile of a pathologists but it should be
+    considered as one.
+    It also filters for an Area's Lead to be able to see al Pathologists under their Area.
+    """
     pathologists = User.objects.filter(
         Q(userprofile__profile_id__in=(4, 5)) | Q(userprofile__is_pathologist=True)
     )
 
     if not user.userprofile.profile_id in (1, 2):
-        assigned_areas = UserArea.objects.filter(user=user)
+        assigned_areas = UserArea.objects.filter(user=user, role=0)
         pks = []
 
         for user_area in assigned_areas:
-            if user_area.role == 0:
-                users = UserArea.objects.filter(area=user_area.area).values_list(
-                    "user", flat=True
-                )
-                pks.extend(users)
+            users = UserArea.objects.filter(area=user_area.area).values_list(
+                "user", flat=True
+            )
+            pks.extend(users)
 
         pathologists = pathologists.filter(pk__in=pks)
 
@@ -114,13 +120,15 @@ class ServiceView(View):
         This is cattered for Pathologists Users, where they can see their
         pending work, and their efficiency.
         """
+        assigned_areas = UserArea.objects.filter(user=request.user, role=0).values_list(
+            "area", flat=True
+        )
+        areas = Area.objects.filter(id__in=assigned_areas)
 
         return render(
             request,
             "pathologist/service.html",
-            {
-                "pathologists": get_pathologists(request.user),
-            },
+            {"pathologists": get_pathologists(request.user), "areas": areas},
         )
 
     def post(self, request):
@@ -130,6 +138,7 @@ class ServiceView(View):
 
         body = json.loads(request.body)
         pathologist = int(body["user_id"]) if str(body["user_id"]).isnumeric() else 0
+        area = int(body["area_id"]) if str(body["area_id"]).isnumeric() else 0
         date_start = body["date_start"]
         date_end = body["date_end"]
 
@@ -154,6 +163,10 @@ class ServiceView(View):
                     "id", flat=True
                 )
             )
+
+        if area and area > 0:
+            users = area.users
+            reports = reports.filter(patologo_id__in=users)
 
         context = []
 
@@ -231,12 +244,17 @@ class EfficiencyView(View):
         Displays multiples tables detailing :model:`backend.AnalysisForm` grouped
         by their state.
         """
+        assigned_areas = UserArea.objects.filter(user=request.user, role=0).values_list(
+            "area", flat=True
+        )
+        areas = Area.objects.filter(id__in=assigned_areas)
 
         return render(
             request,
             "pathologist/efficiency.html",
             {
                 "pathologists": get_pathologists(request.user),
+                "areas": areas,
             },
         )
 
@@ -251,6 +269,7 @@ class EfficiencyView(View):
             if str(body["user_id"]).isnumeric()
             else get_pathologists(request.user).values_list("id", flat=True)
         )
+        area = int(body["area_id"]) if str(body["area_id"]).isnumeric() else 0
         date_start = body["date_start"]
         date_end = body["date_end"]
 
@@ -269,6 +288,16 @@ class EfficiencyView(View):
 
         if pathologist and pathologist > 0:
             reports = reports.filter(patologo_id=pathologist)
+        else:
+            reports = reports.filter(
+                patologo_id__in=get_pathologists(request.user).values_list(
+                    "id", flat=True
+                )
+            )
+
+        if area and area > 0:
+            users = area.users
+            reports = reports.filter(patologo_id__in=users)
 
         context = []
 

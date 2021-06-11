@@ -414,6 +414,7 @@ $(document).ready(function () {
     const date_start = $("#dateStart").val();
     const date_end = $("#dateEnd").val();
     const user_id = $("#pathologist").val();
+    const area_id = $("#area").val();
     Swal.fire({
       title: "Cargando...",
       allowOutsideClick: false,
@@ -421,7 +422,7 @@ $(document).ready(function () {
     Swal.showLoading();
 
     $.ajax(Urls["report:efficiency"](), {
-      data: JSON.stringify({ date_start, date_end, user_id }),
+      data: JSON.stringify({ date_start, date_end, user_id, area_id }),
 
       method: "POST",
 
