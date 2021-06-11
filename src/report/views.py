@@ -451,6 +451,10 @@ class ControlView(View):
             Q(manual_cancelled_date=None) | Q(forms__cancelled=False),
         ).select_related("entryform", "patologo", "stain")
 
+        pathologists = get_pathologists(request.user)
+
+        analysis = analysis.filter(patologo_id__in=pathologists)
+
         return HttpResponse(
             json.dumps(self.serialize_data(analysis), cls=DjangoJSONEncoder),
             content_type="application/json",
