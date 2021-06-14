@@ -14,7 +14,7 @@ $(document).ready(() => {
 
   $("#newFiles").dropzone({
     dictDefaultMessage: "Arrastre sus archivos aqui",
-    acceptedFiles: ".csv, .doc, .docx, .ods, .odt, .pdf, .xls, .xlsx",
+    acceptedFiles: ".csv, .doc, .docx, .ods, .odt, .pdf, .xls, .xlsx, .xlsm",
     createImageThumbnails: false,
     headers: {
       "X-CSRFToken": getCookie("csrftoken"),

@@ -576,7 +576,7 @@ function showServiceReportsModal(id, service, case_closed, form_closed=false){
 
     $("#reports_uploader").dropzone({
       autoProcessQueue: false,
-      acceptedFiles: ".doc, .docx, .pdf",
+      acceptedFiles: ".csv, .doc, .docx, .ods, .odt, .pdf, .xls, .xlsx, .xlsm",
       init: function() {
         var submitButton = document.querySelector(".submit-file")
         myDropzone = this;
