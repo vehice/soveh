@@ -471,7 +471,6 @@ class Unit(models.Model):
     identification = models.ForeignKey(
         Identification, null=True, on_delete=models.SET_NULL
     )
-    # samples = models.ManyToManyField("Sample")
 
     def __str__(self):
         return str(self.correlative)
@@ -567,18 +566,19 @@ class AnalysisForm(models.Model):
 
 class Sample(models.Model):
     """
-    A Sample also known as Unit, is the lowest level subject of study in a Case, (Tube, Fish, Cassette, ...),
+    A Sample also known as Individual, is the lowest level subject of study in a Case, (Tube, Fish, Cassette, ...),
     to this Unit is the lab process applied to and it's its Slide what Pathologist users study.
     """
 
     entryform = models.ForeignKey(EntryForm, null=True, on_delete=models.SET_NULL)
     index = models.IntegerField(null=True, blank=True)  # correlative
-    organs = models.ManyToManyField(Organ)
-    organsUnits = models.ManyToManyField(OrganUnit)
     identification = models.ForeignKey(
-        Identification, null=True, on_delete=models.SET_NULL
+        Identification,
+        null=True,
+        on_delete=models.CASCADE
     )
-
+    unit_organs = models.ManyToManyField(OrganUnit)
+    
     def __str__(self):
         return str(self.index)
 

@@ -109,11 +109,11 @@ class ENTRYFORM(View):
             samples_as_dict = []
             for s in samples:
                 s_dict = model_to_dict(
-                    s, exclude=["organs", "organsUnits", "sampleexams", "identification"]
+                    s, exclude=["organs", "unit_organs", "sampleexams", "identification"]
                 )
                 organs = []
 
-                for org in s.organsUnits.all():
+                for org in s.unit_organs.all():
                     unit = model_to_dict(org.unit, exclude=["organs",])
                     organ = model_to_dict(org.organ)
                     organs.append({
@@ -344,7 +344,6 @@ class ENTRYFORM(View):
                 # 'entryform_types': entryform_types,
                 "research_types_list": researches,
             }
-        # print (data)
         return JsonResponse(data)
 
 
@@ -1676,8 +1675,6 @@ class EMAILTEMPLATE(View):
             to = var_post.get("to").split(",")
             message = var_post.get("body")
             plantilla = var_post.get("plantilla")
-            # template = EmailTemplate.objects.
-            # print ("esta es mi plantilla", plantilla)
             bcc = []
             if plantilla:
                 emailtemplate = EmailTemplate.objects.get(pk=plantilla)
@@ -2337,11 +2334,11 @@ def step_2_entryform(request):
 
         # Deleting previous samples
 
-        # Sample.objects.filter(
-        #     identification=ident,
-        # ).delete()
-
+        Sample.objects.filter(
+            identification=ident,
+        ).delete()
         units = Unit.objects.filter(identification=ident)
+
         if ident.samples_are_correlative:
             unit_by_correlative = {}
             for unit in units:
@@ -2353,51 +2350,60 @@ def step_2_entryform(request):
             for k, v in unit_by_correlative.items():
 
                 sample = Sample.objects.filter(
-                    entryform=entryform, index=index, identification=ident
+                    entryform = entryform, 
+                    index = index, 
+                    identification = ident,
                 ).first()
 
                 if not sample:
                     sample = Sample.objects.create(
-                        entryform=entryform, index=index, identification=ident
+                        entryform = entryform, 
+                        index = index, 
+                        identification = ident
                     )
 
-                sample.organs.clear()
+                sample.unit_organs.clear()
+
                 for ou in OrganUnit.objects.filter(unit__in=map(lambda x: x.pk, v)):
-                    sample.organsUnits.add(ou)
+                    sample.unit_organs.add(ou)
 
                 index += 1
         else:
-            organs = [
-                ou.organ.pk
-                for ou in OrganUnit.objects.filter(unit__in=map(lambda x: x.pk, units))
-            ]
-            organs_copy = organs[:]
+            for unit in units:
+                unique_organs_group = [[]]
 
-            samples_from_organs = []
-            for i in range(len(organs)):
-                if (organs[i]) in organs_copy:
-                    new_comb = [organs[i]]
-                    organs_copy.remove(organs[i])
-                    for j in organs_copy:
-                        if j not in new_comb:
-                            new_comb.append(j)
-                            organs_copy.remove(j)
-                    samples_from_organs.append(new_comb)
+                for uo in OrganUnit.objects.filter(unit=unit):
+                    uo_included = False
+                    for group in unique_organs_group:
+                        if uo.organ.pk not in list(map(lambda x: x.organ.pk, group)):
+                            group.append(uo)
+                            uo_included = True
+                            break
 
-            for s in samples_from_organs:
-                sample = Sample.objects.filter(
-                    entryform=entryform, index=index, identification=ident
-                ).first()
+                    if not uo_included:
+                        unique_organs_group.append([uo])
 
-                if not sample:
-                    sample = Sample.objects.create(
-                        entryform=entryform, index=index, identification=ident
-                    )
-                sample.organs.clear()
-                for org in s:
-                    sample.organs.add(Organ.objects.get(pk=org))
+                for group in unique_organs_group:
+                    
+                    sample = Sample.objects.filter(
+                        entryform = entryform, 
+                        index = index, 
+                        identification = ident,
+                    ).first()
 
-                index += 1
+                    if not sample:
+                        sample = Sample.objects.create(
+                            entryform = entryform, 
+                            index = index, 
+                            identification = ident
+                        )
+
+                    sample.unit_organs.clear()
+
+                    for ou in group:
+                        sample.unit_organs.add(ou)
+
+                    index += 1
 
     return True
 
@@ -2878,7 +2884,6 @@ def step_5_analysisform(request):
     box_diagnostic = var_post.get("box-diagnostics").replace("\\r\\n", "")
     box_comments = var_post.get("box-comments").replace("\\r\\n", "")
     box_tables = var_post.get("box-tables").replace("\\r\\n", "")
-    # print (var_post)
     ReportFinal.objects.filter(analysis_id=analysis_id).delete()
     ReportFinal.objects.create(
         analysis_id=analysis_id,
@@ -3055,7 +3060,14 @@ def save_units(request):
         unit_obj.save()
 
         organs_fmt = list(map(lambda x: int(x.split("-")[0]), unit["organs"]))
-        OrganUnit.objects.filter(unit=unit_obj).delete()
+        for ou in OrganUnit.objects.filter(unit=unit_obj):
+            samples = Sample.objects.filter(unit_organs__in=[ou.id])
+            for s in samples:
+                s.unit_organs.remove(ou)
+                if s.unit_organs.all().count() == 0:
+                    s.delete()
+            ou.delete()
+        
         for org in organs_fmt:
             OrganUnit.objects.create(unit=unit_obj, organ_id=org)
 
@@ -3063,9 +3075,13 @@ def save_units(request):
 
 
 def remove_unit(request, id):
-    for OU in Unit.objects.get(pk=id).organs.all():
-        Sample.objects.filter(organsUnits__in=[OU.id]).delete()
-    Unit.objects.get(pk=id).delete()
+    for OU in OrganUnit.objects.filter(unit_id=id):
+        samples = Sample.objects.filter(unit_organs__in=[OU.id])
+        for s in samples:
+            s.unit_organs.remove(OU)
+            if s.unit_organs.all().count() == 0:
+                s.delete()
+    Unit.objects.get(pk=id).delete()  
     return JsonResponse({"ok": 1})
 
 

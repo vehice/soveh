@@ -421,24 +421,25 @@ var continuar =  "{{request.lang.next}}";
             return false
           }
           if (response.next_step_permission) {
-            var step;
-            var function_name;
-            if(previous_step) {
-              step = currentIndex
-              function_name = "init_step_" + step;
-            } 
-            else {
-              step = newIndex + 1
-              function_name = "init_step_" + step;
-            }
-            setTimeout(function() {
-              window[function_name]({{edit}} == 1);
-              $.get(
-                Urls.sendNotification()+'?'+form_data + "&id_next_step=" + id_next_step +"&previous_step=" + previous_step,
-                function (data) {
-                }
-              )
-            }, 500);
+            // var step;
+            // var function_name;
+            // if(previous_step) {
+            //   step = currentIndex
+            //   function_name = "init_step_" + step;
+            // } 
+            // else {
+            //   step = newIndex + 1
+            //   function_name = "init_step_" + step;
+            // }
+            // setTimeout(function() {
+            //   window[function_name]({{edit}} == 1);
+            //   $.get(
+            //     Urls.sendNotification()+'?'+form_data + "&id_next_step=" + id_next_step +"&previous_step=" + previous_step,
+            //     function (data) {
+            //     }
+            //   )
+            // }, 500);
+            location.reload()
           } 
           else {
             toastr.error('No puedes continuar ya que no tienes permisos para los siguientes pasos.', 'No tienes permisos');

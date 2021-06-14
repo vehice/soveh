@@ -291,7 +291,6 @@ function init_step_2() {
     }).then(isConfirm => {
       if (isConfirm) {
         remove_correlative = row.data().correlative;
-        row.remove().draw();
         if (remove_correlative <= bd_correlative) {
           // OCULTAR EN BD ===> deleted = True
           $.ajax({
@@ -299,6 +298,18 @@ function init_step_2() {
             url: url,
           })
             .done(function (data) {
+              if (data.ok){
+                row.remove().draw();
+                 toastr.success(
+                  'Identificación eliminada exitosamente.',
+                  'Listo!',
+                )
+              } else {
+                 toastr.error(
+                  'No ha sido posible eliminar la identificación, intente nuevamente.',
+                  'Ups!',
+                )
+              }
             })
             .fail(function () {
               console.log("Fail")
@@ -366,7 +377,6 @@ function init_step_2() {
             let id_unit = "";
             $(`#units-table-${ident_id} .unit-correlative`).each(function(index, value){
               let indice = '' + (index + 1);
-              console.log(indice);
               if ($(this).val() != indice){
                 $(this).val(indice);
                 id_unit = $(this).attr('id');
@@ -612,9 +622,14 @@ function retrieveDataRow(row) {
 }
 
 /*** Select organs based on switches values (organs for all and correlative samples) ***/
-function selectOrgansWithConditions(new_id, new_value, ident_id, select){
-  // let organs_switch_option = ($("#units-table-"+ident_id+" .unit-select:checked").length > 0) ? true : false
-  let organs_switch_option = ($(".table-unit .unit-select:checked").length > 0) ? true : false
+function selectOrgansWithConditions(new_id, new_value, ident_id, select, loop_by_units_selected=true){
+  let organs_switch_option;
+  if (loop_by_units_selected){
+    organs_switch_option = ($(".table-unit .unit-select:checked").length > 0) ? true : false
+  } else {
+    organs_switch_option = false
+  }
+
   let correlative_switch_option = $('#correlative-'+ident_id).is(":checked")
 
   if ( organs_switch_option ) {
@@ -629,9 +644,9 @@ function selectOrgansWithConditions(new_id, new_value, ident_id, select){
 
       if (checkbox) {
         if ( !correlative_switch_option ) {
-          new_id = `${new_id}-${Math.random()}`
-          select.append(`<option value="${new_id}">${new_value}</option>`)
-          values.push(new_id)
+          new_aux_id = `${new_id}-${Math.random()}`
+          select.append(`<option value="${new_aux_id}">${new_value}</option>`)
+          values.push(new_aux_id)
           select.val(values)
           select.trigger('change')
         } else {
@@ -681,6 +696,8 @@ function resetOrgansOptions(id, correlative) {
       let x = element.split('-')[0];
       if (selected.indexOf(x) == -1) {
         selected.push(x);
+      } else {
+      
       }
     });
 
@@ -821,7 +838,7 @@ function AddOrgansFromKeypadToUnits(add){
             units_edited = true
             if (add){
               $.each(organs_selected_from_keypad, function(index, value){
-                selectOrgansWithConditions(value[0], value[1], ident_id, $('#select-'+ident_id+'-'+unit_id))
+                selectOrgansWithConditions(value[0], value[1], ident_id, $('#select-'+ident_id+'-'+unit_id), false)
               });
 
             } else {
