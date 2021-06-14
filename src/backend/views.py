@@ -2334,9 +2334,9 @@ def step_2_entryform(request):
 
         # Deleting previous samples
 
-        Sample.objects.filter(
-            identification=ident,
-        ).delete()
+        # Sample.objects.filter(
+        #     identification=ident,
+        # ).delete()
         units = Unit.objects.filter(identification=ident)
 
         if ident.samples_are_correlative:
