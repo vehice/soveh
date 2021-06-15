@@ -1,12 +1,11 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
-from django.contrib.auth.models import Group, User
+from django.contrib.auth.models import Group, Permission, User
 
 from accounts.models import UserProfile, Area, UserArea
 from django.contrib.admin import widgets
 from django.urls import resolve
 
-admin.site.unregister(Group)
 admin.site.unregister(User)
 
 
@@ -28,6 +27,7 @@ class CustomUserProfile(UserAdmin):
                     "email",
                     "password",
                     "username",
+                    "user_permissions",
                     "first_name",
                     "last_name",
                     "is_active",
@@ -54,5 +54,6 @@ class CustomUserProfile(UserAdmin):
 
 
 admin.site.register(User, CustomUserProfile)
+admin.site.register(Permission)
 admin.site.register(Area)
 admin.site.register(UserArea)
