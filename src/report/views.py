@@ -101,11 +101,13 @@ def get_pathologists(user):
 
     if not user.userprofile.profile_id in (1, 2):
         assigned_areas = UserArea.objects.filter(user=user, role=0)
-        pks = []
+        pks = [user.id]
 
         for user_area in assigned_areas:
-            users = UserArea.objects.filter(area=user_area.area).values_list(
-                "user", flat=True
+            users = (
+                UserArea.objects.filter(area=user_area.area)
+                .exclude(user=user)
+                .values_list("user", flat=True)
             )
             pks.extend(users)
 
@@ -154,6 +156,8 @@ class ServiceView(View):
             created_at__gte=date_start,
             created_at__lte=date_end,
         ).select_related("entryform", "patologo", "stain")
+
+        print(get_pathologists(request.user))
 
         if pathologist and pathologist > 0:
             reports = reports.filter(patologo_id=pathologist)
