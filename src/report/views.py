@@ -49,6 +49,7 @@ def serialize_data(queryset):
                         "score_diagnostic",
                         "score_report",
                         "patologo",
+                        "created_at",
                     ],
                 ),
                 "case": model_to_dict(
@@ -395,6 +396,7 @@ class ControlView(View):
                                 "score_diagnostic",
                                 "score_report",
                                 "patologo",
+                                "created_at",
                             ],
                         ),
                         "case": model_to_dict(
@@ -433,7 +435,61 @@ class ControlView(View):
                     }
                 )
             except AttributeError:
-                continue
+                context.append(
+                    {
+                        "report": model_to_dict(
+                            report,
+                            fields=[
+                                "assignment_deadline",
+                                "manual_cancelled_date",
+                                "manual_closing_date",
+                                "assignment_done_at",
+                                "pre_report_ended",
+                                "pre_report_ended_at",
+                                "pre_report_started",
+                                "pre_report_started_at",
+                                "report_code",
+                                "score_diagnostic",
+                                "score_report",
+                                "patologo",
+                                "created_at",
+                            ],
+                        ),
+                        "case": model_to_dict(
+                            report.entryform,
+                            fields=[
+                                "created_at",
+                                "center",
+                                "no_caso",
+                            ],
+                        ),
+                        "customer": model_to_dict(
+                            report.entryform.customer,
+                            fields=[
+                                "name",
+                            ],
+                        ),
+                        "exam": model_to_dict(
+                            report.exam, fields=["name", "pathologists_assignment"]
+                        ),
+                        "user": None,
+                        "stain": model_to_dict(
+                            report.stain, fields=["name", "abbreviation"]
+                        ),
+                        "samples": report.exam.sampleexams_set.filter(
+                            sample__entryform_id=report.entryform_id
+                        ).count(),
+                        "workflow": model_to_dict(
+                            report.forms.all().first(),
+                            fields=[
+                                "form_closed",
+                                "cancelled",
+                                "closed_at",
+                                "cancelled_at",
+                            ],
+                        ),
+                    }
+                )
 
         return context
 
@@ -457,9 +513,25 @@ class ControlView(View):
 
         pathologists = get_pathologists(request.user)
 
+        unassigned = AnalysisForm.objects.exclude(
+            Q(manual_cancelled_date__isnull=False)
+            | Q(manual_closing_date__isnull=False)
+            | Q(forms__form_closed=True)
+            | Q(forms__cancelled=True)
+        ).filter(
+            exam__pathologists_assignment=True,
+            patologo_id__isnull=True,
+        )
+
         analysis = analysis.filter(patologo_id__in=pathologists)
 
         return HttpResponse(
-            json.dumps(self.serialize_data(analysis), cls=DjangoJSONEncoder),
+            json.dumps(
+                {
+                    "queryset": self.serialize_data(analysis),
+                    "unassigned": self.serialize_data(unassigned),
+                },
+                cls=DjangoJSONEncoder,
+            ),
             content_type="application/json",
         )

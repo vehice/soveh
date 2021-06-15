@@ -193,7 +193,7 @@ $(document).ready(function () {
   function filterUnassigned(data) {
     return data.filter((analysis) => {
       const form_closed = analysis.workflow.form_closed;
-      const form_cancelled = analysis.workflow.form_cancelled;
+      const form_cancelled = analysis.workflow.cancelled;
       const manual_cancelled = analysis.report.manual_cancelled_date != null;
       const manual_closed = analysis.report.manual_closing_date != null;
       const pre_report_started = analysis.report.pre_report_started;
@@ -201,7 +201,8 @@ $(document).ready(function () {
       const requires_assignment = analysis.exam.pathologists_assignment;
 
       return (
-        !(form_closed || form_cancelled || manual_cancelled || manual_closed) &&
+        !(form_closed || manual_closed) &&
+        !(form_cancelled || manual_cancelled) &&
         !is_assigned &&
         requires_assignment
       );
@@ -211,7 +212,7 @@ $(document).ready(function () {
   function filterPending(data) {
     return data.filter((analysis) => {
       const form_closed = analysis.workflow.form_closed;
-      const form_cancelled = analysis.workflow.form_cancelled;
+      const form_cancelled = analysis.workflow.cancelled;
       const manual_cancelled = analysis.report.manual_cancelled_date != null;
       const manual_closed = analysis.report.manual_closing_date != null;
       const pre_report_started = analysis.report.pre_report_started;
@@ -232,7 +233,7 @@ $(document).ready(function () {
   function filterDone(data) {
     return data.filter((analysis) => {
       const form_closed = analysis.workflow.form_closed;
-      const form_cancelled = analysis.workflow.form_cancelled;
+      const form_cancelled = analysis.workflow.cancelled;
       const manual_cancelled = analysis.report.manual_cancelled_date != null;
       const manual_closed = analysis.report.manual_closing_date != null;
       const pre_report_started = analysis.report.pre_report_started;
@@ -442,6 +443,18 @@ $(document).ready(function () {
           title: "Caso",
         },
         {
+          data: "customer.name",
+          name: "company",
+          type: "string",
+          title: "Empresa",
+        },
+        {
+          data: "case.center",
+          name: "center",
+          type: "string",
+          title: "Centro",
+        },
+        {
           data: "exam.name",
           name: "exam",
           type: "string",
@@ -467,15 +480,6 @@ $(document).ready(function () {
           render: (data) => {
             const date = new Date(data);
             return date.toLocaleDateString();
-          },
-        },
-        {
-          data: "report.created_at",
-          name: "delay",
-          type: "num",
-          title: "En Sistema",
-          render: (data) => {
-            return dateDiff(data);
           },
         },
       ],
@@ -570,20 +574,6 @@ $(document).ready(function () {
     initializeChart(stages);
   }
 
-  function mapData(data, key) {
-    return data[key].map((row) => {
-      return {
-        report: JSON.parse(row.report)[0],
-        exam: JSON.parse(row.exam)[0],
-        case: JSON.parse(row.case)[0],
-        user: JSON.parse(row.user)[0],
-        stain: JSON.parse(row.stain)[0],
-        samples: JSON.parse(row.samples),
-        workflow: JSON.parse(row.workflow)[0],
-      };
-    });
-  }
-
   function dateDiff(a, b = null) {
     const date = new Date(a);
     const currentDate = b == null ? new Date() : new Date(b);
@@ -614,9 +604,9 @@ $(document).ready(function () {
 
       success: (data, textStatus) => {
         Swal.close();
-        pending = filterPending(data);
-        unassigned = filterUnassigned(data);
-        finished = filterDone(data);
+        pending = filterPending(data.queryset);
+        unassigned = filterUnassigned(data.unassigned);
+        finished = filterDone(data.queryset);
         updateView();
       },
       error: (xhr, textStatus, error) => {
