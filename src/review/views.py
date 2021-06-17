@@ -2,12 +2,12 @@ import json
 import mimetypes
 from smtplib import SMTPException
 
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, permission_required
 from django.contrib.auth.models import User
 from django.core import serializers
 from django.core.mail import BadHeaderError, EmailMultiAlternatives
 from django.db.models import Q
-from django.http.response import JsonResponse
+from django.http.response import Http404, JsonResponse
 from django.shortcuts import get_object_or_404, render
 from django.template.loader import get_template
 from django.utils.decorators import method_decorator
@@ -17,19 +17,18 @@ from review.models import Analysis, AnalysisMailList, File, MailList, Stage
 
 
 @login_required
+@permission_required("review.view_stage", raise_exception=True)
 def index(request):
     """
     Renders template which lists multiple :model:`review.Analysis` grouped by
     their state, allowing the user to move them accross multiple states as necessary.
     """
-    pathologists = User.objects.filter(
-        Q(userprofile__profile_id__in=(4, 5)) | Q(userprofile__is_pathologist=True)
-    )
 
-    return render(request, "index.html", {"pathologists": pathologists})
+    return render(request, "index.html")
 
 
 @login_required
+@permission_required("review.view_stage", raise_exception=True)
 def list(request, index):
     """
     Returns a JSON detailing all :model:`review.Analysis` where their :model:`review.Stage`
@@ -48,14 +47,15 @@ def list(request, index):
         return context
 
     if index in (1, 2, 3, 4):
-        analysis = Analysis.objects.stage(index)
+        analysis = Analysis.objects.stage(index, request.user)
     else:
-        analysis = Analysis.objects.waiting()
+        analysis = Analysis.objects.waiting(request.user)
 
     return JsonResponse(serialize_data(analysis), safe=False)
 
 
 @login_required
+@permission_required(["review.change_stage"], raise_exception=True)
 def update_stage(request, pk):
     """
     Updates a :model:`review.Stage`, storing the change in :model:`review.Logbook`.
@@ -95,6 +95,7 @@ def analysis_mailing_list(request, pk):
 
 
 @login_required
+@permission_required("review.send_email", raise_exception=True)
 def send_email(request, pk):
     """
     Takes a :model:`review.Analysis`'pk and sends an email to all :model:`review.MailList`
@@ -121,6 +122,9 @@ def send_email(request, pk):
 
     recipients = analysis.get_recipients()
 
+    if len(recipients["to"]) <= 0:
+        return JsonResponse({"status": "ERR", "code": 1})
+
     email = EmailMultiAlternatives(
         subject=analysis.email_subject,
         body=message,
@@ -145,7 +149,7 @@ def send_email(request, pk):
     try:
         email.send()
     except (BadHeaderError, SMTPException):
-        return JsonResponse({"status": "ERR", "code": 1})
+        return JsonResponse({"status": "ERR", "code": 2})
 
     stage = Stage.objects.update_or_create(
         analysis=analysis, defaults={"state": 4, "created_by": request.user}
