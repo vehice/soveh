@@ -2337,7 +2337,7 @@ def step_2_entryform(request):
         # Sample.objects.filter(
         #     identification=ident,
         # ).delete()
-        units = Unit.objects.filter(identification=ident)
+        units = Unit.objects.filter(identification=ident).order_by('correlative')
 
         if ident.samples_are_correlative:
             unit_by_correlative = {}
@@ -2369,41 +2369,63 @@ def step_2_entryform(request):
 
                 index += 1
         else:
+            organs_units = {}
             for unit in units:
-                unique_organs_group = [[]]
+                # unique_organs_group = [[]]
 
                 for uo in OrganUnit.objects.filter(unit=unit):
-                    uo_included = False
-                    for group in unique_organs_group:
-                        if uo.organ.pk not in list(map(lambda x: x.organ.pk, group)):
-                            group.append(uo)
-                            uo_included = True
-                            break
+                    if uo.organ.pk in organs_units:
+                        organs_units[uo.organ.pk].append(uo)
+                    else:
+                        organs_units[uo.organ.pk] = [uo]
 
-                    if not uo_included:
-                        unique_organs_group.append([uo])
+            larger_organs_set = []
+            for key, value in organs_units.items():
+                if len(value) > len(larger_organs_set):
+                    larger_organs_set = value
 
-                for group in unique_organs_group:
-                    
-                    sample = Sample.objects.filter(
+            groups = []
+
+            for organ in larger_organs_set:
+                groups.append([organ])
+            
+            organs_not_used = []
+            for group in groups:
+                pre_organs_not_used = []
+                for organ_available in OrganUnit.objects.filter(unit=group[0].unit):
+                    if organ_available.organ.pk not in list(map(lambda x: x.organ.pk, group)):
+                        group.append(organ_available)
+                    else:
+                        pre_organs_not_used.append(organ_available)
+
+                if organs_not_used:
+                    for sobra in organs_not_used:
+                        if sobra.organ.pk not in list(map(lambda x: x.organ.pk, group)):
+                            group.append(sobra)
+                            organs_not_used.remove(sobra)
+                            
+                organs_not_used = organs_not_used + pre_organs_not_used
+
+            for group in groups:
+                sample = Sample.objects.filter(
+                    entryform = entryform, 
+                    index = index, 
+                    identification = ident,
+                ).first()
+
+                if not sample:
+                    sample = Sample.objects.create(
                         entryform = entryform, 
                         index = index, 
-                        identification = ident,
-                    ).first()
+                        identification = ident
+                    )
 
-                    if not sample:
-                        sample = Sample.objects.create(
-                            entryform = entryform, 
-                            index = index, 
-                            identification = ident
-                        )
+                sample.unit_organs.clear()
 
-                    sample.unit_organs.clear()
+                for ou in group:
+                    sample.unit_organs.add(ou)
 
-                    for ou in group:
-                        sample.unit_organs.add(ou)
-
-                    index += 1
+                index += 1
 
     return True
 

@@ -467,11 +467,10 @@ var continuar =  "{{request.lang.next}}";
 
         $('.actions > ul > li:first-child').attr('style', 'display:none');
         
-        if(currentIndex < newIndex){
-          if (currentIndex == 0){
-            receptionFileModal({{form.content_object.id}});
-          } 
-        }
+        if (currentIndex == 1){
+          receptionFileModal({{form.content_object.id}});
+        } 
+        
         return true; 
       }, 
       onFinished: function (event, currentIndex)
