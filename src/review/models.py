@@ -22,6 +22,7 @@ class AnalysisManager(models.Manager):
                 manual_cancelled_date__isnull=True,
                 manual_closing_date__isnull=True,
             )
+            .order_by("entryform__created_at")
         )
 
     def waiting(self):
