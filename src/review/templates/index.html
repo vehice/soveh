@@ -56,7 +56,7 @@
                         </header>
                         <ul id="sending" class="state list-group p-1 finishing" style="background-color: #cccccc"></ul>
                     </section>
-                    {% if request.user.userprofile.profile_id == 1 or request.user.userprofile.profile_id == 2 %}
+                    {% if perms.review.send_email %}
                     <section class="card">
                         <header class="card-header">
                             <h2 class="card-title">
