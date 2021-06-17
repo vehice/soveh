@@ -3,6 +3,7 @@ from django.db import models
 from django.db.models import Q
 
 from backend.models import AnalysisForm, Customer
+from accounts.models import UserArea
 
 
 class AnalysisManager(models.Manager):
@@ -12,8 +13,8 @@ class AnalysisManager(models.Manager):
     functions.
     """
 
-    def get_queryset(self):
-        return (
+    def get_queryset(self, user=None):
+        queryset = (
             super()
             .get_queryset()
             .filter(
@@ -21,34 +22,57 @@ class AnalysisManager(models.Manager):
                 forms__cancelled=0,
                 manual_cancelled_date__isnull=True,
                 manual_closing_date__isnull=True,
+                exam__pathologists_assignment=True,
+                pre_report_started=True,
+                pre_report_ended=True,
             )
             .order_by("entryform__created_at")
         )
 
-    def waiting(self):
+        if user is not None and user.userprofile.profile_id not in (1, 2):
+            pathologists = User.objects.filter(
+                Q(userprofile__profile_id__in=(4, 5))
+                | Q(userprofile__is_pathologist=True)
+            )
+
+            assigned_areas = UserArea.objects.filter(user=user, role=0)
+            pks = [user.id]
+
+            for user_area in assigned_areas:
+                users = (
+                    UserArea.objects.filter(area=user_area.area)
+                    .exclude(user=user)
+                    .values_list("user", flat=True)
+                )
+                pks.extend(users)
+
+            pathologists = pathologists.filter(pk__in=pks)
+
+            return queryset.filter(patologo_id__in=pathologists)
+
+        return queryset
+
+    def waiting(self, user):
         """
         Returns all :model:`backend.AnalysisForm` which a Pathologist
         has finished studying but hasn't being reviewed yet.
         """
         return (
-            self.get_queryset()
+            self.get_queryset(user)
             .filter(
                 Q(stages__isnull=True) | Q(stages__state=0),
-                exam__pathologists_assignment=True,
-                pre_report_started=True,
-                pre_report_ended=True,
             )
             .select_related("entryform", "exam", "stain")
         )
 
-    def stage(self, state_index):
+    def stage(self, state_index, user):
         """
         Returns all :model:`backend.AnalysisForm` according to it's
         :model:`review.Stage`.STATE index.
         """
 
         return (
-            self.get_queryset()
+            self.get_queryset(user)
             .filter(stages__state=state_index)
             .select_related("entryform", "exam", "stain")
         )
@@ -118,6 +142,7 @@ class Analysis(AnalysisForm):
 
     class Meta:
         proxy = True
+        permissions = (("send_email", "Can send an email"),)
 
 
 class Stage(models.Model):
