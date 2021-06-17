@@ -365,12 +365,17 @@ $(document).ready(() => {
                 toastr.error("Ocurrió un error.");
                 switch (response.code) {
                   case 0:
-                    toastr.info(
+                    toastr.warning(
                       "No se encontró archivo en estado `Para Enviar` disponible."
                     );
                     break;
                   case 1:
-                    toastr.info("Ocurrio un error enviando el correo.");
+                    toastr.warning(
+                      "No seleccionó lista de correo, o la lista esta vacia."
+                    );
+                    break;
+                  case 2:
+                    toastr.warning("Ocurrio un error enviando el correo.");
                     break;
                 }
               }
