@@ -82,7 +82,7 @@ def default_tree(user):
             }
         )
 
-    if user.userprofile.profile_id in (1, 2) or user.userprofile.is_reviewer:
+    if user.has_perm("review.view_stage"):
         menu.append(
             {
                 "icon": "ft-check-square",
