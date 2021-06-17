@@ -123,10 +123,13 @@ class ServiceView(View):
         This is cattered for Pathologists Users, where they can see their
         pending work, and their efficiency.
         """
-        assigned_areas = UserArea.objects.filter(user=request.user, role=0).values_list(
+        assigned_areas = UserArea.objects.filter(user=request.user).values_list(
             "area", flat=True
         )
+
         areas = Area.objects.filter(id__in=assigned_areas)
+        if request.user.userprofile.profile_id in (1, 2):
+            areas = Area.objects.all()
 
         return render(
             request,
@@ -249,10 +252,13 @@ class EfficiencyView(View):
         Displays multiples tables detailing :model:`backend.AnalysisForm` grouped
         by their state.
         """
-        assigned_areas = UserArea.objects.filter(user=request.user, role=0).values_list(
+        assigned_areas = UserArea.objects.filter(user=request.user).values_list(
             "area", flat=True
         )
+
         areas = Area.objects.filter(id__in=assigned_areas)
+        if request.user.userprofile.profile_id in (1, 2):
+            areas = Area.objects.all()
 
         return render(
             request,
