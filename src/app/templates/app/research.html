@@ -84,6 +84,7 @@
                     <th>Fecha<br>Muestreo</th>
                     <th></th>
                     <th></th>
+                    <th>Fecha<br>Inicio<br>Lectura</th>
                     <th>Estado<br>Servicio</th>
                     <th></th>
                   </tr>
@@ -107,6 +108,9 @@
                       </td>
                       <td>
                           {{ entryForm.f_m_month|default:"--" }}
+                      </td>
+                      <td>
+                          {{ entryForm.report_started|default:"--" }}
                       </td>
                       <td>
                           {{ entryForm.estado }}
@@ -168,6 +172,7 @@
                     <th>Fecha<br>Muestreo</th>
                     <th></th>
                     <th></th>
+                    <th>Fecha<br>Inicio<br>Lectura</th>
                     <th>Estado<br>Servicio</th>
                     <th></th>
                   </tr>
@@ -191,6 +196,9 @@
                       </td>
                       <td>
                           {{ entryForm.f_m_month|default:"--" }}
+                      </td>
+                      <td>
+                          {{ entryForm.report_started|default:"--" }}
                       </td>
                       <td>
                           {{ entryForm.estado }}
@@ -608,7 +616,7 @@
           "className": "dt-wd-1",
         },
         {
-          "targets": [ 5,6],
+          "targets": [5, 6],
           "visible": false,
         },
       ],
@@ -665,11 +673,11 @@
           "className": "dt-body-center",
         },
         {
-          "targets": [ 0],
+          "targets": [0],
           "className": "dt-wd-1",
         },
         {
-          "targets": [ 5,6],
+          "targets": [5, 6],
           "visible": false,
         },
       ],

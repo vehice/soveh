@@ -54,7 +54,7 @@ $(document).ready(function () {
   let dateEnd = new Date().toLocaleDateString();
   $("#labelDateEnd").text(`Fecha por defecto: ${dateEnd}`);
   let dateStart = new Date();
-  dateStart.setMonth(dateStart.getMonth() - 3);
+  dateStart.setMonth(dateStart.getMonth() - 5);
   dateStart = dateStart.toLocaleDateString();
   $("#labelDateStart").text(`Fecha por defecto: ${dateStart}`);
 
@@ -141,7 +141,6 @@ $(document).ready(function () {
     if ($.fn.DataTable.isDataTable("#pendingTable")) {
       pendingTable.DataTable().clear().destroy();
     }
-
     pendingNumber.text(pending.length);
     pendingTable.DataTable({
       data: pending,
@@ -154,6 +153,12 @@ $(document).ready(function () {
           title: "Caso",
         },
         {
+          data: "customer.name",
+          name: "customer",
+          type: "string",
+          title: "Empresa",
+        },
+        {
           data: "exam.name",
           name: "exam",
           type: "string",
@@ -163,13 +168,13 @@ $(document).ready(function () {
           data: "stain.abbreviation",
           name: "stain",
           type: "num",
-          title: "Tincion",
+          title: "Tinción",
         },
         {
           data: "user",
           name: "pathologist",
           type: "string",
-          title: "Patologo",
+          title: "Patólogo",
           render: (data) => {
             return `${data.first_name[0]}${data.last_name[0]}`;
           },
@@ -197,7 +202,7 @@ $(document).ready(function () {
           data: "report.assignment_done_at",
           name: "derived_at",
           type: "num",
-          title: "Derivacion",
+          title: "Derivación",
           render: (data) => {
             if (data == null || data == undefined) {
               return "";
@@ -254,6 +259,12 @@ $(document).ready(function () {
           title: "Caso",
         },
         {
+          data: "customer.name",
+          name: "customer",
+          type: "string",
+          title: "Empresa",
+        },
+        {
           data: "exam.name",
           name: "exam",
           type: "string",
@@ -263,13 +274,13 @@ $(document).ready(function () {
           data: "stain.abbreviation",
           name: "stain",
           type: "num",
-          title: "Tincion",
+          title: "Tinción",
         },
         {
           data: "user",
           name: "pathologist",
           type: "string",
-          title: "Patologo",
+          title: "Patólogo",
           render: (data) => {
             return `${data.first_name[0]}${data.last_name[0]}`;
           },
@@ -294,7 +305,7 @@ $(document).ready(function () {
           data: "report.assignment_done_at",
           name: "derived_at",
           type: "num",
-          title: "Derivacion",
+          title: "Derivación",
           render: (data) => {
             const date = new Date(data);
             return date.toLocaleDateString();
@@ -364,6 +375,12 @@ $(document).ready(function () {
           title: "Caso",
         },
         {
+          data: "customer.name",
+          name: "customer",
+          type: "string",
+          title: "Empresa",
+        },
+        {
           data: "exam.name",
           name: "exam",
           type: "string",
@@ -373,13 +390,13 @@ $(document).ready(function () {
           data: "stain.abbreviation",
           name: "stain",
           type: "num",
-          title: "Tincion",
+          title: "Tinción",
         },
         {
           data: "user",
           name: "pathologist",
           type: "string",
-          title: "Patologo",
+          title: "Patólogo",
           render: (data) => {
             return `${data.first_name[0]}${data.last_name[0]}`;
           },
@@ -436,95 +453,9 @@ $(document).ready(function () {
           data: "report.pre_report_ended_at",
           name: "delay",
           type: "num",
-          title: "En Revision",
+          title: "En Revisión",
           render: (data) => {
             return dateDiff(data);
-          },
-        },
-      ],
-
-      oLanguage: {
-        sUrl: "https://cdn.datatables.net/plug-ins/1.10.16/i18n/Spanish.json",
-      },
-    });
-  }
-
-  function initializeEfficiency() {
-    if ($.fn.DataTable.isDataTable("#efficiencyTable")) {
-      efficiencyTable.DataTable().clear().destroy();
-    }
-
-    const efficiency = filterDone();
-
-    efficiencyTable.DataTable({
-      data: efficiency,
-
-      columns: [
-        {
-          data: "case.no_caso",
-          name: "case",
-          type: "string",
-          title: "Caso",
-        },
-        {
-          data: "report.report_code",
-          name: "reportCode",
-          type: "string",
-          title: "Informe",
-        },
-        {
-          data: "exam.name",
-          name: "service",
-          type: "string",
-          title: "Servicio",
-        },
-        {
-          data: "user",
-          name: "user",
-          type: "num",
-          title: "Patólogo",
-          render: (data) => {
-            return `${data.first_name[0]}${data.last_name[0]}`;
-          },
-        },
-        {
-          data: "samples",
-          name: "samples",
-          type: "number",
-          title: "Cant. Muestras",
-        },
-        {
-          data: "report.score_diagnostic",
-          name: "score",
-          type: "num",
-          title: "Calificación",
-          render: (data) => {
-            if (data > 0) {
-              return data;
-            } else {
-              return "S/I";
-            }
-          },
-        },
-        {
-          data: "case.created_at",
-          name: "createdAt",
-          type: "string",
-          title: "Ingreso",
-          render: (data) => {
-            const date = new Date(data);
-            return date.toLocaleDateString();
-          },
-        },
-        {
-          data: "workflow.closed_at",
-          name: "closedAt",
-          type: "num",
-          title: "Emisión",
-
-          render: (data) => {
-            const date = new Date(data);
-            return date.toLocaleDateString();
           },
         },
       ],
@@ -544,6 +475,7 @@ $(document).ready(function () {
   function getData() {
     const date_start = $("#dateStart").val();
     const date_end = $("#dateEnd").val();
+    const area_id = $("#area").val();
     const user_id = $("#pathologist").val();
     Swal.fire({
       title: "Cargando...",
@@ -552,7 +484,7 @@ $(document).ready(function () {
     Swal.showLoading();
 
     $.ajax(Urls["report:service"](), {
-      data: JSON.stringify({ date_start, date_end, user_id }),
+      data: JSON.stringify({ date_start, date_end, user_id, area_id }),
 
       method: "POST",
 

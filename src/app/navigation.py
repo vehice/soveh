@@ -15,7 +15,7 @@ following fields::
 
 from django.urls import reverse
 from django.utils.translation import ugettext
-from accounts.models import UserProfile
+from accounts.models import UserArea, UserProfile
 
 
 def generate_navigation_tree(user, request):
@@ -72,7 +72,9 @@ def default_tree(user):
                 "section_name": "Rendimiento" if language == 1 else "Efficiency",
             },
         )
-    if user.userprofile.profile_id in (1, 2):
+
+    assigned_areas = UserArea.objects.filter(user=user, role=0).count()
+    if user.userprofile.profile_id in (1, 2) or assigned_areas > 0:
         reports.append(
             {
                 "path": reverse("report:control"),
@@ -80,7 +82,7 @@ def default_tree(user):
             }
         )
 
-    if user.userprofile.profile_id in (1, 2) or user.userprofile.is_reviewer:
+    if user.has_perm("review.view_stage"):
         menu.append(
             {
                 "icon": "ft-check-square",

@@ -14,6 +14,7 @@ from django.utils.decorators import method_decorator
 from django.views import View
 
 from backend.models import AnalysisForm
+from accounts.models import Area, UserArea
 
 
 def serialize_data(queryset):
@@ -48,6 +49,7 @@ def serialize_data(queryset):
                         "score_diagnostic",
                         "score_report",
                         "patologo",
+                        "created_at",
                     ],
                 ),
                 "case": model_to_dict(
@@ -55,6 +57,12 @@ def serialize_data(queryset):
                     fields=[
                         "created_at",
                         "no_caso",
+                    ],
+                ),
+                "customer": model_to_dict(
+                    report.entryform.customer,
+                    fields=[
+                        "name",
                     ],
                 ),
                 "exam": model_to_dict(
@@ -80,31 +88,53 @@ def serialize_data(queryset):
         return json.dumps(context, cls=DjangoJSONEncoder)
 
 
+def get_pathologists(user):
+    """Returns a queryset of pathologists.
+    This queryset filter the User model according to it's profile, where a profile id of 4 and 5
+    indicates a Pathologist, the userprofile also includes a boolean check for wether that user is
+    pathologists, in cases where a user doesn't have the profile of a pathologists but it should be
+    considered as one.
+    It also filters for an Area's Lead to be able to see al Pathologists under their Area.
+    """
+    pathologists = User.objects.filter(
+        Q(userprofile__profile_id__in=(4, 5)) | Q(userprofile__is_pathologist=True)
+    )
+
+    if not user.userprofile.profile_id in (1, 2):
+        assigned_areas = UserArea.objects.filter(user=user, role=0)
+        pks = [user.id]
+
+        for user_area in assigned_areas:
+            users = (
+                UserArea.objects.filter(area=user_area.area)
+                .exclude(user=user)
+                .values_list("user", flat=True)
+            )
+            pks.extend(users)
+
+        pathologists = pathologists.filter(pk__in=pks)
+
+    return pathologists
+
+
 class ServiceView(View):
     def get(self, request):
         """Displays multiple tables and charts to generate reportability.
         This is cattered for Pathologists Users, where they can see their
         pending work, and their efficiency.
         """
-        pathologists = User.objects.filter(
-            Q(userprofile__profile_id__in=(4, 5)) | Q(userprofile__is_pathologist=True)
+        assigned_areas = UserArea.objects.filter(user=request.user).values_list(
+            "area", flat=True
         )
 
-        user = None
-
-        if (
-            request.user.userprofile is not None
-            and request.user.userprofile.profile_id in (4, 5)
-        ):
-            user = request.user
+        areas = Area.objects.filter(id__in=assigned_areas)
+        if request.user.userprofile.profile_id in (1, 2):
+            areas = Area.objects.all()
 
         return render(
             request,
             "pathologist/service.html",
-            {
-                "pathologists": pathologists,
-                "current_user": user,
-            },
+            {"pathologists": get_pathologists(request.user), "areas": areas},
         )
 
     def post(self, request):
@@ -114,6 +144,7 @@ class ServiceView(View):
 
         body = json.loads(request.body)
         pathologist = int(body["user_id"]) if str(body["user_id"]).isnumeric() else 0
+        area = int(body["area_id"]) if str(body["area_id"]).isnumeric() else 0
         date_start = body["date_start"]
         date_end = body["date_end"]
 
@@ -130,8 +161,20 @@ class ServiceView(View):
             created_at__lte=date_end,
         ).select_related("entryform", "patologo", "stain")
 
+        print(get_pathologists(request.user))
+
         if pathologist and pathologist > 0:
             reports = reports.filter(patologo_id=pathologist)
+        else:
+            reports = reports.filter(
+                patologo_id__in=get_pathologists(request.user).values_list(
+                    "id", flat=True
+                )
+            )
+
+        if area and area > 0:
+            users = area.users
+            reports = reports.filter(patologo_id__in=users)
 
         context = []
 
@@ -165,6 +208,12 @@ class ServiceView(View):
                             fields=[
                                 "created_at",
                                 "no_caso",
+                            ],
+                        ),
+                        "customer": model_to_dict(
+                            report.entryform.customer,
+                            fields=[
+                                "name",
                             ],
                         ),
                         "exam": model_to_dict(
@@ -203,24 +252,20 @@ class EfficiencyView(View):
         Displays multiples tables detailing :model:`backend.AnalysisForm` grouped
         by their state.
         """
-        pathologists = User.objects.filter(
-            Q(userprofile__profile_id__in=(4, 5)) | Q(userprofile__is_pathologist=True)
+        assigned_areas = UserArea.objects.filter(user=request.user).values_list(
+            "area", flat=True
         )
 
-        user = None
-
-        if (
-            request.user.userprofile is not None
-            and request.user.userprofile.profile_id in (4, 5)
-        ):
-            user = request.user
+        areas = Area.objects.filter(id__in=assigned_areas)
+        if request.user.userprofile.profile_id in (1, 2):
+            areas = Area.objects.all()
 
         return render(
             request,
             "pathologist/efficiency.html",
             {
-                "pathologists": pathologists,
-                "current_user": user,
+                "pathologists": get_pathologists(request.user),
+                "areas": areas,
             },
         )
 
@@ -230,7 +275,12 @@ class EfficiencyView(View):
         filtered by request parameters of `date_start`, `date_end`, and `pathologist`.
         """
         body = json.loads(request.body)
-        pathologist = int(body["user_id"]) if str(body["user_id"]).isnumeric() else 0
+        pathologist = (
+            int(body["user_id"])
+            if str(body["user_id"]).isnumeric()
+            else get_pathologists(request.user).values_list("id", flat=True)
+        )
+        area = int(body["area_id"]) if str(body["area_id"]).isnumeric() else 0
         date_start = body["date_start"]
         date_end = body["date_end"]
 
@@ -249,6 +299,16 @@ class EfficiencyView(View):
 
         if pathologist and pathologist > 0:
             reports = reports.filter(patologo_id=pathologist)
+        else:
+            reports = reports.filter(
+                patologo_id__in=get_pathologists(request.user).values_list(
+                    "id", flat=True
+                )
+            )
+
+        if area and area > 0:
+            users = area.users
+            reports = reports.filter(patologo_id__in=users)
 
         context = []
 
@@ -284,6 +344,12 @@ class EfficiencyView(View):
                                 "no_caso",
                             ],
                         ),
+                        "customer": model_to_dict(
+                            report.entryform.customer,
+                            fields=[
+                                "name",
+                            ],
+                        ),
                         "exam": model_to_dict(
                             report.exam, fields=["name", "pathologist_assignment"]
                         ),
@@ -316,25 +382,121 @@ class EfficiencyView(View):
 class ControlView(View):
     def serialize_data(self, queryset):
         context = []
-        for row in queryset:
-            user = (
-                serializers.serialize("json", [row.patologo])
-                if row.patologo is not None
-                else json.dumps([])
-            )
-            context.append(
-                {
-                    "report": serializers.serialize("json", [row]),
-                    "case": serializers.serialize("json", [row.entryform]),
-                    "exam": serializers.serialize("json", [row.exam]),
-                    "user": user,
-                    "stain": serializers.serialize("json", [row.stain]),
-                    "samples": row.exam.sampleexams_set.filter(
-                        sample__entryform_id=row.entryform_id
-                    ).count(),
-                    "workflow": serializers.serialize("json", row.forms.all()),
-                }
-            )
+        for report in queryset:
+            user = report.patologo
+            try:
+                context.append(
+                    {
+                        "report": model_to_dict(
+                            report,
+                            fields=[
+                                "assignment_deadline",
+                                "manual_cancelled_date",
+                                "manual_closing_date",
+                                "assignment_done_at",
+                                "pre_report_ended",
+                                "pre_report_ended_at",
+                                "pre_report_started",
+                                "pre_report_started_at",
+                                "report_code",
+                                "score_diagnostic",
+                                "score_report",
+                                "patologo",
+                                "created_at",
+                            ],
+                        ),
+                        "case": model_to_dict(
+                            report.entryform,
+                            fields=[
+                                "created_at",
+                                "center",
+                                "no_caso",
+                            ],
+                        ),
+                        "customer": model_to_dict(
+                            report.entryform.customer,
+                            fields=[
+                                "name",
+                            ],
+                        ),
+                        "exam": model_to_dict(
+                            report.exam, fields=["name", "pathologists_assignment"]
+                        ),
+                        "user": model_to_dict(user, fields=["first_name", "last_name"]),
+                        "stain": model_to_dict(
+                            report.stain, fields=["name", "abbreviation"]
+                        ),
+                        "samples": report.exam.sampleexams_set.filter(
+                            sample__entryform_id=report.entryform_id
+                        ).count(),
+                        "workflow": model_to_dict(
+                            report.forms.all().first(),
+                            fields=[
+                                "form_closed",
+                                "cancelled",
+                                "closed_at",
+                                "cancelled_at",
+                            ],
+                        ),
+                    }
+                )
+            except AttributeError:
+                context.append(
+                    {
+                        "report": model_to_dict(
+                            report,
+                            fields=[
+                                "assignment_deadline",
+                                "manual_cancelled_date",
+                                "manual_closing_date",
+                                "assignment_done_at",
+                                "pre_report_ended",
+                                "pre_report_ended_at",
+                                "pre_report_started",
+                                "pre_report_started_at",
+                                "report_code",
+                                "score_diagnostic",
+                                "score_report",
+                                "patologo",
+                                "created_at",
+                            ],
+                        ),
+                        "case": model_to_dict(
+                            report.entryform,
+                            fields=[
+                                "created_at",
+                                "center",
+                                "no_caso",
+                            ],
+                        ),
+                        "customer": model_to_dict(
+                            report.entryform.customer,
+                            fields=[
+                                "name",
+                            ],
+                        ),
+                        "exam": model_to_dict(
+                            report.exam, fields=["name", "pathologists_assignment"]
+                        ),
+                        "user": None,
+                        "stain": model_to_dict(
+                            report.stain, fields=["name", "abbreviation"]
+                        ),
+                        "samples": report.exam.sampleexams_set.filter(
+                            sample__entryform_id=report.entryform_id
+                        ).count(),
+                        "workflow": model_to_dict(
+                            report.forms.all().first(),
+                            fields=[
+                                "form_closed",
+                                "cancelled",
+                                "closed_at",
+                                "cancelled_at",
+                            ],
+                        ),
+                    }
+                )
+
         return context
 
     def get(self, request):
@@ -352,34 +514,30 @@ class ControlView(View):
         date_end = date.today()
 
         analysis = AnalysisForm.objects.filter(
-            Q(manual_cancelled_date__isnull=True) | Q(forms__cancelled=False),
+            Q(manual_cancelled_date=None) | Q(forms__cancelled=False),
+        ).select_related("entryform", "patologo", "stain")
+
+        pathologists = get_pathologists(request.user)
+
+        unassigned = AnalysisForm.objects.exclude(
+            Q(manual_cancelled_date__isnull=False)
+            | Q(manual_closing_date__isnull=False)
+            | Q(forms__form_closed=True)
+            | Q(forms__cancelled=True)
+        ).filter(
+            exam__pathologists_assignment=True,
+            patologo_id__isnull=True,
         )
 
-        pending = analysis.filter(
-            Q(forms__form_closed=False) | Q(manual_closing_date__isnull=True),
-            pre_report_started=True,
-            pre_report_ended=True,
-        ).select_related("entryform", "patologo", "stain")
-
-        unassigned = analysis.filter(
-            Q(forms__form_closed=False) | Q(manual_closing_date__isnull=True),
-            patologo__isnull=True,
-            exam__service_id__in=(1, 4),
-        ).select_related("entryform", "patologo", "stain")
-
-        finished = analysis.filter(
-            Q(forms__form_closed=True) | Q(manual_closing_date__isnull=False),
-            pre_report_started=True,
-            pre_report_ended=True,
-        ).select_related("entryform", "patologo", "stain")
+        analysis = analysis.filter(patologo_id__in=pathologists)
 
         return HttpResponse(
             json.dumps(
                 {
-                    "pending": self.serialize_data(pending),
+                    "queryset": self.serialize_data(analysis),
                     "unassigned": self.serialize_data(unassigned),
-                    "finished": self.serialize_data(finished),
-                }
+                },
+                cls=DjangoJSONEncoder,
             ),
             content_type="application/json",
         )

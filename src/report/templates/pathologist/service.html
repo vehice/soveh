@@ -13,12 +13,12 @@
             </header>
             <main class="card-body container">
                 <section class="row">
-                    <div class="col-md-3 d-flex flex-column">
+                    <div class="col-md-2 d-flex flex-column">
                         <b>Inicio:</b>
                         <input class="form-control" type="date" id="dateStart"/>
                         <small id="labelDateStart"></small>
                     </div>
-                    <div class="col-md-3 d-flex flex-column">
+                    <div class="col-md-2 d-flex flex-column">
                         <b>Fin:</b>
                         <input class="form-control" type="date" id="dateEnd"/>
                         <small id="labelDateEnd"></small>
@@ -26,9 +26,6 @@
                     <div class="col-md-3 d-flex flex-column">
                         <b>Histopatólogo:</b>
                         <select id="pathologist" class="form-control">
-                            {% if current_user is not None %}
-                            <option value="{{ current_user.id }}">{{ current_user.first_name }} {{current_user.last_name}}</option>
-                            {% else %}
                             <option value="0">Todos</option>
                             {% for pathologist in pathologists %}
                             <option
@@ -37,10 +34,18 @@
                                 {{ pathologist.first_name }} {{ pathologist.last_name }}
                             </option>
                             {% endfor %}
-                            {% endif %}
                         </select>
                     </div>
-                    <div class="col-md-3 d-flex flex-column justify-content-center align-items-center">
+                    <div class="col-md-3">
+                        <b>Area:</b>
+                        <select id="area" class="form-control">
+                            <option value="0">Todas</option>
+                            {% for area in areas %}
+                            <option value="{{ area.id }}">{{ area.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-2 d-flex flex-column justify-content-center align-items-center">
                         <button id="btnFilter" class="btn-outline-dark py-2 px-3 rounded shadow-box">Filtrar</button>
                     </div>
                 </section>
@@ -57,7 +62,7 @@
             <header class="card-header">
                 <h1 class="card-title">TRABAJO PENDIENTE</h1>
             </header>
-            <main class="card-body container">
+            <main class="card-body container-fluid">
                 <!-- Nav tabs -->
                 <ul class="nav nav-pill nav-fill" id="myTab" role="tablist">
                     <li class="nav-item" role="presentation">
@@ -78,7 +83,7 @@
                     </li>
                     <li class="nav-item" role="presentation">
                         <a class="nav-link" id="unreview-tab" data-toggle="tab" href="#unreview" role="tab" aria-controls="unreview" aria-selected="false">
-                            <h1>Servicios en revision:</h1>
+                            <h1>Servicios en revisión:</h1>
                             <h2>
                                 <span id="unreviewNumber"></span>
                             </h2>
@@ -97,7 +102,7 @@
                         <table id="currentTable" class="table table-sm table-striped" style></table>
                     </div>
                     <div class="tab-pane" id="unreview" role="tabpanel" aria-labelledby="unreview-tab">
-                        <h3 class="border-bottom">Servicios en revision</h3>
+                        <h3 class="border-bottom">Servicios en revisión</h3>
                         <table id="unreviewTable" class="table table-sm table-striped"></table>
                     </div>
                 </div>

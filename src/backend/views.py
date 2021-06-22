@@ -168,8 +168,6 @@ class ENTRYFORM(View):
                         "temp_id",
                     ],
                 )
-                # ident_json['organs_set'] = list(ident.organs.all().values())
-                # ident_json['organs_bv_set'] = list(ident.organs_before_validations.all().values())
                 entryform["identifications"].append(ident_json)
 
             # entryform["analyses"] = list(
@@ -233,8 +231,6 @@ class ENTRYFORM(View):
 
                 entryform["analyses"].append(aux)
 
-            # entryform["cassettes"] = list(
-            # entryform_object.cassette_set.all().values())
             entryform["customer"] = (
                 model_to_dict(entryform_object.customer)
                 if entryform_object.customer
@@ -269,7 +265,6 @@ class ENTRYFORM(View):
                 entryform_object.entry_format,
                 entryform_object.get_entry_format_display(),
             )
-
             exams_set = list(Exam.objects.all().values())
             organs_set = list(Organ.objects.all().values())
 

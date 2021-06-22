@@ -11,7 +11,15 @@
                 <h1 class="card-title">revision servicios</h1>
             </header>
             <main class="card-body">
-                <section class="d-flex flex-row align-items-stretch justify-content-between">
+                <section class="row align-items-center my-2">
+                    <div class="col-md-2 text-right">
+                        <label for="">Buscar:</label>
+                    </div>
+                    <div class="col-md-8">
+                        <input type="text" class="form-control" id="search"/>
+                    </div>
+                </section>
+                <section class="d-flex flex-row align-items-stretch justify-content-between border-top pt-2">
                     <section class="card m-0">
                         <header class="card-header">
                             <h2 class="card-title">
@@ -46,9 +54,9 @@
                                 <small id="sendingCount"></small>
                             </h2>
                         </header>
-                        <ul id="sending" class="state list-group p-1" style="background-color: #cccccc"></ul>
+                        <ul id="sending" class="state list-group p-1 finishing" style="background-color: #cccccc"></ul>
                     </section>
-                    {% if request.user.userprofile.profile_id == 1 or request.user.userprofile.profile_id == 2 %}
+                    {% if perms.review.send_email %}
                     <section class="card">
                         <header class="card-header">
                             <h2 class="card-title">
@@ -56,7 +64,7 @@
                                 <small id="finishedCount"></small>
                             </h2>
                         </header>
-                        <ul id="finished" class="list-group p-1" style="background-color: #f2f2f2"></ul>
+                        <ul id="finished" class="list-group p-1 finishing" style="background-color: #f2f2f2"></ul>
                     </section>
                     {% endif %}
                 </section>

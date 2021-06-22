@@ -1,13 +1,13 @@
 import json
 import mimetypes
-import os
 from smtplib import SMTPException
 
-from django.conf import settings
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, permission_required
+from django.contrib.auth.models import User
 from django.core import serializers
 from django.core.mail import BadHeaderError, EmailMultiAlternatives
-from django.http.response import FileResponse, Http404, JsonResponse
+from django.db.models import Q
+from django.http.response import Http404, JsonResponse
 from django.shortcuts import get_object_or_404, render
 from django.template.loader import get_template
 from django.utils.decorators import method_decorator
@@ -17,15 +17,18 @@ from review.models import Analysis, AnalysisMailList, File, MailList, Stage
 
 
 @login_required
+@permission_required("review.view_stage", raise_exception=True)
 def index(request):
     """
     Renders template which lists multiple :model:`review.Analysis` grouped by
     their state, allowing the user to move them accross multiple states as necessary.
     """
+
     return render(request, "index.html")
 
 
 @login_required
+@permission_required("review.view_stage", raise_exception=True)
 def list(request, index):
     """
     Returns a JSON detailing all :model:`review.Analysis` where their :model:`review.Stage`
@@ -37,23 +40,22 @@ def list(request, index):
         context = []
         for item in queryset:
             context.append(
-                {
-                    "analysis": serializers.serialize("json", [item]),
-                    "case": serializers.serialize("json", [item.entryform]),
-                    "exam": serializers.serialize("json", [item.exam]),
-                }
+                serializers.serialize(
+                    "json", [item, item.entryform, item.exam, item.entryform.customer]
+                )
             )
         return context
 
     if index in (1, 2, 3, 4):
-        analysis = Analysis.objects.stage(index)
+        analysis = Analysis.objects.stage(index, request.user)
     else:
-        analysis = Analysis.objects.waiting()
+        analysis = Analysis.objects.waiting(request.user)
 
     return JsonResponse(serialize_data(analysis), safe=False)
 
 
 @login_required
+@permission_required(["review.change_stage"], raise_exception=True)
 def update_stage(request, pk):
     """
     Updates a :model:`review.Stage`, storing the change in :model:`review.Logbook`.
@@ -71,16 +73,6 @@ def update_stage(request, pk):
     )
 
     return JsonResponse(serializers.serialize("json", [stage[0], analysis]), safe=False)
-
-
-@login_required
-def download_file(request, pk):
-    """Returns a FileResponse from the given pk's :model:`review.File` """
-    review_file = get_object_or_404(File, pk=pk)
-    file_path = os.path.join(settings.MEDIA_ROOT, str(review_file.path))
-    if os.path.exists(file_path):
-        return FileResponse(open(file_path, "rb"))
-    raise Http404
 
 
 @login_required
@@ -103,6 +95,7 @@ def analysis_mailing_list(request, pk):
 
 
 @login_required
+@permission_required("review.send_email", raise_exception=True)
 def send_email(request, pk):
     """
     Takes a :model:`review.Analysis`'pk and sends an email to all :model:`review.MailList`
@@ -127,11 +120,22 @@ def send_email(request, pk):
 
     message = get_template(template_name).render(context=context)
 
+    recipients = analysis.get_recipients()
+
+    if len(recipients["to"]) <= 0:
+        return JsonResponse({"status": "ERR", "code": 1})
+
     email = EmailMultiAlternatives(
-        analysis.email_subject,
-        message,
-        "report@vehice.com",
-        analysis.get_recipients(),
+        subject=analysis.email_subject,
+        body=message,
+        from_email='"VeHiCe"<reports@vehice.com>',
+        to=recipients["to"],
+        cc=recipients["cc"],
+        bcc=[
+            "carlos.sandoval@vehice.com",
+            "felipe.fernandez@vehice.com",
+            "hector.diaz@vehice.com",
+        ],
     )
     email.content_subtype = "html"
 
@@ -145,7 +149,7 @@ def send_email(request, pk):
     try:
         email.send()
     except (BadHeaderError, SMTPException):
-        return JsonResponse({"status": "ERR", "code": 1})
+        return JsonResponse({"status": "ERR", "code": 2})
 
     stage = Stage.objects.update_or_create(
         analysis=analysis, defaults={"state": 4, "created_by": request.user}
@@ -160,12 +164,26 @@ class FileView(View):
         Returns a list of files that belong to a single :model:`review.Analysis`
         """
         analysis = get_object_or_404(Analysis, pk=pk)
-        prereport_files = analysis.external_reports.all()
-        review_files = File.objects.filter(analysis=analysis).select_related("user")
+
+        prereport_files = []
+        for prefile in analysis.external_reports.all():
+            filename = prefile.file.name.split("/")
+            prereport_files.append({"name": filename[1], "download": prefile.file.url})
+
+        review_files = []
+        for review in File.objects.filter(analysis=analysis):
+            review_files.append(
+                {
+                    "name": review.path.name,
+                    "download": review.path.url,
+                    "state": review.state,
+                    "created_at": review.created_at,
+                }
+            )
 
         context = {
-            "prereports": serializers.serialize("json", prereport_files),
-            "reviews": serializers.serialize("json", review_files),
+            "prereports": prereport_files,
+            "reviews": review_files,
         }
 
         return JsonResponse(context)

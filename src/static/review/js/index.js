@@ -8,13 +8,13 @@ $(document).ready(() => {
 
   $("#sending, #finished")
     .sortable({
-      connectWith: "#finished",
+      connectWith: ".finishing",
     })
     .disableSelection();
 
   $("#newFiles").dropzone({
     dictDefaultMessage: "Arrastre sus archivos aqui",
-    acceptedFiles: ".csv, .doc, .docx, .ods, .odt, .pdf, .xls, .xlsx",
+    acceptedFiles: ".csv, .doc, .docx, .ods, .odt, .pdf, .xls, .xlsx, .xlsm",
     createImageThumbnails: false,
     headers: {
       "X-CSRFToken": getCookie("csrftoken"),
@@ -95,23 +95,45 @@ $(document).ready(() => {
 
   function parseResponse(response) {
     return response.map((row) => {
+      const data = JSON.parse(row);
       return {
-        analysis: JSON.parse(row.analysis)[0],
-        exam: JSON.parse(row.exam)[0],
-        case: JSON.parse(row.case)[0],
+        analysis: data[0],
+        case: data[1],
+        exam: data[2],
+        customer: data[3],
       };
     });
   }
 
-  function populateList(id, array) {
+  function populateList(id, array, filter = null) {
     const list = $(id);
     list.empty();
 
-    for (const item of array) {
+    let items = array;
+
+    if (filter != null) {
+      items = array.filter((item) => {
+        if (item.case.fields.no_caso.toLowerCase().includes(filter)) {
+          return true;
+        }
+
+        if (item.exam.fields.name.toLowerCase().includes(filter)) {
+          return true;
+        }
+
+        if (item.customer.fields.name.toLowerCase().includes(filter)) {
+          return true;
+        }
+
+        return false;
+      });
+    }
+
+    for (const item of items) {
       list.append(`<li class="list-group-item">
                         <small>
                             <a href="#" class="serviceItem" id="${item.analysis.pk}">
-                                ${item.case.fields.no_caso} - ${item.exam.fields.name} - ${item.case.fields.company}
+                                ${item.case.fields.no_caso} - ${item.exam.fields.name} - ${item.customer.fields.name}
                             </a>
                         </small>
                     </li>`);
@@ -162,26 +184,25 @@ $(document).ready(() => {
       const mailList = JSON.parse(response["mail_lists"]);
 
       const selected = JSON.parse(response["current_lists"]);
-      if (mailList.length > 0) {
-        if (selectRecipients.hasClass("select2-hidden-accessible")) {
-          selectRecipients.select2("destroy");
-        }
-        const options = mailList.map((mail) => {
-          const isSelected = selected.some(
-            (item) => item.fields.mail_list == mail.pk
-          );
-          return {
-            id: mail.pk,
-            text: mail.fields.name,
-            selected: isSelected,
-          };
-        });
-        selectRecipients.select2({
-          data: options,
-          width: "100%",
-          multiple: true,
-        });
+
+      if (selectRecipients.hasClass("select2-hidden-accessible")) {
+        selectRecipients.select2("destroy");
       }
+      const options = mailList.map((mail) => {
+        const isSelected = selected.some(
+          (item) => item.fields.mail_list == mail.pk
+        );
+        return {
+          id: mail.pk,
+          text: mail.fields.name,
+          selected: isSelected,
+        };
+      });
+      selectRecipients.select2({
+        data: options,
+        width: "100%",
+        multiple: true,
+      });
     });
   }
 
@@ -244,33 +265,35 @@ $(document).ready(() => {
     analysis = e.target.id;
     $("#fileDialog h5.modal-title").text(title);
 
+    updateSelectRecipients();
+
     dlgFileList.show();
 
     $.ajax(Urls["review:files"](analysis), {
       method: "GET",
 
       success: (data, textStatus) => {
-        const prereports = JSON.parse(data.prereports);
+        const prereports = data.prereports;
         const prereportList = $("#prereportList");
         prereportList.empty();
 
         for (const file of prereports) {
-          prereport.append(
-            `<li class="list-group-item">${file.fields.file}</li>`
+          prereportList.append(
+            `<li class="list-group-item"><a href="${file.download}" target="_BLANK">${file.name}</a></li>`
           );
         }
 
-        const reviews = JSON.parse(data.reviews);
+        const reviews = data.reviews;
         const reviewList = $("#reviewList");
         reviewList.empty();
 
         for (const file of reviews) {
-          const created = new Date(file.fields.created_at);
+          const created = new Date(file.created_at);
           reviewList.append(
             `<li class="list-group-item">
-              <a href="${Urls["review:download_file"](file.pk)}">
-                ${file.fields.path}
-                - ${getStateName(file.fields.state)}
+              <a href="${file.download}" target="_BLANK">
+                ${file.name}
+                - ${getStateName(file.state)}
                 - ${created.toLocaleString()}
               </a>
             </li>`
@@ -342,12 +365,17 @@ $(document).ready(() => {
                 toastr.error("Ocurrió un error.");
                 switch (response.code) {
                   case 0:
-                    toastr.info(
+                    toastr.warning(
                       "No se encontró archivo en estado `Para Enviar` disponible."
                     );
                     break;
                   case 1:
-                    toastr.info("Ocurrio un error enviando el correo.");
+                    toastr.warning(
+                      "No seleccionó lista de correo, o la lista esta vacia."
+                    );
+                    break;
+                  case 2:
+                    toastr.warning("Ocurrio un error enviando el correo.");
                     break;
                 }
               }
@@ -361,8 +389,18 @@ $(document).ready(() => {
     });
   });
 
-  $("#btnRefreshRecipient").click(() => {
+  $("#btnRefreshRecipients").click(() => {
     toastr.info("Actualizando destinatarios...");
     updateSelectRecipients();
+  });
+
+  $("#search").on("input", (e) => {
+    const queryString = e.target.value.toLowerCase();
+
+    populateList("#waiting", waiting, queryString);
+    populateList("#formating", formating, queryString);
+    populateList("#reviewing", reviewing, queryString);
+    populateList("#sending", sending, queryString);
+    populateList("#finished", finished, queryString);
   });
 });

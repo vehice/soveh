@@ -190,6 +190,68 @@ $(document).ready(function () {
 
   /* FUNCTIONS */
 
+  function filterUnassigned(data) {
+    return data.filter((analysis) => {
+      const form_closed = analysis.workflow.form_closed;
+      const form_cancelled = analysis.workflow.cancelled;
+      const manual_cancelled = analysis.report.manual_cancelled_date != null;
+      const manual_closed = analysis.report.manual_closing_date != null;
+      const pre_report_started = analysis.report.pre_report_started;
+      const is_assigned = analysis.report.patologo != null;
+      const requires_assignment = analysis.exam.pathologists_assignment;
+
+      return (
+        !(form_closed || manual_closed) &&
+        !(form_cancelled || manual_cancelled) &&
+        !is_assigned &&
+        requires_assignment
+      );
+    });
+  }
+
+  function filterPending(data) {
+    return data.filter((analysis) => {
+      const form_closed = analysis.workflow.form_closed;
+      const form_cancelled = analysis.workflow.cancelled;
+      const manual_cancelled = analysis.report.manual_cancelled_date != null;
+      const manual_closed = analysis.report.manual_closing_date != null;
+      const pre_report_started = analysis.report.pre_report_started;
+      const pre_report_ended = analysis.report.pre_report_ended;
+      const is_assigned = analysis.report.patologo != null;
+      const requires_assignment = analysis.exam.pathologists_assignment;
+
+      return (
+        !(form_closed || form_cancelled || manual_cancelled || manual_closed) &&
+        is_assigned &&
+        requires_assignment &&
+        pre_report_started &&
+        pre_report_ended
+      );
+    });
+  }
+
+  function filterDone(data) {
+    return data.filter((analysis) => {
+      const form_closed = analysis.workflow.form_closed;
+      const form_cancelled = analysis.workflow.cancelled;
+      const manual_cancelled = analysis.report.manual_cancelled_date != null;
+      const manual_closed = analysis.report.manual_closing_date != null;
+      const pre_report_started = analysis.report.pre_report_started;
+      const pre_report_ended = analysis.report.pre_report_ended;
+      const is_assigned = analysis.report.patologo != null;
+      const requires_assignment = analysis.exam.pathologists_assignment;
+
+      return (
+        (form_closed || manual_closed) &&
+        !(form_cancelled || manual_cancelled) &&
+        is_assigned &&
+        requires_assignment &&
+        pre_report_started &&
+        pre_report_ended
+      );
+    });
+  }
+
   function initializeChart(data) {
     let total = [0, 0, 0];
     data.forEach((element, index) => {
@@ -230,40 +292,40 @@ $(document).ready(function () {
 
       columns: [
         {
-          data: "case.fields.no_caso",
+          data: "case.no_caso",
           name: "case",
           type: "string",
           title: "Caso",
         },
         {
-          data: "case.fields.company",
+          data: "customer.name",
           name: "company",
           type: "string",
           title: "Empresa",
         },
         {
-          data: "case.fields.center",
+          data: "case.center",
           name: "center",
           type: "string",
           title: "Centro",
         },
         {
-          data: "exam.fields.name",
+          data: "exam.name",
           name: "exam",
           type: "string",
           title: "Servicio",
         },
         {
-          data: "stain.fields.abbreviation",
+          data: "stain.abbreviation",
           name: "stain",
           type: "num",
           title: "Tincion",
         },
         {
-          data: "user.fields",
+          data: "user",
           name: "pathologist",
           type: "string",
-          title: "Patologo",
+          title: "Patólogo",
           render: (data) => {
             return `${data.first_name[0]}${data.last_name[0]}`;
           },
@@ -282,7 +344,7 @@ $(document).ready(function () {
           },
         },
         {
-          data: "case.fields.created_at",
+          data: "case.created_at",
           name: "entry_date",
           type: "string",
           title: "Ingreso",
@@ -292,17 +354,17 @@ $(document).ready(function () {
           },
         },
         {
-          data: "report.fields.assignment_done_at",
+          data: "report.assignment_done_at",
           name: "derived_at",
           type: "num",
-          title: "Derivacion",
+          title: "Derivación",
           render: (data) => {
             const date = new Date(data);
             return date.toLocaleDateString();
           },
         },
         {
-          data: "report.fields.pre_report_ended_at",
+          data: "report.pre_report_ended_at",
           name: "pre_report_done",
           type: "num",
           title: "Pre-Informe Terminado",
@@ -312,7 +374,7 @@ $(document).ready(function () {
           },
         },
         {
-          data: "report.fields.pre_report_ended_at",
+          data: "report.pre_report_ended_at",
           name: "delay",
           type: "num",
           title: "En Espera",
@@ -321,7 +383,7 @@ $(document).ready(function () {
           },
         },
         {
-          data: "report.fields.created_at",
+          data: "report.created_at",
           name: "delay",
           type: "num",
           title: "En Sistema",
@@ -337,11 +399,11 @@ $(document).ready(function () {
     });
 
     const pendingByService = _.groupBy(pending, (item) => {
-      return item.exam.fields.name;
+      return item.exam.name;
     });
 
     const pendingByPathologist = _.groupBy(pending, (item) => {
-      const data = item.user.fields;
+      const data = item.user;
       return `${data.first_name[0]}${data.last_name[0]}`;
     });
 
@@ -375,13 +437,25 @@ $(document).ready(function () {
 
       columns: [
         {
-          data: "case.fields.no_caso",
+          data: "case.no_caso",
           name: "case",
           type: "string",
           title: "Caso",
         },
         {
-          data: "exam.fields.name",
+          data: "customer.name",
+          name: "company",
+          type: "string",
+          title: "Empresa",
+        },
+        {
+          data: "case.center",
+          name: "center",
+          type: "string",
+          title: "Centro",
+        },
+        {
+          data: "exam.name",
           name: "exam",
           type: "string",
           title: "Servicio",
@@ -393,28 +467,19 @@ $(document).ready(function () {
           title: "Cant. Muestras",
         },
         {
-          data: "stain.fields.abbreviation",
+          data: "stain.abbreviation",
           name: "stain",
           type: "num",
-          title: "Tincion",
+          title: "Tinción",
         },
         {
-          data: "case.fields.created_at",
+          data: "case.created_at",
           name: "entry_date",
           type: "string",
           title: "Ingreso",
           render: (data) => {
             const date = new Date(data);
             return date.toLocaleDateString();
-          },
-        },
-        {
-          data: "report.fields.created_at",
-          name: "delay",
-          type: "num",
-          title: "En Sistema",
-          render: (data) => {
-            return dateDiff(data);
           },
         },
       ],
@@ -435,29 +500,20 @@ $(document).ready(function () {
       let monthPercent = 0;
       for (const row of group) {
         const value = parseInt(
-          dateDiff(
-            row[startKeys[0]].fields[startKeys[1]],
-            row[endKeys[0]].fields[endKeys[1]]
-          )
+          dateDiff(row[startKeys[0]][startKeys[1]], row[endKeys[0]][endKeys[1]])
         );
         const total =
           parseInt(
-            dateDiff(
-              row.case.fields.created_at,
-              row.report.fields.pre_report_started_at
-            )
+            dateDiff(row.case.created_at, row.report.pre_report_started_at)
           ) +
           parseInt(
             dateDiff(
-              row.report.fields.pre_report_started_at,
-              row.report.fields.pre_report_ended_at
+              row.report.pre_report_started_at,
+              row.report.pre_report_ended_at
             )
           ) +
           parseInt(
-            dateDiff(
-              row.report.fields.pre_report_ended_at,
-              row.workflow.fields.closed_at
-            )
+            dateDiff(row.report.pre_report_ended_at, row.workflow.closed_at)
           );
 
         monthValue += value;
@@ -482,7 +538,7 @@ $(document).ready(function () {
     initializeUnassigned();
 
     let finishedByMonth = _.groupBy(finished, (row) => {
-      const date = new Date(row.workflow.fields.closed_at);
+      const date = new Date(row.workflow.closed_at);
       return `${date.getFullYear()}/${date.getMonth() + 1}`;
     });
 
@@ -518,20 +574,6 @@ $(document).ready(function () {
     initializeChart(stages);
   }
 
-  function mapData(data, key) {
-    return data[key].map((row) => {
-      return {
-        report: JSON.parse(row.report)[0],
-        exam: JSON.parse(row.exam)[0],
-        case: JSON.parse(row.case)[0],
-        user: JSON.parse(row.user)[0],
-        stain: JSON.parse(row.stain)[0],
-        samples: JSON.parse(row.samples),
-        workflow: JSON.parse(row.workflow)[0],
-      };
-    });
-  }
-
   function dateDiff(a, b = null) {
     const date = new Date(a);
     const currentDate = b == null ? new Date() : new Date(b);
@@ -560,11 +602,11 @@ $(document).ready(function () {
 
       contentType: "application/json; charset=utf-8",
 
-      success: (_data, textStatus) => {
+      success: (data, textStatus) => {
         Swal.close();
-        pending = mapData(_data, "pending");
-        unassigned = mapData(_data, "unassigned");
-        finished = mapData(_data, "finished");
+        pending = filterPending(data.queryset);
+        unassigned = filterUnassigned(data.unassigned);
+        finished = filterDone(data.queryset);
         updateView();
       },
       error: (xhr, textStatus, error) => {

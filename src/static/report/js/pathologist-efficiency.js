@@ -139,7 +139,7 @@ $(document).ready(function () {
   let dateEnd = new Date().toLocaleDateString();
   $("#labelDateEnd").text(`Fecha por defecto: ${dateEnd}`);
   let dateStart = new Date();
-  dateStart.setMonth(dateStart.getMonth() - 3);
+  dateStart.setMonth(dateStart.getMonth() - 5);
   dateStart = dateStart.toLocaleDateString();
   $("#labelDateStart").text(`Fecha por defecto: ${dateStart}`);
 
@@ -182,6 +182,12 @@ $(document).ready(function () {
           name: "case",
           type: "string",
           title: "Caso",
+        },
+        {
+          data: "customer.name",
+          name: "customer",
+          type: "string",
+          title: "Empresa",
         },
         {
           data: "report.report_code",
@@ -408,6 +414,7 @@ $(document).ready(function () {
     const date_start = $("#dateStart").val();
     const date_end = $("#dateEnd").val();
     const user_id = $("#pathologist").val();
+    const area_id = $("#area").val();
     Swal.fire({
       title: "Cargando...",
       allowOutsideClick: false,
@@ -415,7 +422,7 @@ $(document).ready(function () {
     Swal.showLoading();
 
     $.ajax(Urls["report:efficiency"](), {
-      data: JSON.stringify({ date_start, date_end, user_id }),
+      data: JSON.stringify({ date_start, date_end, user_id, area_id }),
 
       method: "POST",
 

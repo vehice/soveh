@@ -1,6 +1,9 @@
 from django.contrib import admin
 
-from review.models import Recipient, MailList
+from review.models import MailList, Recipient, RecipientMail
+
+
+admin.site.register(RecipientMail)
 
 
 @admin.register(Recipient)

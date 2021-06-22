@@ -157,8 +157,23 @@ def show_ingresos(request):
 
     form = Form.objects.filter(content_type__model="entryform").order_by("-object_id")
     if up.profile_id in (4, 5):
+        assigned_areas = UserArea.objects.filter(user=request.user, role=0)
+        pks = [request.user.id]
+
+        for user_area in assigned_areas:
+            users = (
+                UserArea.objects.filter(area=user_area.area)
+                .exclude(user=request.user)
+                .values_list("user", flat=True)
+            )
+            pks.extend(users)
+
+        pathologists = User.objects.filter(
+            Q(userprofile__profile_id__in=(4, 5)) | Q(userprofile__is_pathologist=True)
+        ).filter(pk__in=pks)
+
         ids = EntryForm.objects.filter(
-            analysisform__patologo_id=up.user_id
+            analysisform__patologo_id__in=pathologists
         ).values_list("id")
         form_ids = form.filter(object_id__in=ids).values_list("id")
         state_ids = Form.objects.filter(
@@ -391,8 +406,9 @@ def show_workflow_main_form(request, form_id):
 
 
 def make_pdf_file(id, url):
-    import pdfkit
     import os
+
+    import pdfkit
     from django.conf import settings
 
     d = datetime.today().strftime("%Y%m%d%H%M%S")
@@ -419,7 +435,6 @@ def make_pdf_file(id, url):
 
 def make_pdf_file2(id, url, filename, userId):
     import pdfkit
-    import os
 
     d = datetime.today().strftime("%Y%m%d%H%M%S")
 
@@ -1202,7 +1217,6 @@ def show_patologos(request, all):
     :template:`app/patologos.html`
     """
     up = UserProfile.objects.filter(user=request.user).first()
-
     # Get AnalysisForm according to user permissions
     if request.user.is_superuser or up.profile_id in (1, 2, 3):
         analysis = (
@@ -1211,11 +1225,27 @@ def show_patologos(request, all):
             .order_by("-entryform_id")
         )
     elif up.profile_id in (4, 5):
+        assigned_areas = UserArea.objects.filter(user=request.user, role=0)
+        pks = [request.user.id]
+
+        for user_area in assigned_areas:
+            users = (
+                UserArea.objects.filter(area=user_area.area)
+                .exclude(user=request.user)
+                .values_list("user", flat=True)
+            )
+            pks.extend(users)
+
+        pathologists = User.objects.filter(
+            Q(userprofile__profile_id__in=(4, 5)) | Q(userprofile__is_pathologist=True)
+        ).filter(pk__in=pks)
+
         analysis = (
-            AnalysisForm.objects.filter(patologo=request.user, exam__isnull=False)
+            AnalysisForm.objects.filter(patologo__in=pathologists, exam__isnull=False)
             .select_related("entryform", "exam")
             .order_by("-entryform_id")
         )
+
     else:
         analysis = (
             AnalysisForm.objects.filter(exam__isnull=False)
