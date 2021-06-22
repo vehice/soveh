@@ -1,8 +1,5 @@
 from datetime import datetime
 
-from django.contrib.auth.models import User
-from django.contrib.contenttypes.fields import GenericForeignKey
-from django.contrib.contenttypes.models import ContentType
 from django.db import connections, models
 from django.urls import reverse
 from numpy import busday_count
@@ -173,3 +170,9 @@ class Slide(models.Model):
 
             return f"http://vehice.net/DSStore/HtmlViewer.aspx?Id=${slide_id}"
         return row
+
+
+class Process(models.Model):
+    """Describes a Laboratory's internal jobs"""
+
+    name = models.CharField(max_length=255)
