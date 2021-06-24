@@ -173,6 +173,38 @@ class Slide(models.Model):
 
 
 class Process(models.Model):
-    """Describes a Laboratory's internal jobs"""
+    """Describes a Laboratory's internal jobs."""
 
     name = models.CharField(max_length=255)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    deleted_at = models.DateTimeField(null=True, blank=True)
+
+
+class Tree(models.Model):
+    """Describes a Laboratory's group of process."""
+
+    name = models.CharField(max_length=255)
+
+    process = models.ManyToManyField(
+        Process, related_name="process", through="ProcessTree"
+    )
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    deleted_at = models.DateTimeField(null=True, blank=True)
+
+
+class ProcessTree(models.Model):
+    """Details the order in which :model:`lab.Process` take place in a :model:`lab.Tree`."""
+
+    process = models.ForeignKey(
+        Process, on_delete=models.CASCADE, related_name="process_trees"
+    )
+    tree = models.ForeignKey(
+        Tree, on_delete=models.CASCADE, related_name="process_trees"
+    )
+    order = models.PositiveSmallIntegerField()
+
+    created_at = models.DateTimeField(auto_now_add=True)
