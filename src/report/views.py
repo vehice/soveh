@@ -541,3 +541,19 @@ class ControlView(View):
             ),
             content_type="application/json",
         )
+
+
+class AnalysisView(View):
+    def get(self, request):
+        """Displays a list of all assigned services for current User.
+        It details the service's progress in Lab, Read, and Review.
+        """
+
+        pathologists = get_pathologists(request.user)
+        analysis = AnalysisForm.objects.exclude(
+            Q(manual_cancelled_date__isnull=False)
+            | Q(manual_closing_date__isnull=False)
+            | Q(forms__form_closed=True)
+            | Q(forms__cancelled=True)
+        ).filter(exam__pathologists_assignment=True, patologo_id__in=pathologists)
+        return render(request, "pathologist/analysis.html", {"analysis": analysis})
