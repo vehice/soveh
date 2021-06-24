@@ -7,6 +7,7 @@ from numpy import busday_count
 from backend.models import (
     ENTRY_FORMAT_OPTIONS,
     EntryForm,
+    Exam,
     Identification,
     Organ,
     Stain,
@@ -177,6 +178,10 @@ class Process(models.Model):
 
     name = models.CharField(max_length=255)
 
+    case = models.ManyToManyField(
+        EntryForm, related_name="processes", through="CaseProcess"
+    )
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     deleted_at = models.DateTimeField(null=True, blank=True)
@@ -204,6 +209,30 @@ class ProcessTree(models.Model):
     )
     tree = models.ForeignKey(
         Tree, on_delete=models.CASCADE, related_name="process_trees"
+    )
+    order = models.PositiveSmallIntegerField()
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+
+class ExamTree(models.Model):
+    """Details the order in which :model:`lab.Tree` take place in a :model:`backend.Exam`"""
+
+    tree = models.ForeignKey(Tree, on_delete=models.CASCADE, related_name="exam_trees")
+    exam = models.ForeignKey(Exam, on_delete=models.CASCADE, related_name="exam_trees")
+    order = models.PositiveSmallIntegerField()
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+
+class CaseProcess(models.Model):
+    """Details the order in which :model:`lab.Process` takes place in a :model:`backend.EntryForm`"""
+
+    entryform = models.ForeignKey(
+        EntryForm, on_delete=models.CASCADE, related_name="case_process"
+    )
+    process = models.ForeignKey(
+        Process, on_delete=models.CASCADE, related_name="case_process"
     )
     order = models.PositiveSmallIntegerField()
 
