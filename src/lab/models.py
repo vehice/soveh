@@ -186,6 +186,12 @@ class Process(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     deleted_at = models.DateTimeField(null=True, blank=True)
 
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        verbose_name_plural = "processes"
+
 
 class Tree(models.Model):
     """Describes a Laboratory's group of process."""
@@ -199,6 +205,9 @@ class Tree(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     deleted_at = models.DateTimeField(null=True, blank=True)
+
+    def __str__(self):
+        return self.name
 
 
 class ProcessTree(models.Model):
@@ -214,6 +223,9 @@ class ProcessTree(models.Model):
 
     created_at = models.DateTimeField(auto_now_add=True)
 
+    def __str__(self):
+        return f"{self.process} en {self.tree}"
+
 
 class ExamTree(models.Model):
     """Details the order in which :model:`lab.Tree` take place in a :model:`backend.Exam`"""
@@ -223,6 +235,9 @@ class ExamTree(models.Model):
     order = models.PositiveSmallIntegerField()
 
     created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.tree} en {self.exam} como paso {self.order}"
 
 
 class CaseProcess(models.Model):
