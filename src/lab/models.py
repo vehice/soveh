@@ -243,7 +243,7 @@ class ExamTree(models.Model):
 class CaseProcess(models.Model):
     """Details the order in which :model:`lab.Process` takes place in a :model:`backend.EntryForm`"""
 
-    entryform = models.ForeignKey(
+    case = models.ForeignKey(
         EntryForm, on_delete=models.CASCADE, related_name="case_process"
     )
     process = models.ForeignKey(
