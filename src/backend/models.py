@@ -595,6 +595,7 @@ class SampleExams(models.Model):
     stain = models.ForeignKey(
         Stain, null=True, on_delete=models.SET_NULL, verbose_name="tinción"
     )
+    unit_organ = models.ForeignKey(OrganUnit, null=True, on_delete=models.CASCADE)
 
     def __str__(self):
         return str(self.sample)

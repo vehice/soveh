@@ -142,6 +142,8 @@ class ENTRYFORM(View):
 
                     sE_dict = {
                         "organ_name": sE.organ.name,
+                        "uo_id": sE.unit_organ_id,
+                        "uo_organ_id": sE.unit_organ.organ.id,
                         "organ_id": sE.organ.id,
                         "stain_id": sE.stain_id,
                         "stain_abbr": sE.stain.abbreviation,
@@ -2501,16 +2503,29 @@ def step_3_entryform(request):
             for se in SampleExams.objects.filter(
                 sample=sample, exam_id=exam_stain[0], stain_id=exam_stain[1]
             ):
-                if se.organ_id not in sample_organs[0]:
+                if se.unit_organ_id+"-"+se.organ_id not in sample_organs[0]:
                     se.delete()
 
+            unit_organ_dict = {}
+            for uo in sample.unit_organs.all():
+                unit_organ_dict[uo.organ.id] = uo.id
+                
+            print ("unit_organ_dict", unit_organ_dict)
+                
             for organ in sample_organs[0]:
+                print("organos que vienen step 3", organ)
+                uo_organ_id = organ.split("-")[0]
+                print("uo_organ_id dp de split",uo_organ_id )
+                organ_id = organ.split("-")[1]
+                uo_id = unit_organ_dict[int(uo_organ_id)]
+                
                 if (
                     SampleExams.objects.filter(
                         sample=sample,
                         exam_id=exam_stain[0],
                         stain_id=exam_stain[1],
-                        organ_id=organ,
+                        organ_id=organ_id,
+                        unit_organ_id=uo_id
                     ).count()
                     == 0
                 ):
@@ -2518,7 +2533,8 @@ def step_3_entryform(request):
                         SampleExams(
                             sample_id=sample.pk,
                             exam_id=exam_stain[0],
-                            organ_id=organ,
+                            organ_id=organ_id,
+                            unit_organ_id=uo_id,
                             stain_id=exam_stain[1],
                         )
                     )

@@ -2,7 +2,6 @@ var data_step_3;
 var previous_data_exists = false;
 
 function init_step_3() {
-  console.log("init_step_3")
   var entryform_id = $('#entryform_id').val();
   var url = Urls.entryform_id(entryform_id);
 
@@ -13,7 +12,6 @@ function init_step_3() {
   })
   .done(function (data) {
     data_step_3 = data
-    // console.log(data_step_3)
     $('.showSummaryBtn').removeClass("hidden");
     $('.showAttachedFilesBtn').removeClass("hidden");
     $('.showReceptionFileBtn').removeClass("hidden");
@@ -74,20 +72,48 @@ function loadStains(stains) {
   });
 }
 
-function loadOrgans(samples) {
+function generateSelectableOrgans(samples){
   let organs = {}
 
   $.each(samples, function(i, sample){
     $.each(sample.organs_set, function(j, ou){
       if (!organs.hasOwnProperty(ou.organ.id)) {
-        organs[ou.organ.id] = ou.organ
+        let organ_data = {
+          'ou': ou,
+          'organ_set' : [] 
+        }
+        if (ou.organ.organ_type == 2){
+          $.each(data_step_3.organs, function(_, org){
+            if (org.organ_type == 1){
+              organ_data.organ_set.push(org)
+            }
+          })
+        } else {
+          organ_data.organ_set.push(ou.organ)
+        }
+        organs[ou.organ.id] = organ_data
       }
     })
   })
+  return organs
+}
 
-  $.each(organs, function (i, item) {
-    var html = '<option value="'+item.id+'">'+item.name+'</option>';
-    $('#organs_select').append($(html));
+function loadOrgans(samples) {
+
+  let organs = generateSelectableOrgans(samples)
+
+  $.each(organs, function (ou_organ_id, organ_data) {
+    if (organ_data.organ_set.length > 1){
+      $.each(organ_data.organ_set, function(i, org){
+        let html = '<option data-ou="'+ou_organ_id+'" value="'+org.id+'">'+organ_data.ou.organ.name+' - '+org.name+'</option>';
+        $('#organs_select').append($(html));
+      })
+    
+    } else {
+      let html = '<option data-ou="'+ou_organ_id+'" value="'+organ_data.organ_set[0].id+'">'+organ_data.organ_set[0].name+'</option>';
+      $('#organs_select').append($(html));
+    }
+
   });
 }
 
@@ -136,14 +162,14 @@ function loadData(data){
         sample.id, 
         exam_id,
         stain,
-        sample.organs_set,
+        generateSelectableOrgans([sample]),
         value[0].analysis_status
       );
       $("#sample-"+sample.id).after(html)
       let analisis_tr = $("#analisis-"+sample.id+"-"+exam_id+"-"+stain.id)
       let select_organs = analisis_tr.find(".organs-select").first()
       select_organs.select2();
-      select_organs.val(value.map(o => o.organ_id)).trigger('change')
+      select_organs.val(value.map(o => o.uo_organ_id+"-"+o.organ_id)).trigger('change')
       
     });
   });
@@ -152,7 +178,15 @@ function loadData(data){
 function addExamToSamples(){
   let analysis_selected = $("#exam_select").val();
   let stain_selected = $("#stain_select").val();
-  let organs_selected = $("#organs_select").val();
+  let organs_selected = [];
+
+  $("#organs_select option:selected").each(function(){
+    let ou_organ_id = $(this).data("ou")
+    let selected_organ_id = $(this).val()
+    organs_selected.push([ou_organ_id, selected_organ_id])
+  })
+
+  // return false
 
   $.each(data_step_3.samples, function(i, sample){
 
@@ -161,10 +195,10 @@ function addExamToSamples(){
       // add exam to empty samples
       let organs_to_analize = []
 
-      for (let organ of organs_selected) {
+      for (let organ_pair of organs_selected) {
         for (let elem of sample.organs_set){
-          if (organ == elem.organ.id) {
-            organs_to_analize.push(elem)
+          if (organ_pair[0] == elem.organ.id) {
+            organs_to_analize.push(organ_pair)
           }
         }
       }
@@ -185,7 +219,7 @@ function addExamToSamples(){
           sample.id, 
           analysis_selected,
           {"id": $("#stain_select").val(), "abbr": $("#stain_select option:selected" ).text()},
-          sample.organs_set,
+          generateSelectableOrgans([sample]),
           "En Ingreso"
         );
         $("#sample-"+sample.id).after(html)
@@ -193,13 +227,13 @@ function addExamToSamples(){
         let select_organs = analisis_tr.find(".organs-select").first()
 
         select_organs.select2();
-        select_organs.val(organs_to_analize.map(o => o.organ.id)).trigger('change')
+        select_organs.val(organs_to_analize.map(o => o[0]+"-"+o[1])).trigger('change')
       
       } else if ( organs_to_analize.length > 0 && analisis_tr.length ) {
 
         let values = select_organs.val()
-        for (let organ of organs_to_analize) {
-          values.push(organ.organ.id)
+        for (let organ_pair of organs_to_analize) {
+          values.push(organ_pair[0]+"-"+organ_pair[1])
         }
         select_organs.val(values)
         select_organs.trigger('change')

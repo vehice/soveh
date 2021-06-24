@@ -116,8 +116,18 @@
   </td>
   <td>
     <select class="form-control organs-select organs-select-<%= sampleId %>-<%= examId %>" style="width:100% !important;" name="sample[organs][<%= sampleId %>][<%= examId %>][<%= stain.id %>]" multiple="multiple" disabled>
-      <% _.each(organs, function (organ) { %>
-        <option value="<%= organ.organ.id %>"> <%= organ.organ.abbreviation %> </option>
+      <% _.each(organs, function (organ_data, ou) { %>
+        <% _.each(organ_data.organ_set, function (org) { %>
+          <% if (ou == org.id ){ %>
+            <option value="<%= ou %>-<%= org.id %>">
+              <%= org.abbreviation %> 
+            </option>
+          <% } else { %>
+             <option value="<%= ou %>-<%= org.id %>">
+              <%= organ_data.ou.organ.abbreviation %> - <%= org.abbreviation %> 
+            </option>
+          <% } %>
+        <% }); %>
       <% }); %>
     </select>
   </td>
