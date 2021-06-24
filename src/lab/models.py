@@ -252,3 +252,23 @@ class CaseProcess(models.Model):
     order = models.PositiveSmallIntegerField()
 
     created_at = models.DateTimeField(auto_now_add=True)
+
+
+class ProcessItem(models.Model):
+    """Details a single :model:`lab.CaseProcess`.
+    Stores the date in which the operation started, ended, and wether or raise not
+    this was the last operation for this particular :model:`lab.Process` for the
+    :model:`backend.EntryForm`.
+    """
+
+    case_process = models.ForeignKey(
+        CaseProcess, on_delete=models.CASCADE, related_name="process_items"
+    )
+
+    started_at = models.DateTimeField()
+    ended_at = models.DateTimeField(null=True, blank=True)
+    completed = models.BooleanField(verbose_name="finalizado")
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    deleted_at = models.DateTimeField(null=True, blank=True)
