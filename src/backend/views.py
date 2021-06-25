@@ -2334,11 +2334,6 @@ def step_2_entryform(request):
     index = 1
     for ident in identifications:
 
-        # Deleting previous samples
-
-        # Sample.objects.filter(
-        #     identification=ident,
-        # ).delete()
         units = Unit.objects.filter(identification=ident).order_by('correlative')
 
         if ident.samples_are_correlative:
@@ -2365,16 +2360,16 @@ def step_2_entryform(request):
                     )
 
                 sample.unit_organs.clear()
+                sample.save()
 
                 for ou in OrganUnit.objects.filter(unit__in=map(lambda x: x.pk, v)):
-                    sample.unit_organs.add(ou)
+                    if ou.pk not in sample.unit_organs.all().values_list("pk", flat=True):
+                        sample.unit_organs.add(ou)
 
                 index += 1
         else:
             organs_units = {}
             for unit in units:
-                # unique_organs_group = [[]]
-
                 for uo in OrganUnit.objects.filter(unit=unit):
                     if uo.organ.pk in organs_units:
                         organs_units[uo.organ.pk].append(uo)
@@ -2392,6 +2387,7 @@ def step_2_entryform(request):
                 groups.append([organ])
             
             organs_not_used = []
+            units_proccesed = []
             for group in groups:
                 pre_organs_not_used = []
                 for organ_available in OrganUnit.objects.filter(unit=group[0].unit):
@@ -2407,7 +2403,16 @@ def step_2_entryform(request):
                             organs_not_used.remove(sobra)
                             
                 organs_not_used = organs_not_used + pre_organs_not_used
-
+                units_proccesed.append(group[0].unit.pk)
+            
+            for unit in units:
+                if unit.pk not in units_proccesed:
+                    for uo in OrganUnit.objects.filter(unit=unit):
+                        for group in groups:
+                            if uo.organ.pk not in list(map(lambda x: x.organ.pk, group)):
+                                group.append(uo)
+                                break
+                                
             for group in groups:
                 sample = Sample.objects.filter(
                     entryform = entryform, 
@@ -2509,13 +2514,9 @@ def step_3_entryform(request):
             unit_organ_dict = {}
             for uo in sample.unit_organs.all():
                 unit_organ_dict[uo.organ.id] = uo.id
-                
-            print ("unit_organ_dict", unit_organ_dict)
-                
+                                
             for organ in sample_organs[0]:
-                print("organos que vienen step 3", organ)
                 uo_organ_id = organ.split("-")[0]
-                print("uo_organ_id dp de split",uo_organ_id )
                 organ_id = organ.split("-")[1]
                 uo_id = unit_organ_dict[int(uo_organ_id)]
                 

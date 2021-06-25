@@ -515,13 +515,16 @@ function init_step_2() {
           return;
         }
         resetOrgansOptions(id, true);
+        saveIdentification(id)
+        saveUnitsByIdentification(id)
       });
     }
     else {
       resetOrgansOptions(id, false);
+      saveIdentification(id)
+      saveUnitsByIdentification(id)
     }
-    saveIdentification(id)
-    saveUnitsByIdentification(id)
+
   });
 
   $(document).on("blur", ".ident-data", function () {
@@ -700,6 +703,7 @@ function resetOrgansOptions(id, correlative) {
       
       }
     });
+
 
     select.html(templateHTML)
 

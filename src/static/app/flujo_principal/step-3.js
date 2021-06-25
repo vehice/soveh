@@ -83,6 +83,7 @@ function generateSelectableOrgans(samples){
           'organ_set' : [] 
         }
         if (ou.organ.organ_type == 2){
+          organ_data.organ_set.push(ou.organ)
           $.each(data_step_3.organs, function(_, org){
             if (org.organ_type == 1){
               organ_data.organ_set.push(org)
@@ -105,7 +106,12 @@ function loadOrgans(samples) {
   $.each(organs, function (ou_organ_id, organ_data) {
     if (organ_data.organ_set.length > 1){
       $.each(organ_data.organ_set, function(i, org){
-        let html = '<option data-ou="'+ou_organ_id+'" value="'+org.id+'">'+organ_data.ou.organ.name+' - '+org.name+'</option>';
+        let html = "";
+        if (organ_data.ou.organ.id == org.id){
+          html = '<option data-ou="'+ou_organ_id+'" value="'+org.id+'">'+org.name+'</option>';
+        } else {
+          html = '<option data-ou="'+ou_organ_id+'" value="'+org.id+'">'+organ_data.ou.organ.name+' - '+org.name+'</option>';
+        }
         $('#organs_select').append($(html));
       })
     
@@ -247,7 +253,13 @@ function addExamToSamples(){
 function removeExamFromSamples(){
   let analysis_selected = $("#exam_select").val();
   let stain_selected = $("#stain_select").val();
-  let organs_selected = $("#organs_select").val();
+  let organs_selected = [];
+
+  $("#organs_select option:selected").each(function(){
+    let ou_organ_id = $(this).data("ou")
+    let selected_organ_id = $(this).val()
+    organs_selected.push([ou_organ_id, selected_organ_id])
+  })
 
   $.each(data_step_3.samples, function(i, sample){
 
@@ -260,8 +272,21 @@ function removeExamFromSamples(){
         
         let organ_new_values = []
         let current_select_values = select_organs.val()
+        
         for (let organ of current_select_values){
-          if (!organs_selected.includes(organ)){
+          let ou_organ_id = organ.split("-")[0]
+          let selected_organ_id = organ.split("-")[1]
+          let organ_is_included = false
+
+          for (let os of organs_selected){
+
+            if (parseInt(os[0]) == parseInt(ou_organ_id) && parseInt(os[1]) == parseInt(selected_organ_id)){
+              organ_is_included = true
+              break
+            }
+          }
+
+          if (!organ_is_included){
             organ_new_values.push(organ)
           }
         }
