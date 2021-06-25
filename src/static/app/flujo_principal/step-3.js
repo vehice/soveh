@@ -206,8 +206,6 @@ function addExamToSamples() {
     organs_selected.push([ou_organ_id, selected_organ_id]);
   });
 
-  // return false
-
   $.each(data_step_3.samples, function (i, sample) {
     // if sample is checked
     if ($("#sampleCheck-" + sample.id + " input").is(":checked")) {
@@ -297,16 +295,18 @@ function removeExamFromSamples() {
       );
       let select_organs = analisis_tr.find(".organs-select");
 
-      console.log({ analisis_tr, select_organs });
-
       if (analisis_tr.length) {
         let organ_new_values = [];
         let current_select_values = select_organs.val();
         for (let organ of current_select_values) {
-          if (!organs_selected.includes(organ)) {
-            organ_new_values.push(organ);
+          if (organ.includes("-")) {
+            const organ_fixes = organ.split("-");
+            if (organs_selected.includes(organ_fixes[1])) {
+              organ_new_values.push(organ);
+            }
           }
         }
+
         if (organ_new_values.length > 0) {
           select_organs.val(organ_new_values).trigger("change");
         } else {
