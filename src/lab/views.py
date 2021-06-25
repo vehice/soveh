@@ -15,7 +15,7 @@ from django.views import View
 from django.views.generic import DetailView, ListView
 
 from backend.models import Organ, Stain, Unit
-from lab.models import Case, Cassette, CassetteOrgan, Slide
+from lab.models import Case, CaseProcess, Cassette, CassetteOrgan, Process, Slide
 
 
 def home(request):
@@ -668,3 +668,22 @@ class SlideDetail(View):
         return HttpResponse(
             serializers.serialize("json", [slide]), content_type="application/json"
         )
+
+
+# Process related views
+
+
+class ProcessView(View):
+    def get(self, request):
+        processes = Process.objects.all()
+        return render(request, "process/index.html", {"processes": processes})
+
+
+class CaseProcessList(ListView):
+    def get_process_cases(self, process_id):
+        cases_id = CaseProcess.objects.filter(process_id=process_id).values_list(
+            "case", flat=True
+        )
+        cases = Case.objects.filter(pk=cases_id)
+
+        return JsonResponse(serializers.serialize("json", cases), safe=False)

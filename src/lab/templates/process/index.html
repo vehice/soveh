@@ -1,0 +1,68 @@
+{% extends 'layout.html' %}
+{% load static %}
+
+{% block content %}
+<!-- MAIN -->
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <header class="card-header">
+                <h4 class="card-title">Procesos de Laboratorio</h4>
+                <span class="d-flex flex-row justify-content-between mt-md-1 align-items-center">
+                    <small class="card-subtitle">Indice</small>
+                </span>
+            </header>
+            <section class="card-body table-responsive">
+                <div class="row mb-1">
+                    <div class="col-md-5">
+                        <select name="" class="form-control">
+                            <option value="0">Seleccione un proceso</option>
+                            {% for process in processes %}
+                            <option value="{{ process.id }}">{{ process.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                <table class="table table-bordered table-striped zero-configuration">
+                    <thead>
+                        <tr>
+                            <th scope="col">Caso</th>
+                            <th scope="col">Identificacion</th>
+                            <th scope="col">Unidad</th>
+                            <th scope="col">Empresa</th>
+                            <th scope="col">Centro</th>
+                            <th scope="col">Fecha Recepcion</th>
+                            <th scope="col">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
+            </section>
+        </div>
+    </div>
+</div>
+
+<!-- END MAIN -->
+
+<!-- MODALS -->
+
+
+<!-- END MODALS-->
+
+
+{% endblock content %}
+{% block scripts %}
+<script
+    type="text/javascript"
+    src="https://cdn.datatables.net/buttons/1.7.0/js/dataTables.buttons.min.js"
+    defer>
+</script>
+
+<script
+    type="text/javascript"
+    src="//cdn.jsdelivr.net/npm/sweetalert2@10"
+    defer>
+</script>
+
+{% endblock scripts %}

@@ -5,7 +5,7 @@ from django.test import Client, TestCase
 from django.urls import reverse
 
 from backend.models import Identification, Organ, OrganUnit, Unit
-from lab.models import Case, Cassette, Slide
+from lab.models import Case, CaseProcess, Cassette, Process, ProcessTree, Slide, Tree
 
 
 class VariantTest(TestCase):
@@ -1110,4 +1110,34 @@ class SlideDetailTest(TestCase):
         self.assertTrue(
             response.json()[0]["pk"] == self.slide.id,
             "Response should contain expected Slide.",
+        )
+
+
+class ProcessTest(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.client = Client()
+        cls.client = Client()
+        cls.case = Case.objects.create()
+        cls.identification = Identification.objects.create(entryform=cls.case)
+        cls.unit = Unit.objects.create(identification=cls.identification)
+
+        cls.process = Process.objects.create(name="Test")
+        cls.tree = Tree.objects.create(name="Test")
+        ProcessTree.objects.create(process=cls.process, tree=cls.tree, order=1)
+        CaseProcess.objects.create(case=cls.case, process=cls.process, order=1)
+
+    def test_view_renders_template(self):
+        self.client.login(username="jmonagas", password="vehice1234")
+        response = self.client.get(reverse("lab:process_index"))
+
+        self.assertTemplateUsed(response, "process/index.html")
+
+    def test_view_contains_processes(self):
+        self.client.login(username="jmonagas", password="vehice1234")
+        response = self.client.get(reverse("lab:process_index"))
+
+        self.assertTrue(
+            response.context["processes"][0] == self.process,
+            "Response context must contain expected Process.",
         )
