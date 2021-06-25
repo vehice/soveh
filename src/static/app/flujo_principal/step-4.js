@@ -13,6 +13,7 @@ function init_step_4(active = true) {
       $(".showShareBtn").removeClass("hidden");
       $(".showLogBtn").removeClass("hidden");
       $(".showSummaryBtn").removeClass("hidden");
+      $(".showReceptionFileBtn").removeClass("hidden");
       $(".showAttachedFilesBtn").removeClass("hidden");
       saltar = true;
       loadAnalysisData(data);

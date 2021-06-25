@@ -155,6 +155,10 @@
         "es":"Fijador",
         "en":"Fixative"
     },
+    "laboratory":{
+        "es":"Laboratorio de Ingreso",
+        "en":"Entrance Laboratory"
+    },
     "type_case":{
         "es":"Tipo de ingreso",
         "en":"Type of case"
@@ -311,9 +315,9 @@
         "es":"Volver",
         "en":"Back"
     },
-    "nro_sample":{
-        "es":"N° Muestra",
-        "en":"No. Sample"
+    "nro_individual":{
+        "es":"N° Individuo",
+        "en":"No. Individual"
     },
     "preselected_analysis":{
         "es":"Análisis pre-seleccionados",
@@ -654,5 +658,13 @@
     "no":{
         "es":"No",
         "en":"No"
+    },
+    "individual":{
+        "es":"Individuo",
+        "en":"Individual"
+    },
+    "services_by_individual":{
+        "es": "Servicios por individuo",
+        "en": "Services by individual"
     }
 }

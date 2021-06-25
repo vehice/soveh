@@ -279,6 +279,12 @@
         </select>\
       ';
 
+      var selectLaboratory = '<select class="select2 form-control selectOpt" id="laboratories" name="laboratory" >';
+      $.each(data.laboratories, function(j, o){
+          selectLaboratory += '<option value="'+o.id+'">'+o.name+'</option>';
+      });
+      selectLaboratory +='</select>';
+
       var selectSpecie = '<select class="select2 form-control selectOpt" id="specie" name="specie" >';
       $.each(data.species_list, function(j, o){
           selectSpecie += '<option value="'+o.id+'">'+o.name+'</option>';
@@ -331,6 +337,8 @@
       $('.summaryWaterSource').html('<label>{{request.lang.water_source}}:</label>'+selectwatersource);
       
       $('.summaryEntryFormat').html('<label for="entryformat_select">Formato de Ingreso :</label>'+selectEntryFormat);
+
+      $('.summaryLaboratory').html('<label>Laboratorio de Ingreso :</label>'+selectLaboratory);
     
       // var tpl_identification = '';
       var tpl_identification = '<div class="col-sm-12"><h6 class="form-section"> <b>{{request.lang.identification}}</b>';
@@ -470,8 +478,8 @@
       tpl_exams += '</div>';
       $('.summaryExams').html(tpl_exams);
 
-      var tpl_samples = '<div class="col-sm-12"><h6 class="form-section mt-2"> <b>{{request.lang.samples}}</b></h6></br><table class="table table-bordered table-xs">';
-      tpl_samples += '<thead><tr><th>{{request.lang.nro_sample}}</th><th>{{request.lang.identification}}</th><th>{{request.lang.analysis}}</th><th>{{request.lang.stain}}</th><th>{{request.lang.organs}}</th></tr></thead><tbody>';
+      var tpl_samples = '<div class="col-sm-12"><h6 class="form-section mt-2"> <b>{{request.lang.services_by_individual}}</b></h6></br><table class="table table-bordered table-xs">';
+      tpl_samples += '<thead><tr><th>{{request.lang.nro_individual}}</th><th>{{request.lang.identification}}</th><th>{{request.lang.analysis}}</th><th>{{request.lang.stain}}</th><th>{{request.lang.organs}}</th></tr></thead><tbody>';
       var patologos = {};
       $.each(data.patologos, function(i, v){
         patologos[v.id]=v.first_name+' '+v.last_name;
@@ -509,6 +517,10 @@
 
       if (data.entryform.fixative != null) {
         $('#fixative').val(data.entryform.fixative.id);
+      }
+
+      if (data.entryform.laboratory_id != null) {
+        $('#laboratories').val(data.entryform.laboratory_id);
       }
 
       if (data.entryform.entryform_type != null) {
@@ -956,6 +968,8 @@
                       <div class="col-sm-3 summaryDevStatus">
                       </div>
                       <div class="col-sm-3 summaryWaterSource">
+                      </div>
+                      <div class="col-sm-3 summaryLaboratory">
                       </div>
                     </form>
                   </div>

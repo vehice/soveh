@@ -309,6 +309,21 @@ class Customer(models.Model):
     class Meta:
         verbose_name = "cliente"
 
+class Laboratory(models.Model):
+    """
+    Entrance Laboratory for Entryform.
+    """
+
+    name = models.CharField(
+        max_length=250, null=True, blank=True, verbose_name="nombre"
+    )
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        verbose_name = "Laboratorio de Ingreso"
+
 
 class EntryForm_Type(models.Model):
     """
@@ -365,6 +380,11 @@ class EntryForm(models.Model):
     )
     fixative = models.ForeignKey(
         Fixative,
+        null=True,
+        on_delete=models.SET_NULL,
+    )
+    laboratory = models.ForeignKey(
+        Laboratory,
         null=True,
         on_delete=models.SET_NULL,
     )
@@ -451,7 +471,6 @@ class Unit(models.Model):
     identification = models.ForeignKey(
         Identification, null=True, on_delete=models.SET_NULL
     )
-    # samples = models.ManyToManyField("Sample")
 
     def __str__(self):
         return str(self.correlative)
@@ -547,17 +566,19 @@ class AnalysisForm(models.Model):
 
 class Sample(models.Model):
     """
-    A Sample also known as Unit, is the lowest level subject of study in a Case, (Tube, Fish, Cassette, ...),
+    A Sample also known as Individual, is the lowest level subject of study in a Case, (Tube, Fish, Cassette, ...),
     to this Unit is the lab process applied to and it's its Slide what Pathologist users study.
     """
 
     entryform = models.ForeignKey(EntryForm, null=True, on_delete=models.SET_NULL)
     index = models.IntegerField(null=True, blank=True)  # correlative
-    organs = models.ManyToManyField(Organ)
     identification = models.ForeignKey(
-        Identification, null=True, on_delete=models.SET_NULL
+        Identification,
+        null=True,
+        on_delete=models.CASCADE
     )
-
+    unit_organs = models.ManyToManyField(OrganUnit)
+    
     def __str__(self):
         return str(self.index)
 
@@ -574,6 +595,7 @@ class SampleExams(models.Model):
     stain = models.ForeignKey(
         Stain, null=True, on_delete=models.SET_NULL, verbose_name="tinción"
     )
+    unit_organ = models.ForeignKey(OrganUnit, null=True, on_delete=models.CASCADE)
 
     def __str__(self):
         return str(self.sample)
@@ -790,3 +812,21 @@ class DocumentResumeActionLog(models.Model):
     download_action = models.BooleanField(default=False)
     action_date = models.DateTimeField(auto_now_add=True)
     done_by = models.ForeignKey(User, null=True, on_delete=models.SET_NULL)
+
+class LogType(models.Model):
+    type = models.CharField(max_length=250, null=True, blank=True)
+    
+class Log(models.Model):
+    """
+    Logs
+    """
+
+    log_date = models.DateTimeField()
+    user = models.ForeignKey(
+        User, null=True, on_delete=models.PROTECT, verbose_name="Usuario"
+    )
+    log_type = models.ForeignKey(
+        LogType, null=True, on_delete=models.PROTECT, verbose_name="Tipo"
+    )
+    modelo = models.IntegerField(null=True, blank=True)
+    id_modelo = models.IntegerField(null=True, blank=True)

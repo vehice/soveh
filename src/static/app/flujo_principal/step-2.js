@@ -143,15 +143,12 @@ function init_step_2() {
     let data = retrieveDataRow(dataRow)
     var id = data.id;
     var table_id = `units-table-${id}`
+    var contador_id = `contador-${id}`
     var correlative_checked = ""
     if (data.samples_are_correlative)
       correlative_checked = "checked"
     var table_template = `
       <div class="row justify-content-center">
-        <div class="form-group pl-2 pt-2">
-          <input type="checkbox" id="organs-${id}" class="switch2" />
-          <label for="organs-${id}" class="font-medium-1 text-bold-600 ml-1">Órganos para todas las unidades</label>
-        </div>
         <div class="switch-div form-group pl-2 pt-2">
           <input type="checkbox" id="correlative-${id}" class="switch2 correlative" ${correlative_checked} />
           <label for="correlative-${id}" class="font-medium-1 text-bold-600 ml-1">Correlativos</label>
@@ -161,6 +158,7 @@ function init_step_2() {
         <div class="pl-0 col-sm-12">
           <button type="button" class="btn btn-sm btn-light" onclick="selectAllUnitsByIdentification(${id}, 1)"><i class="fa fa-check-square-o"></i> Seleccionar unidades</button>
           <button type="button" class="btn btn-sm btn-light" onclick="selectAllUnitsByIdentification(${id}, 0)"><i class="fa fa-square-o"></i> Deseleccionar unidades</button>
+          <span class="badge badge-secondary contador_seleccion" id="${contador_id}">Tienes 0 unidades seleccionadas de 0 identificaciones</span>
         </div>
       </div>
       
@@ -243,9 +241,6 @@ function init_step_2() {
       tr.addClass('shown');
       let ident_id = tr.attr("id")
 
-      waitForEl('.organs-'+ident_id, function() {
-        $('#organs-'+ident_id).trigger("click")
-      });
     }
   });
 
@@ -296,7 +291,6 @@ function init_step_2() {
     }).then(isConfirm => {
       if (isConfirm) {
         remove_correlative = row.data().correlative;
-        row.remove().draw();
         if (remove_correlative <= bd_correlative) {
           // OCULTAR EN BD ===> deleted = True
           $.ajax({
@@ -304,6 +298,18 @@ function init_step_2() {
             url: url,
           })
             .done(function (data) {
+              if (data.ok){
+                row.remove().draw();
+                 toastr.success(
+                  'Identificación eliminada exitosamente.',
+                  'Listo!',
+                )
+              } else {
+                 toastr.error(
+                  'No ha sido posible eliminar la identificación, intente nuevamente.',
+                  'Ups!',
+                )
+              }
             })
             .fail(function () {
               console.log("Fail")
@@ -368,6 +374,17 @@ function init_step_2() {
             amount_control.val(new_value)
             saveIdentification(ident_id)
             $("#unit-"+ident_id+"-"+id).remove()
+            let id_unit = "";
+            $(`#units-table-${ident_id} .unit-correlative`).each(function(index, value){
+              let indice = '' + (index + 1);
+              if ($(this).val() != indice){
+                $(this).val(indice);
+                id_unit = $(this).attr('id');
+              }
+            });
+            if (id_unit != ""){
+              $(`#${id_unit}`).trigger("change");
+            }
             toastr.success(
               'Unidad eliminada exitosamente.',
               'Listo!',
@@ -537,6 +554,21 @@ function init_step_2() {
   })
 }
 
+$(document).on("change", '.unit-select', function(){
+  if($(".table-unit .unit-select:checked").length > 0) {
+    let table_ids = [];
+    $(".table-unit .unit-select:checked").each(function (i, v) {
+      let ident_id = $(this).closest('tr').attr("id").split("-")[1];
+      if(table_ids.indexOf(ident_id) == -1) {
+        table_ids.push(ident_id);
+      }
+    });
+    $(".contador_seleccion").html(`Tienes ${$(".table-unit .unit-select:checked").length} unidades seleccionadas de ${table_ids.length} identificaciones`);
+  } else {
+    $(".contador_seleccion").html(`Tienes 0 unidades seleccionadas de 0 identificaciones`);
+  }
+});
+
 function alertDuplicatedOrgansInSameCorrelative(){
   swal({
     title: "Información",
@@ -590,29 +622,41 @@ function retrieveDataRow(row) {
 }
 
 /*** Select organs based on switches values (organs for all and correlative samples) ***/
-function selectOrgansWithConditions(new_id, new_value, ident_id, select){
-  let organs_switch_option = $('#organs-'+ident_id).is(":checked")
+function selectOrgansWithConditions(new_id, new_value, ident_id, select, loop_by_units_selected=true){
+  let organs_switch_option;
+  if (loop_by_units_selected){
+    organs_switch_option = ($(".table-unit .unit-select:checked").length > 0) ? true : false
+  } else {
+    organs_switch_option = false
+  }
+
   let correlative_switch_option = $('#correlative-'+ident_id).is(":checked")
 
   if ( organs_switch_option ) {
-    $.each( $("#units-table-"+ident_id+" .organs"), function (i, v) {
-      let select = $(v)
+    // $.each( $("#units-table-"+ident_id+" tr"), function (i, v) {
+    $.each( $(".table-unit .unit-select:checked"), function (i, v) {
+      let tr = $(this).closest('tr')
+      let checkbox = tr.find('.unit-select').is(":checked")
+      let select = tr.find('.organs')
       let unit_id = select.attr("id").split("-")[2]
+      let ident_id = select.attr("id").split("-")[1]
       let values = select.val()
 
-      if ( !correlative_switch_option ) {
-        new_id = `${new_id}-${Math.random()}`
-        select.append(`<option value="${new_id}">${new_value}</option>`)
-        values.push(new_id)
-        select.val(values)
-        select.trigger('change')
-      } else {
-        values.push(new_id)
-        if (!checkDuplicatedOrgansInSameCorrelative(ident_id, unit_id, values)){
+      if (checkbox) {
+        if ( !correlative_switch_option ) {
+          new_aux_id = `${new_id}-${Math.random()}`
+          select.append(`<option value="${new_aux_id}">${new_value}</option>`)
+          values.push(new_aux_id)
           select.val(values)
           select.trigger('change')
         } else {
-          alertDuplicatedOrgansInSameCorrelative()
+          values.push(new_id)
+          if (!checkDuplicatedOrgansInSameCorrelative(ident_id, unit_id, values)){
+            select.val(values)
+            select.trigger('change')
+          } else {
+            alertDuplicatedOrgansInSameCorrelative()
+          }
         }
       }
     })
@@ -652,6 +696,8 @@ function resetOrgansOptions(id, correlative) {
       let x = element.split('-')[0];
       if (selected.indexOf(x) == -1) {
         selected.push(x);
+      } else {
+      
       }
     });
 
@@ -661,7 +707,8 @@ function resetOrgansOptions(id, correlative) {
       select.val(selected).trigger('change')
     } else {
       let selected_unique = []
-      selected.forEach(element => {
+      values.forEach(x => {
+        element = x.split('-')[0];
         let new_id = `${element}-${Math.random()}`;
         let new_value = select.find("option[value='"+element+"']").text();
         select.append(`<option value="${new_id}">${new_value}</option>`);
@@ -791,12 +838,9 @@ function AddOrgansFromKeypadToUnits(add){
             units_edited = true
             if (add){
               $.each(organs_selected_from_keypad, function(index, value){
-                selectOrgansWithConditions(value[0], value[1], ident_id, $('#select-'+ident_id+'-'+unit_id))
+                selectOrgansWithConditions(value[0], value[1], ident_id, $('#select-'+ident_id+'-'+unit_id), false)
               });
 
-              if ($('#organs-'+ident_id).is(":checked")){
-                return false
-              }
             } else {
               $.each(organs_selected_from_keypad, function(index, value){
                 let aux_val = $('#select-'+ident_id+'-'+unit_id).val()
@@ -928,7 +972,8 @@ function selectAllUnits(opt){
       let units_tbody_trs = "units-table-"+ident_id+" tr"
 
       waitForEl("#"+units_tbody_trs, function() {
-        $('#'+units_tbody_trs+' .unit-select').prop("checked", true)
+        $('#'+units_tbody_trs+' .unit-select').prop("checked", true);
+        $(".unit-select").trigger("change");
       });
     });
   } else {
@@ -945,26 +990,28 @@ function selectAllUnits(opt){
       let units_tbody_trs = "units-table-"+ident_id+" tr"
 
       waitForEl("#"+units_tbody_trs, function() {
-        $('#'+units_tbody_trs+' .unit-select').prop("checked", false)
+        $('#'+units_tbody_trs+' .unit-select').prop("checked", false);
+        $(".unit-select").trigger("change");
       });
     });
   }
 }
 
 function selectAllUnitsByIdentification(id, opt){
-  let units_tbody_trs = "units-table-"+id+" tr"
+  let units_tbody_trs = "units-table-"+id+" tr";
   if (opt == 1){
 
     waitForEl("#"+units_tbody_trs, function() {
-      $('#'+units_tbody_trs+' .unit-select').prop("checked", true)
+      $('#'+units_tbody_trs+' .unit-select').prop("checked", true);
     });
   } else {
-    let units_tbody_trs = "units-table-"+id+" tr"
+    let units_tbody_trs = "units-table-"+id+" tr";
 
     waitForEl("#"+units_tbody_trs, function() {
-      $('#'+units_tbody_trs+' .unit-select').prop("checked", false)
+      $('#'+units_tbody_trs+' .unit-select').prop("checked", false);
     });
   }
+  $(".unit-select").trigger("change");
 }
 
 $(document).on("click", ".keypad-organ-selector", function(){

@@ -104,6 +104,7 @@ function init_step_1() {
     loadSpecies(data.species)
     loadLarvalStages(data.larvalStages)
     loadWaterSources(data.waterSources)
+    loadLaboratories(data.laboratories)
   }
 
   function initialConf() {
@@ -255,6 +256,15 @@ function loadLarvalStages(larvalStages) {
 function loadWaterSources(waterSources) {
   $.each(waterSources, function (i, item) {
     $('#watersource_select').append($('<option>', {
+      value: item.id,
+      text: item.name
+    }));
+  });
+}
+
+function loadLaboratories(laboratories) {
+  $.each(laboratories, function (i, item) {
+    $('#laboratory_select').append($('<option>', {
       value: item.id,
       text: item.name
     }));
