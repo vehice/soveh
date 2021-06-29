@@ -254,7 +254,7 @@ class CaseProcess(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
 
-class ProcessItem(models.Model):
+class ProcessUnit(models.Model):
     """Details a single :model:`lab.CaseProcess`.
     Stores the date in which the operation started, ended, and wether or raise not
     this was the last operation for this particular :model:`lab.Process` for the
