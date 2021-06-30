@@ -2329,8 +2329,6 @@ def step_2_entryform(request):
     var_post = request.POST.copy()
     entryform = EntryForm.objects.get(pk=var_post.get("entryform_id"))
 
-    identifications = Identification.objects.filter(entryform=entryform)
-
     index = 1
     
     correlative_idents = Identification.objects.filter(entryform=entryform, samples_are_correlative=True)    
@@ -2351,23 +2349,15 @@ def step_2_entryform(request):
         for k, v in unit_by_correlative.items():
 
             sample = Sample.objects.filter(
-                entryform = entryform, 
-                    entryform = entryform, 
-                entryform = entryform, 
-                index = index, 
-                    index = index, 
-                index = index, 
-                identification = ident,
+                entryform = entryform,
+                index = index,
+                identification = ident
             ).first()
 
             if not sample:
                 sample = Sample.objects.create(
-                    entryform = entryform, 
-                        entryform = entryform, 
-                    entryform = entryform, 
-                    index = index, 
-                        index = index, 
-                    index = index, 
+                    entryform = entryform,
+                    index = index,
                     identification = ident
                 )
 
@@ -2416,23 +2406,15 @@ def step_2_entryform(request):
                         
     for group in groups:
         sample = Sample.objects.filter(
-            entryform = entryform, 
-                    entryform = entryform, 
-            entryform = entryform, 
-            index = index, 
-                    index = index, 
-            index = index, 
-            identification = group[0].unit.identification,
+            entryform = entryform,
+            index = index,
+            identification = group[0].unit.identification
         ).first()
 
         if not sample:
             sample = Sample.objects.create(
-                entryform = entryform, 
-                        entryform = entryform, 
-                entryform = entryform, 
-                index = index, 
-                        index = index, 
-                index = index, 
+                entryform = entryform,
+                index = index,
                 identification = group[0].unit.identification
             )
 
