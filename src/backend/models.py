@@ -309,6 +309,7 @@ class Customer(models.Model):
     class Meta:
         verbose_name = "cliente"
 
+
 class Laboratory(models.Model):
     """
     Entrance Laboratory for Entryform.
@@ -407,12 +408,12 @@ class EntryForm(models.Model):
         null=True,
         on_delete=models.SET_NULL,
     )
-    attached_files = models.ManyToManyField(CaseFile)
+    attached_files = models.ManyToManyField(CaseFile, blank=True)
     transfer_order = models.CharField(max_length=250, null=True, blank=True)
     entry_format = models.IntegerField(choices=ENTRY_FORMAT_OPTIONS, default=1)
 
     def __str__(self):
-        return str(self.pk)
+        return f"#{self.pk} - {self.no_caso}"
 
     @property
     def form(self):
@@ -518,28 +519,35 @@ class AnalysisForm(models.Model):
     forms = GenericRelation(Form)
     comments = models.TextField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
-    patologo = models.ForeignKey(User, null=True, on_delete=models.SET_NULL)
-    service_comments = models.ManyToManyField(ServiceComment)
-    external_reports = models.ManyToManyField(ExternalReport)
+    patologo = models.ForeignKey(User, null=True, on_delete=models.SET_NULL, blank=True)
+    service_comments = models.ManyToManyField(ServiceComment, blank=True)
+    external_reports = models.ManyToManyField(ExternalReport, blank=True)
     assignment_done_at = models.DateTimeField(default=None, blank=True, null=True)
     assignment_deadline = models.DateTimeField(default=None, blank=True, null=True)
     assignment_comment = models.TextField(default="", blank=True, null=True)
     manual_closing_date = models.DateTimeField(default=None, blank=True, null=True)
     manual_cancelled_date = models.DateTimeField(default=None, blank=True, null=True)
     manual_cancelled_by = models.ForeignKey(
-        User, null=True, on_delete=models.SET_NULL, related_name="cancelled_by"
+        User,
+        null=True,
+        on_delete=models.SET_NULL,
+        related_name="cancelled_by",
+        blank=True,
     )
     pre_report_started = models.BooleanField(default=False)
     pre_report_started_at = models.DateTimeField(default=None, blank=True, null=True)
     pre_report_ended = models.BooleanField(default=False)
     pre_report_ended_at = models.DateTimeField(default=None, blank=True, null=True)
     report_code = models.CharField(max_length=250, null=True, blank=True)
-    researches = models.ManyToManyField(Research)
+    researches = models.ManyToManyField(Research, blank=True)
     score_diagnostic = models.FloatField(default=None, null=True, blank=True)
     score_report = models.FloatField(default=None, null=True, blank=True)
     stain = models.ForeignKey(
-        Stain, null=True, on_delete=models.SET_NULL, verbose_name="tinción"
+        Stain, null=True, on_delete=models.SET_NULL, verbose_name="tinción", blank=True
     )
+
+    def __str__(self):
+        return f"{self.entryform.no_caso} - {self.exam.name}"
 
     @property
     def status(self):
@@ -573,12 +581,10 @@ class Sample(models.Model):
     entryform = models.ForeignKey(EntryForm, null=True, on_delete=models.SET_NULL)
     index = models.IntegerField(null=True, blank=True)  # correlative
     identification = models.ForeignKey(
-        Identification,
-        null=True,
-        on_delete=models.CASCADE
+        Identification, null=True, on_delete=models.CASCADE
     )
     unit_organs = models.ManyToManyField(OrganUnit)
-    
+
     def __str__(self):
         return str(self.index)
 
@@ -813,9 +819,11 @@ class DocumentResumeActionLog(models.Model):
     action_date = models.DateTimeField(auto_now_add=True)
     done_by = models.ForeignKey(User, null=True, on_delete=models.SET_NULL)
 
+
 class LogType(models.Model):
     type = models.CharField(max_length=250, null=True, blank=True)
-    
+
+
 class Log(models.Model):
     """
     Logs
