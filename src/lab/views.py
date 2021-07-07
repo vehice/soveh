@@ -15,7 +15,7 @@ from django.views import View
 from django.views.generic import DetailView, ListView
 
 from backend.models import Organ, Stain, Unit
-from lab.models import Case, CaseProcess, Cassette, CassetteOrgan, Process, Slide
+from lab.models import Case, Cassette, CassetteOrgan, Process, ProcessUnit, Slide
 
 
 def home(request):
@@ -673,17 +673,12 @@ class SlideDetail(View):
 # Process related views
 
 
-class ProcessView(View):
-    def get(self, request):
-        processes = Process.objects.all()
-        return render(request, "process/index.html", {"processes": processes})
+class ProcessTreeView(View):
+    def get(self, request, pk):
+        """Displays a tree view of all processes for a :model:`lab.Case`"""
+        case = get_object_or_404(Case, pk=pk)
+        processes = Process.objects.filter(deleted_at__isnull=True)
 
-
-class CaseProcessList(ListView):
-    def get_process_cases(self, process_id):
-        cases_id = CaseProcess.objects.filter(process_id=process_id).values_list(
-            "case", flat=True
+        return render(
+            request, "process/tree.html", {"case": case, "processes": processes}
         )
-        cases = Case.objects.filter(pk=cases_id)
-
-        return JsonResponse(serializers.serialize("json", cases), safe=False)

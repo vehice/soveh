@@ -1,0 +1,139 @@
+{% extends 'layout.html' %}
+{% load static %}
+
+{% block stylesheets %}
+<link rel="stylesheet" href="{% static 'lab/css/checktree.css' %}" type="text/css" media="screen" />
+{% endblock stylesheets %}
+
+{% block content %}
+<!-- MAIN -->
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <header class="card-header">
+                <h4 class="card-title">Arboles de Proceso</h4>
+                <span class="d-flex flex-row justify-content-between mt-md-1 align-items-center" id="root">
+                    <small class="card-subtitle">Caso {{ case.no_caso }}</small>
+                </span>
+            </header>
+            <section class="card-body container-fluid">
+                <div class="row">
+                    <div class="col-md-9 d-flex flex-row border-right depth">
+                        <span>
+                            <button class="btn btn-outline-info addProcess">+</button>
+                        </span>
+                    </div>
+                    <div class="col-md-3">
+                        <ul class="checktree">
+                            <li>
+                                <input id="{{ case.id }}" type="checkbox" /><label for="{{ case.no_caso }}">{{ case.no_caso }}</label>
+                                <ul>
+                                    {% for identification in case.identification_set.all %}
+                                    <li>
+                                        <input id="{{ identification.id }}" type="checkbox" /><label for="{{ identification.cage }}">{{ identification.cage }}</label>
+                                        <ul>
+                                            {% for unit in identification.unit_set.all %}
+                                            <li>
+                                                <input id="{{unit.id}}" type="checkbox" /><label for="{{ unit.name }}">{{ unit.correlative }}</label>
+                                                <ul>
+                                                    {% for organ in unit.organs.all %}
+                                                    <li>
+                                                        <input id="{{organ.id}}" type="checkbox" /><label for="{{ organ.name }}">{{ organ.name }}</label>
+                                                    </li>
+                                                    {% endfor %}
+                                                </ul>
+                                            </li>
+                                            {% endfor %}
+                                        </ul>
+                                    </li>
+                                    {% endfor %}
+                                </ul>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+</div>
+
+<!-- END MAIN -->
+
+<!-- MODALS -->
+<div class="modal" id="modalSelectProcess" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Agregar un proceso al arbol</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <label for="">Seleccione Proceso:</label>
+                <select id="selectProcess" class="form-control">
+                    {% for process in processes %}
+                    <option value="{{ process.id }}_{{process.name}}">{{ process.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">cerrar</button>
+                <button type="button" class="btn btn-primary" id="buttonAddProcess">Agregar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- END MODALS-->
+
+
+{% endblock content %}
+{% block scripts %}
+<script
+    type="text/javascript"
+    src="//cdn.jsdelivr.net/npm/sweetalert2@10"
+    defer>
+</script>
+
+<script
+    type="text/javascript"
+    src="//cdn.jsdelivr.net/npm/sweetalert2@10"
+    defer>
+</script>
+
+<script type="text/javascript"
+        src="{% static 'lab/js/checktree.js' %}"
+        defer>
+</script>
+
+<script type="text/javascript">
+ const modalSelectProcess = $("#modalSelectProcess")
+
+ let currentDepth = null;
+
+ $(document).ready(() => {
+     $("ul.checktree").checktree();
+ })
+ const card = 
+     $(document).on("click",".addProcess",(e) => {
+         currentDepth = $($(e.target).parents(".depth")[0])
+         modalSelectProcess.modal("show");
+     })
+
+ $("#buttonAddProcess").click((e) => {
+     const process = ($("#selectProcess").val()).split("_")
+     currentDepth.append(`
+                        <div class="shadow-sm p-1 mx-1 border-right rounded">
+                            <h5 class="text-center">${process[1]}</h5>
+                            <div class="d-flex flex-row depth" data-depth="${process[0]}">
+                                <button class="btn btn-outline-info addProcess">+</button>
+                            </div>
+                        </div>
+     `)
+    modalSelectProcess.modal("hide");
+ })
+</script>
+
+
+{% endblock scripts %}

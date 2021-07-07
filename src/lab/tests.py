@@ -1127,17 +1127,10 @@ class ProcessTest(TestCase):
         ProcessTree.objects.create(process=cls.process, tree=cls.tree, order=1)
         CaseProcess.objects.create(case=cls.case, process=cls.process, order=1)
 
-    def test_view_renders_template(self):
+    def test_process_tree_view_get_correct_template(self):
         self.client.login(username="jmonagas", password="vehice1234")
-        response = self.client.get(reverse("lab:process_index"))
-
-        self.assertTemplateUsed(response, "process/index.html")
-
-    def test_view_contains_processes(self):
-        self.client.login(username="jmonagas", password="vehice1234")
-        response = self.client.get(reverse("lab:process_index"))
-
-        self.assertTrue(
-            response.context["processes"][0] == self.process,
-            "Response context must contain expected Process.",
+        response = self.client.get(
+            reverse("lab:process_tree", kwargs={"pk": self.case.id})
         )
+
+        self.assertTemplateUsed(response, "process/tree.html")

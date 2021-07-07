@@ -1,8 +1,7 @@
 from django.contrib import admin
-
-from lab.models import ExamTree, Process, ProcessTree, Tree
+from lab.models import CaseProcessTree, Process, Tree, TreeProcess
 
 admin.site.register(Process)
+admin.site.register(CaseProcessTree)
 admin.site.register(Tree)
-admin.site.register(ProcessTree)
-admin.site.register(ExamTree)
+admin.site.register(TreeProcess)

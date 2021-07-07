@@ -15,7 +15,7 @@
             <section class="card-body table-responsive">
                 <div class="row mb-1">
                     <div class="col-md-5">
-                        <select name="" class="form-control">
+                        <select id="selProcess" class="form-control">
                             <option value="0">Seleccione un proceso</option>
                             {% for process in processes %}
                             <option value="{{ process.id }}">{{ process.name }}</option>
@@ -23,7 +23,7 @@
                         </select>
                     </div>
                 </div>
-                <table class="table table-bordered table-striped zero-configuration">
+                <table class="table table-bordered table-striped" id="datatable">
                     <thead>
                         <tr>
                             <th scope="col">Caso</th>
@@ -35,8 +35,6 @@
                             <th scope="col">Acciones</th>
                         </tr>
                     </thead>
-                    <tbody>
-                    </tbody>
                 </table>
             </section>
         </div>
@@ -63,6 +61,11 @@
     type="text/javascript"
     src="//cdn.jsdelivr.net/npm/sweetalert2@10"
     defer>
+</script>
+
+<script type="text/javascript"
+        src="{% static 'lab/js/process-index.js' %}"
+        defer>
 </script>
 
 {% endblock scripts %}

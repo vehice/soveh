@@ -10,6 +10,8 @@ from backend.models import (
     Exam,
     Identification,
     Organ,
+    Sample,
+    SampleExams,
     Stain,
     Unit,
 )
@@ -79,6 +81,31 @@ class Case(EntryForm):
 
     def get_absolute_url(self):
         return reverse("lab:case_detail", kwargs={"pk": self.id})
+
+    def generate_process_list(self):
+        samples = Sample.objects.filter(entryform=self).values_list("id", flat=True)
+        sample_exams = (
+            SampleExams.objects.filter(sample__in=samples)
+            .values_list("exam_id", flat=True)
+            .distinct()
+        )
+        exam_tree = ExamTree.objects.filter(exam_id__in=sample_exams).order_by("order")
+        processes = []
+        for tree in exam_tree:
+            process_tree = (
+                ProcessTree.objects.filter(tree_id=tree.id)
+                .values_list("process_id", flat=True)
+                .order_by("order")
+                .distinct()
+            )
+            processes.extend(process_tree)
+
+        order = 1
+        for process in processes:
+            CaseProcess.objects.create(case=self, process_id=process, order=order)
+            order += 1
+
+        return CaseProcess.objects.filter(case=self).order_by("order")
 
     class Meta:
         proxy = True
@@ -178,10 +205,6 @@ class Process(models.Model):
 
     name = models.CharField(max_length=255)
 
-    case = models.ManyToManyField(
-        EntryForm, related_name="processes", through="CaseProcess"
-    )
-
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     deleted_at = models.DateTimeField(null=True, blank=True)
@@ -193,65 +216,19 @@ class Process(models.Model):
         verbose_name_plural = "processes"
 
 
-class Tree(models.Model):
-    """Describes a Laboratory's group of process."""
+class CaseProcessTree(models.Model):
+    """
+    Describes the process tree which a :model:`lab.Case`
+    must fulfill to be considered `done` (In lab terms).
+    """
 
-    name = models.CharField(max_length=255)
-
-    process = models.ManyToManyField(
-        Process, related_name="process", through="ProcessTree"
-    )
+    case = models.ForeignKey(Case, on_delete=models.CASCADE)
+    process = models.ForeignKey(Process, on_delete=models.CASCADE)
+    parent = models.ForeignKey("self", on_delete=models.CASCADE, null=True, blank=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     deleted_at = models.DateTimeField(null=True, blank=True)
-
-    def __str__(self):
-        return self.name
-
-
-class ProcessTree(models.Model):
-    """Details the order in which :model:`lab.Process` take place in a :model:`lab.Tree`."""
-
-    process = models.ForeignKey(
-        Process, on_delete=models.CASCADE, related_name="process_trees"
-    )
-    tree = models.ForeignKey(
-        Tree, on_delete=models.CASCADE, related_name="process_trees"
-    )
-    order = models.PositiveSmallIntegerField()
-
-    created_at = models.DateTimeField(auto_now_add=True)
-
-    def __str__(self):
-        return f"{self.process} en {self.tree}"
-
-
-class ExamTree(models.Model):
-    """Details the order in which :model:`lab.Tree` take place in a :model:`backend.Exam`"""
-
-    tree = models.ForeignKey(Tree, on_delete=models.CASCADE, related_name="exam_trees")
-    exam = models.ForeignKey(Exam, on_delete=models.CASCADE, related_name="exam_trees")
-    order = models.PositiveSmallIntegerField()
-
-    created_at = models.DateTimeField(auto_now_add=True)
-
-    def __str__(self):
-        return f"{self.tree} en {self.exam} como paso {self.order}"
-
-
-class CaseProcess(models.Model):
-    """Details the order in which :model:`lab.Process` takes place in a :model:`backend.EntryForm`"""
-
-    case = models.ForeignKey(
-        EntryForm, on_delete=models.CASCADE, related_name="case_process"
-    )
-    process = models.ForeignKey(
-        Process, on_delete=models.CASCADE, related_name="case_process"
-    )
-    order = models.PositiveSmallIntegerField()
-
-    created_at = models.DateTimeField(auto_now_add=True)
 
 
 class ProcessUnit(models.Model):
@@ -262,7 +239,7 @@ class ProcessUnit(models.Model):
     """
 
     case_process = models.ForeignKey(
-        CaseProcess, on_delete=models.CASCADE, related_name="process_units"
+        CaseProcessTree, on_delete=models.CASCADE, related_name="process_units"
     )
     unit = models.ForeignKey(Unit, on_delete=models.CASCADE, related_name="processes")
 
@@ -272,3 +249,35 @@ class ProcessUnit(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     deleted_at = models.DateTimeField(null=True, blank=True)
+
+
+class Tree(models.Model):
+    """Groups :model:`lab.Process` for a :model:`backend.Exam` must take."""
+
+    name = models.CharField(max_length=255)
+    exam = models.ForeignKey(Exam, on_delete=models.CASCADE, null=True, blank=True)
+    entry_type = models.CharField(
+        max_length=1, choices=ENTRY_FORMAT_OPTIONS, null=True, blank=True
+    )
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    deleted_at = models.DateTimeField(null=True, blank=True)
+
+    def __str__(self):
+        return self.name
+
+
+class TreeProcess(models.Model):
+    """Details which :model:`lab.Process` belong to which :model:`lab.Tree`"""
+
+    tree = models.ForeignKey(Tree, on_delete=models.CASCADE)
+    process = models.ForeignKey(Process, on_delete=models.CASCADE)
+    parent = models.ForeignKey("self", on_delete=models.CASCADE, null=True, blank=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    deleted_at = models.DateTimeField(null=True, blank=True)
+
+    def __str__(self):
+        return f"{self.tree.name} - {self.process.name} despues de: {self.parent}"
