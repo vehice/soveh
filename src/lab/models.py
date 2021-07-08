@@ -256,8 +256,8 @@ class Tree(models.Model):
 
     name = models.CharField(max_length=255)
     exam = models.ForeignKey(Exam, on_delete=models.CASCADE, null=True, blank=True)
-    entry_type = models.CharField(
-        max_length=1, choices=ENTRY_FORMAT_OPTIONS, null=True, blank=True
+    entry_format = models.IntegerField(
+        choices=ENTRY_FORMAT_OPTIONS, null=True, blank=True
     )
 
     created_at = models.DateTimeField(auto_now_add=True)
