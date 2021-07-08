@@ -2324,105 +2324,174 @@ def step_2_entryform(request):
     var_post = request.POST.copy()
     entryform = EntryForm.objects.get(pk=var_post.get("entryform_id"))
 
-    identifications = Identification.objects.filter(entryform=entryform)
-
     index = 1
-    for ident in identifications:
+    
+    ### Processing correlative idents
+        
+    correlative_idents = Identification.objects.filter(entryform=entryform, samples_are_correlative=True).order_by('id')
+    
+    for ident in correlative_idents:
 
-        # Deleting previous samples
-
-        # Sample.objects.filter(
-        #     identification=ident,
-        # ).delete()
-        units = Unit.objects.filter(identification=ident).order_by('correlative')
-
-        if ident.samples_are_correlative:
-            unit_by_correlative = {}
-            for unit in units:
-                if unit.correlative in unit_by_correlative.keys():
-                    unit_by_correlative[unit.correlative].append(unit)
-                else:
-                    unit_by_correlative[unit.correlative] = [unit]
-
-            for k, v in unit_by_correlative.items():
-
-                sample = Sample.objects.filter(
-                    entryform = entryform, 
-                    index = index, 
-                    identification = ident,
-                ).first()
-
-                if not sample:
-                    sample = Sample.objects.create(
-                        entryform = entryform, 
-                        index = index, 
-                        identification = ident
-                    )
-
-                sample.unit_organs.clear()
-
-                for ou in OrganUnit.objects.filter(unit__in=map(lambda x: x.pk, v)):
-                    sample.unit_organs.add(ou)
-
-                index += 1
-        else:
-            organs_units = {}
-            for unit in units:
-                # unique_organs_group = [[]]
-
-                for uo in OrganUnit.objects.filter(unit=unit):
-                    if uo.organ.pk in organs_units:
-                        organs_units[uo.organ.pk].append(uo)
-                    else:
-                        organs_units[uo.organ.pk] = [uo]
-
-            larger_organs_set = []
-            for key, value in organs_units.items():
-                if len(value) > len(larger_organs_set):
-                    larger_organs_set = value
-
-            groups = []
-
-            for organ in larger_organs_set:
-                groups.append([organ])
+        units = Unit.objects.filter(identification=ident).order_by('pk')
             
-            organs_not_used = []
-            for group in groups:
-                pre_organs_not_used = []
-                for organ_available in OrganUnit.objects.filter(unit=group[0].unit):
-                    if organ_available.organ.pk not in list(map(lambda x: x.organ.pk, group)):
-                        group.append(organ_available)
-                    else:
-                        pre_organs_not_used.append(organ_available)
+        unit_by_correlative = {}
+        for unit in units:
+            if unit.correlative in unit_by_correlative.keys():
+                unit_by_correlative[unit.correlative].append(unit)
+            else:
+                unit_by_correlative[unit.correlative] = [unit]
 
-                if organs_not_used:
-                    for sobra in organs_not_used:
-                        if sobra.organ.pk not in list(map(lambda x: x.organ.pk, group)):
-                            group.append(sobra)
-                            organs_not_used.remove(sobra)
-                            
-                organs_not_used = organs_not_used + pre_organs_not_used
+        for k, v in unit_by_correlative.items():
 
-            for group in groups:
-                sample = Sample.objects.filter(
-                    entryform = entryform, 
-                    index = index, 
-                    identification = ident,
-                ).first()
+            sample = Sample.objects.filter(
+                entryform = entryform,
+                index = index,
+                identification = ident
+            ).first()
 
-                if not sample:
-                    sample = Sample.objects.create(
-                        entryform = entryform, 
-                        index = index, 
+            if not sample:
+                sample = Sample.objects.create(
+                    entryform = entryform,
+                    index = index,
+                    identification = ident
+                )
+
+            sample.save()
+            
+            # Cleaning sample's unit organs not setted
+            to_remove = []                      
+            for ou in sample.unit_organs.all():
+                if ou.pk not in list(map(lambda x: x.pk, v)):
+                    to_remove.append(ou)
+                    
+            for ou in to_remove:
+                sample.unit_organs.remove(ou)
+            
+            # Adding new unit organs to sample 
+            for ou in OrganUnit.objects.filter(unit__in=map(lambda x: x.pk, v)):
+                if ou.pk not in sample.unit_organs.all().values_list("pk", flat=True):
+                    sample.unit_organs.add(ou)
+                    
+            index += 1
+        
+    ### Processing non-correlative idents
+    
+    non_correlative_idents = Identification.objects.filter(entryform=entryform, samples_are_correlative=False).order_by('id')
+    
+    for ident in non_correlative_idents:
+        units = Unit.objects.filter(identification=ident).order_by('correlative')
+        organs_units = {}
+        for unit in units:
+            for uo in OrganUnit.objects.filter(unit=unit).order_by('id'):
+                if uo.organ.pk in organs_units:
+                    organs_units[uo.organ.pk].append(uo)
+                else:
+                    organs_units[uo.organ.pk] = [uo]
+
+        larger_organs_set = []
+        for key, value in organs_units.items():
+            if len(value) > len(larger_organs_set):
+                larger_organs_set = value
+
+        groups = []
+
+        for organ in larger_organs_set:
+            groups.append([organ])
+            
+        for unit in units:
+            used_organ = False
+                
+            for ou_available in OrganUnit.objects.filter(unit=unit).order_by('id'):
+                ou_is_used = False
+                for group in groups:
+                    organs_ids_in_group = list(map(lambda ou: ou.organ.pk, group))
+                    if ou_available.organ.pk not in organs_ids_in_group:
+                        group.append(ou_available)
+                        ou_is_used = True
+                        break
+        
+        for group in groups:
+            
+            index_sample = Sample.objects.filter(
+                entryform = entryform,
+                index = index,
+            ).first()
+            
+            nexts_samples = Sample.objects.filter(
+                entryform = entryform,
+                index__gt=index,
+            ).order_by('index')
+            
+            
+            if index_sample and len(nexts_samples) > 0:
+                
+                if index_sample.identification != ident:
+                    new_sample = Sample.objects.create(
+                        entryform = entryform,
+                        index = index,
                         identification = ident
                     )
+                    index_sample.index = int(index_sample.index) + 1
+                    index_sample.save()
+                    
+                    for ns in nexts_samples:
+                        ns.index = int(ns.index) + 1
+                        ns.save()
+                else:
+                    diff = nexts_samples[0].index - index
+                    if diff > 1:
+                        for ns in nexts_samples:
+                            ns.index = int(ns.index) - (diff-1)
+                            ns.save()                        
+                        
+            elif not index_sample and len(nexts_samples) > 0:
+                diff = nexts_samples[0].index - index
+                
+                if nexts_samples[0].identification != ident:
+                    new_sample = Sample.objects.create(
+                        entryform = entryform,
+                        index = index,
+                        identification = ident
+                    )
+                    
+                    if diff > 1:
+                        for ns in nexts_samples:
+                            ns.index = int(ns.index) - (diff-1)
+                            ns.save()
+                else:
+                    for ns in nexts_samples:
+                        ns.index = int(ns.index) - diff
+                        ns.save()                        
 
-                sample.unit_organs.clear()
-
-                for ou in group:
+            elif not index_sample and len(nexts_samples) == 0:
+                new_sample = Sample.objects.create(
+                    entryform = entryform,
+                    index = index,
+                    identification = ident
+                )
+  
+            sample = Sample.objects.filter(
+                entryform = entryform,
+                index = index,
+                identification = ident
+            ).first()                    
+            
+            # Cleaning sample's unit organs not setted  
+            to_remove = []                  
+            for ou in sample.unit_organs.all():
+                if ou.id not in list(map(lambda x: x.id, group)):
+                    to_remove.append(ou)
+            
+            for ou in to_remove:
+                sample.unit_organs.remove(ou)
+                # SampleExams.objects.filter(sample=sample, unit_organ=ou).delete()
+            
+            # Adding new unit organs to sample 
+            for ou in group:
+                if ou.pk not in sample.unit_organs.all().values_list("pk", flat=True):
                     sample.unit_organs.add(ou)
-
-                index += 1
+                    
+            index += 1
 
     return True
 
@@ -2504,13 +2573,9 @@ def step_3_entryform(request):
             unit_organ_dict = {}
             for uo in sample.unit_organs.all():
                 unit_organ_dict[uo.organ.id] = uo.id
-                
-            print ("unit_organ_dict", unit_organ_dict)
-                
+                                
             for organ in sample_organs[0]:
-                print("organos que vienen step 3", organ)
                 uo_organ_id = organ.split("-")[0]
-                print("uo_organ_id dp de split",uo_organ_id )
                 organ_id = organ.split("-")[1]
                 uo_id = unit_organ_dict[int(uo_organ_id)]
                 
@@ -3093,16 +3158,47 @@ def save_units(request):
         unit_obj.save()
 
         organs_fmt = list(map(lambda x: int(x.split("-")[0]), unit["organs"]))
+                
+        # Check if organs previously saved must exists in new organs set. 
+        # If it doesn't exists must be removed
+        org_already_used = []
         for ou in OrganUnit.objects.filter(unit=unit_obj):
-            samples = Sample.objects.filter(unit_organs__in=[ou.id])
-            for s in samples:
-                s.unit_organs.remove(ou)
-                if s.unit_organs.all().count() == 0:
-                    s.delete()
-            ou.delete()
-        
+            ou_exists_in_new_set = False
+            for org in organs_fmt:
+                if ou.organ.pk == org and org not in org_already_used:
+                    ou_exists_in_new_set = True
+                    org_already_used.append(org)
+                    break
+
+            if not ou_exists_in_new_set:
+                # Check if there are samples with the OrganUnit.
+                # If they exist then validate if when removing the OrgaUnit the sample remains empty, therefore it must also be removed.
+                samples = Sample.objects.filter(unit_organs__in=[ou.id])
+                for s in samples:
+                    s.unit_organs.remove(ou)
+                    SampleExams.objects.filter(unit_organ=ou).delete()
+                
+                    if s.unit_organs.all().count() == 0:
+                        SampleExams.objects.filter(sample=s).delete()
+                        s.delete()
+
+                ou.delete()
+
+        unit_organs = OrganUnit.objects.filter(unit=unit_obj)
+
+        # Check if new organs set exists in unit. 
+        # Just if it doesn't exists must be created as OrganUnit.
+        ou_already_used = []
         for org in organs_fmt:
-            OrganUnit.objects.create(unit=unit_obj, organ_id=org)
+            new_org_exists_in_unit = False
+            for ou in unit_organs:
+                if ou.organ.pk == org and ou.id not in ou_already_used:
+                    new_org_exists_in_unit = True
+                    ou_already_used.append(ou.id)
+                    break
+                
+            if not new_org_exists_in_unit:
+               OrganUnit.objects.create(unit=unit_obj, organ_id=org)
 
     return JsonResponse({"ok": 1})
 
@@ -3196,6 +3292,7 @@ def save_new_identification(request, id):
 def remove_identification(request, id):
     try:
         Sample.objects.filter(identification_id=id).delete()
+        Unit.objects.filter(identification_id=id).delete()
         Identification.objects.get(pk=id).delete()
         return JsonResponse({"ok": 1})
     except:

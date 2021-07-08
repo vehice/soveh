@@ -203,7 +203,7 @@ function init_step_2() {
           tags: true
         });
         $.each(unit.organs, function(_, org){
-          selectOrgansWithConditions(org.id, org.name, id, $(`#select-${id}-${unit.id}`));
+          selectOrgansWithConditions(org.id, org.name, id, $(`#select-${id}-${unit.id}`), true, false);
         });
       });
     })
@@ -475,7 +475,7 @@ function init_step_2() {
     let select = e.target
 
     selectOrgansWithConditions(new_id, new_value, ident_id, $(select));
-    saveUnitsByIdentification(ident_id)
+    // saveUnitsByIdentification(ident_id)
 
   });
 
@@ -515,13 +515,16 @@ function init_step_2() {
           return;
         }
         resetOrgansOptions(id, true);
+        saveIdentification(id)
+        saveUnitsByIdentification(id)
       });
     }
     else {
       resetOrgansOptions(id, false);
+      saveIdentification(id)
+      saveUnitsByIdentification(id)
     }
-    saveIdentification(id)
-    saveUnitsByIdentification(id)
+
   });
 
   $(document).on("blur", ".ident-data", function () {
@@ -622,7 +625,7 @@ function retrieveDataRow(row) {
 }
 
 /*** Select organs based on switches values (organs for all and correlative samples) ***/
-function selectOrgansWithConditions(new_id, new_value, ident_id, select, loop_by_units_selected=true){
+function selectOrgansWithConditions(new_id, new_value, ident_id, select, loop_by_units_selected=true, force_save_units=true){
   let organs_switch_option;
   if (loop_by_units_selected){
     organs_switch_option = ($(".table-unit .unit-select:checked").length > 0) ? true : false
@@ -634,6 +637,7 @@ function selectOrgansWithConditions(new_id, new_value, ident_id, select, loop_by
 
   if ( organs_switch_option ) {
     // $.each( $("#units-table-"+ident_id+" tr"), function (i, v) {
+    let idents_to_save = []
     $.each( $(".table-unit .unit-select:checked"), function (i, v) {
       let tr = $(this).closest('tr')
       let checkbox = tr.find('.unit-select').is(":checked")
@@ -659,7 +663,16 @@ function selectOrgansWithConditions(new_id, new_value, ident_id, select, loop_by
           }
         }
       }
+      idents_to_save.push(ident_id)
     })
+    
+    if (force_save_units){
+      $.each($.unique(idents_to_save), function(_, ident){
+        saveUnitsByIdentification(ident)
+      });
+    }
+
+
   } else {
     let values = select.val();
     let unit_id = select.attr("id").split("-")[2]
@@ -677,7 +690,10 @@ function selectOrgansWithConditions(new_id, new_value, ident_id, select, loop_by
       } else {
         alertDuplicatedOrgansInSameCorrelative()
       }
-    
+    }
+
+    if (force_save_units){
+      saveUnitsByIdentification(ident_id)
     }
   }
 }
@@ -700,6 +716,7 @@ function resetOrgansOptions(id, correlative) {
       
       }
     });
+
 
     select.html(templateHTML)
 
@@ -838,7 +855,7 @@ function AddOrgansFromKeypadToUnits(add){
             units_edited = true
             if (add){
               $.each(organs_selected_from_keypad, function(index, value){
-                selectOrgansWithConditions(value[0], value[1], ident_id, $('#select-'+ident_id+'-'+unit_id), false)
+                selectOrgansWithConditions(value[0], value[1], ident_id, $('#select-'+ident_id+'-'+unit_id), false, true)
               });
 
             } else {

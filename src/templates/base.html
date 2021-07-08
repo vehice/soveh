@@ -497,7 +497,7 @@
           tpl_exams += '<td>'+ v.map(function(k){return k.organ_name}).join(", ") +'</td></tr>';
         });
         tpl_samples += '<tr id="sample-id-'+item.id+'">';
-        tpl_samples += '<td rowspan="'+len+'"><button type="button" class="btn btn-sm btn-danger round btn_process_summary" onclick="deleteSample('+item.id+');">X</button> '+ item.index +'</td>';
+        tpl_samples += '<td rowspan="'+len+'">'+ item.index +'</td>';
 
         tpl_samples += '<td rowspan="'+len+'">'+ item.identification.cage +'-'+item.identification.group+'</td>';
         tpl_samples += '</tr>';
