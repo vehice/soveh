@@ -1196,7 +1196,9 @@ def notification(request):
 @login_required
 def show_patologos(request, all):
     """
-    Generates the template to be converted to PDF and downloaded
+    Lists :model:`backend.AnalysisForm` according to the current user,
+    allowing different filters to be used to display detailed data related
+    to all items.
 
     **Parameters**
     ``all``
