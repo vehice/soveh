@@ -2331,9 +2331,9 @@ def step_2_entryform(request):
 
     index = 1
     
-    correlative_idents = Identification.objects.filter(entryform=entryform, samples_are_correlative=True).order_by('id')
-    
     ### Processing correlative idents
+        
+    correlative_idents = Identification.objects.filter(entryform=entryform, samples_are_correlative=True).order_by('id')
     
     for ident in correlative_idents:
 
