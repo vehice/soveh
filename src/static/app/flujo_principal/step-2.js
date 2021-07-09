@@ -203,7 +203,7 @@ function init_step_2() {
           tags: true
         });
         $.each(unit.organs, function(_, org){
-          selectOrgansWithConditions(org.id, org.name, id, $(`#select-${id}-${unit.id}`), true, false);
+          selectOrgansWithConditions(org.id, org.name, id, $(`#select-${id}-${unit.id}`), false, false);
         });
       });
     })
