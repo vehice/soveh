@@ -855,7 +855,7 @@ function AddOrgansFromKeypadToUnits(add){
             units_edited = true
             if (add){
               $.each(organs_selected_from_keypad, function(index, value){
-                selectOrgansWithConditions(value[0], value[1], ident_id, $('#select-'+ident_id+'-'+unit_id), false, true)
+                selectOrgansWithConditions(value[0], value[1], ident_id, $('#select-'+ident_id+'-'+unit_id), false, false)
               });
 
             } else {
