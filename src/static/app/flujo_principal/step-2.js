@@ -203,7 +203,7 @@ function init_step_2() {
           tags: true
         });
         $.each(unit.organs, function(_, org){
-          selectOrgansWithConditions(org.id, org.name, id, $(`#select-${id}-${unit.id}`), true, false);
+          selectOrgansWithConditions(org.id, org.name, id, $(`#select-${id}-${unit.id}`), false, false);
         });
       });
     })
@@ -855,7 +855,7 @@ function AddOrgansFromKeypadToUnits(add){
             units_edited = true
             if (add){
               $.each(organs_selected_from_keypad, function(index, value){
-                selectOrgansWithConditions(value[0], value[1], ident_id, $('#select-'+ident_id+'-'+unit_id), false, true)
+                selectOrgansWithConditions(value[0], value[1], ident_id, $('#select-'+ident_id+'-'+unit_id), false, false)
               });
 
             } else {
