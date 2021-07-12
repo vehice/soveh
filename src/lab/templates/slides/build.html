@@ -139,12 +139,13 @@
 <script type="text/javascript">
  const data = {{slides|safe}}
  const slides = data.map((row) => {
+     const items = JSON.parse(row)
      return {
-         "case": JSON.parse(row.case)[0],
-         "identification": JSON.parse(row.identification)[0],
-         "unit": JSON.parse(row.unit)[0],
-         "cassette": JSON.parse(row.cassette)[0],
-         "caseUrl": Urls["lab:case_detail"](JSON.parse(row.case)[0].pk)
+         "case": items[0],
+         "identification": items[1],
+         "unit": items[2],
+         "cassette": items[3] ?? null,
+         "caseUrl": Urls["lab:case_detail"](items[0].pk)
      }
  })
 </script>

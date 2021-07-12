@@ -550,7 +550,9 @@ class SlideBuild(View):
                 slides = Slide.objects.filter(unit__in=units)
                 parameters["correlative"] = slides.count() + 1
 
-            if "cassette_id" in slide and "cassette" not in parameters:
+            if (
+                "cassette_id" in slide and slide["cassette_id"]
+            ) and "cassette" not in parameters:
                 try:
                     cassette = Cassette.objects.get(pk=slide["cassette_id"])
                 except Cassette.DoesNotExist:

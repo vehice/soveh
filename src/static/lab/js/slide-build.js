@@ -49,6 +49,13 @@ $(document).ready(function () {
         name: "cassetteCorrelative",
         type: "num",
         title: "# Cassette",
+        render: (data) => {
+          if (data) {
+            return `${data}`;
+          } else {
+            return "N/A";
+          }
+        },
       },
       {
         data: "caseUrl",
@@ -117,10 +124,17 @@ $(document).ready(function () {
         title: "# Unidad",
       },
       {
-        data: "cassette.fields.correlative",
+        data: "cassette",
         name: "cassetteCorrelative",
         type: "num",
         title: "# Cassette",
+        render: (data) => {
+          if (data) {
+            return `${data.fields.correlative}`;
+          } else {
+            return `N/A`;
+          }
+        },
       },
       {
         data: "stain.text",
@@ -285,10 +299,8 @@ $(document).ready(function () {
     if (pk < 0) return;
 
     const filteredItems = selectedItems.filter(
-      (item) => item.unit.pk == pk && _.has(item, "cassette")
+      (item) => item.unit.pk == pk && item["cassette"] != null
     );
-
-    if (filteredItems.length <= 0) return;
 
     let cassettes = filteredItems.map((item) => {
       return {
@@ -316,14 +328,20 @@ $(document).ready(function () {
   $("#btnCreateSlide").click(() => {
     const selectedCase = selectCase.select2("data")[0].id;
     const unit = getUnitByPk(selectUnit.select2("data")[0].id);
-    const cassette = getCassetteByPk(selectCassette.select2("data")[0].id);
+    let cassette = null;
+    if (
+      selectCassette.hasClass("select2-hidden-accessible") &&
+      selectCassette.select2("data")[0].id > 0
+    ) {
+      cassette = getCassetteByPk(selectCassette.select2("data")[0].id).cassette;
+    }
     const stain = selectStain.select2("data")[0];
     const quantity = parseInt($("#inputQty").val());
 
     const row = {
       case: selectedItems[selectedCase].case,
       unit: unit.unit,
-      cassette: cassette.cassette,
+      cassette: cassette,
       stain: stain,
       quantity: quantity,
     };
@@ -343,11 +361,15 @@ $(document).ready(function () {
       for (const row of grouped[group]) {
         for (let i = 0; i < row.quantity; i++) {
           text += `<li class="list-group-item">${group},${row.stain.text},${group_count}</li>`;
+          let cassette = null;
+          if (row.cassette) {
+            cassette = row.cassette.pk;
+          }
           slides.push({
             unit_id: row.unit.pk,
             stain_id: row.stain.id,
             correlative: group_count++,
-            cassette_id: row.cassette.pk || null,
+            cassette_id: cassette,
           });
         }
       }
