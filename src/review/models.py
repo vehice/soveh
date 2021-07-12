@@ -4,6 +4,7 @@ from django.db.models import Q
 
 from backend.models import AnalysisForm, Customer
 from accounts.models import UserArea
+from datetime import datetime
 
 
 class AnalysisManager(models.Manager):
@@ -139,6 +140,12 @@ class Analysis(AnalysisForm):
         except File.DoesNotExist:
             pass
         return sendable
+
+    def close(self):
+        form = self.forms.get()
+        form.form_closed = True
+        form.closed_at = datetime.now()
+        form.save()
 
     class Meta:
         proxy = True

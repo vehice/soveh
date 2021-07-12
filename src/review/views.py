@@ -154,6 +154,8 @@ def send_email(request, pk):
     stage = Stage.objects.update_or_create(
         analysis=analysis, defaults={"state": 4, "created_by": request.user}
     )
+    analysis.close()
+
     return JsonResponse({"status": "OK"})
 
 
