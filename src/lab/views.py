@@ -428,36 +428,19 @@ class SlideBuild(View):
             for case in cases:
                 for identification in case.identifications:
                     for unit in identification.units:
-                        serialize_case = serializers.serialize("json", [case])
-                        serialize_identification = serializers.serialize(
-                            "json", [identification]
-                        )
-                        serialize_unit = serializers.serialize("json", [unit])
                         slides.append(
-                            {
-                                "case": serialize_case,
-                                "identification": serialize_identification,
-                                "unit": serialize_unit,
-                            }
+                            serializers.serialize("json", [case, identification, unit])
                         )
 
         if cassettes.count() > 0:
             for cassette in cassettes:
-                serialize_case = serializers.serialize(
-                    "json", [cassette.unit.identification.entryform]
-                )
-                serialize_identification = serializers.serialize(
-                    "json", [cassette.unit.identification]
-                )
-                serialize_unit = serializers.serialize("json", [cassette.unit])
-                serialize_cassette = serializers.serialize("json", [cassette])
+                case = cassette.unit.identification.entryform
+                identification = cassette.unit.identification
+                unit = cassette.unit
                 slides.append(
-                    {
-                        "case": serialize_case,
-                        "identification": serialize_identification,
-                        "unit": serialize_unit,
-                        "cassette": serialize_cassette,
-                    }
+                    serializers.serialize(
+                        "json", [case, identification, unit, cassette]
+                    )
                 )
 
         return render(
