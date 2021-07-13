@@ -196,7 +196,7 @@ class Slide(models.Model):
         if row:
             slide_id = row[0]
 
-            return f"http://vehice.net/DSStore/HtmlViewer.aspx?Id=${slide_id}"
+            return f"http://vehice.net/DSStore/HtmlViewer.aspx?Id={slide_id}"
         return row
 
 
