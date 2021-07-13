@@ -658,12 +658,7 @@ class SlideDetail(View):
 # Process related views
 
 
-class ProcessTreeView(View):
-    def get(self, request, pk):
-        """Displays a tree view of all processes for a :model:`lab.Case`"""
-        case = get_object_or_404(Case, pk=pk)
-        processes = Process.objects.filter(deleted_at__isnull=True)
-
-        return render(
-            request, "process/tree.html", {"case": case, "processes": processes}
-        )
+class ProcessList(View):
+    def get(self, request):
+        processes = Process.objects.all()
+        return render(request, "process/index.html", {"processes": processes})
