@@ -28,5 +28,5 @@ urlpatterns = [
     #
     # Process Routes
     #
-    path("process/<int:pk>/tree", views.ProcessTreeView.as_view(), name="process_tree"),
+    path("process", views.ProcessList.as_view(), name="process_index"),
 ]
