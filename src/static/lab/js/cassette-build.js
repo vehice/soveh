@@ -142,11 +142,7 @@ $(document).ready(function () {
         name: "cassetteOrgans",
         title: "Organos",
         render: function (data, type, row, meta) {
-          const select = $("<select>")
-            .addClass(`unitSelectOrgan unit-${row.unit_id}`)
-            .attr("id", `U${row.unit_id}C${row.cassette}`);
-
-          return select.prop("outerHTML");
+          return `<span class="unitSelectOrgan flex flex-row" id="${row.unit_id};${row.cassette}"></span>`;
         },
       },
     ],
@@ -223,23 +219,18 @@ $(document).ready(function () {
 
   function activateOrganSelect() {
     $(".unitSelectOrgan").each(function (i, elem) {
-      const unitId = elem.classList[1].split("-")[1];
-      const cassetteId = $(this).attr("id").split("C")[1];
-      const organs = getOrgansFromUnit(unitId);
-      const cassetteOrgans = getOrgansFromCassette(unitId, cassetteId);
-      const options = organs.map((organ) => {
-        const isSelected = cassetteOrgans.some((row) => row.pk == organ.pk);
-        return {
-          id: organ.pk,
-          text: organ.fields.name,
-          selected: isSelected,
-        };
-      });
-      $(this).select2({
-        data: options,
-        width: "100%",
-        multiple: true,
-      });
+      const element = $(elem);
+      const elementId = elem.id.split(";");
+      const organs = getOrgansFromUnit(elementId[0]);
+      const cassetteOrgans = getOrgansFromCassette(elementId[0], elementId[1]);
+
+      for (const organ of cassetteOrgans) {
+        const organDOM = `<div class="btn-group mr-1" role="group">
+                            <button class="btn btn-secondary organId" type="button" value="${organ.pk}" disabled>${organ.fields.abbreviation}</button>
+                            <button class="btn btn-danger deleteOrgan" type="button">X</button>
+                          </div>`;
+        element.append(organDOM);
+      }
     });
   }
 
@@ -316,7 +307,6 @@ $(document).ready(function () {
 
     tableBuild.row.add(newRow).draw();
 
-    activateOrganSelect();
     updateNumberCassettes();
   });
 
@@ -375,6 +365,11 @@ $(document).ready(function () {
 
   tableBuild.on("select.dt deselect.dt", (e, dt, type, indexes) => {
     setSelectedCassettes();
+  });
+
+  tableBuild.on("click", ".deleteOrgan", (e) => {
+    const element = $(e.target);
+    element.parent().remove();
   });
 
   $("#btnSaveCassette").click(() => {
@@ -504,35 +499,28 @@ $(document).ready(function () {
     });
   });
 
-  $("#tableBuildDialog").on("select2:selecting", ".unitSelectOrgan", (e) => {
-    const organ = parseInt(e.target.value);
-    const unitId = e.target.id.split("C")[0].substring(1); //Selects contain an id made of U[Unit's pk]C[Cassette's correlative]
-    const availableOrganCount = getOrgansFromUnit(unitId).filter(
-      (row) => row.pk == organ
-    ).length;
-    const tableData = tableBuild
-      .rows()
-      .data()
-      .filter((row) => row.unit == unitId);
-
-    let currentCount = 0;
-
-    tableData.each((row) => {
-      const id = `U${row.unit}C${row.cassette}`;
-
-      const select = $(`#${id}`).select2("data")[0].id;
-      if (select == organ) currentCount++;
+  $("#addOrgansButton").click(() => {
+    const selectedOrgans = $("#selectNewOrgans").select2("data");
+    const selectedRows = tableBuild.rows(".selected").data();
+    selectedRows.each((value, index) => {
+      const organs = getOrgansFromUnit(value.unit_id);
+      for (const organ of organs) {
+        if (
+          selectedOrgans.some(
+            (selectedOrgan) => selectedOrgan.id == organ.pk
+          ) ||
+          organ.fields.organ_type == 2
+        ) {
+          const id = `${value.unit_id};${value.cassette}`;
+          const element = $(document.getElementById(id));
+          const organDOM = `<div class="btn-group mr-1" role="group">
+                            <button class="btn btn-secondary organId" type="button" value="${organ.pk}" disabled>${organ.fields.abbreviation}</button>
+                            <button class="btn btn-danger deleteOrgan" type="button">X</button>
+                          </div>`;
+          element.append(organDOM);
+        }
+      }
     });
-
-    if (currentCount >= availableOrganCount) {
-      e.preventDefault();
-      Swal.fire({
-        title: "No se puede agregar organo",
-        icon: "error",
-        text: "Ese organo ya esta asignado a otro Cassette de la misma Unidad.",
-      });
-      return;
-    }
   });
 
   /* END EVENTS */
