@@ -363,7 +363,7 @@ $(document).ready(function () {
     setSelectedUnits();
   });
 
-  tableBuild.on("select.dt deselect.dt", (e, dt, type, indexes) => {
+  tableBuild.on("select.dt deselect.dt", () => {
     setSelectedCassettes();
   });
 
@@ -378,9 +378,14 @@ $(document).ready(function () {
       const data = this.data();
       const cassette = tableBuild.cell({ row: rowIdx, column: 3 }).data();
       const cell = tableBuild.cell({ row: rowIdx, column: 4 });
-      const organs = $($(cell.node()).children()[0])
-        .select2("data")
-        .map((organ) => parseInt(organ.id));
+      const cassetteOrgans = $(cell.node()).find(".unitSelectOrgan").children();
+
+      let organs = [];
+
+      for (const organGroup of cassetteOrgans) {
+        const organId = $(organGroup).children(".organId").val();
+        organs.push(organId);
+      }
 
       new_cassettes.push({
         id: data.unit_id,
@@ -388,6 +393,7 @@ $(document).ready(function () {
         organs: organs,
       });
     });
+
     const build_at = $("#buildAt").val();
     $.ajax(Urls["lab:cassette_build"](), {
       data: JSON.stringify({
