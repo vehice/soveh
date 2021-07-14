@@ -89,10 +89,9 @@ function generateSelectableOrgans(samples) {
       if (!organs.hasOwnProperty(ou.organ.id)) {
         let organ_data = {
           ou: ou,
-          organ_set: [],
+          organ_set: [ou.organ],
         };
         if (ou.organ.organ_type == 2) {
-          organ_data.organ_set.push(ou.organ);
           $.each(data_step_3.organs, function (_, org) {
             if (org.organ_type == 1) {
               organ_data.organ_set.push(org);
