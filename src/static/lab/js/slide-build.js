@@ -108,7 +108,21 @@ $(document).ready(function () {
   });
 
   const tableBuild = $("#tableBuildDialog").DataTable({
-    data: [],
+    ajax: {
+      url: Urls["lab:slide_prebuild"](),
+      contentType: "application/json",
+      type: "POST",
+      headers: {
+        "X-CSRFToken": getCookie("csrftoken"),
+      },
+      data: function () {
+        if (selectedItems && selectedItems.length > 0) {
+          return JSON.stringify(selectedItems.map((item) => item.cassette.pk));
+        }
+        return [];
+      },
+      dataSrc: "",
+    },
     columns: [
       {
         data: "case.fields.no_caso",
@@ -233,6 +247,9 @@ $(document).ready(function () {
   });
 
   $("#btnArmarSlide").click(() => {
+    tableBuild.ajax.reload((response) => {
+      console.log({ response });
+    });
     let now = new Date();
     now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
     $("#buildAt").val(now.toISOString().slice(0, 16));

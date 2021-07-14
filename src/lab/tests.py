@@ -5,7 +5,7 @@ from django.test import Client, TestCase
 from django.urls import reverse
 
 from backend.models import Identification, Organ, OrganUnit, Unit
-from lab.models import Case, CaseProcess, Cassette, Process, ProcessTree, Slide, Tree
+from lab.models import Case, Cassette, CassetteOrgan, Slide
 
 
 class VariantTest(TestCase):
@@ -985,6 +985,156 @@ class SlideBuildTest(TestCase):
         self.assertIn("status", response.json(), "Response must contain expected item.")
 
 
+class CassettePrebuildTest(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.client = Client()
+        cls.cases = []
+        for entry in range(1, 5):
+            case = Case.objects.create(entry_format=entry, no_caso=f"V000{entry}")
+            cls.cases.append(case)
+
+        cls.identifications = []
+
+        for case in cls.cases:
+            identification = Identification.objects.create(entryform=case)
+            cls.identifications.append(identification)
+
+        cls.units = []
+
+        for identification in cls.identifications:
+            unit = Unit.objects.create(identification=identification)
+            cls.units.append(unit)
+
+            for organ in Organ.objects.filter(id__gt=46):
+                OrganUnit.objects.create(unit=unit, organ=organ)
+
+    def test_no_rules(self):
+        self.client.login(username="jmonagas", password="vehice1234")
+        response = self.client.generic(
+            "GET",
+            reverse("lab:cassette_prebuild"),
+            json.dumps(
+                {
+                    "selected": [self.units[0].id, self.units[1].id],
+                    "rules": {"uniques": [], "groups": [], "max": 0},
+                }
+            ),
+        )
+
+        self.assertGreaterEqual(
+            len(response.json()),
+            2,
+            "Response must contain as many items as units given.",
+        )
+
+        self.assertDictContainsSubset(
+            {"unit_id": self.units[0].id},
+            response.json()[0],
+            "Response must contain expected data.",
+        )
+
+        self.assertDictContainsSubset(
+            {"unit_id": self.units[1].id},
+            response.json()[1],
+            "Response must contain expected data.",
+        )
+
+        self.assertDictContainsSubset(
+            {"cassette": 1},
+            response.json()[0],
+            "Response must contain expected data.",
+        )
+
+    def test_rule_unique(self):
+        self.client.login(username="jmonagas", password="vehice1234")
+        response = self.client.generic(
+            "GET",
+            reverse("lab:cassette_prebuild"),
+            json.dumps(
+                {
+                    "selected": [self.units[0].id, self.units[1].id],
+                    "rules": {"uniques": [59], "groups": [], "max": 0},
+                }
+            ),
+        )
+
+        self.assertEquals(
+            59,
+            json.loads(response.json()[0]["cassette_organs"])[0].get("pk"),
+            "Response must contain expected data.",
+        )
+
+    def test_rule_groups(self):
+        self.client.login(username="jmonagas", password="vehice1234")
+        response = self.client.generic(
+            "GET",
+            reverse("lab:cassette_prebuild"),
+            json.dumps(
+                {
+                    "selected": [self.units[0].id, self.units[1].id],
+                    "rules": {"uniques": [], "groups": [[59, 57], [58, 56]], "max": 0},
+                }
+            ),
+        )
+
+        self.assertEquals(
+            len(json.loads(response.json()[0]["cassette_organs"])),
+            2,
+            "Response must contain expected data.",
+        )
+
+    def test_rule_max(self):
+        self.client.login(username="jmonagas", password="vehice1234")
+        response = self.client.generic(
+            "GET",
+            reverse("lab:cassette_prebuild"),
+            json.dumps(
+                {
+                    "selected": [self.units[0].id, self.units[1].id],
+                    "rules": {"uniques": [], "groups": [], "max": 2},
+                }
+            ),
+        )
+
+        self.assertEquals(
+            len(json.loads(response.json()[0]["cassette_organs"])),
+            2,
+            "Response must contain expected data.",
+        )
+
+    def test_rule_all(self):
+        self.client.login(username="jmonagas", password="vehice1234")
+        response = self.client.generic(
+            "GET",
+            reverse("lab:cassette_prebuild"),
+            json.dumps(
+                {
+                    "selected": [self.units[0].id, self.units[1].id],
+                    "rules": {"uniques": [55], "groups": [[56, 57]], "max": 2},
+                }
+            ),
+        )
+
+        self.assertEquals(
+            len(json.loads(response.json()[0]["cassette_organs"])),
+            1,
+            "Response must contain expected data.",
+        )
+
+        self.assertEquals(
+            len(json.loads(response.json()[1]["cassette_organs"])),
+            2,
+            "Response must contain expected data.",
+        )
+
+        self.assertEquals(
+            len(json.loads(response.json()[2]["cassette_organs"])),
+            2,
+            "Response must contain expected data.",
+        )
+
+
 class SlideIndexTest(TestCase):
     @classmethod
     def setUpTestData(cls):
@@ -1113,24 +1263,65 @@ class SlideDetailTest(TestCase):
         )
 
 
-class ProcessTest(TestCase):
+class SlidePrebuildTest(TestCase):
     @classmethod
     def setUpTestData(cls):
         cls.client = Client()
-        cls.client = Client()
-        cls.case = Case.objects.create()
-        cls.identification = Identification.objects.create(entryform=cls.case)
-        cls.unit = Unit.objects.create(identification=cls.identification)
+        cls.cases = []
+        for entry in range(1, 5):
+            case = Case.objects.create(entry_format=entry, no_caso=f"V000{entry}")
+            cls.cases.append(case)
 
-        cls.process = Process.objects.create(name="Test")
-        cls.tree = Tree.objects.create(name="Test")
-        ProcessTree.objects.create(process=cls.process, tree=cls.tree, order=1)
-        CaseProcess.objects.create(case=cls.case, process=cls.process, order=1)
+        cls.identifications = []
 
-    def test_process_tree_view_get_correct_template(self):
+        for case in cls.cases:
+            identification = Identification.objects.create(entryform=case)
+            cls.identifications.append(identification)
+
+        cls.units = []
+
+        for identification in cls.identifications:
+            unit = Unit.objects.create(identification=identification)
+            cls.units.append(unit)
+
+            for organ in Organ.objects.filter(id__gt=46):
+                OrganUnit.objects.create(unit=unit, organ=organ)
+
+        count = 0
+        cls.cassettes = []
+        for unit in cls.units:
+            count += 1
+            cassette = Cassette.objects.create(unit=unit, correlative=count)
+
+            cls.cassettes.append(cassette)
+
+            for organ in unit.organs.all():
+                CassetteOrgan.objects.create(cassette=cassette, organ=organ)
+
+    def test_no_rules(self):
         self.client.login(username="jmonagas", password="vehice1234")
-        response = self.client.get(
-            reverse("lab:process_tree", kwargs={"pk": self.case.id})
+        response = self.client.generic(
+            "POST",
+            reverse("lab:slide_prebuild"),
+            json.dumps([self.cassettes[0].id]),
         )
 
-        self.assertTemplateUsed(response, "process/tree.html")
+        print(response.json())
+
+        self.assertGreaterEqual(
+            len(response.json()),
+            1,
+            "Response must contain as many items as cassettes given.",
+        )
+
+        self.assertDictContainsSubset(
+            {"unit_id": self.units[0]["pk"]},
+            response.json()[0],
+            "Response must contain expected data.",
+        )
+
+        self.assertDictContainsSubset(
+            {"slide": 1},
+            response.json()[0],
+            "Response must contain expected data.",
+        )

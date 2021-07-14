@@ -14,7 +14,7 @@ from django.utils.decorators import method_decorator
 from django.views import View
 from django.views.generic import DetailView, ListView
 
-from backend.models import Organ, Stain, Unit
+from backend.models import Organ, SampleExams, Stain, Unit
 from lab.models import Case, Cassette, CassetteOrgan, Process, ProcessUnit, Slide
 
 
@@ -212,7 +212,7 @@ class CassetteBuild(View):
 def cassette_prebuild(request):
     """
     Receives a JSON with 2 keys: `selected` which is an array of unit ids;
-    and `rules` which is in itself another object that dictates how the cassettes are build,
+    and `rules` which is a dictionary that dictates how the cassettes are build,
 
     * rules["unique"]
         Is an array of unit ids in which all of those units are to be put by themselves
@@ -253,7 +253,7 @@ def cassette_prebuild(request):
         cassette_count = 1 if cassette_count == 0 else cassette_count
         excludes = []
 
-        if len(rules["uniques"]) > 0:
+        if rules["uniques"] and len(rules["uniques"]) > 0:
             organs = unit.organs.filter(pk__in=rules["uniques"])
 
             if not organs.count() <= 0:
@@ -263,7 +263,7 @@ def cassette_prebuild(request):
 
                 excludes.extend([pk for pk in rules["uniques"]])
 
-        if len(rules["groups"]) > 0:
+        if rules["groups"] and len(rules["groups"]) > 0:
             for group in rules["groups"]:
                 organs = unit.organs.filter(pk__in=group).exclude(pk__in=excludes)
 
@@ -274,7 +274,7 @@ def cassette_prebuild(request):
 
         organs = unit.organs.exclude(pk__in=excludes).order_by("-id")
 
-        if rules["max"] > 0:
+        if rules["max"] and rules["max"] > 0:
             organs_pages = Paginator(organs, rules["max"], allow_empty_first_page=False)
 
             for page in organs_pages.page_range:
@@ -397,6 +397,46 @@ class CassetteProcess(View):
 
 
 # Slide related views
+
+
+@login_required
+def slide_prebuild(request):
+    """
+    Returns a JSON response detailing :model:`lab.Slide` prototypes that
+    could be generated from the request's Cassette or Units list.
+    """
+    try:
+        items = json.loads(request.body)
+    except json.JSONDecodeError:
+        return JsonResponse({})
+
+    cassettes = Cassette.objects.filter(pk__in=items)
+
+    slides = []
+    for cassette in cassettes:
+        unit = cassette.unit
+        identification = unit.identification
+        case = identification.entryform
+        cassette_organs = cassette.organs.all()
+        organ_unit = unit.organunit_set.all().values_list("id", flat=True)
+        sample_exams = SampleExams.objects.filter(
+            unit_organ__in=organ_unit, organ__in=cassette_organs
+        )
+
+        for sample_exam in sample_exams:
+            slides.append(
+                [
+                    case,
+                    identification,
+                    unit,
+                    cassette,
+                    sample_exam.exam,
+                    sample_exam.stain,
+                ],
+            )
+
+    print(slides)
+    return JsonResponse(serializers.serialize("json", slides), safe=False)
 
 
 class SlideBuild(View):
