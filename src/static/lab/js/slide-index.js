@@ -83,6 +83,20 @@ $(document).ready(function () {
 
   /*  EVENTS  */
 
+  $(".btnEdit").click((e) => {
+    const id = getIdFromClassList(e.target.classList);
+
+    $.get(Urls["lab:slide_detail"](id), (data) => {
+      slide = data[0];
+
+      correlative.val(slide.fields.correlative);
+      editStain.val(slide.fields.stain).trigger("change");
+      buildDate.val(slide.fields.build_at);
+    });
+
+    dlgEdit.show();
+  });
+
   $(".btn-close").click(() => {
     dlgEdit.hide();
     dlgCreate.hide();
@@ -90,19 +104,14 @@ $(document).ready(function () {
 
   $("#btnSave").click(() => {
     const correlative_value = correlative.val();
+    const stainValue = editStain.select2("data")[0].id;
     const buildDateValue = buildDate.val();
-
-    let organs = [];
-    const rows = $("#tableOrgans > tbody").children();
-    for (const row of rows) {
-      organs.push(parseInt($(row).children("td:first-child").text()));
-    }
 
     $.ajax(Urls["lab:slide_detail"](slide.pk), {
       data: JSON.stringify({
         build_at: buildDateValue,
         correlative: correlative_value,
-        organs: organs,
+        stain_id: stainValue,
       }),
 
       method: "POST",
