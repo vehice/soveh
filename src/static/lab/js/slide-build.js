@@ -117,7 +117,16 @@ $(document).ready(function () {
       },
       data: function () {
         if (selectedItems && selectedItems.length > 0) {
-          return JSON.stringify(selectedItems.map((item) => item.cassette.pk));
+          return JSON.stringify(
+            selectedItems.map((item) => {
+              const unit = item.unit.pk;
+              const cassette = item.cassette ? item.cassette.pk : -1;
+              return {
+                unit,
+                cassette,
+              };
+            })
+          );
         }
         return [];
       },
@@ -125,14 +134,19 @@ $(document).ready(function () {
     },
     columns: [
       {
-        data: "case.fields.no_caso",
+        data: "case.no_caso",
         name: "case",
         type: "string",
         title: "Caso",
-        orderData: [0, 1],
       },
       {
-        data: "unit.fields.correlative",
+        data: "identification.cage",
+        name: "identification",
+        type: "num",
+        title: "Ident.",
+      },
+      {
+        data: "unit.correlative",
         name: "unitCorrelative",
         type: "num",
         title: "# Unidad",
@@ -143,32 +157,37 @@ $(document).ready(function () {
         type: "num",
         title: "# Cassette",
         render: (data) => {
-          if (data) {
-            return `${data.fields.correlative}`;
+          if (data[0] && data[0].correlative) {
+            return `${data[0].correlative}`;
           } else {
             return `N/A`;
           }
         },
       },
       {
-        data: "stain.text",
+        data: "stain.abbreviation",
         name: "stain",
         type: "string",
         title: "Tincion",
       },
       {
-        data: "quantity",
-        name: "slides",
-        type: "number",
-        title: "Cant. Slide",
+        data: "slide",
+        name: "index",
+        type: "string",
+        title: "Correlativo",
+        render: (data, type, row, meta) => {
+          return data;
+        },
       },
     ],
 
-    rowsGroup: [0, 1, 2, 3, 4],
+    rowsGroup: [0, 1, 2, 3],
 
     select: {
       style: "multi",
     },
+
+    paging: false,
   });
 
   // Array of Unit Ids from the index table.
@@ -214,6 +233,23 @@ $(document).ready(function () {
     return cassette;
   }
 
+  function updateCorrelativeSlide() {
+    let caseId = 1;
+    let correlativeNumber = 1;
+
+    tableBuild.rows().every(function (rowIdx, tableLoop, rowLoop) {
+      const row = this.data();
+      let currentCorrelativeCell = tableBuild.cell({ row: rowIdx, column: 5 });
+      console.log({ row });
+      if (row.case.id != caseId) {
+        caseId = row.case.id;
+        correlativeNumber = 1;
+      }
+      currentCorrelativeCell.data(correlativeNumber);
+      correlativeNumber += 1;
+    });
+  }
+
   function groupBy(xs) {
     return xs.reduce(function (rv, x) {
       (rv[x["case"].fields.no_caso] = rv[x["case"].fields.no_caso] || []).push(
@@ -247,25 +283,30 @@ $(document).ready(function () {
   });
 
   $("#btnArmarSlide").click(() => {
-    tableBuild.ajax.reload((response) => {
-      console.log({ response });
-    });
+    tableBuild.ajax.reload();
     let now = new Date();
     now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
     $("#buildAt").val(now.toISOString().slice(0, 16));
 
     dlgArmarSlide.show();
 
-    let cases = selectedItems.map((item, index) => {
-      return {
-        id: index,
-        text: `${item.case.fields.no_caso}`,
-      };
-    });
+    let cases = selectedItems
+      .map((item, index) => {
+        return {
+          id: `${item.case.pk};${item.identification.pk};${item.unit.pk}`,
+          text: `${item.case.fields.no_caso} / ${item.identification.fields.cage} / ${item.unit.fields.correlative}`,
+        };
+      })
+      .filter(
+        (row, index, self) =>
+          index === self.findIndex((obj) => obj.id === row.id)
+      );
+
     cases.unshift({
       id: -1,
-      text: "Seleccione un Caso",
+      text: "Seleccione un Caso / Identificacion / Unidad",
     });
+
     selectCase.select2({
       data: cases,
     });
@@ -274,44 +315,11 @@ $(document).ready(function () {
 
   $("#btnDeleteSelected").click(() => {
     tableBuild.rows(".selected").remove().draw(false);
+    updateCorrelativeSlide();
   });
 
   selectCase.on("change", (e) => {
-    const index = e.target.value;
-
-    if (index < 0) return;
-
-    const selectedCase = selectedItems[index].case;
-
-    const filteredItems = selectedItems.filter(
-      (item) => item.case == selectedCase
-    );
-
-    let units = filteredItems.map((item) => {
-      return {
-        id: item.unit.pk,
-        text: `${item.identification.fields.cage} / ${item.unit.fields.correlative}`,
-      };
-    });
-
-    units.unshift({
-      id: -1,
-      text: `Seleccione Ident/Unidad`,
-    });
-
-    selectUnit.empty();
-    for (const unit of units) {
-      selectUnit.append(new Option(unit.text, unit.id));
-    }
-
-    if (selectUnit.hasClass("select2-hidden-accessible")) {
-      selectUnit.select2("destroy");
-    }
-    selectUnit.select2();
-  });
-
-  selectUnit.on("change", (e) => {
-    const pk = e.target.value;
+    const pk = e.target.value.split(";")[2];
 
     if (pk < 0) return;
 
@@ -343,8 +351,7 @@ $(document).ready(function () {
   });
 
   $("#btnCreateSlide").click(() => {
-    const selectedCase = selectCase.select2("data")[0].id;
-    const unit = getUnitByPk(selectUnit.select2("data")[0].id);
+    const selectedCase = selectCase.select2("data")[0].id.split(";");
     let cassette = null;
     if (
       selectCassette.hasClass("select2-hidden-accessible") &&
@@ -352,45 +359,73 @@ $(document).ready(function () {
     ) {
       cassette = getCassetteByPk(selectCassette.select2("data")[0].id).cassette;
     }
-    const stain = selectStain.select2("data")[0];
-    const quantity = parseInt($("#inputQty").val());
 
-    const row = {
-      case: selectedItems[selectedCase].case,
-      unit: unit.unit,
-      cassette: cassette,
-      stain: stain,
-      quantity: quantity,
+    const row = getUnitByPk(selectedCase[2]);
+    const stain = selectStain.select2("data")[0];
+
+    let new_row = {
+      case: {
+        id: row.case.pk,
+        no_caso: row.case.fields.no_caso,
+      },
+      identification: {
+        id: row.identification.pk,
+        cage: row.identification.fields.cage,
+      },
+      unit: {
+        id: row.unit.pk,
+        correlative: row.unit.fields.correlative,
+      },
+      stain: {
+        id: stain.id,
+        abbreviation: stain.text,
+      },
+      slide: 0,
     };
 
-    tableBuild.row.add(row).draw();
+    if ("pk" in cassette && "fields" in cassette) {
+      new_row.cassette = [
+        {
+          id: cassette.pk,
+          correlative: cassette.fields.correlative,
+        },
+      ];
+    } else {
+      new_row.cassette = [
+        {
+          id: -1,
+          correlative: "N/A",
+        },
+      ];
+    }
+
+    tableBuild.row.add(new_row).draw();
+    updateCorrelativeSlide();
   });
 
   $("#btnSaveSlide").click(() => {
     const build_at = $("#buildAt").val();
 
-    const data = tableBuild.rows().data();
-    const grouped = groupBy(data);
     let slides = [];
     let text = "";
-    for (const group in grouped) {
-      let group_count = 1;
-      for (const row of grouped[group]) {
-        for (let i = 0; i < row.quantity; i++) {
-          text += `<li class="list-group-item">${group},${row.stain.text},${group_count}</li>`;
-          let cassette = null;
-          if (row.cassette) {
-            cassette = row.cassette.pk;
-          }
-          slides.push({
-            unit_id: row.unit.pk,
-            stain_id: row.stain.id,
-            correlative: group_count++,
-            cassette_id: cassette,
-          });
+    const data = tableBuild
+      .rows()
+      .data()
+      .each((value, index) => {
+        let new_slide = {
+          unit_id: value.unit.id,
+          stain_id: value.stain.id,
+          correlative: index + 1,
+        };
+        if (value.cassette[0] && value.cassette[0].id > 0) {
+          new_slide.cassette_id = value.cassette[0].id;
         }
-      }
-    }
+        slides.push(new_slide);
+
+        text += `<li class="list-group-item">${value.case.no_caso},${
+          value.stain.abbreviation
+        },${index + 1}</li>`;
+      });
 
     Swal.fire({
       title: "Se crearan los siguientes slides:",

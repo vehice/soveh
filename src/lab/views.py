@@ -6,16 +6,18 @@ from django.contrib.auth.decorators import login_required
 from django.core import serializers
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.paginator import InvalidPage, Paginator
+from django.db.models import Count
 from django.db.models.query_utils import Q
 from django.db.utils import IntegrityError
+from django.forms.models import model_to_dict
 from django.http import Http404, HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, render
 from django.utils.decorators import method_decorator
 from django.views import View
 from django.views.generic import DetailView, ListView
 
-from backend.models import Organ, SampleExams, Stain, Unit
-from lab.models import Case, Cassette, CassetteOrgan, Process, ProcessUnit, Slide
+from backend.models import Exam, Organ, SampleExams, Stain, Unit
+from lab.models import Case, Cassette, CassetteOrgan, Process, Slide
 
 
 def home(request):
@@ -410,33 +412,65 @@ def slide_prebuild(request):
     except json.JSONDecodeError:
         return JsonResponse({})
 
-    cassettes = Cassette.objects.filter(pk__in=items)
-
     slides = []
-    for cassette in cassettes:
-        unit = cassette.unit
+    prev_case = None
+    slide_correlative = 1
+    for item in items:
+        cassette = None
+        unit = None
+        organs_subject = None
+
+        # Cassette is an optional parameter, Unit is required, if no Cassette is given
+        # then use the unit_id to prototype the Slide
+        if item["cassette"] > 0:
+            cassette = Cassette.objects.get(pk=item["cassette"])
+            unit = cassette.unit
+            organs_subject = cassette.organs.all()
+        else:
+            unit = Unit.objects.get(pk=item["unit"])
+            organs_subject = unit.organunit_set.all().values_list("id", flat=True)
+
         identification = unit.identification
         case = identification.entryform
-        cassette_organs = cassette.organs.all()
         organ_unit = unit.organunit_set.all().values_list("id", flat=True)
-        sample_exams = SampleExams.objects.filter(
-            unit_organ__in=organ_unit, organ__in=cassette_organs
+        sample_exams = (
+            SampleExams.objects.filter(
+                unit_organ__in=organ_unit, organ__in=organs_subject
+            )
+            .values("exam_id", "stain_id")
+            .annotate(exam_count=Count("exam_id"))
+            .order_by("stain_id")
         )
 
-        for sample_exam in sample_exams:
-            slides.append(
-                [
-                    case,
-                    identification,
-                    unit,
-                    cassette,
-                    sample_exam.exam,
-                    sample_exam.stain,
-                ],
+        # The correlative is just a count of all Slides for one Case
+        if prev_case != case:
+            case_identifications = case.identification_set.all().values_list(
+                "id", flat=True
             )
+            case_units = Unit.objects.filter(identification_id__in=case_identifications)
+            case_slides_count = Slide.objects.filter(unit_id__in=case_units).count()
+            slide_correlative = 1 if case_slides_count < 1 else case_slides_count
+            prev_case = case
 
-    print(slides)
-    return JsonResponse(serializers.serialize("json", slides), safe=False)
+        for sample_exam in sample_exams:
+            exam = Exam.objects.get(pk=sample_exam["exam_id"])
+            stain = Stain.objects.get(pk=sample_exam["stain_id"])
+            row = {
+                "case": model_to_dict(case, fields=["id", "no_caso"]),
+                "identification": model_to_dict(identification, fields=["id", "cage"]),
+                "unit": model_to_dict(unit, fields=["id", "correlative"]),
+                "exam": model_to_dict(exam, fields=["id", "name"]),
+                "stain": model_to_dict(stain, fields=["id", "abbreviation"]),
+                "slide": slide_correlative,
+            }
+            if cassette:
+                row["cassette"] = (
+                    model_to_dict(cassette, fields=["id", "correlative"]),
+                )
+            slides.append(row)
+            slide_correlative += 1
+
+    return JsonResponse(slides, safe=False)
 
 
 class SlideBuild(View):
