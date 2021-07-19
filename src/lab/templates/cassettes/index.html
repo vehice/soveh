@@ -41,8 +41,8 @@
                             <td>
                                 {{ cassette.organs.all|join:", " }}
                             </td>
-                            <td>{{ cassette.unit.identification.entryform.created_at }}</td>
-                            <td>{{ cassette.build_at }}</td>
+                            <td>{{ cassette.unit.identification.entryform.created_at|date:"d/m/Y G:i" }}</td>
+                            <td>{{ cassette.build_at|date:"d/m/Y G:i" }}</td>
                             <td>
                                 <div class="btn-group">
                                     <button class="btn btn-outline-primary btnEdit id-{{cassette.id}}">Editar</button>
