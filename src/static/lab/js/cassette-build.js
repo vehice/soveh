@@ -13,8 +13,6 @@ $(document).ready(function () {
     }
   );
 
-  const selectUnit = $("#selectNewCassetteUnit");
-
   const rulesForm = {
     uniqueOrgans: $("#selUniqueOrgans"),
     groupOrgans: $("#selGroupOrgans"),
@@ -37,6 +35,7 @@ $(document).ready(function () {
   $(".organSelect").select2({
     data: organOptions,
     width: "100%",
+    placeholder: "Seleccione organos",
   });
 
   // Main table which displays all availables Cases to build Cassettes from.
@@ -209,12 +208,6 @@ $(document).ready(function () {
         text: `${row.case} / ${row.identification} / ${row.unit}`,
       };
     });
-    selectUnit.select2({
-      placeholder: "Selecciona caso / identificacion / unidad",
-      allowClear: true,
-      data: options,
-      width: "100%",
-    });
   }
 
   function activateOrganSelect() {
@@ -285,35 +278,33 @@ $(document).ready(function () {
   /* EVENTS */
 
   $("#btnCreateCassette").click(() => {
-    const selectedUnit = selectUnit.select2("data");
+    const selectedRows = tableBuild
+      .rows({ selected: true })
+      .data()
+      .each((value, index) => {
+        const unitList = units.filter((row) => row.unit_id === value.unit_id);
+        const cassetteCount = unitList.length + 1;
 
-    const unitList = units.filter(
-      (row) => row.unit_id === parseInt(selectedUnit[0].id)
-    );
+        const newRow = {
+          case: unitList[0].case,
+          identification: unitList[0].identification,
+          organs: unitList[0].organs,
+          unit: unitList[0].unit,
+          unit_id: unitList[0].unit_id,
+          cassette: cassetteCount,
+          cassette_organs: [],
+        };
 
-    const cassetteCount = unitList.length + 1;
+        units.push(newRow);
 
-    const newRow = {
-      case: unitList[0].case,
-      identification: unitList[0].identification,
-      organs: unitList[0].organs,
-      unit: unitList[0].unit,
-      unit_id: unitList[0].unit_id,
-      cassette: cassetteCount,
-      cassette_organs: [],
-    };
-
-    units.push(newRow);
-
-    tableBuild.row.add(newRow).draw();
+        tableBuild.row.add(newRow).draw();
+      });
 
     updateNumberCassettes();
+    debugger;
   });
 
   $(".btn-close").click(function () {
-    if (selectUnit.hasClass("select2-hidden-accessible")) {
-      selectUnit.select2("destroy");
-    }
     dlgArmarCassette.hide();
     dlgConfigurarCassette.hide();
 
