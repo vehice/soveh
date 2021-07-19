@@ -54,38 +54,27 @@
                             <input type="datetime-local" class="form-control" id="buildAt">
                         </div>
                     </div>
-                    <div class="row">
-                        <div class="col-md-2">
+                    <div class="d-flex flex-row justify-content-center align-items-center">
                             <button
                                 id="btnDeleteSelected"
                                 type="button"
-                                class="btn btn-danger"
+                                class="btn btn-danger mx-2"
                             >
                                 Borrar Seleccionadas
                             </button>
-                        </div>
-                        <div class="col-md-2">
-                            <select id="selectCase" style="width: 100%"></select>
-                        </div>
-                        <div class="col-md-2">
-                            <select id="selectCassette" style="width: 100%"></select>
-                        </div>
-                        <div class="col-md-1">
-                            <select id="selectStain" style="width: 100%">
+                            <label class="mx-2 border-left pl-2" for="">Seleccione la tincion:</label>
+                            <select id="selectStain" class="mx-2">
                                 {% for stain in stains %}
                                 <option value="{{ stain.id }}">{{ stain.abbreviation }}</option>
                                 {% endfor %}
                             </select>
-                        </div>
-                        <div class="col-md-1">
                             <button
                                 id="btnCreateSlide"
                                 type="button"
-                                class="btn btn-success"
+                                class="btn btn-success mx-2"
                             >
-                                Agregar
+                                Agregar a seleccionadas
                             </button>
-                        </div>
                     </div>
                     <div class="row my-2">
                         <div class="col-md-12 table-responsive">

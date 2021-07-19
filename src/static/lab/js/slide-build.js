@@ -351,55 +351,52 @@ $(document).ready(function () {
   });
 
   $("#btnCreateSlide").click(() => {
-    const selectedCase = selectCase.select2("data")[0].id.split(";");
-    let cassette = null;
-    if (
-      selectCassette.hasClass("select2-hidden-accessible") &&
-      selectCassette.select2("data")[0].id > 0
-    ) {
-      cassette = getCassetteByPk(selectCassette.select2("data")[0].id).cassette;
-    }
-
-    const row = getUnitByPk(selectedCase[2]);
     const stain = selectStain.select2("data")[0];
+    tableBuild
+      .rows({ selected: true })
+      .data()
+      .each((value, index) => {
+        const cassette = getCassetteByPk(value.cassette[0].id).cassette;
+        const row = getUnitByPk(value.unit.id);
 
-    let new_row = {
-      case: {
-        id: row.case.pk,
-        no_caso: row.case.fields.no_caso,
-      },
-      identification: {
-        id: row.identification.pk,
-        cage: row.identification.fields.cage,
-      },
-      unit: {
-        id: row.unit.pk,
-        correlative: row.unit.fields.correlative,
-      },
-      stain: {
-        id: stain.id,
-        abbreviation: stain.text,
-      },
-      slide: 0,
-    };
+        let new_row = {
+          case: {
+            id: row.case.pk,
+            no_caso: row.case.fields.no_caso,
+          },
+          identification: {
+            id: row.identification.pk,
+            cage: row.identification.fields.cage,
+          },
+          unit: {
+            id: row.unit.pk,
+            correlative: row.unit.fields.correlative,
+          },
+          stain: {
+            id: stain.id,
+            abbreviation: stain.text,
+          },
+          slide: 0,
+        };
 
-    if ("pk" in cassette && "fields" in cassette) {
-      new_row.cassette = [
-        {
-          id: cassette.pk,
-          correlative: cassette.fields.correlative,
-        },
-      ];
-    } else {
-      new_row.cassette = [
-        {
-          id: -1,
-          correlative: "N/A",
-        },
-      ];
-    }
+        if ("pk" in cassette && "fields" in cassette) {
+          new_row.cassette = [
+            {
+              id: cassette.pk,
+              correlative: cassette.fields.correlative,
+            },
+          ];
+        } else {
+          new_row.cassette = [
+            {
+              id: -1,
+              correlative: "N/A",
+            },
+          ];
+        }
 
-    tableBuild.row.add(new_row).draw();
+        tableBuild.row.add(new_row).draw();
+      });
     updateCorrelativeSlide();
   });
 
