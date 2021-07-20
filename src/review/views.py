@@ -3,17 +3,25 @@ import mimetypes
 from smtplib import SMTPException
 
 from django.contrib.auth.decorators import login_required, permission_required
-from django.contrib.auth.models import User
 from django.core import serializers
 from django.core.mail import BadHeaderError, EmailMultiAlternatives
-from django.db.models import Q
-from django.http.response import Http404, JsonResponse
+from django.http.response import JsonResponse
 from django.shortcuts import get_object_or_404, render
 from django.template.loader import get_template
 from django.utils.decorators import method_decorator
 from django.views import View
+from django.views.generic.detail import DetailView
 
-from review.models import Analysis, AnalysisMailList, File, MailList, Stage
+from review.models import (
+    Analysis,
+    AnalysisRecipient,
+    File,
+    MailList,
+    Recipient,
+    RecipientMail,
+    Stage,
+)
+from django.forms.models import model_to_dict
 
 
 @login_required
@@ -159,6 +167,56 @@ def send_email(request, pk):
     return JsonResponse({"status": "OK"})
 
 
+@login_required
+def mail_list_recipients(request, pk):
+    mail_list = get_object_or_404(MailList, pk=pk)
+
+    recipients_lists = RecipientMail.objects.all()
+
+    context = []
+    for recipient_list in recipients_lists:
+        row = model_to_dict(
+            recipient_list.recipient, fields=["id", "first_name", "last_name", "email"]
+        )
+        row["is_main"] = recipient_list.is_main
+        context.append(row)
+
+    return JsonResponse(context, safe=False)
+
+
+@login_required
+def new_recipient(request):
+    form_data = json.loads(request.body)
+
+    recipient = Recipient.objects.create(
+        first_name=form_data["first_name"],
+        last_name=form_data["last_name"],
+        role=form_data["role"],
+        email=form_data["email"],
+    )
+
+    return JsonResponse(model_to_dict(recipient), safe=False)
+
+
+@login_required
+def new_mail_list(request):
+    form_data = json.loads(request.body)
+
+    analysis = get_object_or_404(Analysis, pk=form_data["analysis_pk"])
+    customer = analysis.entryform.customer
+
+    mail_list = MailList.objects.create(name=form_data["name"], customer=customer)
+
+    for recipient in form_data["recipients"]:
+        RecipientMail.objects.create(
+            mail_list=mail_list,
+            recipient_id=recipient["id"],
+            is_main=recipient["is_main"],
+        )
+
+    return JsonResponse(model_to_dict(mail_list, fields=["id", "name"]), safe=False)
+
+
 class FileView(View):
     @method_decorator(login_required)
     def get(self, request, pk):
@@ -211,7 +269,7 @@ class FileView(View):
         return JsonResponse(serializers.serialize("json", [review_file]), safe=False)
 
 
-class MailView(View):
+class AnalysisRecipientView(View):
     @method_decorator(login_required)
     def get(self, request, pk):
         """
@@ -222,11 +280,13 @@ class MailView(View):
         analysis = get_object_or_404(Analysis, pk=pk)
         customer = analysis.entryform.customer
         mail_lists = MailList.objects.filter(customer=customer)
-        current_lists = AnalysisMailList.objects.filter(analysis=analysis)
+        recipients = Recipient.objects.all()
+        current_recipients = AnalysisRecipient.objects.filter(analysis=analysis)
         return JsonResponse(
             {
                 "mail_lists": serializers.serialize("json", mail_lists),
-                "current_lists": serializers.serialize("json", current_lists),
+                "current_recipients": serializers.serialize("json", current_recipients),
+                "recipients": serializers.serialize("json", recipients),
             }
         )
 
@@ -239,18 +299,23 @@ class MailView(View):
         """
         analysis = get_object_or_404(Analysis, pk=pk)
 
-        mail_list_pk = json.loads(request.body)
+        recipients = json.loads(request.body)
 
-        AnalysisMailList.objects.filter(analysis=analysis).delete()
+        AnalysisRecipient.objects.filter(analysis=analysis).delete()
 
         errors = []
-        for pk in mail_list_pk:
+        for recipient in recipients:
             try:
-                mail_list = MailList.objects.get(pk=pk)
-            except MailList.DoesNotExist:
-                errors.append(pk)
+                recipient_instace = Recipient.objects.get(pk=recipient["pk"])
+            except Recipient.DoesNotExist:
+                errors.append(recipient)
                 continue
-            AnalysisMailList.objects.create(analysis=analysis, mail_list=mail_list)
+            else:
+                AnalysisRecipient.objects.create(
+                    analysis=analysis,
+                    recipient=recipient_instace,
+                    is_main=recipient["is_main"],
+                )
 
         if len(errors) > 0:
             return JsonResponse({"status": "ERR", "errors": errors})

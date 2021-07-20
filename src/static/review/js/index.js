@@ -28,14 +28,22 @@ $(document).ready(() => {
     },
   });
 
-  const selectRecipients = $("#selectRecipients");
+  const selectRecipients = $(".selectRecipients");
 
   const dlgNewRecipient = new bootstrap.Modal(
-    document.getElementById("dlgRecipient")
+    document.getElementById("recipientDialog")
   );
   const dlgFileList = new bootstrap.Modal(
     document.getElementById("fileDialog")
   );
+
+  const dlgNewMailList = new bootstrap.Modal(
+    document.getElementById("mailListDialog")
+  );
+
+  const newRecipientForm = $("#newRecipientForm");
+
+  const newMailListForm = $("#newMailListForm");
 
   let waiting;
   let formating;
@@ -180,24 +188,39 @@ $(document).ready(() => {
   }
 
   function updateSelectRecipients() {
-    $.get(Urls["review:mail_list"](analysis), (response) => {
-      const mailList = JSON.parse(response["mail_lists"]);
-
-      const selected = JSON.parse(response["current_lists"]);
+    $.get(Urls["review:recipients"](analysis), (response) => {
+      const recipients = JSON.parse(response["recipients"]);
+      const selected = JSON.parse(response["current_recipients"]);
+      const mailLists = JSON.parse(response["mail_lists"]);
 
       if (selectRecipients.hasClass("select2-hidden-accessible")) {
         selectRecipients.select2("destroy");
       }
-      const options = mailList.map((mail) => {
-        const isSelected = selected.some(
-          (item) => item.fields.mail_list == mail.pk
-        );
+
+      const mailListOptions = mailLists.map((list) => {
         return {
-          id: mail.pk,
-          text: mail.fields.name,
-          selected: isSelected,
+          id: list.pk,
+          text: list.fields.name,
         };
       });
+
+      mailListOptions.unshift({
+        id: -1,
+        text: "Agregue una lista de correos",
+      });
+
+      $("#selectMailList").select2({
+        data: mailListOptions,
+        width: "100%",
+      });
+
+      const options = recipients.map((mail) => {
+        return {
+          id: mail.pk,
+          text: `${mail.fields.first_name} ${mail.fields.last_name}<${mail.fields.email}>`,
+        };
+      });
+
       selectRecipients.select2({
         data: options,
         width: "100%",
@@ -307,20 +330,39 @@ $(document).ready(() => {
   });
 
   selectRecipients.on("change", (e) => {
-    const selected = selectRecipients
-      .select2("data")
-      .map((selected) => parseInt(selected.id));
+    const mainRecipients = $("#mainRecipient").select2("data");
+    const ccRecipients = $("#ccRecipient").select2("data");
 
-    $.ajax(Urls["review:mail_list"](analysis), {
+    let recipients = [];
+
+    for (const [index, element] of mainRecipients.entries()) {
+      recipients.push({
+        pk: element.id,
+        is_main: true,
+      });
+    }
+
+    for (const [index, element] of ccRecipients.entries()) {
+      recipients.push({
+        pk: element.id,
+        is_main: false,
+      });
+    }
+
+    $.ajax(Urls["review:recipients"](analysis), {
       method: "POST",
-      data: JSON.stringify(selected),
+      data: JSON.stringify(recipients),
       headers: {
         "X-CSRFToken": getCookie("csrftoken"),
       },
       contentType: "application/json; charset=utf-8",
 
       success: () => {
-        toastr.success("Actualizado exitosamente");
+        toastr.success("Actualizado exitosamente.");
+      },
+
+      error: () => {
+        toastr.error("Ha ocurrido un error.");
       },
     });
   });
@@ -402,5 +444,116 @@ $(document).ready(() => {
     populateList("#reviewing", reviewing, queryString);
     populateList("#sending", sending, queryString);
     populateList("#finished", finished, queryString);
+  });
+
+  $("#selectMailList").change((e) => {
+    const mailListPk = $("#selectMailList").select2("data")[0].id;
+
+    if (mailListPk == -1) return;
+
+    $.ajax(Urls["review:list_recipients"](mailListPk), {
+      method: "GET",
+      headers: {
+        "X-CSRFToken": getCookie("csrftoken"),
+      },
+      contentType: "application/json; charset=utf-8",
+
+      success: (response) => {
+        const recipients = response;
+
+        const mains = recipients
+          .filter((recipient) => recipient.is_main)
+          .map((recipient) => recipient.id);
+        const ccs = recipients
+          .filter((recipient) => !recipient.is_main)
+          .map((recipient) => recipient.id);
+
+        $("#mainRecipient").val(mains).trigger("change");
+        $("#ccRecipient").val(ccs).trigger("change");
+      },
+    });
+  });
+
+  $("#btnCreateRecipient").click(() => {
+    dlgFileList.hide();
+    dlgNewRecipient.show();
+  });
+
+  $("#btnCreateMailList").click(() => {
+    dlgFileList.hide();
+    dlgNewMailList.show();
+  });
+
+  newRecipientForm.submit((e) => {
+    e.preventDefault();
+    const newRecipient = newRecipientForm
+      .serializeArray()
+      .reduce((acc, input) => ({ ...acc, [input.name]: input.value }), {});
+
+    $.ajax(Urls["review:create_recipient"](), {
+      method: "POST",
+      data: JSON.stringify(newRecipient),
+      headers: {
+        "X-CSRFToken": getCookie("csrftoken"),
+      },
+      contentType: "application/json; charset=utf-8",
+
+      success: (response) => {
+        toastr.success("Destinatario creado.");
+        newRecipientForm.trigger("reset");
+        updateSelectRecipients();
+        dlgFileList.show();
+        dlgNewRecipient.hide();
+      },
+      error: (err) => {
+        toastr.error("Ha ocurrido un error.");
+      },
+    });
+  });
+
+  newMailListForm.submit((e) => {
+    e.preventDefault();
+    let newMailList = newMailListForm
+      .serializeArray()
+      .reduce((acc, input) => ({ ...acc, [input.name]: input.value }), {});
+
+    newMailList.analysis_pk = analysis;
+    const mains = $("#mainRecipient")
+      .select2("data")
+      .map((main) => {
+        return {
+          id: main.id,
+          is_main: true,
+        };
+      });
+    const ccs = $("#ccRecipient")
+      .select2("data")
+      .map((cc) => {
+        return {
+          id: cc.id,
+          is_main: false,
+        };
+      });
+
+    newMailList.recipients = [...mains, ...ccs];
+
+    $.ajax(Urls["review:new_mail_list"](), {
+      method: "POST",
+      data: JSON.stringify(newMailList),
+      headers: {
+        "X-CSRFToken": getCookie("csrftoken"),
+      },
+      contentType: "application/json; charset=utf-8",
+
+      success: (response) => {
+        toastr.success("Lista de correos creada.");
+        newMailListForm.trigger("reset");
+        dlgFileList.show();
+        dlgNewMailList.hide();
+      },
+      error: (err) => {
+        toastr.error("Ha ocurrido un error.");
+      },
+    });
   });
 });

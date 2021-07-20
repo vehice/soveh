@@ -79,7 +79,7 @@
 
 <!-- DIALOG FILES -->
 <div class="modal" tabindex="-1" id="fileDialog">
-    <div class="modal-dialog">
+    <div class="modal-dialog modal-xl">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title"></h5>
@@ -88,44 +88,139 @@
                 </button>
             </div>
             <div class="modal-body container-fluid">
-                <section class="row border-bottom pb-2 mb-2 align-items-center">
-                    <div class="col-md-10 form-group">
-                        <label for=""><h4>Destinatarios:</h4></label>
-                        <select class="form-control" id="selectRecipients"></select>
+                <main class="row">
+                    <div class="col-md-4 border-right">
+                        <h3>Archivos</h3>
+                        <section class="row border-bottom pb-2 mb-2">
+                            <div class="col-md-12">
+                                <form action="/"
+                                      class="dropzone"
+                                      id="newFiles">
+                                </form>
+                            </div>
+                        </section>
+                        <section class="row border-bottom pb-2 mb-2">
+                            <div class="col-md-12">
+                                <h4>Pre-Reportes</h4>
+                                <ul class="list-group" id="prereportList">
+                                </ul>
+                            </div>
+                        </section>
+                        <section class="row">
+                            <div class="col-md-12">
+                                <h4>Revisiones</h4>
+                                <ul class="list-group" id="reviewList">
+                                </ul>
+                            </div>
+                        </section>
                     </div>
-                    <div class="col-md-2">
-                        <button class="btn btn-ouline-info" id="btnRefreshRecipients">
-                            <i class="ft-refresh-cw"></i>
-                        </button>
+                    <div class="col-md-8">
+                        <h3>Destinarios</h3>
+                        <select id="selectMailList">
+                        </select>
+                        <fieldset class="border mt-2">
+                            <legend>Principal</legend>
+                            <ul class="list-group">
+                            </ul>
+                            <select class="selectRecipients" id="mainRecipient"></select>
+                        </fieldset>
+                        <fieldset class="border mt-2">
+                            <legend>CC</legend>
+                            <ul class="list-group">
+                            </ul>
+                            <select class="selectRecipients" id="ccRecipient"></select>
+                        </fieldset>
+                        <span class="d-flex flex-row justify-content-between mt-2">
+                            <button id="btnCreateRecipient" class="btn btn-info">Crear destinatario</button>
+                            <button id="btnCreateMailList" class="btn btn-info">Crear lista de correo</button>
+                        </span>
                     </div>
-                </section>
-                <section class="row border-bottom pb-2 mb-2">
-                    <div class="col-md-12">
-                        <form action="/"
-                              class="dropzone"
-                              id="newFiles">
-                        </form>
-                    </div>
-                </section>
-                <section class="row border-bottom pb-2 mb-2">
-                    <div class="col-md-12">
-                        <h4>Pre-Reportes</h4>
-                        <ul class="list-group" id="prereportList">
-                        </ul>
-                    </div>
-                </section>
-                <section class="row">
-                    <div class="col-md-12">
-                        <h4>Revisiones</h4>
-                        <ul class="list-group" id="reviewList">
-                        </ul>
-                    </div>
-                </section>
+                </main>
             </div>
         </div>
     </div>
 </div>
 
+
+<!-- RECIPIENT MODAL -->
+
+<div class="modal" tabindex="-1" id="recipientDialog">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Crear Destinatario</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body container-fluid">
+                <main class="row">
+                    <form class="col-md-12" id="newRecipientForm">
+                        <div class="row">
+                            <div class="col-md-6 form-group">
+                                <label for="">Nombre:</label>
+                                <input required name="first_name" type="text" value="" class="form-control"/>
+                                <small>Obligatorio</small>
+                            </div>
+
+                            <div class="col-md-6 form-group">
+                                <label for="">Apellido:</label>
+                                <input name="last_name" type="text" value="" class="form-control"/>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12 form-group">
+                                <label for="">Email:</label>
+                                <input required class="form-control" name="email" type="email" value=""/>
+                                <small>Obligatorio</small>
+                            </div>
+                        </div>
+                        <div class="row align-items-end">
+                            <div class="col-md-4">
+                                <label for="">Cargo:</label>
+                                <input class="form-control" name="role" type="text" value=""/>
+                            </div>
+                            <div class="col-md-2 offset-md-2">
+                                <button type="submit" class="btn btn-primary">Guardar</button>
+                            </div>
+                        </div>
+                    </form>
+                </main>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- NEW MAIL LIST -->
+<div class="modal" tabindex="-1" id="mailListDialog">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Crear Lista de Correo</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body container-fluid">
+                <main class="row">
+                    <form class="col-md-12" id="newMailListForm">
+                        <div class="row align-items-center">
+                            <div class="col-md-6 form-group">
+                                <label for="">Nombre:</label>
+                                <input required name="name" type="text" value="" class="form-control"/>
+                                <small>Obligatorio</small>
+                            </div>
+
+                            <div class="col-md-2 offset-md-2">
+                                <button type="submit" class="btn btn-primary">Guardar</button>
+                            </div>
+                        </div>
+                    </form>
+                </main>
+            </div>
+        </div>
+    </div>
+</div>
 
 <!-- END MODAL -->
 

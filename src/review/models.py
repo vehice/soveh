@@ -257,9 +257,6 @@ class MailList(models.Model):
     recipients = models.ManyToManyField(
         to=Recipient, related_name="mailing_lists", through="RecipientMail"
     )
-    analysis = models.ManyToManyField(
-        to=Analysis, related_name="mailing_lists", through="AnalysisMailList"
-    )
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -299,11 +296,14 @@ class RecipientMail(models.Model):
         return f"{self.mail_list.name} {self.recipient.first_name}"
 
 
-class AnalysisMailList(models.Model):
+class AnalysisRecipient(models.Model):
     """
-    A :model:`review.Analysis` may contain multiple :model:`review.MailList` and vice-versa thus this model works
+    A :model:`review.Analysis` may contain multiple :model:`review.Recipient` and vice-versa thus this model works
     as a middle-man to join them.
     """
 
     analysis = models.ForeignKey(to=Analysis, on_delete=models.CASCADE)
-    mail_list = models.ForeignKey(to=MailList, on_delete=models.CASCADE)
+    recipient = models.ForeignKey(to=Recipient, on_delete=models.CASCADE)
+    is_main = models.BooleanField(
+        verbose_name="Is primary recipient (TO)", default=True
+    )
