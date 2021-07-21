@@ -78,7 +78,7 @@
 <!-- MODAL -->
 
 <!-- DIALOG FILES -->
-<div class="modal" tabindex="-1" id="fileDialog">
+<div class="modal" tabindex="-1" id="fileDialog"  data-backdrop="static" data-keyboard="false" >
     <div class="modal-dialog modal-xl">
         <div class="modal-content">
             <div class="modal-header">
@@ -116,23 +116,31 @@
                     </div>
                     <div class="col-md-8">
                         <h3>Destinarios</h3>
-                        <select id="selectMailList">
+                        <select id="selectMailList" style="width:100%">
                         </select>
                         <fieldset class="border mt-2">
                             <legend>Principal</legend>
-                            <ul class="list-group">
-                            </ul>
-                            <select class="selectRecipients" id="mainRecipient"></select>
+                            <select class="selectRecipients" id="mainRecipient" multiple style="width:100%">
+                                {% for recipient in recipients %}
+                                <option value="{{ recipient.id }}">{{ recipient.full_name }}&lt;{{ recipient.email }}&gt;</option>
+                                {% endfor %}
+                            </select>
                         </fieldset>
                         <fieldset class="border mt-2">
                             <legend>CC</legend>
-                            <ul class="list-group">
-                            </ul>
-                            <select class="selectRecipients" id="ccRecipient"></select>
+                            <select class="selectRecipients" id="ccRecipient" multiple style="width:100%">
+
+                                {% for recipient in recipients %}
+                                <option value="{{ recipient.email }}">{{ recipient.full_name }}&lt;{{ recipient.email }}&gt;</option>
+                                {% endfor %}
+                            </select>
                         </fieldset>
                         <span class="d-flex flex-row justify-content-between mt-2">
                             <button id="btnCreateRecipient" class="btn btn-info">Crear destinatario</button>
                             <button id="btnCreateMailList" class="btn btn-info">Crear lista de correo</button>
+                        </span>
+                        <span>
+                            <button id="btnSaveRecipients" class="btn btn-primary">Guardar</button>
                         </span>
                     </div>
                 </main>

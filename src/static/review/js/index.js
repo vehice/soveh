@@ -30,17 +30,29 @@ $(document).ready(() => {
 
   const selectRecipients = $(".selectRecipients");
 
+  selectRecipients.select2();
+
+  const selectMailList = $("#selectMailList");
+
   const dlgNewRecipient = new bootstrap.Modal(
-    document.getElementById("recipientDialog")
+    document.getElementById("recipientDialog"),
+    {
+      backdrop: "static",
+    }
   );
   const dlgFileList = new bootstrap.Modal(
-    document.getElementById("fileDialog")
+    document.getElementById("fileDialog"),
+    {
+      backdrop: "static",
+    }
   );
 
   const dlgNewMailList = new bootstrap.Modal(
-    document.getElementById("mailListDialog")
+    document.getElementById("mailListDialog"),
+    {
+      backdrop: "static",
+    }
   );
-
   const newRecipientForm = $("#newRecipientForm");
 
   const newMailListForm = $("#newMailListForm");
@@ -189,43 +201,39 @@ $(document).ready(() => {
 
   function updateSelectRecipients() {
     $.get(Urls["review:recipients"](analysis), (response) => {
-      const recipients = JSON.parse(response["recipients"]);
-      const selected = JSON.parse(response["current_recipients"]);
+      const selectedRecipients = JSON.parse(response["current_recipients"]);
       const mailLists = JSON.parse(response["mail_lists"]);
 
-      if (selectRecipients.hasClass("select2-hidden-accessible")) {
-        selectRecipients.select2("destroy");
+      $("#mainRecipient").val(null).trigger("change");
+      $("#ccRecipient").val(null).trigger("change");
+
+      if (selectMailList.hasClass("select2-hidden-accessible")) {
+        selectMailList.select2("destroy");
       }
 
-      const mailListOptions = mailLists.map((list) => {
-        return {
-          id: list.pk,
-          text: list.fields.name,
-        };
-      });
+      selectMailList.empty();
 
-      mailListOptions.unshift({
-        id: -1,
-        text: "Agregue una lista de correos",
-      });
+      selectMailList.append(
+        `<option value="-1" selected>Agregar una lista de correos</option>`
+      );
+      for (const option of mailLists) {
+        selectMailList.append(
+          `<option value="${option.pk}">${option.fields.name}</option>`
+        );
+      }
 
-      $("#selectMailList").select2({
-        data: mailListOptions,
-        width: "100%",
-      });
+      selectMailList.select2();
 
-      const options = recipients.map((mail) => {
-        return {
-          id: mail.pk,
-          text: `${mail.fields.first_name} ${mail.fields.last_name}<${mail.fields.email}>`,
-        };
-      });
+      const selectedMainRecipients = selectedRecipients
+        .filter((selected) => selected.fields.is_main)
+        .flatMap((selected) => [selected.fields.recipient]);
 
-      selectRecipients.select2({
-        data: options,
-        width: "100%",
-        multiple: true,
-      });
+      const selectedCCRecipients = selectedRecipients
+        .filter((selected) => !selected.fields.is_main)
+        .flatMap((selected) => [selected.fields.recipient]);
+
+      $("#mainRecipient").val(selectedMainRecipients).trigger("change");
+      $("#ccRecipient").val(selectedCCRecipients).trigger("change");
     });
   }
 
@@ -329,44 +337,6 @@ $(document).ready(() => {
     });
   });
 
-  selectRecipients.on("change", (e) => {
-    const mainRecipients = $("#mainRecipient").select2("data");
-    const ccRecipients = $("#ccRecipient").select2("data");
-
-    let recipients = [];
-
-    for (const [index, element] of mainRecipients.entries()) {
-      recipients.push({
-        pk: element.id,
-        is_main: true,
-      });
-    }
-
-    for (const [index, element] of ccRecipients.entries()) {
-      recipients.push({
-        pk: element.id,
-        is_main: false,
-      });
-    }
-
-    $.ajax(Urls["review:recipients"](analysis), {
-      method: "POST",
-      data: JSON.stringify(recipients),
-      headers: {
-        "X-CSRFToken": getCookie("csrftoken"),
-      },
-      contentType: "application/json; charset=utf-8",
-
-      success: () => {
-        toastr.success("Actualizado exitosamente.");
-      },
-
-      error: () => {
-        toastr.error("Ha ocurrido un error.");
-      },
-    });
-  });
-
   $("#finished").on("sortreceive", (e, ui) => {
     const analysisId = ui.item[0].children[0].children[0].id;
     $.get(Urls["review:analysis_emails"](analysisId), (response) => {
@@ -446,8 +416,8 @@ $(document).ready(() => {
     populateList("#finished", finished, queryString);
   });
 
-  $("#selectMailList").change((e) => {
-    const mailListPk = $("#selectMailList").select2("data")[0].id;
+  selectMailList.change((e) => {
+    const mailListPk = selectMailList.select2("data")[0].id;
 
     if (mailListPk == -1) return;
 
@@ -472,10 +442,12 @@ $(document).ready(() => {
         $("#ccRecipient").val(ccs).trigger("change");
       },
     });
+
+    selectMailList.val(null).trigger("change");
+    selectMailList.select2("close");
   });
 
   $("#btnCreateRecipient").click(() => {
-    dlgFileList.hide();
     dlgNewRecipient.show();
   });
 
@@ -552,6 +524,44 @@ $(document).ready(() => {
         dlgNewMailList.hide();
       },
       error: (err) => {
+        toastr.error("Ha ocurrido un error.");
+      },
+    });
+  });
+
+  $("#btnSaveRecipients").click(() => {
+    const mainRecipients = $("#mainRecipient").select2("data");
+    const ccRecipients = $("#ccRecipient").select2("data");
+
+    let recipients = [];
+
+    for (const [index, element] of mainRecipients.entries()) {
+      recipients.push({
+        pk: element.id,
+        is_main: true,
+      });
+    }
+
+    for (const [index, element] of ccRecipients.entries()) {
+      recipients.push({
+        pk: element.id,
+        is_main: false,
+      });
+    }
+
+    $.ajax(Urls["review:recipients"](analysis), {
+      method: "POST",
+      data: JSON.stringify(recipients),
+      headers: {
+        "X-CSRFToken": getCookie("csrftoken"),
+      },
+      contentType: "application/json; charset=utf-8",
+
+      success: () => {
+        toastr.success("Actualizado exitosamente.");
+      },
+
+      error: () => {
         toastr.error("Ha ocurrido un error.");
       },
     });

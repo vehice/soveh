@@ -32,7 +32,8 @@ def index(request):
     their state, allowing the user to move them accross multiple states as necessary.
     """
 
-    return render(request, "index.html")
+    recipients = Recipient.objects.all()
+    return render(request, "index.html", {"recipients": recipients})
 
 
 @login_required
@@ -280,13 +281,11 @@ class AnalysisRecipientView(View):
         analysis = get_object_or_404(Analysis, pk=pk)
         customer = analysis.entryform.customer
         mail_lists = MailList.objects.filter(customer=customer)
-        recipients = Recipient.objects.all()
         current_recipients = AnalysisRecipient.objects.filter(analysis=analysis)
         return JsonResponse(
             {
                 "mail_lists": serializers.serialize("json", mail_lists),
                 "current_recipients": serializers.serialize("json", current_recipients),
-                "recipients": serializers.serialize("json", recipients),
             }
         )
 
