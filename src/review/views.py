@@ -5,12 +5,12 @@ from smtplib import SMTPException
 from django.contrib.auth.decorators import login_required, permission_required
 from django.core import serializers
 from django.core.mail import BadHeaderError, EmailMultiAlternatives
+from django.forms.models import model_to_dict
 from django.http.response import JsonResponse
 from django.shortcuts import get_object_or_404, render
 from django.template.loader import get_template
 from django.utils.decorators import method_decorator
 from django.views import View
-from django.views.generic.detail import DetailView
 
 from review.models import (
     Analysis,
@@ -21,7 +21,6 @@ from review.models import (
     RecipientMail,
     Stage,
 )
-from django.forms.models import model_to_dict
 
 
 @login_required
