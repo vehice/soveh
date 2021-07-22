@@ -95,10 +95,6 @@
                         {% if entryForm.form_closed and request.user.is_superuser and not entryForm.cancelled %}
                           <button type="button" data-id="{{ entryForm.id }}" class="btn btn-blue btn-sm reopenFlow"><i class="fa fa-check-square-o fa-fx"></i> {{request.lang.reopen}}</button>                   
                         {% endif %}
-
-                        {% if eliminar and not entryForm.cancelled %}
-                          <button type="button" data-id="{{ entryForm.id }}" class="btn btn-danger btn-sm deleteFlow"><i class="fa fa-trash fa-fx"></i> {{request.lang.cancel}}</button>
-                        {% endif %}
                       </div>
                     </td>
                   </tr>
