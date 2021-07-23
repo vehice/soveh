@@ -13,8 +13,7 @@ urlpatterns = [
     path(
         "recipients/<int:pk>/", views.AnalysisRecipientView.as_view(), name="recipients"
     ),
-    path("lists/", views.new_mail_list, name="new_mail_list"),
-    path("lists/<int:pk>/", views.mail_list_recipients, name="list_recipients"),
+    path("lists/<int:pk>/", views.MailListView.as_view(), name="mail_list"),
     path(
         "analysis/<int:pk>/mails", views.analysis_mailing_list, name="analysis_emails"
     ),

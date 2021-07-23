@@ -89,33 +89,8 @@
             </div>
             <div class="modal-body container-fluid">
                 <main class="row">
-                    <div class="col-md-4 border-right">
-                        <h3>Archivos</h3>
-                        <section class="row border-bottom pb-2 mb-2">
-                            <div class="col-md-12">
-                                <form action="/"
-                                      class="dropzone"
-                                      id="newFiles">
-                                </form>
-                            </div>
-                        </section>
-                        <section class="row border-bottom pb-2 mb-2">
-                            <div class="col-md-12">
-                                <h4>Pre-Reportes</h4>
-                                <ul class="list-group" id="prereportList">
-                                </ul>
-                            </div>
-                        </section>
-                        <section class="row">
-                            <div class="col-md-12">
-                                <h4>Revisiones</h4>
-                                <ul class="list-group" id="reviewList">
-                                </ul>
-                            </div>
-                        </section>
-                    </div>
                     <div class="col-md-8">
-                        <h3>Destinarios</h3>
+                        <h3>Destinatarios</h3>
                         <select id="selectMailList" style="width:100%">
                         </select>
                         <fieldset class="border mt-2">
@@ -131,16 +106,46 @@
                             <select class="selectRecipients" id="ccRecipient" multiple style="width:100%">
 
                                 {% for recipient in recipients %}
-                                <option value="{{ recipient.email }}">{{ recipient.full_name }}&lt;{{ recipient.email }}&gt;</option>
+                                <option value="{{ recipient.id }}">{{ recipient.full_name }}&lt;{{ recipient.email }}&gt;</option>
                                 {% endfor %}
                             </select>
                         </fieldset>
-                        <button id="btnSaveRecipients" class="btn btn-primary mt-2">Guardar</button>
-
-                        <span class="d-flex flex-row justify-content-around mt-4">
-                            <button id="btnCreateRecipient" class="btn btn-info">Crear destinatario</button>
-                            <button id="btnCreateMailList" class="btn btn-info">Crear lista de correo</button>
+                        <span class="btn-group mt-2" role="group">
+                            <button id="btnSaveRecipients" class="btn btn-primary">Guardar los destinatarios para este servicio</button>
+                            <button id="btnCreateRecipient" class="btn btn-secondary">Crear un nuevo destinatario</button>
+                            <button id="btnCreateMailList" class="btn btn-secondary">Crear una nueva lista de correos</button>
+                            <button id="btnUpdateMailList" class="btn btn-secondary">Actualizar la lista de correos seleccionada</button>
                         </span>
+
+                    </div>
+                    <div class="col-md-4 border-left">
+                        <h3>Archivos de revisiones</h3>
+                        <small class="text-muted my-1">
+                            Arrastre un archivo en el cuadro, o haga click en el mismo para seleccionar un archivo, el archivo se sube automáticamente.
+                        </small>
+                        <section class="row border-bottom pb-2 my-2">
+                            <div class="col-md-12">
+                                <form action="/"
+                                      class="dropzone"
+                                      id="newFiles"
+                                >
+                                </form>
+                            </div>
+                        </section>
+                        <section class="row border-bottom pb-2 mb-2">
+                            <div class="col-md-12">
+                                <h4>Archivos subidos por patologos</h4>
+                                <ul class="list-group" id="prereportList">
+                                </ul>
+                            </div>
+                        </section>
+                        <section class="row">
+                            <div class="col-md-12">
+                                <h4>Archivos subidos en revisiones</h4>
+                                <ul class="list-group" id="reviewList">
+                                </ul>
+                            </div>
+                        </section>
                     </div>
                 </main>
             </div>

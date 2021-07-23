@@ -167,25 +167,81 @@ def send_email(request, pk):
     return JsonResponse({"status": "OK"})
 
 
-@login_required
-def mail_list_recipients(request, pk):
-    mail_list = get_object_or_404(MailList, pk=pk)
+class MailListView(View):
+    def get(self, request, pk):
+        """Returns a JSON list with all :model:`review.Recipients` from a single :model:`review.MailList`."""
+        mail_list = get_object_or_404(MailList, pk=pk)
 
-    recipients_lists = RecipientMail.objects.all()
+        recipients_lists = RecipientMail.objects.filter(mail_list=mail_list)
 
-    context = []
-    for recipient_list in recipients_lists:
-        row = model_to_dict(
-            recipient_list.recipient, fields=["id", "first_name", "last_name", "email"]
-        )
-        row["is_main"] = recipient_list.is_main
-        context.append(row)
+        context = []
+        for recipient_list in recipients_lists:
+            row = model_to_dict(
+                recipient_list.recipient,
+                fields=["id", "first_name", "last_name", "email"],
+            )
+            row["is_main"] = recipient_list.is_main
+            context.append(row)
 
-    return JsonResponse(context, safe=False)
+        return JsonResponse(context, safe=False)
+
+    def post(self, request, pk):
+        """
+        Stores a single new :model:`review.MailList`
+        and returns the created resource in JSON.
+
+        Required:
+            - name
+            - recipients
+        """
+        form_data = json.loads(request.body)
+
+        analysis = get_object_or_404(Analysis, pk=pk)
+        customer = analysis.entryform.customer
+
+        mail_list = MailList.objects.create(name=form_data["name"], customer=customer)
+
+        for recipient in form_data["recipients"]:
+            RecipientMail.objects.create(
+                mail_list=mail_list,
+                recipient_id=recipient["id"],
+                is_main=recipient["is_main"],
+            )
+
+        return JsonResponse(model_to_dict(mail_list, fields=["id", "name"]), safe=False)
+
+    def put(self, request, pk):
+        """Updates a single existing :model:`review.MailList`
+        and returns a JSON detailing the created resource."""
+        form_data = json.loads(request.body)
+
+        mail_list = get_object_or_404(MailList, pk=pk)
+
+        RecipientMail.objects.filter(mail_list=mail_list).delete()
+
+        for recipient in form_data:
+            RecipientMail.objects.create(
+                mail_list=mail_list,
+                recipient_id=recipient["id"],
+                is_main=recipient["is_main"],
+            )
+
+        return JsonResponse(model_to_dict(mail_list, fields=["id", "name"]), safe=False)
 
 
 @login_required
 def new_recipient(request):
+    """
+    Stores a single new :model:`lab.Recipient`
+    and returns the created resource in JSON.
+
+    Required:
+        - first_name
+        - email
+    Optional:
+        - last_name
+        - role
+    """
     form_data = json.loads(request.body)
 
     recipient = Recipient.objects.create(
@@ -196,25 +252,6 @@ def new_recipient(request):
     )
 
     return JsonResponse(model_to_dict(recipient), safe=False)
-
-
-@login_required
-def new_mail_list(request):
-    form_data = json.loads(request.body)
-
-    analysis = get_object_or_404(Analysis, pk=form_data["analysis_pk"])
-    customer = analysis.entryform.customer
-
-    mail_list = MailList.objects.create(name=form_data["name"], customer=customer)
-
-    for recipient in form_data["recipients"]:
-        RecipientMail.objects.create(
-            mail_list=mail_list,
-            recipient_id=recipient["id"],
-            is_main=recipient["is_main"],
-        )
-
-    return JsonResponse(model_to_dict(mail_list, fields=["id", "name"]), safe=False)
 
 
 class FileView(View):
