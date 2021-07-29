@@ -33,7 +33,11 @@
                                     <th scope="row">{{ slide.correlative }}</th>
                                     <td>{{ slide.unit.identification.cage }} / {{ slide.unit.correlative }}</td>
                                     <td>{{ slide.unit.identification.group }}</td>
-                                    <td>{{ slide.cassette.organs.all|join:", " }}</td>
+                                    <td>
+                                        {% for organ in slide.cassette.organs.all %}
+                                            {{ organ.abbreviation }},
+                                        {% endfor %}
+                                        </td>
                                     <td>{{ slide.stain }}</td>
                                     <td>{{ slide.tag }}</td>
                                     <td>
