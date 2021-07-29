@@ -1,0 +1,94 @@
+{% extends 'layout.html' %}
+{% load static %}
+
+{% block content %}
+<!-- MAIN -->
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <header class="card-header">
+                <h4 class="card-title">
+                    Progreso de Caso: {{ case.no_caso }}
+                </h4>
+            </header>
+            <main class="card-body container-fluid">
+                <div class="row">
+                    <div class="col-md-12">
+                        <h5>Información General:</h5>
+                    </div>
+                </div>
+                <section class="row">
+                    <div class="col-md-4 d-flex flex-column">
+                        <span class="my-1">Cliente: {{ case.customer|default:"S/I" }}</span>
+                        <span>Centro: {{ case.center|default:"S/I" }}</span>
+                    </div>
+                    <div class="col-md-4">
+                        <b><a href="{% url 'lab:case_read_sheet' case.id %}">Hoja de Lectura</a></b>
+                    </div>
+                </section>
+                <div class="row mt-2">
+                    <div class="col-md-12">
+                        <h5>Servicios:</h5>
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th scope="col">#</th>
+                                    <th scope="col">Servicio</th>
+                                    <th scope="col">Fecha de Ingreso</th>
+                                    <th scope="col">Patologo</th>
+                                    <th scope="col">Fecha de Derivación</th>
+                                    <th scope="col">Plazo</th>
+                                    <th scope="col">Progreso (Estimado)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for service in analysis %}
+                                <tr>
+                                    <td>{{ service.id }}</td>
+                                    <td>{{ service.exam }}</td>
+                                    <td>{{ service.created_at|date:"d/m/Y" }}</td>
+                                    <td>{{ service.patologo|default:"Sin Asignar" }}</td>
+                                    <td>{{ service.assignment_done_at|date:"d/m/Y"|default:"Sin derivar" }}</td>
+                                    <td>{{ service.assignment_deadline|date:"d/m/Y"|default:"Sin plazo" }}</td>
+                                    <td>{{ service.lab_progress|floatformat:"0" }} %</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+</div>
+
+<!-- END MAIN -->
+
+{% endblock content %}
+{% block scripts %}
+<script
+    type="text/javascript"
+    src="//cdn.jsdelivr.net/npm/sweetalert2@10"
+    defer>
+</script>
+
+<script type="text/javascript">
+ $(document).ready(() => {
+     $(".zero-configuration").DataTable();
+
+     $(".detailTrigger").click(function (e) {
+         e.preventDefault();
+         const url = $(e.target).attr("href");
+         $.get(url, function (data, textStatus) {
+             Swal.fire({
+                 html: data,
+                 width: "80%",
+             });
+         });
+     });
+
+ })
+</script>
+
+
+{% endblock scripts %}

@@ -17,7 +17,7 @@ from django.views import View
 from django.views.generic import DetailView, ListView
 
 from backend.models import Exam, Organ, SampleExams, Stain, Unit
-from lab.models import Case, Cassette, CassetteOrgan, Process, Slide
+from lab.models import Analysis, Case, Cassette, CassetteOrgan, Process, Slide
 
 
 def home(request):
@@ -40,8 +40,8 @@ def home(request):
         units_count = Unit.objects.filter(identification__in=identifications).count()
         slides.append({"case": case, "count": units_count})
 
-    for case in slide_cassettes:
-        slides.append({"case": case, "count": units_count})
+    for cassette in slide_cassettes:
+        slides.append({"case": cassette.unit.identification.entryform, "count": 1})
 
     context = {"cassettes": cassettes, "slides": slides, "cases": cases}
     return render(request, "home.html", context)
@@ -736,3 +736,16 @@ class ProcessList(View):
     def get(self, request):
         processes = Process.objects.all()
         return render(request, "process/index.html", {"processes": processes})
+
+
+@login_required
+def case_process_state(request, pk):
+    """
+    Displays general information, lab process state, and service reading availability
+    for the provided pk's :model:`lab.Case`
+    """
+
+    case = get_object_or_404(Case, pk=pk)
+    analysis = Analysis.objects.filter(entryform=case)
+
+    return render(request, "cases/state.html", {"case": case, "analysis": analysis})

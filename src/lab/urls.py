@@ -9,6 +9,7 @@ urlpatterns = [
     path("<int:pk>", views.home_detail, name="home_detail"),
     path("case/<int:pk>", views.CaseDetail.as_view(), name="case_detail"),
     path("case/<int:pk>/sheet", views.CaseReadSheet.as_view(), name="case_read_sheet"),
+    path("case/<int:pk>/state", views.case_process_state, name="case_process_state"),
     path("organs", views.organ_list, name="organ_index"),
     path("stains", views.stain_list, name="stain_index"),
     #

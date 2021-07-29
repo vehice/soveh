@@ -21,6 +21,7 @@
     color: blue !important;
   }
 
+
   .bootstrap-duallistbox-container label {
     font-size: 18px !important;
     color: black !important;
@@ -63,6 +64,10 @@
           <button class="btn btn-secondary square showSummaryBtn hidden" 
           data-id="{{ form.content_object.pk }}" 
           data-closed="{% if form.form_closed or form.cancelled %}1{% else %}0{% endif %}" data-editable="{% if edit_case %}1{% else %}0{% endif %}"><i class="fa fa-list fa-fx"></i> {{request.lang.summary_case}}</button>
+          <a class="btn btn-secondary square" href="{% url 'lab:case_process_state' form.content_object.id %}">
+              <i class="fa ft-clock fa-fx"></i>
+              Progreso Laboratorio
+          </a>
           <button class="btn btn-secondary square showShareBtn hidden" onclick="shareChoice()"><i class="fa fa-paper-plane fa-fx"></i> {{request.lang.send_case}}</button>
           <button class="btn btn-secondary square showLogBtn hidden" onclick="logModal()"><i class="fa fa-list fa-fx"></i> {{request.lang.shipment_record}}</button>
           <button class="btn btn-secondary square showReceptionFileBtn hidden" onclick="receptionFileModal({{form.content_object.id}})"><i class="fa fa-clipboard fa-fx"></i> {{request.lang.reception_receive}} </button>

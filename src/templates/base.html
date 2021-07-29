@@ -354,6 +354,7 @@
       tpl_table_identification += '<th>{{request.lang.cage|safe}}</th>'
       tpl_table_identification += '<th>{{request.lang.group|safe}}</th>'
       tpl_table_identification += '<th>{{request.lang.extra_features|safe}}</th>'
+      tpl_table_identification += '<th>Son correlativas</th>'
       tpl_table_identification += '<th>{{request.lang.case_client|safe}}</th>'
       tpl_table_identification += '<th>{{request.lang.weight|safe}}</th>'
       tpl_table_identification += '<th>{{request.lang.optimus_condition|safe}}</th>'
@@ -401,22 +402,32 @@
             }
           },
           {
+            "width": "3%",
+            "targets": 4, "orderable": false, "data": "samples_are_correlative",
+            "render": function (data, type, row, meta) {
+
+              return `
+              <input type="checkbox" style="margin-top:10%" name="samples_are_correlative" class="form-control-table summary-ident-data checkbox-2x" ${data ? 'checked' : ''}>
+              `;
+            }
+          },
+          {
             "width": "8%",
-            "targets": 4, "orderable": false, "data": "client_case_number",
+            "targets": 5, "orderable": false, "data": "client_case_number",
             "render": function (data, type, row, meta) {
               return `<input name="client_case_number" class="form-control-table summary-ident-data" value="${data ? data : ""}" >`;
             }
           },
           {
             "width": "5%",
-            "targets": 5, "orderable": false, "data": "weight",
+            "targets": 6, "orderable": false, "data": "weight",
             "render": function (data, type, row, meta) {
               return `<input name="weight" class="form-control-table summary-ident-data" type="number" step="0.1" min="0" value="${data ? data : "0"}" >`;
             }
           },
           {
             "width": "3%",
-            "targets": 6, "orderable": false, "data": "is_optimum",
+            "targets": 7, "orderable": false, "data": "is_optimum",
             "render": function (data, type, row, meta) {
               return `
               <input type="checkbox" style="margin-top:10%" name="is_optimum" class="form-control-table summary-ident-data checkbox-2x" ${data ? 'checked' : ''}>
@@ -425,14 +436,14 @@
           },
           {
             "width": "20%",
-            "targets": 7, "orderable": false, "data": "observation",
+            "targets": 8, "orderable": false, "data": "observation",
             "render": function (data, type, row, meta) {
               return `<textarea name="observation" class="form-control-table summary-ident-data" rows="1">${data ? data : ""} </textarea>`;
             }
           },
           {
             "width": "3%",
-            "targets": 8, "orderable": false, "data": "quantity",
+            "targets": 9, "orderable": false, "data": "quantity",
             "render": function (data, type, row, meta) {
               return `<input disabled id="amount_${row.id}" name="quantity" class="form-control-table amount" type="number" data-ident="${row.id}" value="${data ? data : "0"}" min="${data ? data : ""}">`;
             }

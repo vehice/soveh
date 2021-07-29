@@ -17,22 +17,6 @@
                                 Armado de Cassettes ({{ cassettes|length }})
                                 <i class="iconify" data-icon="mdi:chevron-down"></i>
                             </button>
-                            <button type="button" class="btn btn-light">
-                                Procesado de Cassettes (S/I)
-                                <i class="iconify" data-icon="mdi:chevron-down"></i>
-                            </button>
-                            <button type="button" class="btn btn-warning">
-                                Bloque (S/I)
-                                <i class="iconify" data-icon="mdi:chevron-down"></i>
-                            </button>
-                            <button type="button" class="btn btn-info">
-                                Corte (S/I)
-                                <i class="iconify" data-icon="mdi:chevron-down"></i>
-                            </button>
-                            <button type="button" class="btn btn-danger">
-                                Tincion (S/I)
-                                <i class="iconify" data-icon="mdi:chevron-down"></i>
-                            </button>
                             <button id="btnSlide" value="{{ slides|length }}" type="button" class="btn btn-success">
                                 Liberación ({{ slides|length }})
                                 <i class="iconify" data-icon="mdi:chevron-down"></i>
@@ -48,7 +32,7 @@
 
                                 <!-- CASSETTE ACCORDION -->
                                 <div id="cassetteAccordion" class="collapse">
-                                    <div class="card-body overflow-auto d-flex flex-column" style="max-height: 38rem;">
+                                    <div class="card-body overflow-auto d-flex flex-column">
                                         <table class="table table-sm zero-configuration compact table-bordered">
                                             <thead>
                                                 <tr>
@@ -81,7 +65,7 @@
                                 <!-- END ACCORDION -->
                                 <!-- SLIDE ACCORDION -->
                                 <div id="slideAccordion" class="collapse">
-                                    <div class="card-body overflow-auto d-flex flex-column" style="max-height: 38rem;">
+                                    <div class="card-body overflow-auto d-flex flex-column">
                                         <table class="table table-sm zero-configuration compact table-bordered">
                                             <thead>
                                                 <tr>
@@ -164,11 +148,7 @@
              radius: "50%",
              data: [
                  { name: 'Cassettes por Armar', value: cassette_count },
-                 { name: 'Cassettes por Procesar', value: 1 },
-                 { name: 'Bloques por Armar', value: 1 },
-                 { name: 'Cortes por Realizar', value: 1 },
-                 { name: 'Cortes por Teñir', value: 1 },
-                 { name: 'Slides por Liberar', value: 1 },
+                 { name: 'Slides por Liberar', value: slide_count },
              ],
              emphasis: {
                  itemStyle: {

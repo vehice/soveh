@@ -5,16 +5,67 @@ from django.urls import reverse
 from numpy import busday_count
 
 from backend.models import (
+    AnalysisForm,
     ENTRY_FORMAT_OPTIONS,
     EntryForm,
     Exam,
     Identification,
     Organ,
+    OrganUnit,
     Sample,
     SampleExams,
     Stain,
     Unit,
 )
+
+
+class Analysis(AnalysisForm):
+    """
+    Proxy class for :model:`backend.AnalysisForm` to add
+    custom methods for app Lab without modifying the original
+    model.
+    """
+
+    def lab_progress(self):
+        """
+        Returns an integer representing the percentage progress
+        of an Analysis's processing in a Lab
+
+        The progress is calculated according to how many unit_organs with
+        the Analysis' exam already have a slide, if they don't have a slide
+        then a Cassette it's looked instead, and if it doesn't have either
+        then no progress is added.
+        """
+        case_samples = self.entryform.sample_set.all()
+        case_identifications = self.entryform.identification_set.all()
+        case_units = Unit.objects.filter(
+            identification_id__in=case_identifications.values_list("id", flat=True)
+        )
+        analysis_exam = self.exam
+        case_samples_exams = SampleExams.objects.filter(
+            sample_id__in=case_samples.values_list("id", flat=True), exam=analysis_exam
+        )
+        exam_units_organs = OrganUnit.objects.filter(
+            id__in=case_samples_exams.values_list("unit_organ_id", flat=True)
+        )
+
+        cassettes = Cassette.objects.filter(
+            organs__in=exam_units_organs.values_list("organ_id", flat=True),
+            unit_id__in=exam_units_organs.values_list("unit_id", flat=True),
+        )
+
+        total_progress = 0
+        progress_value = 1 / exam_units_organs.count()
+        for cassette in cassettes:
+            if cassette.slides.count() > 0:
+                total_progress += progress_value
+            else:
+                total_progress += progress_value / 2
+
+        return total_progress * 100
+
+    class Meta:
+        proxy = True
 
 
 class CaseManager(models.Manager):
@@ -56,6 +107,7 @@ class CaseManager(models.Manager):
                     to_attr="units",
                 ),
             )
+            .filter(identification__unit__isnull=False)
         )
 
 
@@ -70,6 +122,7 @@ class Case(EntryForm):
 
     @property
     def delay(self):
+        """Returns an integer despicting the ongoing days counts"""
         days = 0
         try:
             days = busday_count(
@@ -82,30 +135,9 @@ class Case(EntryForm):
     def get_absolute_url(self):
         return reverse("lab:case_detail", kwargs={"pk": self.id})
 
-    def generate_process_list(self):
-        samples = Sample.objects.filter(entryform=self).values_list("id", flat=True)
-        sample_exams = (
-            SampleExams.objects.filter(sample__in=samples)
-            .values_list("exam_id", flat=True)
-            .distinct()
-        )
-        exam_tree = ExamTree.objects.filter(exam_id__in=sample_exams).order_by("order")
-        processes = []
-        for tree in exam_tree:
-            process_tree = (
-                ProcessTree.objects.filter(tree_id=tree.id)
-                .values_list("process_id", flat=True)
-                .order_by("order")
-                .distinct()
-            )
-            processes.extend(process_tree)
-
-        order = 1
-        for process in processes:
-            CaseProcess.objects.create(case=self, process_id=process, order=order)
-            order += 1
-
-        return CaseProcess.objects.filter(case=self).order_by("order")
+    def units(self):
+        identifications = self.identification_set.values_list("id", flat=True)
+        return Unit.objects.filter(identification_id__in=identifications)
 
     class Meta:
         proxy = True
