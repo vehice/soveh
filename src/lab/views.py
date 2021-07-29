@@ -134,14 +134,15 @@ class CassetteBuild(View):
         ``lab/cassettes/build.html``
         """
 
-        query_filter = {"entry_format__in": [1, 2, 6, 7]}
-        unit_filter = {"cassettes": None}
-        cases = Case.objects.units(kwargs_filter=query_filter, kwargs_units=unit_filter)
+        units = Unit.objects.filter(
+            cassettes__isnull=True,
+            identification__entryform__entry_format__in=[1, 2, 6, 7],
+        ).select_related("identification__entryform")
 
         organs = serializers.serialize("json", Organ.objects.all())
 
         return render(
-            request, "cassettes/build.html", {"cases": cases, "organs": organs}
+            request, "cassettes/build.html", {"units": units, "organs": organs}
         )
 
     @method_decorator(login_required)

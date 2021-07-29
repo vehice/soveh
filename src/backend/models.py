@@ -2,6 +2,7 @@ from datetime import datetime
 
 from django.contrib.contenttypes.fields import GenericRelation
 from django.db import models
+from numpy import busday_count
 
 from accounts.models import User
 from workflows.models import Form
@@ -418,6 +419,18 @@ class EntryForm(models.Model):
     @property
     def form(self):
         return self.form.get()
+
+    @property
+    def delay(self):
+        """Returns an integer despicting the ongoing days counts"""
+        days = 0
+        try:
+            days = busday_count(
+                self.created_at.date(), datetime.now().date(), weekmask="1111110"
+            )
+        except AttributeError:
+            days = 0
+        return days
 
     @property
     def get_subflow(self):

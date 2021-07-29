@@ -44,21 +44,19 @@
                         </tr>
                     </thead>
                     <tbody>
-                        {% for case in cases %}
-                        {% for identification in case.identifications %}
-                        {% for unit in identification.units %}
+                        {% for unit in units %}
                         <tr>
-                            <td>{{ case.entryform_type|capfirst }}</td>
-                            <td>{{ case.no_caso|capfirst }}</td>
-                            <td>{{ identification.cage }}</td>
-                            <td>{{ identification.group }}</td>
+                            <td>{{ unit.identification.entryform.entryform_type|capfirst }}</td>
+                            <td>{{ unit.identification.entryform.no_caso|capfirst }}</td>
+                            <td>{{ unit.identification.cage }}</td>
+                            <td>{{ unit.identification.group }}</td>
                             <td>{{ unit.correlative }}</td>
                             <td>{{ unit.id }}</td>
-                            <td>{{ case.delay }}</td>
-                            <td><a href="{{ case.get_absolute_url }}" class="detailTrigger">Detalle</a></td>
+                            <td>{{ unit.identification.entryform.delay }}</td>
+                            <td>
+                                <a href="{% url 'lab:case_detail' unit.identification.entryform.id %}" class="detailTrigger">Detalle</a>
+                            </td>
                         </tr>
-                        {% endfor %}
-                        {% endfor %}
                         {% endfor %}
                     </tbody>
                 </table>

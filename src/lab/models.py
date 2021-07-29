@@ -2,7 +2,6 @@ from datetime import datetime
 
 from django.db import connections, models
 from django.urls import reverse
-from numpy import busday_count
 
 from backend.models import (
     AnalysisForm,
@@ -119,18 +118,6 @@ class Case(EntryForm):
     """
 
     objects = CaseManager()
-
-    @property
-    def delay(self):
-        """Returns an integer despicting the ongoing days counts"""
-        days = 0
-        try:
-            days = busday_count(
-                self.created_at.date(), datetime.now().date(), weekmask="1111110"
-            )
-        except AttributeError:
-            days = 0
-        return days
 
     def get_absolute_url(self):
         return reverse("lab:case_detail", kwargs={"pk": self.id})
