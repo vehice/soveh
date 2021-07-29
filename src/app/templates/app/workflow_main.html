@@ -64,7 +64,7 @@
           <button class="btn btn-secondary square showSummaryBtn hidden" 
           data-id="{{ form.content_object.pk }}" 
           data-closed="{% if form.form_closed or form.cancelled %}1{% else %}0{% endif %}" data-editable="{% if edit_case %}1{% else %}0{% endif %}"><i class="fa fa-list fa-fx"></i> {{request.lang.summary_case}}</button>
-          <a class="btn btn-secondary square" href="{% url 'lab:case_process_state' form.content_object.id %}">
+          <a class="btn btn-secondary showReceptionFileBtn square hidden" href="{% url 'lab:case_process_state' form.content_object.id %}">
               <i class="fa ft-clock fa-fx"></i>
               Progreso Laboratorio
           </a>
