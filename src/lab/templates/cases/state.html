@@ -19,8 +19,13 @@
                 </div>
                 <section class="row">
                     <div class="col-md-4 d-flex flex-column">
-                        <span class="my-1">Cliente: {{ case.customer|default:"S/I" }}</span>
+                        <span>Cliente: {{ case.customer|default:"S/I" }}</span>
                         <span>Centro: {{ case.center|default:"S/I" }}</span>
+                        <span>Especie: {{ case.specie|default:"S/I" }}</span>
+                        <span>Fuente de Agua: {{ case.watersource|default:"S/I" }}</span>
+                        <span>Fijador: {{ case.fixative|default:"S/I" }}</span>
+                        <span>Anamnesis: {{ case.anamnesis|default:"S/I" }}</span>
+                        <span>Tipo de Ingreso: {{ case.get_entry_format_display|default:"S/I" }}</span>
                     </div>
                     <div class="col-md-4">
                         <b><a href="{% url 'lab:case_read_sheet' case.id %}">Hoja de Lectura</a></b>
