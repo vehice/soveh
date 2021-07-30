@@ -13,9 +13,20 @@
                 </span>
             </header>
             <section class="card-body table-responsive">
-                <div class="row justify-content-end mb-1">
-                    <div class="col-md-1">
-                      <button id="btnCreate" class="btn btn-primary">Crear</button>
+                <div class="row justify-content-between mb-1">
+                    <div class="col-md-3">
+                        <form class="d-flex flex-row" method="GET">
+                            <select class="form-control mr-1" name="range">
+                                <option selected value="1">Ultima Semana</option>
+                                <option value="2">Ultimo Mes</option>
+                                <option value="3">Ultimos 3 Meses</option>
+                                <option value="4">Ultimos 6 Meses</option>
+                            </select>
+                            <button class="btn btn-info" type="submit">Filtrar lista de cassettes</button>
+                        </form>
+                    </div>
+                    <div class="col-md-2">
+                      <button id="btnCreate" class="btn btn-primary">Crear un nuevo cassette</button>
                     </div>
                 </div>
                 <table class="table table-bordered table-striped zero-configuration">
@@ -39,7 +50,9 @@
                             <td>{{ cassette.unit.correlative }}</td>
                             <td>{{ cassette.correlative }}</td>
                             <td>
-                                {{ cassette.organs.all|join:", " }}
+                                {% for organ in cassette.organs.all %}
+                                    {{ organ.abbreviation }},
+                                {% endfor %}
                             </td>
                             <td>{{ cassette.unit.identification.entryform.created_at|date:"d/m/Y G:i" }}</td>
                             <td>{{ cassette.build_at|date:"d/m/Y G:i" }}</td>
@@ -135,13 +148,6 @@
                     <div class="row my-1">
                         <div class="col-md">
                             <select id="newSelectUnit" class="w-full">
-                        {% for case in cases %}
-                        {% for identification in case.identifications %}
-                        {% for unit in identification.units %}
-                                <option value="{{unit.id}}">{{ case.no_caso }} / {{identification.cage}} / {{unit.correlative}}</option>
-                        {% endfor %}
-                        {% endfor %}
-                        {% endfor %}
                             </select>
                         </div>
                     </div>

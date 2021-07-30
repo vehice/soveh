@@ -124,7 +124,9 @@ class Case(EntryForm):
 
     def units(self):
         identifications = self.identification_set.values_list("id", flat=True)
-        return Unit.objects.filter(identification_id__in=identifications)
+        return Unit.objects.filter(
+            identification_id__in=identifications
+        ).select_related("identification__entryform")
 
     class Meta:
         proxy = True

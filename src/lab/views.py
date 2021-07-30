@@ -1,5 +1,5 @@
 import json
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from dateutil.parser import ParserError, parse
 from django.contrib.auth.decorators import login_required
@@ -88,7 +88,22 @@ class CaseDetail(DetailView):
     template_name = "cases/detail.html"
 
 
+@login_required
+def case_process_state(request, pk):
+    """
+    Displays general information, lab process state, and service reading availability
+    for the provided pk's :model:`lab.Case`
+    """
+
+    case = get_object_or_404(Case, pk=pk)
+    analysis = Analysis.objects.filter(entryform=case)
+
+    return render(request, "cases/state.html", {"case": case, "analysis": analysis})
+
+
 # Organ related views
+
+
 @login_required
 def organ_list(request):
     """Returns a list of all :model:`backend.Organ`"""
@@ -100,6 +115,8 @@ def organ_list(request):
 
 
 # Stain related views
+
+
 @login_required
 def stain_list(request):
     """Returns a list of all :model:`backend.Stain`"""
@@ -108,6 +125,81 @@ def stain_list(request):
     return HttpResponse(
         serializers.serialize("json", stains), content_type="application/json"
     )
+
+
+# Unit related views
+
+
+@login_required
+def unit_select_options(request):
+    """
+    Returns a formatted JSON to be used in a Select2 input
+    listing all Units with their Case.
+
+    **REQUEST**
+        `search`: Search term to look for in Units, Identifications, and Entryforms.
+        `page`: Paginator's current page.
+
+    """
+    search_term = request.GET.get("search")
+
+    if not search_term:
+        return JsonResponse({})
+
+    units = Unit.objects.filter(
+        Q(correlative__icontains=search_term)
+        | Q(identification__cage__icontains=search_term)
+        | Q(identification__entryform__no_caso__icontains=search_term)
+        | Q(
+            identification__entryform__forms__cancelled=0,
+            identification__entryform__forms__form_closed=0,
+        )
+    ).select_related("identification__entryform")
+
+    includes_cassettes = request.GET.get("cassettes")
+
+    cassettes = None
+
+    if includes_cassettes:
+        cassettes = Cassette.objects.filter(
+            Q(correlative__icontains=search_term)
+            | Q(unit__correlative__icontains=search_term)
+            | Q(unit__identification__cage__icontains=search_term)
+            | Q(unit__identification__entryform__no_caso__icontains=search_term)
+            | Q(
+                identification__entryform__forms__cancelled=0,
+                identification__entryform__forms__form_closed=0,
+            )
+        ).select_related("unit__identification__entryform")
+
+    page = request.GET.get("page")
+
+    units_paginator = Paginator(units, 20)
+    units_paginated = units_paginator.get_page(page)
+
+    response = {"results": [], "pagination": {"more": units_paginated.has_next()}}
+
+    for unit in units_paginated:
+        response["results"].append(
+            {
+                "id": unit.id,
+                "text": f"""{unit.identification.entryform.no_caso} / {unit.identification.cage} / {unit.correlative}""",
+            }
+        )
+
+    if cassettes:
+        cassettes_paginator = Paginator(cassettes, 20)
+        cassettes_paginated = cassettes_paginator.get_page(page)
+
+        for cassette in cassettes_paginated:
+            response["results"].append(
+                {
+                    "id": f"""cassette.{cassette.id}""",
+                    "text": f"""{cassette.unit.identification.entryform.no_caso} / {cassette.unit.identification.cage} / {cassette.unit.correlative} / {cassette.correlative}""",
+                }
+            )
+
+    return JsonResponse(response)
 
 
 # Cassette related views
@@ -312,14 +404,34 @@ class CassetteIndex(ListView):
 
     """
 
-    queryset = Cassette.objects.all().prefetch_related("organs")
     template_name = "cassettes/index.html"
     context_object_name = "cassettes"
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context["cases"] = Case.objects.units
-        return context
+    def get_queryset(self):
+        cassette_range = self.request.GET.get("range")
+        now = datetime.now()
+
+        time_delta = timedelta(days=7)
+        if cassette_range == "2":
+            time_delta = timedelta(days=30)
+        elif cassette_range == "3":
+            time_delta = timedelta(days=90)
+        elif cassette_range == "4":
+            time_delta = timedelta(days=180)
+
+        date_range = now - time_delta
+
+        cassettes = (
+            Cassette.objects.filter(
+                created_at__gte=date_range,
+                unit__identification__entryform__forms__cancelled=0,
+                unit__identification__entryform__forms__form_closed=0,
+            )
+            .select_related("unit__identification__entryform")
+            .prefetch_related("organs")
+        )
+
+        return cassettes
 
 
 class CassetteDetail(View):
@@ -490,8 +602,11 @@ class SlideBuild(View):
         ``lab/slides/build.html``
         """
 
-        query_filter = {"entry_format__in": [5]}
-        cases = Case.objects.units(kwargs_filter=query_filter)
+        units = Unit.objects.filter(
+            identification__entryform__entry_format=5,
+            identification__entryform__forms__cancelled=0,
+            identification__entryform__forms__form_closed=0,
+        ).select_related("identification__entryform")
         cassettes = Cassette.objects.filter(slides=None).select_related(
             "unit__identification__entryform"
         )
@@ -499,13 +614,14 @@ class SlideBuild(View):
 
         slides = []
 
-        if cases.count() > 0:
-            for case in cases:
-                for identification in case.identifications:
-                    for unit in identification.units:
-                        slides.append(
-                            serializers.serialize("json", [case, identification, unit])
-                        )
+        if units.count() > 0:
+            for unit in units:
+                slides.append(
+                    serializers.serialize(
+                        "json",
+                        [unit.identification.entryform, unit.identification, unit],
+                    )
+                )
 
         if cassettes.count() > 0:
             for cassette in cassettes:
@@ -648,24 +764,30 @@ class SlideIndex(ListView):
 
     """
 
-    queryset = Slide.objects.all().select_related(
-        "cassette__unit__identification__entryform"
-    )
     template_name = "slides/index.html"
     context_object_name = "slides"
 
-    def get_context_data(self, *, object_list=None, **kwargs):
-        query_filter = {"entry_format__in": [5]}
-        cases = Case.objects.units()
-        cassettes = Cassette.objects.all().select_related(
-            "unit__identification__entryform"
-        )
+    def get_queryset(self):
+        slide_range = self.request.GET.get("range")
+        now = datetime.now()
 
-        context = super().get_context_data(**kwargs)
-        context["cases"] = cases
-        context["cassettes"] = cassettes
+        time_delta = timedelta(days=7)
+        if slide_range == "2":
+            time_delta = timedelta(days=30)
+        elif slide_range == "3":
+            time_delta = timedelta(days=90)
+        elif slide_range == "4":
+            time_delta = timedelta(days=180)
 
-        return context
+        date_range = now - time_delta
+
+        slides = Slide.objects.filter(
+            created_at__gte=date_range,
+            unit__identification__entryform__forms__cancelled=0,
+            unit__identification__entryform__forms__form_closed=0,
+        ).select_related("unit__identification__entryform")
+
+        return slides
 
 
 class SlideDetail(View):
@@ -737,16 +859,3 @@ class ProcessList(View):
     def get(self, request):
         processes = Process.objects.all()
         return render(request, "process/index.html", {"processes": processes})
-
-
-@login_required
-def case_process_state(request, pk):
-    """
-    Displays general information, lab process state, and service reading availability
-    for the provided pk's :model:`lab.Case`
-    """
-
-    case = get_object_or_404(Case, pk=pk)
-    analysis = Analysis.objects.filter(entryform=case)
-
-    return render(request, "cases/state.html", {"case": case, "analysis": analysis})

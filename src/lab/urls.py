@@ -12,6 +12,7 @@ urlpatterns = [
     path("case/<int:pk>/state", views.case_process_state, name="case_process_state"),
     path("organs", views.organ_list, name="organ_index"),
     path("stains", views.stain_list, name="stain_index"),
+    path("units", views.unit_select_options, name="unit_select_options"),
     #
     # Cassettes Routes
     #

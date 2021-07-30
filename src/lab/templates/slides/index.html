@@ -13,10 +13,20 @@
                 </span>
             </header>
             <section class="card-body table-responsive">
-                <div class="row justify-content-end mb-1">
-                    <div class="col-md-1">
-
-                      <button id="btnCreate" class="btn btn-primary">Crear</button>
+                <div class="row justify-content-between mb-1">
+                    <div class="col-md-3">
+                        <form class="d-flex flex-row" method="GET">
+                            <select class="form-control mr-1" name="range">
+                                <option selected value="1">Ultima Semana</option>
+                                <option value="2">Ultimo Mes</option>
+                                <option value="3">Ultimos 3 Meses</option>
+                                <option value="4">Ultimos 6 Meses</option>
+                            </select>
+                            <button class="btn btn-info" type="submit">Filtrar lista de cassettes</button>
+                        </form>
+                    </div>
+                    <div class="col-md-2">
+                        <button id="btnCreate" class="btn btn-primary">Crear un nuevo slide</button>
                     </div>
                 </div>
                 <table class="table table-bordered table-striped zero-configuration">
@@ -113,27 +123,6 @@
                     <div class="row my-1">
                         <div class="col-md">
                             <select id="newSelectUnit" class="w-full">
-                                <optgroup label="Casos sin Cassettes">
-                                {% for case in cases %}
-                                {% for identification in case.identifications.all %}
-                                {% for unit in identification.units.all %}
-                                    <option value="backend.unit.{{unit.id}}">
-                                        {{case.no_caso}} / {{identification.cage}} / {{unit.correlative}}
-                                    </option>
-                                {% endfor %}
-                                {% endfor %}
-                                {% endfor %}
-                                </optgroup>
-                                <optgroup label="Casos con Cassettes">
-                                {% for cassette in cassettes %}
-                                    <option value="lab.cassette.{{cassette.id}}">
-                                        {{ cassette.unit.identification.entryform.no_caso }}
-                                        / {{ cassette.unit.identification.cage }}
-                                        / {{ cassette.unit.correlative }}
-                                        / {{ cassette.correlative}}
-                                    </option>
-                                {% endfor %}
-                                </optgroup>
                             </select>
                             <small>Correlativo se ingresa automaticamente al guardar.</small>
                         </div>
