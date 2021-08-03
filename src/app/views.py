@@ -900,6 +900,7 @@ def template_resumen_report(request, id, userId):
 
     subflow = entryform_object.get_subflow
     entryform["subflow"] = subflow
+    entryform["entry_format"] = entryform_object.get_entry_format_display()
     identifications = list(
         Identification.objects.filter(entryform=entryform["id"]).values()
     )
