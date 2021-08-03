@@ -164,14 +164,20 @@
           <td class="col-xs-2">
             <span class="t3">Fecha Muestreo:</span>
           </td>
-          <td colspan="2" class="col-xs-4">
+          <td class="col-xs-2">
             <span class="t3_n">{{ entryform.sampled_at|date:'d/m/Y, H:i'}}</span>
           </td>
           <td class="col-xs-2">
             <span class="t3">Fijador:</span>
           </td>
-          <td colspan="2" class="col-xs-4">
+          <td colspan="2" class="col-xs-2">
             <span class="t3_n">{{entryform.fixative.name|default:""|title}}</span>
+          </td>
+          <td class="col-xs-2">
+            <span class="t3">Formato Ingreso:</span>
+          </td>
+          <td colspan="2" class="col-xs-2">
+            <span class="t3_n">{{entryform.entry_format.name|default:""|title}}</span>
           </td>
         </tr>
 
@@ -227,14 +233,14 @@
           <td class="col-xs-2 t3_n">{{item.cage}}</td>
           <td class="col-xs-2" style="background-color: #fbe9e7;"><span class="t3"> Grupo/Nro Caso Cliente: </span></td>
           <td class="col-xs-2 t3_n">{{item.group}}</td>
-          <td class="col-xs-2" style="background-color: #fbe9e7;"><span class="t3"> Peso Promedio: </span></td>
-          <td class="col-xs-2 t3_n">{{item.weight}}</td>
+          <td class="col-xs-2" style="background-color: #fbe9e7;"><span class="t3"> Caracteristicas Extras: </span></td>
+          <td class="col-xs-2 t3_n">{{item.extra_features_detail}}</td>
         </tr>
         <tr>
-          <td class="col-xs-2" style="background-color: #fbe9e7;"><span class="t3"> Contenedores: </span></td>
-          <td class="col-xs-2 t3_n">{{item.no_container}}</td>
-          <td  class="col-xs-2" style="background-color: #fbe9e7;"><span class="t3"> Peces </span></td>
-          <td class="col-xs-2 t3_n">{{item.no_fish}}</td>
+          <td class="col-xs-2" style="background-color: #fbe9e7;"><span class="t3"> Peso Promedio: </span></td>
+          <td class="col-xs-2 t3_n">{{item.weight}}</td>
+          <td  class="col-xs-2" style="background-color: #fbe9e7;"><span class="t3"> Unidades: </span></td>
+          <td class="col-xs-2 t3_n">{{item.units.count}}</td>
           <td class="col-xs-2" style="background-color: #fbe9e7;"><span class="t3"> ¿Óptimo? </span></td>
           <td class="col-xs-2 t3_n">{% if item.is_optimum %} Sí {%else%} No {% endif %}</td>
         </tr>

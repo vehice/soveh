@@ -164,14 +164,20 @@
           <td class="col-xs-2">
             <span class="t3">Sampling Date:</span>
           </td>
-          <td colspan="2" class="col-xs-4">
+          <td colspan="2" class="col-xs-2">
             <span class="t3_n">{{ entryform.sampled_at|date:'m/d/Y, H:i'}}</span>
           </td>
           <td class="col-xs-2">
             <span class="t3">Fixative:</span>
           </td>
-          <td colspan="2" class="col-xs-4">
+          <td colspan="2" class="col-xs-2">
             <span class="t3_n">{{entryform.fixative.name|default:""|title}}</span>
+          </td>
+          <td class="col-xs-2">
+            <span class="t3">Entry format:</span>
+          </td>
+          <td colspan="2" class="col-xs-2">
+            <span class="t3_n">{{entryform.entry_format.name|default:""|title}}</span>
           </td>
         </tr>
 
@@ -227,23 +233,23 @@
           <td class="col-xs-2 t3_n">{{item.cage}}</td>
           <td class="col-xs-2" style="background-color: #fbe9e7;"><span class="t3"> Group/Batch: </span></td>
           <td class="col-xs-2 t3_n">{{item.group}}</td>
-          <td class="col-xs-2" style="background-color: #fbe9e7;"><span class="t3"> Weight (g): </span></td>
-          <td class="col-xs-2 t3_n">{{item.weight}}</td>
+          <td class="col-xs-2" style="background-color: #fbe9e7;"><span class="t3"> Extra Features: </span></td>
+          <td class="col-xs-2 t3_n">{{item.extra_features_detail}}</td>
         </tr>
         <tr>
-          <td class="col-xs-2" style="background-color: #fbe9e7;"><span class="t3"> No. Containers: </span></td>
-          <td class="col-xs-2 t3_n">{{item.no_container}}</td>
-          <td  class="col-xs-2" style="background-color: #fbe9e7;"><span class="t3"> No. Fishes: </span></td>
-          <td class="col-xs-2 t3_n">{{item.no_fish}}</td>
+          <td class="col-xs-2" style="background-color: #fbe9e7;"><span class="t3"> Weight (g): </span></td>
+          <td class="col-xs-2 t3_n">{{item.weight}}</td>
+          <td  class="col-xs-2" style="background-color: #fbe9e7;"><span class="t3"> No. Units: </span></td>
+          <td class="col-xs-2 t3_n">{{item.units.count}}</td>
           <td class="col-xs-2" style="background-color: #fbe9e7;"><span class="t3"> Optimum? </span></td>
-          <td class="col-xs-2 t3_n">{% if item.is_optimum %} Sí {%else%} No {% endif %}</td>
+          <td class="col-xs-2 t3_n">{% if item.is_optimum %} Yes {%else%} No {% endif %}</td>
         </tr>
         <tr>
           <td class="col-xs-2" style="background-color: #fbe9e7;"><span class="t3">Observations</span></td>
           <td colspan="5" class="t3_n">{{item.observation}}</td>
         </tr>
         <tr>
-          <td class="col-xs-2" style="background-color: #fbe9e7;"><span class="t3">ANALYSES REQUESTED</span></td>
+          <td class="col-xs-2" style="background-color: #fbe9e7;"><span class="t3">ANALYSIS REQUESTED</span></td>
           <td colspan="5">
             {% for key, value in item.servicios.items %} 
               <p>
