@@ -177,7 +177,7 @@
             <span class="t3">Entry format:</span>
           </td>
           <td class="col-xs-2">
-            <span class="t3_n">{{entryform.entry_format.name|default:""|title}}</span>
+            <span class="t3_n">{{entryform.get_entry_format_display|default:""|title}}</span>
           </td>
         </tr>
 
@@ -240,7 +240,7 @@
           <td class="col-xs-2" style="background-color: #fbe9e7;"><span class="t3"> Weight (g): </span></td>
           <td class="col-xs-2 t3_n">{{item.weight}}</td>
           <td  class="col-xs-2" style="background-color: #fbe9e7;"><span class="t3"> No. Units: </span></td>
-          <td class="col-xs-2 t3_n">{{item.unit_set.count}}</td>
+          <td class="col-xs-2 t3_n">{{item.unit_count}}</td>
           <td class="col-xs-2" style="background-color: #fbe9e7;"><span class="t3"> Optimum? </span></td>
           <td class="col-xs-2 t3_n">{% if item.is_optimum %} Yes {%else%} No {% endif %}</td>
         </tr>

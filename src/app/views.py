@@ -975,6 +975,7 @@ def template_resumen_report(request, id, userId):
             ident, exclude=["organs", "organs_before_validations"]
         )
         ident_json["organs_set"] = list(ident.organs.all().values())
+        ident_json["unit_count"] = ident.unit_set.count()
         entryform["identifications"].append(ident_json)
 
     entryform["analyses"] = list(
