@@ -198,13 +198,31 @@ class Slide(models.Model):
 
     @property
     def tag(self):
+        """
+        A Tag is a string identifier used in third party services and
+        in-site lab.
+        """
         no_caso = self.unit.identification.entryform.no_caso[1::]
         stain = self.stain.abbreviation.replace(" ", ",").replace("+", ",").upper()
         correlative = str(self.correlative).zfill(3)
 
         return f"{no_caso},{stain},{correlative}"
 
+    @property
+    def organs(self):
+        if self.cassette:
+            return self.cassette.organs.all()
+
+        if self.unit:
+            return self.unit.organs.all()
+
+        return Organ.objects.none()
+
     def get_absolute_url(self):
+        """
+        Returns a URL string with a `guess` from what a
+        Slide view in DsStore is located.
+        """
         tag = self.tag
 
         with connections["dsstore"].cursor() as cursor:
