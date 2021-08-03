@@ -19,7 +19,8 @@
                             <thead>
                                 <tr>
                                     <th scope="col">Slide</th>
-                                    <th scope="col">Identificacion / Unidad</th>
+                                    <th scope="col">Identificación</th>
+                                    <th scope="col">Unidad</th>
                                     <th scope="col">Grupo</th>
                                     <th scope="col">Organos</th>
                                     <th scope="col">Tincion</th>
@@ -31,10 +32,11 @@
                                 {% for slide in slides %}
                                 <tr>
                                     <th scope="row">{{ slide.correlative }}</th>
-                                    <td>{{ slide.unit.identification.cage }} / {{ slide.unit.correlative }}</td>
+                                    <td>{{ slide.unit.identification.cage }}</td>
+                                    <td>{{ slide.unit.correlative }}</td>
                                     <td>{{ slide.unit.identification.group }}</td>
                                     <td>
-                                        {% for organ in slide.cassette.organs.all %}
+                                        {% for organ in slide.organs %}
                                             {{ organ.abbreviation }},
                                         {% endfor %}
                                         </td>
