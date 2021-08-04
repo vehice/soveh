@@ -170,6 +170,18 @@ class CassetteOrgan(models.Model):
         db_table = "lab_cassette_organ"
 
 
+class UnitDifference(models.Model):
+    STATUS = ((0, "SIN CORREGIR"), (1, "CORREGIDO"))
+    unit = models.ForeignKey(Unit, on_delete=models.CASCADE)
+    organ = models.ForeignKey(Organ, on_delete=models.CASCADE)
+    difference = models.IntegerField()
+
+    status = models.IntegerField(choices=STATUS, default=0)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+
 class Slide(models.Model):
     """
     A Slide contains a cut after it's stained, it can be
