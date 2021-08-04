@@ -1,0 +1,28 @@
+{% extends 'layout.html' %}
+{% load static %}
+
+{% block content %}
+<!-- MAIN -->
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <header class="card-header">
+                <h1 class="card-title">CASSETTES</h1>
+            </header>
+            <main class="card-body table-responsive">
+                <section class="row d-flex justify-content-around mt-2">
+                    <a class="btn btn-outline-success" href="{% url 'lab:cassette_build' %}">Armado de Cassettes</a>
+                    <a class="btn btn-outline-warning" href="{% url 'lab:cassette_difference' %}">Diferencias de Cassettes</a>
+                    <a class="btn btn-outline-primary" href="{% url 'lab:cassette_index' %}">Indice de Cassettes</a>
+                    <a class="btn btn-outline-primary" href="">Reportes de Cassettes</a>
+                </section>
+            </main>
+        </div>
+    </div>
+</div>
+
+<!-- END MAIN -->
+
+{% endblock content %}
+{% block scripts %}
+{% endblock scripts %}

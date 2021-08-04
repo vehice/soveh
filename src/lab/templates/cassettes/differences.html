@@ -1,0 +1,50 @@
+{% extends 'layout.html' %}
+{% load static %}
+
+{% block content %}
+<!-- MAIN -->
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <header class="card-header">
+                <h1 class="card-title">CASSETTES</h1>
+            </header>
+            <main class="card-body">
+                <table class="table table-sm table-bordered table-striped compact">
+                    <thead>
+                        <tr>
+                            <th>Caso</th>
+                            <th>Identificacion</th>
+                            <th>Unidad</th>
+                            <th>Diferencia</th>
+                            <th>Resolver</th>
+                            <th>Corregir</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for difference in differences %}
+                        <tr>
+                            <td>{{ difference.unit.identification.entryform.no_caso }}</td>
+                            <td>{{ difference.unit.identification.cage }}</td>
+                            <td>{{ difference.unit.correlative }}</td>
+                            <td>{{ difference.organ.abbreviation }} ({{difference.difference}})</td>
+                            <td>
+                                <button class="btn btn-warning">SIN REVISAR</button>
+                            </td>
+                            <td>
+                                <a href="">Editar Identificacion/Unidad</a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </main>
+        </div>
+    </div>
+</div>
+
+<!-- END MAIN -->
+
+{% endblock content %}
+{% block scripts %}
+{% endblock scripts %}

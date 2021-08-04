@@ -17,7 +17,15 @@ from django.views import View
 from django.views.generic import DetailView, ListView
 
 from backend.models import Exam, Organ, SampleExams, Stain, Unit
-from lab.models import Analysis, Case, Cassette, CassetteOrgan, Process, Slide
+from lab.models import (
+    Analysis,
+    Case,
+    Cassette,
+    CassetteOrgan,
+    Process,
+    Slide,
+    UnitDifference,
+)
 
 
 def home(request):
@@ -205,6 +213,103 @@ def unit_select_options(request):
 # Cassette related views
 
 
+@login_required
+def cassette_home(request):
+    return render(request, "cassettes/home.html")
+
+
+@login_required
+def cassette_differences(request):
+    differences = UnitDifference.objects.filter(status=0)
+    context = {"differences": differences}
+    return render(request, "cassettes/differences.html", context)
+
+
+@login_required
+def cassette_prebuild(request):
+    """
+    Receives a JSON with 2 keys: `selected` which is an array of unit ids;
+    and `rules` which is a dictionary that dictates how the cassettes are build,
+
+    * rules["unique"]
+        Is an array of unit ids in which all of those units are to be put by themselves
+        in their own Cassette.
+
+    * rules["groups"]
+        Is an array of arrays containing unit ids, in which all of those groups must be put
+        together in their own Cassettes.
+
+    * rules["max"]
+        Is an integer greater than or equal to 0, and any Cassette can't have more organs than this
+        number, unless is 0, then a Cassette can have as many Organs as available.
+
+
+    This returns a JSON containing Cassette prototypes.
+    """
+    items = json.loads(request.body)
+    units_id = items["selected"]
+    rules = items["rules"]
+
+    units = Unit.objects.filter(pk__in=units_id).order_by("identification__entryform")
+
+    response = []
+
+    def response_format(unit, organs, count):
+        return {
+            "case": unit.identification.entryform.no_caso,
+            "identification": unit.identification.cage,
+            "unit": unit.correlative,
+            "unit_id": unit.id,
+            "cassette": count,
+            "organs": serializers.serialize("json", unit.organs.all()),
+            "cassette_organs": serializers.serialize("json", organs),
+        }
+
+    for unit in units:
+        cassette_count = unit.cassettes.count()
+        cassette_count = 1 if cassette_count == 0 else cassette_count
+        excludes = []
+
+        if rules["uniques"] and len(rules["uniques"]) > 0:
+            organs = unit.organs.filter(pk__in=rules["uniques"])
+
+            if not organs.count() <= 0:
+                for organ in organs:
+                    response.append(response_format(unit, [organ], cassette_count))
+                    cassette_count += 1
+
+                excludes.extend([pk for pk in rules["uniques"]])
+
+        if rules["groups"] and len(rules["groups"]) > 0:
+            for group in rules["groups"]:
+                organs = unit.organs.filter(pk__in=group).exclude(pk__in=excludes)
+
+                if not organs.count() <= 0:
+                    response.append(response_format(unit, organs, cassette_count))
+                    cassette_count += 1
+                    excludes.extend([pk for pk in group])
+
+        organs = unit.organs.exclude(pk__in=excludes).order_by("-id")
+
+        if rules["max"] and rules["max"] > 0:
+            organs_pages = Paginator(organs, rules["max"], allow_empty_first_page=False)
+
+            for page in organs_pages.page_range:
+                try:
+                    current_page = response_format(
+                        unit, organs_pages.get_page(page), cassette_count
+                    )
+                except InvalidPage:
+                    continue
+                else:
+                    response.append(current_page)
+                    cassette_count += 1
+        elif organs.count() > 0:
+            response.append(response_format(unit, organs, cassette_count))
+
+    return HttpResponse(json.dumps(response), content_type="application/json")
+
+
 class CassetteBuild(View):
     @method_decorator(login_required)
     def get(self, request):
@@ -301,91 +406,6 @@ class CassetteBuild(View):
             safe=False,
             status=201,
         )
-
-
-@login_required
-def cassette_prebuild(request):
-    """
-    Receives a JSON with 2 keys: `selected` which is an array of unit ids;
-    and `rules` which is a dictionary that dictates how the cassettes are build,
-
-    * rules["unique"]
-        Is an array of unit ids in which all of those units are to be put by themselves
-        in their own Cassette.
-
-    * rules["groups"]
-        Is an array of arrays containing unit ids, in which all of those groups must be put
-        together in their own Cassettes.
-
-    * rules["max"]
-        Is an integer greater than or equal to 0, and any Cassette can't have more organs than this
-        number, unless is 0, then a Cassette can have as many Organs as available.
-
-
-    This returns a JSON containing Cassette prototypes.
-    """
-    items = json.loads(request.body)
-    units_id = items["selected"]
-    rules = items["rules"]
-
-    units = Unit.objects.filter(pk__in=units_id).order_by("identification__entryform")
-
-    response = []
-
-    def response_format(unit, organs, count):
-        return {
-            "case": unit.identification.entryform.no_caso,
-            "identification": unit.identification.cage,
-            "unit": unit.correlative,
-            "unit_id": unit.id,
-            "cassette": count,
-            "organs": serializers.serialize("json", unit.organs.all()),
-            "cassette_organs": serializers.serialize("json", organs),
-        }
-
-    for unit in units:
-        cassette_count = unit.cassettes.count()
-        cassette_count = 1 if cassette_count == 0 else cassette_count
-        excludes = []
-
-        if rules["uniques"] and len(rules["uniques"]) > 0:
-            organs = unit.organs.filter(pk__in=rules["uniques"])
-
-            if not organs.count() <= 0:
-                for organ in organs:
-                    response.append(response_format(unit, [organ], cassette_count))
-                    cassette_count += 1
-
-                excludes.extend([pk for pk in rules["uniques"]])
-
-        if rules["groups"] and len(rules["groups"]) > 0:
-            for group in rules["groups"]:
-                organs = unit.organs.filter(pk__in=group).exclude(pk__in=excludes)
-
-                if not organs.count() <= 0:
-                    response.append(response_format(unit, organs, cassette_count))
-                    cassette_count += 1
-                    excludes.extend([pk for pk in group])
-
-        organs = unit.organs.exclude(pk__in=excludes).order_by("-id")
-
-        if rules["max"] and rules["max"] > 0:
-            organs_pages = Paginator(organs, rules["max"], allow_empty_first_page=False)
-
-            for page in organs_pages.page_range:
-                try:
-                    current_page = response_format(
-                        unit, organs_pages.get_page(page), cassette_count
-                    )
-                except InvalidPage:
-                    continue
-                else:
-                    response.append(current_page)
-                    cassette_count += 1
-        elif organs.count() > 0:
-            response.append(response_format(unit, organs, cassette_count))
-
-    return HttpResponse(json.dumps(response), content_type="application/json")
 
 
 @method_decorator(login_required, name="dispatch")
