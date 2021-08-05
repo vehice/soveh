@@ -25,14 +25,14 @@
                         {% for difference in differences %}
                         <tr>
                             <td>{{ difference.unit.identification.entryform.no_caso }}</td>
-                            <td>{{ difference.unit.identification.cage }}</td>
+                            <td>{{ difference.unit.identification }}</td>
                             <td>{{ difference.unit.correlative }}</td>
                             <td>{{ difference.organ.abbreviation }} ({{difference.difference}})</td>
                             <td>
-                                <button class="btn btn-warning">SIN REVISAR</button>
+                                <button id="{{difference.pk}}" class="btn btn-warning markAsFixed">SIN REVISAR</button>
                             </td>
                             <td>
-                                <a href="">Editar Identificacion/Unidad</a>
+                                <a href="{% url 'lab:redirect_to_workflow_edit' difference.unit.identification.entryform.pk 2 %}">Editar Identificacion/Unidad</a>
                             </td>
                         </tr>
                         {% endfor %}
@@ -47,4 +47,67 @@
 
 {% endblock content %}
 {% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.1.2/dist/sweetalert2.all.min.js"></script>
+<script type="text/javascript">
+ function getCookie(name) {
+     var cookieValue = null;
+     if (document.cookie && document.cookie !== "") {
+         var cookies = document.cookie.split(";");
+         for (var i = 0; i < cookies.length; i++) {
+             var cookie = jQuery.trim(cookies[i]);
+             // Does this cookie string begin with the name we want?
+             if (cookie.substring(0, name.length + 1) === name + "=") {
+                 cookieValue = decodeURIComponent(
+                     cookie.substring(name.length + 1)
+                 );
+                 break;
+             }
+         }
+     }
+     return cookieValue;
+ }
+
+ $(document).ready(() => {
+     $(".markAsFixed").click((e) => {
+         const differenceId = e.target.id;
+
+         Swal.fire({
+             title: "Se marcará como Revisado",
+             icon: "info",
+             text: "Puede agregar un comentario opcional:",
+             input: "text",
+             confirmButtonText: "Listo, marcar como revisado",
+             cancelButtonText: "Cancelar",
+             showCancelButton: true
+         }).then((result) => {
+             if (result.isConfirmed) {
+
+                 $.ajax(Urls["lab:update_unit_difference"](differenceId), {
+                     data: { message: result.value },
+
+                     method: "POST",
+
+                     headers: {
+                         "X-CSRFToken": getCookie("csrftoken"),
+                     },
+                     success: (data, textStatus) => {
+                         Swal.fire({
+                             icon: "success",
+                             title: "Se ha marcado como revisado",
+                             text: "Se recargará la pagina"
+                         }).then(() => {
+                            location.reload();
+                         });
+                     },
+                     error: (xhr, textStatus, error) => {
+                         Swal.fire({
+                             icon: "error",
+                         });
+                     },
+                 });
+             }
+         })
+     })
+ })
+</script>
 {% endblock scripts %}

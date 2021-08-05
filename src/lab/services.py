@@ -1,5 +1,7 @@
-from lab.models import CassetteOrgan, UnitDifference
+from lab.models import Case, CassetteOrgan, UnitDifference
 from django.db.models import Count
+from workflows.models import Form
+from django.shortcuts import get_object_or_404
 
 
 def generate_differences(unit):
@@ -31,14 +33,29 @@ def generate_differences(unit):
                     difference = (
                         unit_organ["organ_count"] - cassette_organ["organ_count"]
                     )
-                    differences.append(
-                        {
-                            "organ": unit_organ["organ"],
-                            "difference": difference,
-                        }
+                    obj, created = UnitDifference.objects.update_or_create(
+                        unit=unit,
+                        organ_id=unit_organ["organ"],
+                        defaults={"difference": difference},
                     )
-                    UnitDifference.objects.create(
-                        unit=unit, organ_id=unit_organ["organ"], difference=difference
-                    )
+                    differences.append(obj)
 
     return differences
+
+
+def change_case_step(case_pk, step):
+    """
+    Updates the given :model:`workflow.Form` to the given
+    step, regardless of current state.
+    """
+
+    case = get_object_or_404(Case, pk=case_pk)
+    form = case.forms.first()
+
+    if form.reception_finished and int(step) in (2, 3):
+        form.reception_finished = False
+        form.reception_finished_at = None
+    form.state_id = step
+    form.save()
+
+    return (case, form)

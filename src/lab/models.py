@@ -16,6 +16,7 @@ from backend.models import (
     Stain,
     Unit,
 )
+from django.contrib.auth.models import User
 
 
 class Analysis(AnalysisForm):
@@ -176,7 +177,12 @@ class UnitDifference(models.Model):
     organ = models.ForeignKey(Organ, on_delete=models.CASCADE)
     difference = models.IntegerField()
 
-    status = models.IntegerField(choices=STATUS, default=0)
+    status = models.PositiveSmallIntegerField(choices=STATUS, default=0)
+    status_change_log = models.TextField(null=True, blank=True)
+    status_changed_at = models.DateTimeField(null=True, blank=True)
+    status_changed_by = models.ForeignKey(
+        User, on_delete=models.CASCADE, null=True, blank=True
+    )
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

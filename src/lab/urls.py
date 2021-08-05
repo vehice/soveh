@@ -10,6 +10,16 @@ urlpatterns = [
     path("case/<int:pk>", views.CaseDetail.as_view(), name="case_detail"),
     path("case/<int:pk>/sheet", views.CaseReadSheet.as_view(), name="case_read_sheet"),
     path("case/<int:pk>/state", views.case_process_state, name="case_process_state"),
+    path(
+        "case/<int:pk>/<int:step>/edit",
+        views.redirect_to_workflow_edit,
+        name="redirect_to_workflow_edit",
+    ),
+    path(
+        "difference/<int:pk>",
+        views.update_unit_difference,
+        name="update_unit_difference",
+    ),
     path("organs", views.organ_list, name="organ_index"),
     path("stains", views.stain_list, name="stain_index"),
     path("units", views.unit_select_options, name="unit_select_options"),

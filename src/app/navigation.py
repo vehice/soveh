@@ -108,18 +108,7 @@ def default_tree(user):
                         "path": reverse("lab:home"),
                         "section_name": "Inicio" if language == 1 else "Home",
                     },
-                    {
-                        "path": reverse("lab:cassette_build"),
-                        "section_name": "Armar Cassettes"
-                        if language == 1
-                        else "Build Cassettes",
-                    },
-                    {
-                        "path": reverse("lab:cassette_index"),
-                        "section_name": "Indice Cassettes"
-                        if language == 1
-                        else "Index Cassettes",
-                    },
+                    {"path": reverse("lab:cassette_home"), "section_name": "Cassettes"},
                     {
                         "path": reverse("lab:slide_build"),
                         "section_name": "Armar Slides"

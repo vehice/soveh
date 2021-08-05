@@ -11,7 +11,7 @@ from django.db.models.query_utils import Q
 from django.db.utils import IntegrityError
 from django.forms.models import model_to_dict
 from django.http import Http404, HttpResponse, JsonResponse
-from django.shortcuts import get_object_or_404, render
+from django.shortcuts import get_object_or_404, redirect, render
 from django.utils.decorators import method_decorator
 from django.views import View
 from django.views.generic import DetailView, ListView
@@ -26,6 +26,8 @@ from lab.models import (
     Slide,
     UnitDifference,
 )
+from lab.services import change_case_step
+from django.urls import reverse
 
 
 def home(request):
@@ -215,14 +217,54 @@ def unit_select_options(request):
 
 @login_required
 def cassette_home(request):
-    return render(request, "cassettes/home.html")
+    """Dashboard for Cassettes.
+    Includes links to build, reports, and index.
+    """
+    build_count = Unit.objects.filter(
+        cassettes__isnull=True,
+        identification__entryform__entry_format__in=[1, 2, 6, 7],
+    ).count()
+    differences_count = UnitDifference.objects.filter(status=0).count()
+
+    return render(
+        request,
+        "cassettes/home.html",
+        {"build_count": build_count, "differences_count": differences_count},
+    )
 
 
 @login_required
 def cassette_differences(request):
+    """
+    List of all :model:`lab.UnitDifference` generated during :view:`lab.CassetteBuild`
+    that haven't been resolved (as in status=1).
+    """
     differences = UnitDifference.objects.filter(status=0)
     context = {"differences": differences}
     return render(request, "cassettes/differences.html", context)
+
+
+@login_required
+def redirect_to_workflow_edit(request, pk, step):
+    """Redirects a case to it's workflow form according to the given step"""
+    case, form = change_case_step(pk, step)
+    return redirect(reverse("workflow_w_id", kwargs={"form_id": form.pk}))
+
+
+@login_required
+def update_unit_difference(request, pk):
+    """
+    Toggle the state for the given :model:`lab.UnitDifference` between
+    0 (Unreviewed) and 1 (reviewed).
+    """
+    difference = get_object_or_404(UnitDifference, pk=pk)
+    difference.status = not difference.status
+    log_message = request.POST.get("message")
+    if log_message:
+        difference.status_change_log = f"{difference.status_change_log};{log_message}"
+    difference.save()
+
+    return JsonResponse(model_to_dict(difference))
 
 
 @login_required
