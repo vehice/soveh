@@ -12,6 +12,7 @@ from django.db.utils import IntegrityError
 from django.forms.models import model_to_dict
 from django.http import Http404, HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
 from django.utils.decorators import method_decorator
 from django.views import View
 from django.views.generic import DetailView, ListView
@@ -27,7 +28,7 @@ from lab.models import (
     UnitDifference,
 )
 from lab.services import change_case_step
-from django.urls import reverse
+import csv
 
 
 def home(request):
@@ -215,22 +216,146 @@ def unit_select_options(request):
 # Cassette related views
 
 
-@login_required
-def cassette_home(request):
-    """Dashboard for Cassettes.
-    Includes links to build, reports, and index.
-    """
-    build_count = Unit.objects.filter(
-        cassettes__isnull=True,
-        identification__entryform__entry_format__in=[1, 2, 6, 7],
-    ).count()
-    differences_count = UnitDifference.objects.filter(status=0).count()
+class CassetteHome(View):
+    def get_context(self):
+        """
+        Returns common context for the class.
+        """
+        build_count = Unit.objects.filter(
+            cassettes__isnull=True,
+            identification__entryform__entry_format__in=[1, 2, 6, 7],
+        ).count()
+        differences_count = UnitDifference.objects.filter(status=0).count()
+        return {"build_count": build_count, "differences_count": differences_count}
 
-    return render(
-        request,
-        "cassettes/home.html",
-        {"build_count": build_count, "differences_count": differences_count},
-    )
+    def report_created_cassettes(self, date_range, response=None):
+        """
+        Returns a list with :model:`lab.Cassette` which have been
+        created within the given date range tuple (start, end).
+        """
+        cassettes = Cassette.objects.filter(
+            created_at__gte=date_range[0], created_at__lte=date_range[1]
+        )
+
+        response_data = []
+
+        if response:
+            csv_writer = csv.writer(response)
+            csv_writer.writerow(
+                ["Caso", "Identificacion", "Unidad", "Cassette", "Organos"]
+            )
+
+            for cassette in cassettes:
+                organs_text = ",".join(
+                    [organ.abbreviation for organ in cassette.organs.all()]
+                )
+                csv_writer.writerow(
+                    [
+                        cassette.unit.identification.entryform.no_caso,
+                        str(cassette.unit.identification),
+                        cassette.unit.correlative,
+                        cassette.correlative,
+                        organs_text,
+                    ]
+                )
+
+            return response
+
+        return cassettes
+
+    def report_differences_cassettes(self, date_range, include_solved, response=None):
+        """
+        Returns a list with :model:`lab.UnitDifferences` which have been
+        created withing the given date range tuple (start, end).
+        """
+        differences = UnitDifference.objects.filter(
+            created_at__gte=date_range[0], created_at__lte=date_range[1]
+        )
+
+        if not include_solved:
+            differences = differences.filter(status=0)
+
+        if response:
+            csv_writer = csv.writer(response)
+            csv_writer.writerow(
+                ["Caso", "Identificacion", "Unidad", "Organo", "Cantidad"]
+            )
+
+            for difference in differences:
+                csv_writer.writerow(
+                    [
+                        difference.unit.identification.entryform.no_caso,
+                        str(difference.unit.identification),
+                        difference.unit.correlative,
+                        difference.organ,
+                        difference.difference,
+                    ]
+                )
+
+            return response
+
+        return differences
+
+    @method_decorator(login_required)
+    def get(self, request):
+        """Dashboard for Cassettes.
+        Includes links to build, reports, and index.
+        """
+        context = self.get_context()
+
+        return render(request, "cassettes/home.html", context)
+
+    @method_decorator(login_required)
+    def post(self, request):
+        """
+        Returns either a FileResponse or an HttpResponse
+        from the given parameters.
+
+        **REQUEST**
+            ``report_name``: Name of the report that will be generated. ("created", "differences")
+            ``from_date``: Earlier limit for the date range.
+            ``to_date``: Latest limit for the date range. Defaults to current.
+            ``include_solved``: Latest limit for the date range. Defaults to current.
+            ``report_type``: boolean which determines if the response is a file or on-screen.
+        """
+        try:
+            from_date = parse(request.POST.get("from_date"))
+        except ParserError:
+            raise Http404
+        try:
+            to_date = request.POST.get("to_date")
+        except ParserError:
+            to_date = datetime.now()
+
+        date_range = (from_date, to_date)
+
+        report_name = request.POST.get("report_name")
+        is_csv = int(request.POST.get("report_type"))
+
+        if is_csv:
+            response = HttpResponse(content_type="text/csv")
+            response["Content-Disposition"] = 'attachment; filename="somefilename.csv"'
+
+            if report_name == "created":
+                return self.report_created_cassettes(date_range, response)
+            elif report_name == "differences":
+                return self.report_differences_cassettes(date_range, response)
+
+            raise Http404
+
+        context = self.get_context()
+        context["report_name"] = report_name
+        if report_name == "created":
+            context["rows"] = self.report_created_cassettes(date_range)
+        elif report_name == "differences":
+            include_solved = bool(request.POST.get("include_solved"))
+            context["rows"] = self.report_differences_cassettes(
+                date_range, include_solved
+            )
+
+        print(context["rows"])
+
+        return render(request, "cassettes/home.html", context)
 
 
 @login_required
@@ -299,7 +424,7 @@ def cassette_prebuild(request):
     def response_format(unit, organs, count):
         return {
             "case": unit.identification.entryform.no_caso,
-            "identification": unit.identification.cage,
+            "identification": str(unit.identification),
             "unit": unit.correlative,
             "unit_id": unit.id,
             "cassette": count,

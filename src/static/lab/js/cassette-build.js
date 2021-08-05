@@ -122,7 +122,7 @@ $(document).ready(function () {
                 data: "identification",
                 name: "identification",
                 type: "string",
-                title: "Est/Jau",
+                title: "Identificacion",
                 orderData: [0],
             },
             {

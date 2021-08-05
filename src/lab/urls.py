@@ -26,7 +26,7 @@ urlpatterns = [
     #
     # Cassettes Routes
     #
-    path("cassettes", views.cassette_home, name="cassette_home"),
+    path("cassettes", views.CassetteHome.as_view(), name="cassette_home"),
     path("cassettes/index", views.CassetteIndex.as_view(), name="cassette_index"),
     path("cassettes/diff", views.cassette_differences, name="cassette_difference"),
     path("cassettes/<int:pk>", views.CassetteDetail.as_view(), name="cassette_detail"),

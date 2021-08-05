@@ -29,8 +29,113 @@
                     >
                         Indice de Cassettes
                     </a>
-                    <a class="btn btn-outline-primary" href="">Reportes de Cassettes</a>
                 </section>
+                <section class="row my-2">
+                    <div class="col-md-12">
+                        <h5>Reporte de Cassettes Generados</h5>
+                        <form class="row align-items-center" method="POST">
+                            {% csrf_token %}
+                            <input type="hidden" name="report_name" value="created" />
+                            <div class="form-group col-md-2">
+                                <label for="">Desde:</label>
+                                <input class="form-control" name="from_date" type="date" value=""/>
+                            </div>
+                            <div class="form-group col-md-2">
+                                <label for="">Hasta:</label>
+                                <input class="form-control" name="to_date" type="date" value=""/>
+                            </div>
+                            <div class="col-md-2 offset-md-2">
+                                <button name="report_type" value="0" class="btn btn-info">Generar reporte en pantalla</button>
+                            </div>
+                            <div class="col-md-2">
+                                <button name="report_type" value="1" class="btn btn-secondary">Generar reporte en csv/excel</button>
+                            </div>
+                        </form>
+                    </div>
+                </section>
+                {% if report_name and report_name == "created" %}
+                <section class="row my-1">
+                    <div class="col-md-12 table-responsive">
+                        <table class="table table-sm table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Caso</th>
+                                    <th>Identificacion</th>
+                                    <th>Unidad</th>
+                                    <th>Cassette</th>
+                                    <th>Organos</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for cassette in rows %}
+                                <tr>
+                                    <td>{{ cassette.unit.identification.entryform.no_caso }}</td>
+                                    <td>{{ cassette.unit.identification }}</td>
+                                    <td>{{ cassette.unit.correlative }}</td>
+                                    <td>{{ cassette.correlative }}</td>
+                                    <td>{{ cassette.organs.all|join:"," }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+                {% endif %}
+                <section class="row my-2">
+                    <div class="col-md-12">
+                        <h5>Reporte de Diferencias en Cassettes</h5>
+                        <form class="row align-items-center" method="POST" >
+                            {% csrf_token %}
+                            <input type="hidden" name="report_name" value="differences" />
+                            <div class="form-group col-md-2">
+                                <label for="">Desde:</label>
+                                <input class="form-control" name="from_date" type="date" value=""/>
+                            </div>
+                            <div class="form-group col-md-2">
+                                <label for="">Hasta:</label>
+                                <input class="form-control" name="to_date" type="date" value=""/>
+                            </div>
+                            <div class="col-md-2 form-check">
+                                <input class="form-check-input" name="include_solved" type="checkbox" value="true"/>
+                                <label class="form-check-label" for="include_solved">Incluir revisados</label>
+                            </div>
+                            <div class="col-md-2">
+                                <button name="report_type" value="0" class="btn btn-info">Generar reporte en pantalla</button>
+                            </div>
+                            <div class="col-md-2">
+                                <button name="report_type" value="1" class="btn btn-secondary">Generar reporte en csv/excel</button>
+                            </div>
+                        </form>
+                    </div>
+                </section>
+                {% if report_name and report_name == "differences" %}
+                <section class="row">
+                    <div class="col-md-12 table-responsive">
+                        <table class="table table-sm table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Caso</th>
+                                    <th>Identificacion</th>
+                                    <th>Unidad</th>
+                                    <th>Organos</th>
+                                    <th>Cantidad</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for difference in rows %}
+                                <tr>
+                                    <td>{{ difference.unit.identification.entryform.no_caso }}</td>
+                                    <td>{{ difference.unit.identification }}</td>
+                                    <td>{{ difference.unit.correlative }}</td>
+                                    <td>{{ difference.organ }}</td>
+                                    <td>{{ difference.difference }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+                {% endif %}
             </main>
         </div>
     </div>
