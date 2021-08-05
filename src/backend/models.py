@@ -476,7 +476,7 @@ class Identification(models.Model):
     )
 
     def __str__(self):
-        return str(self.pk)
+        return f"{self.cage} {self.group} {self.extra_features_detail}"
 
 
 class Unit(models.Model):
