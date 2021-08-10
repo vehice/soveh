@@ -52,7 +52,7 @@
         "en": "Request"
     },
     "reception_date" : {
-        "es": "Fecha Inicio",
+        "es": "Fecha Recepción",
         "en": "Reception Date"
     },
     "current_stage" : {
@@ -140,7 +140,7 @@
         "en":"Aplicant name"
     },
     "sampling_date":{
-        "es":"Fecha muestreo",
+        "es":"Fecha Muestreo",
         "en":"Sampling date"
     },
     "work_order":{
@@ -488,8 +488,8 @@
         "en":"Reception Date & time"
     },
     "sampling_date_time":{
-        "es":"Fecha/Hora Muestreo",
-        "en":"Sampling Date & time"
+        "es":"Hora Muestreo",
+        "en":"Sampling time"
     },
     "sample_detail":{
         "es":"Detalle Muestra",
