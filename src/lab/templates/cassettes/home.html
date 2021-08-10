@@ -18,6 +18,12 @@
                         Armado de Cassettes ({{ build_count }})
                     </a>
                     <a
+                        class="btn btn-outline-info"
+                        href="{% url 'lab:cassette_process' %}"
+                    >
+                        Procesador de Tejidos ({{ process_count }})
+                    </a>
+                    <a
                         class="btn btn-outline-warning"
                         href="{% url 'lab:cassette_difference' %}"
                     >
@@ -64,6 +70,7 @@
                                     <th>Unidad</th>
                                     <th>Cassette</th>
                                     <th>Organos</th>
+                                    <th>Codigo</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -74,6 +81,7 @@
                                     <td>{{ cassette.unit.correlative }}</td>
                                     <td>{{ cassette.correlative }}</td>
                                     <td>{{ cassette.organs.all|join:"," }}</td>
+                                    <td>{{ cassette.tag }}</td>
                                 </tr>
                                 {% endfor %}
                             </tbody>
