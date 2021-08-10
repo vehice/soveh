@@ -181,8 +181,9 @@ $(document).ready(function () {
             .rows({ selected: true })
             .data()
             .each((element) => {
-                selected.push(parseInt(element[5]));
+                selected.push(parseInt(element[4]));
             });
+
         selectedItems = selected;
     }
 
@@ -411,8 +412,9 @@ $(document).ready(function () {
                 Swal.fire({
                     icon: "success",
                     title: "Guardado",
+                }).then(() => {
+                    location.reload();
                 });
-                location.reload();
             },
             error: (xhr, textStatus, error) => {
                 Swal.fire({
