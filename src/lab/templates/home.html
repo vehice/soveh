@@ -11,96 +11,63 @@
             </header>
             <main class="card-body">
                 <section class="row">
-                    <div class="col-md-12 d-flex justify-content-center">
-                        <main class="btn-group">
-                            <button id="btnCassette" value="{{ cassettes|length }}" type="button" class="btn btn-primary">
-                                Armado de Cassettes ({{ cassettes|length }})
-                                <i class="iconify" data-icon="mdi:chevron-down"></i>
-                            </button>
-                            <button id="btnSlide" value="{{ slides|length }}" type="button" class="btn btn-success">
-                                Liberación ({{ slides|length }})
-                                <i class="iconify" data-icon="mdi:chevron-down"></i>
-                            </button>
-                        </main>
+                    <div class="col-md-2">
+                        <div class="dropdown">
+                            <a
+                                class="btn btn-primary dropdown-toggle"
+                                href="#"
+                                role="button"
+                                id="dropdownCassettesLink"
+                                data-toggle="dropdown"
+                                aria-haspopup="true"
+                                aria-expanded="false"
+                            >
+                                Cassettes ({{ cassettes_workload }})
+                            </a>
+                            <div class="dropdown-menu" aria-labelledby="dropdownCassettesLink">
+                                <a class="dropdown-item" href="{% url 'lab:cassette_build' %}">
+                                    Armado de Cassettes ({{ cassettes_to_build }})
+                                </a>
+                                <a class="dropdown-item" href="{% url 'lab:cassette_process' %}">
+                                    Procesador de Tejidos ({{ cassettes_to_process }})
+                                </a>
+                                <a class="dropdown-item" href="{% url 'lab:cassette_difference' %}">
+                                    Diferencias de Cassettes ({{ cassettes_differences }})
+                                </a>
+                                <a class="dropdown-item" href="{% url 'lab:cassette_index' %}">
+                                    Indice de Cassettes
+                                </a>
+                            </div>
+                        </div>
                     </div>
-
-                </section>
-                <section class="row d-flex justify-content-center mt-2">
-                    <div class="col-md-6">
-                        <div class="accordion">
-                            <div class="card border rounded shadow-lg">
-
-                                <!-- CASSETTE ACCORDION -->
-                                <div id="cassetteAccordion" class="collapse">
-                                    <div class="card-body overflow-auto d-flex flex-column">
-                                        <table class="table table-sm zero-configuration compact table-bordered">
-                                            <thead>
-                                                <tr>
-                                                    <th scope="col" class="text-right">Caso</th>
-                                                    <th scope="col" class="text-right">Cassettes (Supuesto)</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                {% for cassette in cassettes %}
-                                                <tr>
-                                                    <td class="text-right">
-                                                        {{cassette.case.no_caso}}
-                                                    </td>
-                                                    <td class="text-right">
-                                                        {{ cassette.count }}
-                                                    </td>
-                                                </tr>
-                                                {% endfor %}
-                                            </tbody>
-
-                                        </table>
-                                    </div>
-                                    <div class="card-footer text-right">
-                                        <a href="{% url "lab:cassette_build" %}">
-                                            Ir a armar cassettes
-                                            <span class="iconify" data-icon="mdi:chevron-right" data-inline="false"></span>
-                                        </a>
-                                    </div>
-                                </div>
-                                <!-- END ACCORDION -->
-                                <!-- SLIDE ACCORDION -->
-                                <div id="slideAccordion" class="collapse">
-                                    <div class="card-body overflow-auto d-flex flex-column">
-                                        <table class="table table-sm zero-configuration compact table-bordered">
-                                            <thead>
-                                                <tr>
-                                                    <th scope="col" class="text-right">Caso</th>
-                                                    <th scope="col" class="text-right">Slides (Supuesto)</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                {% for slide in slides %}
-                                                <tr>
-                                                    <td class="text-right">
-                                                        {{slide.case.no_caso}}
-                                                    </td>
-                                                    <td class="text-right">
-                                                        {{ slide.count }}
-                                                    </td>
-                                                </tr>
-                                                {% endfor %}
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                    <div class="card-footer text-right">
-                                        <a href="{% url "lab:slide_build" %}">
-                                            Ir a armar slides
-                                            <span class="iconify" data-icon="mdi:chevron-right" data-inline="false"></span>
-                                        </a>
-                                    </div>
-                                </div>
-                                <!-- END ACCORDION -->
+                    <div class="col-md-2">
+                        <div class="dropdown">
+                            <a
+                                class="btn btn-primary dropdown-toggle"
+                                href="#"
+                                role="button"
+                                id="dropdownCassettesLink"
+                                data-toggle="dropdown"
+                                aria-haspopup="true"
+                                aria-expanded="false"
+                            >
+                                Slides ({{ slides_to_build }})
+                            </a>
+                            <div class="dropdown-menu" aria-labelledby="dropdownCassettesLink">
+                                <a class="dropdown-item" href="{% url 'lab:slide_build' %}">
+                                    Armado de Slides ({{ slides_to_build }})
+                                </a>
+                                <a class="dropdown-item" href="{% url 'lab:slide_index' %}">
+                                    Indice de Slides
+                                </a>
                             </div>
                         </div>
                     </div>
 
-                    <div class="col-md-5">
-                        <div id="container" style="width: 100%; height:20rem;"></div>
+                </section>
+                <section class="row mt-2">
+                    <div class="col-md-6">
+                        <div id="container" style="width: 100%; height:30rem;"></div>
                     </div>
                 </section>
             </main>
@@ -115,18 +82,6 @@
 <script src="https://code.iconify.design/1/1.0.7/iconify.min.js" defer></script>
 <script type="text/javascript" defer>
  $(document).ready(() => {
-     $(".zero-configuration").DataTable({
-         oLanguage: {
-             sUrl: "https://cdn.datatables.net/plug-ins/1.10.16/i18n/Spanish.json",
-         },
-
-         rowsGroup: [0, 1],
-     });
-
-     const listGroupCases = $("#listGroupCases");
-
-     const cases = listGroupCases.children();
-
      const cassette_count = parseInt($("#btnCassette").val());
      const slide_count = parseInt($("#btnSlide").val());
 
@@ -147,8 +102,9 @@
              type: "pie",
              radius: "50%",
              data: [
-                 { name: 'Cassettes por Armar', value: cassette_count },
-                 { name: 'Slides por Liberar', value: slide_count },
+                 { name: 'Cassettes por Armar', value: "{{ cassettes_to_build }}" },
+                 { name: 'Cassettes por Procesar', value: "{{ cassettes_to_process }}" },
+                 { name: 'Slides por Liberar', value: "{{ slides_to_build }}" },
              ],
              emphasis: {
                  itemStyle: {
@@ -166,30 +122,9 @@
 
      /* END VARIABLES */
 
-     /* FUNCTIONS */
-
-     /* END FUNCTIONS */
-
-
-     /* EVENTS */
-
-     $("#btnCassette").click(() => $("#cassetteAccordion").collapse("toggle"));
-
-     $("#btnSlide").click(() => $("#slideAccordion").collapse("toggle"));
-
-     $("#filterCase").on("input", (e) => {
-         const filter = e.target.value;
-         clearTimeout(timeout)
-         timeout = setTimeout(() => {
-             const items = cases.filter((item) => 
-                 cases[item].innerText.includes(filter)
-             );
-             listGroupCases.empty()
-             listGroupCases.append(items)
-         }, 1000);
-     });
-
-     /* END EVENTS */
+     $(".dropdown-toggle").click((e) => {
+         $(e.target).dropdown("toggle");
+     })
 
  });
 </script>

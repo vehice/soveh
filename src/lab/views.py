@@ -1,3 +1,4 @@
+import csv
 import json
 from datetime import datetime, timedelta
 
@@ -28,43 +29,33 @@ from lab.models import (
     UnitDifference,
 )
 from lab.services import change_case_step
-import csv
 
 
+@login_required
 def home(request):
-    cases = Case.objects.all()
-    cassette_cases = Case.objects.units(
-        kwargs_filter={"entry_format__in": [1, 2, 6, 7]}
+    cassettes_to_build = Unit.objects.filter(
+        cassettes__isnull=True,
+        organs__isnull=False,
+        identification__entryform__entry_format__in=[1, 2, 6, 7],
+    ).count()
+    cassettes_to_process = Cassette.objects.filter(processed_at=None).count()
+    differences_count = UnitDifference.objects.filter(status=0).count()
+    slides_to_build = Cassette.objects.filter(
+        slides=None, processed_at__isnull=False
+    ).count()
+    return render(
+        request,
+        "home.html",
+        {
+            "cassettes_to_build": cassettes_to_build,
+            "cassettes_to_process": cassettes_to_process,
+            "cassettes_differences": differences_count,
+            "cassettes_workload": cassettes_to_build
+            + cassettes_to_process
+            + differences_count,
+            "slides_to_build": slides_to_build,
+        },
     )
-    slide_cases = Case.objects.units(kwargs_filter={"entry_format__in": [5]})
-    slide_cassettes = Cassette.objects.filter(slides__isnull=True)
-
-    cassettes = []
-    slides = []
-    for case in cassette_cases:
-        identifications = case.identifications
-        units_count = Unit.objects.filter(identification__in=identifications).count()
-        cassettes.append({"case": case, "count": units_count})
-
-    for case in slide_cases:
-        identifications = case.identifications
-        units_count = Unit.objects.filter(identification__in=identifications).count()
-        slides.append({"case": case, "count": units_count})
-
-    for cassette in slide_cassettes:
-        slides.append({"case": cassette.unit.identification.entryform, "count": 1})
-
-    context = {"cassettes": cassettes, "slides": slides, "cases": cases}
-    return render(request, "home.html", context)
-
-
-# TODO obtain details from the current lab progress of any Case by their pk
-def home_detail(request, pk):
-    case = get_object_or_404(Case, id=pk)
-
-    data = serializers.serialize("json", [case])
-
-    return JsonResponse(data, safe=False)
 
 
 # Case related views
@@ -225,8 +216,13 @@ class CassetteHome(View):
             cassettes__isnull=True,
             identification__entryform__entry_format__in=[1, 2, 6, 7],
         ).count()
+        process_count = Cassette.objects.filter(processed_at=None).count()
         differences_count = UnitDifference.objects.filter(status=0).count()
-        return {"build_count": build_count, "differences_count": differences_count}
+        return {
+            "build_count": build_count,
+            "process_count": process_count,
+            "differences_count": differences_count,
+        }
 
     def report_created_cassettes(self, date_range, response=None):
         """
@@ -242,7 +238,7 @@ class CassetteHome(View):
         if response:
             csv_writer = csv.writer(response)
             csv_writer.writerow(
-                ["Caso", "Identificacion", "Unidad", "Cassette", "Organos"]
+                ["Caso", "Identificacion", "Unidad", "Cassette", "Organos", "Codigo"]
             )
 
             for cassette in cassettes:
@@ -256,6 +252,7 @@ class CassetteHome(View):
                         cassette.unit.correlative,
                         cassette.correlative,
                         organs_text,
+                        cassette.tag,
                     ]
                 )
 
@@ -299,6 +296,7 @@ class CassetteHome(View):
     @method_decorator(login_required)
     def get(self, request):
         """Dashboard for Cassettes.
+
         Includes links to build, reports, and index.
         """
         context = self.get_context()
@@ -334,7 +332,14 @@ class CassetteHome(View):
 
         if is_csv:
             response = HttpResponse(content_type="text/csv")
-            response["Content-Disposition"] = 'attachment; filename="somefilename.csv"'
+            filename = (
+                "Cassettes creados"
+                if report_name == "created"
+                else "Diferencias en Unidades"
+            )
+            response[
+                "Content-Disposition"
+            ] = f"attachment; filename='Reporte {filename} {from_date} - {to_date}.csv'"
 
             if report_name == "created":
                 return self.report_created_cassettes(date_range, response)
@@ -352,8 +357,6 @@ class CassetteHome(View):
             context["rows"] = self.report_differences_cassettes(
                 date_range, include_solved
             )
-
-        print(context["rows"])
 
         return render(request, "cassettes/home.html", context)
 
@@ -500,6 +503,7 @@ class CassetteBuild(View):
 
         units = Unit.objects.filter(
             cassettes__isnull=True,
+            organs__isnull=False,
             identification__entryform__entry_format__in=[1, 2, 6, 7],
         ).select_related("identification__entryform")
 
@@ -692,10 +696,31 @@ class CassetteDetail(View):
 class CassetteProcess(View):
     @method_decorator(login_required)
     def get(self, request):
-        cassettes = Cassette.objects.all().select_related(
+        """
+        Displays a list of :model:`lab.Cassette` which ``processed_at`` date is null.
+        """
+        cassettes = Cassette.objects.filter(processed_at=None).select_related(
             "unit__identification__entryform"
         )
         return render(request, "cassettes/process.html", {"cassettes": cassettes})
+
+    @method_decorator(login_required)
+    def post(self, request):
+        """
+        Updates the given :model:`lab.Cassette` with the given date for `processed_at`.
+        """
+        request_data = json.loads(request.body)
+
+        try:
+            processed_at = parse(request_data["processed_at"])
+        except (ParserError):
+            processed_at = datetime.now()
+
+        cassettes_updated = Cassette.objects.filter(
+            pk__in=request_data["cassettes"]
+        ).update(processed_at=processed_at)
+
+        return JsonResponse(cassettes_updated, safe=False)
 
 
 # Slide related views
@@ -794,9 +819,9 @@ class SlideBuild(View):
             identification__entryform__forms__cancelled=0,
             identification__entryform__forms__form_closed=0,
         ).select_related("identification__entryform")
-        cassettes = Cassette.objects.filter(slides=None).select_related(
-            "unit__identification__entryform"
-        )
+        cassettes = Cassette.objects.filter(
+            slides=None, processed_at__isnull=False
+        ).select_related("unit__identification__entryform")
         stains = Stain.objects.all()
 
         slides = []
