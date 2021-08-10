@@ -157,6 +157,13 @@ class Cassette(models.Model):
     def __str__(self):
         return f"{self.correlative}"
 
+    @property
+    def tag(self):
+        """
+        String identifier of a Cassette used in-situ.
+        """
+        return f"{self.unit.identification.entryform.no_caso},{self.unit.identification},{self.unit.correlative},{self.correlative}"
+
 
 class CassetteOrgan(models.Model):
     """Middle table joining Cassette with multiple Organ.
