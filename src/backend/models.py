@@ -397,6 +397,8 @@ class EntryForm(models.Model):
     center = models.CharField(max_length=250, null=True, blank=True)
     created_at = models.DateTimeField(null=True, blank=True)
     sampled_at = models.DateTimeField(null=True, blank=True)
+    sampled_at_hour = models.CharField(max_length=5, null=True, blank=True)
+    sampled_at_am_pm = models.CharField(max_length=2, null=True, blank=True)
     forms = GenericRelation(Form)
     flag_subflow = models.BooleanField(default=False)
     responsible = models.CharField(max_length=250, null=True, blank=True)

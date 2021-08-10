@@ -200,7 +200,7 @@ function init_step_2() {
         $(`#${table_id}`).append(rows);
         $(`#select-${id}-${unit.id}`).select2({
           templateResult: formatResultData,
-          tags: true
+          tags: false
         });
         $.each(unit.organs, function(_, org){
           selectOrgansWithConditions(org.id, org.name, id, $(`#select-${id}-${unit.id}`), false, false);
@@ -448,7 +448,7 @@ function init_step_2() {
               
               $(`#select-${id}-${unit.id}`).select2({
                 templateResult: formatResultData,
-                tags: true
+                tags: false
               });
 
               data_saved = true
@@ -737,8 +737,9 @@ function resetOrgansOptions(id, correlative) {
 }
 
 function formatResultData(data) {
-  if (!data.id) return data.text;
-  if (data.element.selected) return
+  if (data.selected){
+    return null;
+  }
   return data.text;
 };
 

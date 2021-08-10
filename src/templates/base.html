@@ -303,6 +303,12 @@
       });
       selectwatersource +='</select>';
 
+      var selectSampledAtAmPm = '<select class="form-control" id="sampled_at_am_pm" name="sampled_at_am_pm" >';
+      selectSampledAtAmPm += '<option value="">--</option>';
+      selectSampledAtAmPm += '<option value="AM">AM</option>';
+      selectSampledAtAmPm += '<option value="PM">PM</option>';
+      selectSampledAtAmPm +='</select>';
+
       
       $('.NoCasoSummary').html(data.entryform.no_caso);
       
@@ -318,7 +324,11 @@
       
       $('.summaryReception').html('<label>{{request.lang.reception_date}}:</label> <div class="input-group date" id=""><input type="text" class="form-control" name="recive" value="'+ moment(data.entryform.created_at).format("DD/MM/YYYY HH:mm")+'" /><div class="input-group-append"><span class="input-group-text"><span class="fa fa-calendar"></span></span></div></div> ' );
       
-      $('.sumarrySampling').html('<label>{{request.lang.sampling_date}}:</label> <div class="input-group date" id=""><input type="text" class="form-control" name="muestreo" value="'+ moment(data.entryform.sampled_at).format("DD/MM/YYYY HH:mm")+'" /><div class="input-group-append"><span class="input-group-text"><span class="fa fa-calendar"></span></span></div></div> ' );
+      $('.sumarrySampling').html('<label>{{request.lang.sampling_date}}:</label> <div class="input-group date2" id=""><input type="text" class="form-control" name="muestreo" value="'+ moment(data.entryform.sampled_at).format("DD/MM/YYYY")+'" /><div class="input-group-append"><span class="input-group-text"><span class="fa fa-calendar"></span></span></div></div> ' );
+
+      $('.sumarrySamplingHour').html('<label>{{request.lang.sampling_date_time}}:</label> <div class="input-group date3" id=""><input type="text" class="form-control" name="sampled_at_hour" value="'+ data.entryform.sampled_at_hour +'" /><div class="input-group-append"><span class="input-group-text"><span class="fa fa-clock-o"></span></span></div></div> ' );
+
+      $('.sumarrySamplingAmPm').html('<label>AM/PM</label>'+selectSampledAtAmPm);
       
       $('.summaryNoOrder').html('<label>{{request.lang.work_order}}:</label> <input class="form-control" value="'+ replaceNull(data.entryform.no_order)+'" name="no_order" />');
       
@@ -523,7 +533,7 @@
         $('#client').val(data.entryform.customer.id);
       }
       if (data.entryform.entry_format != null) {
-        $('#entryformat_select').val(data.entryform.entry_format);
+        $('#entryformat_select option[value="'+data.entryform.entry_format+'"]').attr('selected', 'selected');
       }
 
       if (data.entryform.fixative != null) {
@@ -552,6 +562,14 @@
         $('#larvalstage').val(data.entryform.larvalstage.id);
       }
 
+      if (data.entryform.sampled_at_am_pm != null) {
+        $('#sampled_at_am_pm option[value="'+data.entryform.sampled_at_am_pm+'"]').attr('selected', 'selected');
+      }
+
+      if (data.entryform.sampled_at_hour != null) {
+        $('#sampled_at_hour').val(data.entryform.sampled_at_hour);
+      }
+
       $('.selectOpt').select2({'width':'100%'});
       $('.selectOrgs').select2({'width':'100%'});
       
@@ -559,6 +577,18 @@
         locale: 'es',
         keepOpen: false,
         format:'DD/MM/YYYY HH:mm'
+      });
+
+      $('.date2').datetimepicker({
+        locale: 'es',
+        keepOpen: false,
+        format:'DD/MM/YYYY'
+      });
+
+      $('.date3').datetimepicker({
+        locale: 'es',
+        keepOpen: false,
+        format:'hh:mm'
       });
 
       // $('#datetime_sampled_at').datetimepicker({
@@ -956,11 +986,15 @@
                       </div>
                       <div class="col-sm-3 form-group summaryResponsible">
                       </div>
-                      <div class="col-sm-3 form-group summaryReception">
+                      <div class="col-sm-2 form-group summaryReception">
                       </div>
-                      <div class="col-sm-3 form-group sumarrySampling">
+                      <div class="col-sm-2 form-group sumarrySampling">
                       </div>
-                      <div class="col-sm-3 form-group summaryNoOrder">
+                      <div class="col-sm-2 form-group sumarrySamplingHour">
+                      </div>
+                      <div class="col-sm-1 form-group sumarrySamplingAmPm">
+                      </div>
+                      <div class="col-sm-2 form-group summaryNoOrder">
                       </div>
                       <div class="col-sm-3 form-group summaryNoRequest">
                       </div>
