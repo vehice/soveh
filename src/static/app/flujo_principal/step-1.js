@@ -84,14 +84,26 @@ function init_step_1() {
         }
         if (entryform.sampled_at)
         {
-          $('[name="sampled_at"]').val(moment(entryform.sampled_at).format("DD/MM/YYYY HH:mm") || "");
+          $('[name="sampled_at"]').val(moment(entryform.sampled_at).format("DD/MM/YYYY") || "");
         } else
         {
           $('[name="sampled_at"]').val("");
         }
 
+        if (entryform.sampled_at_hour)
+        {
+          $('[name="sampled_at_hour"]').val(moment(entryform.sampled_at_hour).format("hh:mm") || "");
+        } else
+        {
+          $('[name="sampled_at_hour"]').val("");
+        }
+
         $('#created_at_submit').val(entryform.created_at);
         $('#sampled_at_submit').val(entryform.sampled_at);
+
+        if (entryform.sampled_at_am_pm){
+          $('#sampled_at_am_pm').val(entryform.sampled_at_am_pm);
+        }
       })
       .fail(function () {
         console.log("Fail")
@@ -120,7 +132,15 @@ function init_step_1() {
     $('#datetime_sampled_at').datetimepicker({
       locale: 'es',
       keepOpen: false,
-      format: 'DD/MM/YYYY HH:mm'
+      format: 'DD/MM/YYYY'
+    }).on('dp.change', function (ev) {
+      formChanged = true;
+    });
+
+    $('#datetime_sampled_at_hour').datetimepicker({
+      locale: 'es',
+      keepOpen: false,
+      format: 'hh:mm'
     }).on('dp.change', function (ev) {
       formChanged = true;
     });
@@ -184,7 +204,64 @@ $(document).on('click', '#saveStep1', function () {
 
 function validate_step_1() {
 
-  return true;
+  let sucess = 1;
+
+  if( $('#customer_select').val() == "" ){
+    toastr.error(
+      'Para continuar debe seleccionar un cliente.',
+      'Error',
+      { positionClass: 'toast-top-full-width', containerId: 'toast-bottom-full-width' }
+    );
+    return false
+  }
+
+  console.log("created_at", $('#created_at').val());
+  if( $('#created_at').val() == "" ){
+    toastr.error(
+      'Para continuar debe ingresar la fecha de repceción.',
+      'Error',
+      { positionClass: 'toast-top-full-width', containerId: 'toast-bottom-full-width' }
+    );
+    return false
+  }
+
+  if( $('#entryformat_select').val() == "" ){
+    toastr.error(
+      'Para continuar debe seleccionar el formato de ingreso.',
+      'Error',
+      { positionClass: 'toast-top-full-width', containerId: 'toast-bottom-full-width' }
+    );
+    return false
+  }
+
+  if( $('#specie_select').val() == ""){
+    toastr.error(
+      'Para continuar debe seleccionar la especie.',
+      'Error',
+      { positionClass: 'toast-top-full-width', containerId: 'toast-bottom-full-width' }
+    );
+    return false
+  }
+
+  if( $('#larvalstage_select').val() == "" ){
+    toastr.error(
+      'Para continuar debe seleccionar estadío.',
+      'Error',
+      { positionClass: 'toast-top-full-width', containerId: 'toast-bottom-full-width' }
+    );
+    return false
+  }
+
+  if( $('#watersource_select').val() == "" ){
+    toastr.error(
+      'Para continuar debe seleccionar fuente de agua.',
+      'Error',
+      { positionClass: 'toast-top-full-width', containerId: 'toast-bottom-full-width' }
+    );
+    return false
+  }
+
+  return sucess;
 
 }
 

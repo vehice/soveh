@@ -2234,19 +2234,32 @@ def step_1_entryform(request):
         pass
     try:
         if entryform.sampled_at != datetime.strptime(
-            var_post.get("sampled_at"), "%d/%m/%Y %H:%M"
+            var_post.get("sampled_at"), "%d/%m/%Y"
         ) and (
             entryform.sampled_at
-            != datetime.strptime(var_post.get("sampled_at"), "%d/%m/%Y %H:%M")
+            != datetime.strptime(var_post.get("sampled_at"), "%d/%m/%Y")
             != ""
         ):
             # change = True
             pass
         entryform.sampled_at = datetime.strptime(
-            var_post.get("sampled_at"), "%d/%m/%Y %H:%M"
+            var_post.get("sampled_at"), "%d/%m/%Y"
         )
     except:
         pass
+
+
+    if str(entryform.sampled_at_hour) != var_post.get("sampled_at_hour") and (
+        entryform.sampled_at_hour == None and var_post.get("sampled_at_hour") != ""
+    ):
+        change = True
+    entryform.sampled_at_hour = var_post.get("sampled_at_hour")
+
+    if str(entryform.sampled_at_am_pm) != var_post.get("sampled_at_am_pm") and (
+        entryform.sampled_at_am_pm == None and var_post.get("sampled_at_am_pm") != ""
+    ):
+        change = True
+    entryform.sampled_at_am_pm = var_post.get("sampled_at_am_pm")
 
     if str(entryform.center) != var_post.get("center") and (
         entryform.center == None and var_post.get("center") != ""
@@ -3318,6 +3331,8 @@ def save_generalData(request, id):
     entry.no_order = var_post["no_order"]
     entry.no_request = var_post["no_solic"]
     entry.anamnesis = var_post["anamnesis"]
+    entry.sampled_at_hour = var_post["sampled_at_hour"]
+    entry.sampled_at_am_pm = var_post["sampled_at_am_pm"]
 
     try:
         entry.created_at = datetime.strptime(var_post.get("recive"), "%d/%m/%Y %H:%M")

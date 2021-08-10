@@ -81,7 +81,7 @@
         <div class="form-group">
           <label>{{request.lang.reception_date_time}} : </label>
           <div class='input-group date' id='datetime_created_at'>
-            <input type="text" class="form-control" name="created_at" {% if not edit %}disabled{% endif %} />
+            <input type="text" class="form-control" id="created_at" name="created_at" {% if not edit %}disabled{% endif %} />
             <div class="input-group-append">
               <span class="input-group-text">
                 <span class="fa fa-calendar"></span>
@@ -90,17 +90,44 @@
           </div>
           <input type="hidden" name="created_at_submit" id="created_at_submit" {% if not edit %}disabled{% endif %} />
         </div>
-        <div class="form-group">
-          <label>{{request.lang.sampling_date_time}} : </label>
-          <div class='input-group date' id='datetime_sampled_at'>
-            <input type='text' class="form-control" name='sampled_at' {% if not edit %}disabled{% endif %} />
-            <div class="input-group-append">
-              <span class="input-group-text">
-                <span class="fa fa-calendar"></span>
-              </span>
+        <div class="row">
+          <div class="col-md-6">
+            <div class="form-group">
+              <label>{{request.lang.sampling_date}} : </label>
+              <div class='input-group date' id='datetime_sampled_at'>
+                <input type='text' class="form-control" name='sampled_at' {% if not edit %}disabled{% endif %} />
+                <div class="input-group-append">
+                  <span class="input-group-text">
+                    <span class="fa fa-calendar"></span>
+                  </span>
+                </div>
+              </div>
+              <input type="hidden" name="sampled_at_submit" id="sampled_at_submit" {% if not edit %}disabled{% endif %} />
             </div>
           </div>
-          <input type="hidden" name="sampled_at_submit" id="sampled_at_submit" {% if not edit %}disabled{% endif %} />
+          <div class="col-md-4">
+            <div class="form-group">
+              <label>{{request.lang.sampling_date_time}} : </label>
+              <div class='input-group'>
+                <input type='text' id='datetime_sampled_at_hour' class="form-control" name='sampled_at_hour' {% if not edit %}disabled{% endif %} />
+                <div class="input-group-append">
+                  <span class="input-group-text">
+                    <span class="fa fa-clock-o"></span>
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-2">
+            <div class="form-group">
+              <label>AM/PM</label>
+              <select class="form-control" id="sampled_at_am_pm" name="sampled_at_am_pm" {% if not edit %}disabled{% endif %}>
+                <option selected value="">--</option>
+                <option value="AM">AM</option>
+                <option value="PM">PM</option>
+              </select>
+            </div>
+          </div>
         </div>
         <div class="form-group" id="responsible">
           <label for="responsible">
