@@ -144,10 +144,15 @@ class ENTRYFORM(View):
 
                     exam_stain_tuple = str(sE.exam_id) + "-" + str(sE.stain_id)
 
+                    uo_organ_id = None
+
+                    if sE.unit_organ is not None:
+                        uo_organ_id = sE.unit_organ.organ.id
+
                     sE_dict = {
                         "organ_name": sE.organ.name,
                         "uo_id": sE.unit_organ_id,
-                        "uo_organ_id": sE.unit_organ.organ.id,
+                        "uo_organ_id": uo_organ_id,
                         "organ_id": sE.organ.id,
                         "stain_id": sE.stain_id,
                         "stain_abbr": sE.stain.abbreviation,
