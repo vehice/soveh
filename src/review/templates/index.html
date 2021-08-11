@@ -110,12 +110,16 @@
                                 {% endfor %}
                             </select>
                         </fieldset>
-                        <span class="btn-group mt-2" role="group">
-                            <button id="btnSaveRecipients" class="btn btn-primary">Guardar los destinatarios para este servicio</button>
-                            <button id="btnCreateRecipient" class="btn btn-secondary">Crear un nuevo destinatario</button>
-                            <button id="btnCreateMailList" class="btn btn-secondary">Crear una nueva lista de correos</button>
-                            <button id="btnUpdateMailList" class="btn btn-secondary">Actualizar la lista de correos seleccionada</button>
-                        </span>
+                        <div class="row">
+                            <div class="col-md-5 offset-md-7">
+                                <span class="d-flex flex-column mt-2">
+                                    <button id="btnSaveRecipients" class="btn btn-success">Guardar los destinatarios para este servicio</button>
+                                    <button id="btnCreateRecipient" class="btn btn-secondary">Crear un nuevo destinatario</button>
+                                    <button id="btnCreateMailList" class="btn btn-secondary">Crear una nueva lista de correos</button>
+                                    <button id="btnUpdateMailList" class="btn btn-secondary">Actualizar la lista de correos seleccionada</button>
+                                </span>
+                            </div>
+                        </div>
 
                     </div>
                     <div class="col-md-4 border-left">
