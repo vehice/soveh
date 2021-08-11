@@ -319,7 +319,7 @@ class CassetteHome(View):
         try:
             from_date = parse(request.POST.get("from_date"))
         except ParserError:
-            raise Http404
+            raise Http404("Sin fecha de inicio.")
         try:
             to_date = request.POST.get("to_date")
         except ParserError:
@@ -346,7 +346,7 @@ class CassetteHome(View):
             elif report_name == "differences":
                 return self.report_differences_cassettes(date_range, response)
 
-            raise Http404
+            raise Http404("Tipo de reporte invalido.")
 
         context = self.get_context()
         context["report_name"] = report_name
