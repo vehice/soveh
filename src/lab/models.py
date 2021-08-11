@@ -55,14 +55,16 @@ class Analysis(AnalysisForm):
         )
 
         total_progress = 0
-        progress_value = 1 / exam_units_organs.count()
-        for cassette in cassettes:
-            if cassette.slides.count() > 0:
-                total_progress += progress_value
-            else:
-                total_progress += progress_value / 2
-
-        return total_progress * 100
+        total_organs_count = exam_units_organs.count()
+        if total_organs_count > 0:
+            progress_value = 1 / exam_units_organs.count()
+            for cassette in cassettes:
+                if cassette.slides.count() > 0:
+                    total_progress += progress_value
+                else:
+                    total_progress += progress_value / 2
+            return total_progress * 100
+        return 0
 
     class Meta:
         proxy = True
