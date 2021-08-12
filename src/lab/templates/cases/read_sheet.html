@@ -37,7 +37,11 @@
                                     <td>{{ slide.unit.identification.group }}</td>
                                     <td>
                                         {% for organ in slide.organs %}
-                                            {{ organ.abbreviation }},
+                                            {% if forloop.last %}
+                                                {{ organ.abbreviation }}
+                                            {% else %}
+                                                {{ organ.abbreviation }},
+                                            {% endif %}
                                         {% endfor %}
                                         </td>
                                     <td>{{ slide.stain }}</td>
