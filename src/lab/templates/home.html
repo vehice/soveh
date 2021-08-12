@@ -11,61 +11,70 @@
             </header>
             <main class="card-body">
                 <section class="row">
-                    <div class="col-md-2">
-                        <div class="dropdown">
-                            <a
-                                class="btn btn-primary dropdown-toggle"
-                                href="#"
-                                role="button"
-                                id="dropdownCassettesLink"
-                                data-toggle="dropdown"
-                                aria-haspopup="true"
-                                aria-expanded="false"
-                            >
-                                Cassettes ({{ cassettes_workload }})
-                            </a>
-                            <div class="dropdown-menu" aria-labelledby="dropdownCassettesLink">
-                                <a class="dropdown-item" href="{% url 'lab:cassette_build' %}">
-                                    Armado de Cassettes ({{ cassettes_to_build }})
-                                </a>
-                                <a class="dropdown-item" href="{% url 'lab:cassette_process' %}">
-                                    Procesador de Tejidos ({{ cassettes_to_process }})
-                                </a>
-                                <a class="dropdown-item" href="{% url 'lab:cassette_difference' %}">
-                                    Diferencias de Cassettes ({{ cassettes_differences }})
-                                </a>
-                                <a class="dropdown-item" href="{% url 'lab:cassette_index' %}">
-                                    Indice de Cassettes
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-2">
-                        <div class="dropdown">
-                            <a
-                                class="btn btn-primary dropdown-toggle"
-                                href="#"
-                                role="button"
-                                id="dropdownCassettesLink"
-                                data-toggle="dropdown"
-                                aria-haspopup="true"
-                                aria-expanded="false"
-                            >
-                                Slides ({{ slides_to_build }})
-                            </a>
-                            <div class="dropdown-menu" aria-labelledby="dropdownCassettesLink">
-                                <a class="dropdown-item" href="{% url 'lab:slide_build' %}">
-                                    Armado de Slides ({{ slides_to_build }})
-                                </a>
-                                <a class="dropdown-item" href="{% url 'lab:slide_index' %}">
-                                    Indice de Slides
-                                </a>
-                            </div>
-                        </div>
-                    </div>
+                    <div class="col-md-4">
+                        Accesos Directos
+                        <div class="accordion" id="accordionExample">
+                            <div class="card">
+                                <div class="card-header" id="headingOne">
+                                    <h2 class="mb-0">
+                                        <button
+                                            class="btn btn-link btn-block text-left"
+                                            type="button"
+                                            data-toggle="collapse"
+                                            data-target="#collapseOne"
+                                            aria-expanded="true"
+                                            aria-controls="collapseOne"
+                                        >
+                                            Cassettes ({{ cassettes_workload }})
+                                        </button>
+                                    </h2>
+                                </div>
 
-                </section>
-                <section class="row mt-2">
+                                <div id="collapseOne" class="collapse show" aria-labelledby="headingOne" data-parent="#accordionExample">
+                                    <div class="card-body nav flex-column">
+                                        <a class="nav-link" href="{% url 'lab:cassette_build' %}">
+                                            Armado de Cassettes ({{ cassettes_to_build }})
+                                        </a>
+                                        <a class="nav-link" href="{% url 'lab:cassette_process' %}">
+                                            Procesador de Tejidos ({{ cassettes_to_process }})
+                                        </a>
+                                        <a class="nav-link" href="{% url 'lab:cassette_difference' %}">
+                                            Diferencias de Cassettes ({{ cassettes_differences }})
+                                        </a>
+                                        <a class="nav-link" href="{% url 'lab:cassette_index' %}">
+                                            Indice de Cassettes
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card">
+                                <div class="card-header" id="headingTwo">
+                                    <h2 class="mb-0">
+                                        <button
+                                            class="btn btn-link btn-block text-left collapsed"
+                                            type="button"
+                                            data-toggle="collapse"
+                                            data-target="#collapseTwo"
+                                            aria-expanded="false"
+                                            aria-controls="collapseTwo"
+                                        >
+                                            Slides ({{ slides_to_build }})
+                                        </button>
+                                    </h2>
+                                </div>
+                                <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionExample">
+                                    <div class="card-body nav flex-column">
+                                        <a class="nav-link" href="{% url 'lab:slide_build' %}">
+                                            Armado de Slides ({{ slides_to_build }})
+                                        </a>
+                                        <a class="nav-link" href="{% url 'lab:slide_index' %}">
+                                            Indice de Slides
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                     <div class="col-md-6">
                         <div id="container" style="width: 100%; height:30rem;"></div>
                     </div>
@@ -118,13 +127,7 @@
 
      chart.setOption(options)
 
-     let timeout = null
-
      /* END VARIABLES */
-
-     $(".dropdown-toggle").click((e) => {
-         $(e.target).dropdown("toggle");
-     })
 
  });
 </script>
