@@ -18,7 +18,7 @@ from django.utils.decorators import method_decorator
 from django.views import View
 from django.views.generic import DetailView, ListView
 
-from backend.models import Exam, Organ, SampleExams, Stain, Unit
+from backend.models import Exam, Organ, OrganUnit, SampleExams, Stain, Unit
 from lab.models import (
     Analysis,
     Case,
@@ -724,6 +724,109 @@ class CassetteProcess(View):
 
 
 # Slide related views
+
+
+class SlideHome(View):
+    def get_context(self):
+        """
+        Returns common context for the class.
+        """
+
+        units_count = Unit.objects.filter(
+            identification__entryform__entry_format=5,
+            identification__entryform__forms__cancelled=0,
+            identification__entryform__forms__form_closed=0,
+        ).count()
+        cassettes_count = Cassette.objects.filter(
+            slides=None, processed_at__isnull=False
+        ).count()
+        build_count = units_count + cassettes_count
+        differences_count = UnitDifference.objects.filter(status=0).count()
+        return {
+            "build_count": build_count,
+        }
+
+    def report_created_slides(self, date_range, response=None):
+        """
+        Returns a list with :model:`lab.Cassette` which have been
+        created within the given date range tuple (start, end).
+        """
+        slides = Slide.objects.filter(
+            created_at__gte=date_range[0], created_at__lte=date_range[1]
+        )
+
+        response_data = []
+
+        if response:
+            csv_writer = csv.writer(response)
+            csv_writer.writerow(
+                ["Caso", "Identificacion", "Unidad", "Correlativo", "Organos", "Codigo"]
+            )
+
+            for slide in slides:
+                organs_text = ",".join([organ.abbreviation for organ in slide.organs])
+                csv_writer.writerow(
+                    [
+                        slide.unit.identification.entryform.no_caso,
+                        str(slide.unit.identification),
+                        slide.unit.correlative,
+                        slide.correlative,
+                        organs_text,
+                        slide.tag,
+                    ]
+                )
+
+            return response
+
+        return slides
+
+    @method_decorator(login_required)
+    def get(self, request):
+        """Dashboard for Slides.
+
+        Includes links to build, reports, and index.
+        """
+        context = self.get_context()
+
+        return render(request, "slides/home.html", context)
+
+    @method_decorator(login_required)
+    def post(self, request):
+        """
+        Returns either a FileResponse or an HttpResponse
+        from the given parameters.
+
+        **REQUEST**
+            ``from_date``: Earlier limit for the date range.
+            ``to_date``: Latest limit for the date range. Defaults to current.
+            ``report_type``: boolean which determines if the response is a file or on-screen.
+        """
+        try:
+            from_date = parse(request.POST.get("from_date"))
+        except ParserError:
+            raise Http404("Sin fecha de inicio.")
+        try:
+            to_date = request.POST.get("to_date")
+        except ParserError:
+            to_date = datetime.now()
+
+        date_range = (from_date, to_date)
+
+        is_csv = int(request.POST.get("report_type"))
+
+        if is_csv:
+            response = HttpResponse(content_type="text/csv")
+            response[
+                "Content-Disposition"
+            ] = f"attachment; filename=Reporte Slides Generados {from_date} - {to_date}.csv"
+
+            return self.report_created_slides(date_range, response)
+
+        context = self.get_context()
+        context["show_report"] = True
+        context["rows"] = self.report_created_slides(date_range)
+
+        return render(request, "slides/home.html", context)
 
 
 @login_required
