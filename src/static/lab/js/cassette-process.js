@@ -21,6 +21,10 @@ function getCookie(name) {
 }
 
 $(document).ready(function () {
+    let now = new Date();
+    now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+    $("#processAt").val(now.toISOString().slice(0, 16));
+
     const tableList = $("#datatable").DataTable({
         dom: "Bfrtip",
 
@@ -28,7 +32,7 @@ $(document).ready(function () {
             {
                 text: "Seleccionar todos",
                 action: function () {
-                    tableIndex
+                    tableList
                         .rows({
                             page: "current",
                         })
@@ -39,7 +43,7 @@ $(document).ready(function () {
             {
                 text: "Deseleccionar todos",
                 action: function () {
-                    tableIndex
+                    tableList
                         .rows({
                             page: "current",
                         })
