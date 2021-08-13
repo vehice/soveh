@@ -313,7 +313,6 @@ $(document).ready(function () {
             });
 
         updateNumberCassettes();
-        debugger;
     });
 
     $(".btn-close").click(function () {
@@ -409,12 +408,32 @@ $(document).ready(function () {
             contentType: "application/json; charset=utf-8",
 
             success: (data, textStatus) => {
-                Swal.fire({
-                    icon: "success",
-                    title: "Guardado",
-                }).then(() => {
-                    location.reload();
-                });
+                if (data.differences) {
+                    Swal.fire({
+                        icon: "info",
+                        title: "Se guardó con diferencias",
+                        text:
+                            "Hay órganos en la unidad que no están presentes en los cassettes creados, deseas ver las diferencias? o continuar en esta pagina?",
+                        showCancelButton: true,
+                        confirmButtonText: "Ir a ver las diferencias",
+                        cancelButtonText: "Continuar en esta pagina",
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            window.location.replace(
+                                Urls["lab:cassette_difference"]()
+                            );
+                        } else {
+                            location.reload();
+                        }
+                    });
+                } else {
+                    Swal.fire({
+                        icon: "success",
+                        title: "Guardado exitosamente",
+                    }).then(() => {
+                        location.reload();
+                    });
+                }
             },
             error: (xhr, textStatus, error) => {
                 Swal.fire({

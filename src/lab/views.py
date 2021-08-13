@@ -541,6 +541,7 @@ class CassetteBuild(View):
 
         created = []
         errors = []
+        differences = False
         for row in units:
             try:
                 unit = Unit.objects.get(pk=row["id"])
@@ -577,10 +578,15 @@ class CassetteBuild(View):
                     CassetteOrgan.objects.create(organ=organ, cassette=cassette)
                     created.append(cassette)
 
-            generate_differences(unit)
+            if not differences:
+                differences = generate_differences(unit)
 
         return JsonResponse(
-            {"created": serializers.serialize("json", created), "errors": errors},
+            {
+                "created": serializers.serialize("json", created),
+                "errors": errors,
+                "differences": differences,
+            },
             safe=False,
             status=201,
         )
