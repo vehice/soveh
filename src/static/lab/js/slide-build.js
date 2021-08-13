@@ -22,21 +22,15 @@ $(document).ready(function () {
                 name: "case",
                 type: "string",
                 title: "Caso",
-                orderData: [0, 1],
             },
             {
-                data: "identification.fields.cage",
+                data: "identification.fields",
                 name: "identification",
                 type: "string",
-                title: "Est/Jau",
-                orderData: [0],
-            },
-            {
-                data: "identification.fields.group",
-                name: "group",
-                type: "string",
-                title: "Grupo",
-                orderData: [1],
+                title: "Identificacion",
+                render: (data) => {
+                    return `${data.cage} ${data.group} ${data.extra_features_detail}`;
+                },
             },
             {
                 data: "unit.fields.correlative",
@@ -100,7 +94,7 @@ $(document).ready(function () {
 
         paging: false,
 
-        rowsGroup: [0, 1, 2, 3],
+        rowsGroup: [0],
 
         oLanguage: {
             sUrl:
@@ -135,6 +129,7 @@ $(document).ready(function () {
             },
             dataSrc: "",
         },
+
         columns: [
             {
                 data: "case.no_caso",
@@ -143,10 +138,13 @@ $(document).ready(function () {
                 title: "Caso",
             },
             {
-                data: "identification.cage",
+                data: "identification",
                 name: "identification",
                 type: "num",
-                title: "Ident.",
+                title: "Identificacion",
+                render: (data) => {
+                    return `${data.cage} ${data.group} ${data.extra_features_detail}`;
+                },
             },
             {
                 data: "unit.correlative",
@@ -168,23 +166,34 @@ $(document).ready(function () {
                 },
             },
             {
+                data: "organs",
+                name: "organs",
+                type: "string",
+                title: "Organos",
+                orderable: false,
+            },
+            {
                 data: "stain.abbreviation",
                 name: "stain",
                 type: "string",
                 title: "Tincion",
+                orderable: false,
             },
             {
                 data: "slide",
                 name: "index",
                 type: "string",
                 title: "Correlativo",
+                orderable: false,
                 render: (data, type, row, meta) => {
                     return data;
                 },
             },
         ],
 
-        rowsGroup: [0, 1, 2, 3],
+        rowsGroup: [0],
+
+        orderMulti: false,
 
         select: {
             style: "multi",
@@ -374,6 +383,9 @@ $(document).ready(function () {
                     identification: {
                         id: row.identification.pk,
                         cage: row.identification.fields.cage,
+                        group: row.identification.fields.group,
+                        extra_features_detail:
+                            row.identification.fields.extra_features_detail,
                     },
                     unit: {
                         id: row.unit.pk,
