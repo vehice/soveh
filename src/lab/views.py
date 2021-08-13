@@ -28,7 +28,7 @@ from lab.models import (
     Slide,
     UnitDifference,
 )
-from lab.services import change_case_step
+from lab.services import change_case_step, generate_differences
 
 
 @login_required
@@ -367,6 +367,7 @@ def cassette_differences(request):
     List of all :model:`lab.UnitDifference` generated during :view:`lab.CassetteBuild`
     that haven't been resolved (as in status=1).
     """
+    units = Unit.objects.filter(cassettes__isnull=False)
     differences = UnitDifference.objects.filter(status=0)
     context = {"differences": differences}
     return render(request, "cassettes/differences.html", context)
@@ -501,11 +502,15 @@ class CassetteBuild(View):
         ``lab/cassettes/build.html``
         """
 
-        units = Unit.objects.filter(
-            cassettes__isnull=True,
-            organs__isnull=False,
-            identification__entryform__entry_format__in=[1, 2, 6, 7],
-        ).select_related("identification__entryform")
+        units = (
+            Unit.objects.filter(
+                cassettes__isnull=True,
+                organs__isnull=False,
+                identification__entryform__entry_format__in=[1, 2, 6, 7],
+            )
+            .select_related("identification__entryform")
+            .distinct()
+        )
 
         organs = serializers.serialize("json", Organ.objects.all())
 
@@ -571,6 +576,8 @@ class CassetteBuild(View):
                 else:
                     CassetteOrgan.objects.create(organ=organ, cassette=cassette)
                     created.append(cassette)
+
+            generate_differences(unit)
 
         return JsonResponse(
             {"created": serializers.serialize("json", created), "errors": errors},
@@ -885,7 +892,10 @@ def slide_prebuild(request):
             stain = Stain.objects.get(pk=sample_exam["stain_id"])
             row = {
                 "case": model_to_dict(case, fields=["id", "no_caso"]),
-                "identification": model_to_dict(identification, fields=["id", "cage"]),
+                "identification": model_to_dict(
+                    identification,
+                    fields=["id", "cage", "group", "extra_features_detail"],
+                ),
                 "unit": model_to_dict(unit, fields=["id", "correlative"]),
                 "exam": model_to_dict(exam, fields=["id", "name"]),
                 "stain": model_to_dict(stain, fields=["id", "abbreviation"]),
@@ -895,6 +905,14 @@ def slide_prebuild(request):
                 row["cassette"] = (
                     model_to_dict(cassette, fields=["id", "correlative"]),
                 )
+                row["organs"] = ",".join(
+                    [organ.abbreviation for organ in cassette.organs.all()]
+                )
+            else:
+                row["organs"] = ",".join(
+                    [organ.abbreviation for organ in unit.organs.all()]
+                )
+
             slides.append(row)
             slide_correlative += 1
 
@@ -917,14 +935,20 @@ class SlideBuild(View):
         ``lab/slides/build.html``
         """
 
-        units = Unit.objects.filter(
-            identification__entryform__entry_format=5,
-            identification__entryform__forms__cancelled=0,
-            identification__entryform__forms__form_closed=0,
-        ).select_related("identification__entryform")
-        cassettes = Cassette.objects.filter(
-            slides=None, processed_at__isnull=False
-        ).select_related("unit__identification__entryform")
+        units = (
+            Unit.objects.filter(
+                identification__entryform__entry_format=5,
+                identification__entryform__forms__cancelled=0,
+                identification__entryform__forms__form_closed=0,
+            )
+            .distinct()
+            .select_related("identification__entryform")
+        )
+        cassettes = (
+            Cassette.objects.filter(slides=None, processed_at__isnull=False)
+            .distinct()
+            .select_related("unit__identification__entryform")
+        )
         stains = Stain.objects.all()
 
         slides = []
