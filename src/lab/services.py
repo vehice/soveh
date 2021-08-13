@@ -9,38 +9,38 @@ def generate_differences(unit):
     Creates :model:`lab.CassetteDifference` for any
     :model:`backend.Organ` that it's present in a Unit
     but not in any of its :model:`lab.Cassette`.
+    Returns True if any difference is generated.
     """
     cassettes_pk = unit.cassettes.all().values_list("id", flat=True)
-    cassettes_organs = (
+    cassettes_organs = list(
         CassetteOrgan.objects.filter(cassette_id__in=cassettes_pk)
         .values("organ")
         .annotate(organ_count=Count("organ"))
         .order_by()
     )
-    unit_organs = (
+    unit_organs = list(
         unit.organunit_set.values("organ")
         .annotate(organ_count=Count("organ"))
         .order_by()
     )
 
-    differences = []
-    for unit_organ in unit_organs:
-        for cassette_organ in cassettes_organs:
-            if cassette_organ["organ"] == unit_organ["organ"]:
-                if cassette_organ["organ_count"] == unit_organ["organ_count"]:
-                    continue
-                else:
-                    difference = (
-                        unit_organ["organ_count"] - cassette_organ["organ_count"]
-                    )
-                    obj, created = UnitDifference.objects.update_or_create(
-                        unit=unit,
-                        organ_id=unit_organ["organ"],
-                        defaults={"difference": difference},
-                    )
-                    differences.append(obj)
+    if cassettes_organs != unit_organs:
+        organ_differences = [
+            organ
+            for organ in cassettes_organs + unit_organs
+            if organ not in cassettes_organs or organ not in unit_organs
+        ]
 
-    return differences
+        for difference in organ_differences:
+            UnitDifference.objects.update_or_create(
+                unit=unit,
+                organ_id=difference["organ"],
+                defaults={"difference": difference["organ_count"]},
+            )
+
+        return True
+
+    return False
 
 
 def change_case_step(case_pk, step):
