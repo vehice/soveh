@@ -248,10 +248,16 @@ class CassetteHome(View):
         """
         Returns common context for the class.
         """
-        build_count = Unit.objects.filter(
-            cassettes__isnull=True,
-            identification__entryform__entry_format__in=[1, 2, 6, 7],
-        ).count()
+        build_count = (
+            Unit.objects.filter(
+                cassettes__isnull=True,
+                organs__isnull=False,
+                identification__entryform__entry_format__in=[1, 2, 6, 7],
+            )
+            .select_related("identification__entryform")
+            .distinct()
+            .count()
+        )
         process_count = Cassette.objects.filter(processed_at=None).count()
         differences_count = UnitDifference.objects.filter(status=0).count()
         return {
