@@ -76,7 +76,7 @@
         <%= sample.index %>
     </td>
     <td id="sampleIden-<%= sample.id %>" rowspan="1">
-        (<%= sample.identification.correlative %>) <%= sample.identification.cage %>-<%= sample.identification.group %>
+        (<%= sample.identification.correlative %>) <%= sample.identification.cage %>-<%= sample.identification.group %>-<%= sample.identification.extra_features_detail %>
     </td>
     <td id="sampleOrgans-<%= sample.id %>" rowspan="1">
       <select id="sampleOrgans-<%= sample.id %>" multiple class="form-control sampleOrgansSelect" style="width:100% !important;" disabled >
