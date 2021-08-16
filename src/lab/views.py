@@ -437,8 +437,11 @@ def cassette_prebuild(request):
         }
 
     for unit in units:
-        cassette_count = unit.cassettes.count()
-        cassette_count = 1 if cassette_count == 0 else cassette_count
+        last_correlative = 1
+        cassette_highest_correlative = unit.cassettes.order_by("-correlative").first()
+        cassette_count = 1
+        if cassette_highest_correlative:
+            cassette_count = cassette_highest_correlative.correlative
         excludes = []
 
         if rules["uniques"] and len(rules["uniques"]) > 0:

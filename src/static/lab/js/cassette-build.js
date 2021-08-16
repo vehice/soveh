@@ -268,9 +268,10 @@ $(document).ready(function () {
                 row: rowIdx,
                 column: 3,
             });
-            if (row.case.id != caseId) {
-                caseId = row.case.id;
-                correlativeNumber = 1;
+
+            if (row.case != caseId) {
+                caseId = row.case;
+                correlativeNumber = row.cassette;
             }
             currentCorrelativeCell.data(correlativeNumber);
             correlativeNumber += 1;
