@@ -768,6 +768,8 @@ class CassetteDetail(View):
 
         data = self.serialize_data(cassette)
 
+        differences = generate_differences(cassette.unit)
+
         return HttpResponse(json.dumps(data), content_type="application/json")
 
 
