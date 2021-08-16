@@ -538,11 +538,9 @@ $(document).ready(function () {
                                 <button class="btn btn-danger deleteOrgan" type="button">X</button>
                             </div>`;
                 element.append(organDOM);
-
-                continue;
+            } else {
+                return;
             }
-
-            return;
         });
     });
 
