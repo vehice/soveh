@@ -257,7 +257,6 @@ $(document).ready(function () {
                 row: rowIdx,
                 column: 5,
             });
-            console.log({ row });
             if (row.case.id != caseId) {
                 caseId = row.case.id;
                 correlativeNumber = 1;
