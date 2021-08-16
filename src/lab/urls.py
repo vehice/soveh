@@ -14,6 +14,7 @@ urlpatterns = [
         views.redirect_to_workflow_edit,
         name="redirect_to_workflow_edit",
     ),
+    path("cases", views.case_select_options, name="case_select_options"),
     path(
         "difference/<int:pk>",
         views.update_unit_difference,

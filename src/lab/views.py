@@ -103,6 +103,42 @@ def case_process_state(request, pk):
     return render(request, "cases/state.html", {"case": case, "analysis": analysis})
 
 
+@login_required
+def case_select_options(request):
+    """
+    Returns a formatted JSON to be used in a Select2 input
+    listing all :model:`lab.Case`
+
+    **REQUEST**
+        `search`: Search term to look for in case.no_caso.
+        `page`: Paginator's current page.
+
+    """
+    search_term = request.GET.get("search")
+
+    if not search_term:
+        return JsonResponse({})
+
+    cases = Case.objects.filter(no_caso__icontains=search_term)
+
+    page = request.GET.get("page")
+
+    cases_paginator = Paginator(cases, 20)
+    cases_paginated = cases_paginator.get_page(page)
+
+    response = {"results": [], "pagination": {"more": cases_paginated.has_next()}}
+
+    for case in cases_paginated:
+        response["results"].append(
+            {
+                "id": case.id,
+                "text": case.no_caso,
+            }
+        )
+
+    return JsonResponse(response)
+
+
 # Organ related views
 
 
@@ -224,14 +260,19 @@ class CassetteHome(View):
             "differences_count": differences_count,
         }
 
-    def report_created_cassettes(self, date_range, response=None):
+    def report_created_cassettes(self, date_range, case=None, response=None):
         """
         Returns a list with :model:`lab.Cassette` which have been
         created within the given date range tuple (start, end).
         """
-        cassettes = Cassette.objects.filter(
-            created_at__gte=date_range[0], created_at__lte=date_range[1]
-        )
+
+        cassettes = None
+        if case:
+            cassettes = Cassette.objects.filter(unit__identification__entryform_id=case)
+        else:
+            cassettes = Cassette.objects.filter(
+                created_at__gte=date_range[0], created_at__lte=date_range[1]
+            )
 
         response_data = []
 
@@ -260,14 +301,23 @@ class CassetteHome(View):
 
         return cassettes
 
-    def report_differences_cassettes(self, date_range, include_solved, response=None):
+    def report_differences_cassettes(
+        self, date_range, include_solved, case=None, response=None
+    ):
         """
         Returns a list with :model:`lab.UnitDifferences` which have been
         created withing the given date range tuple (start, end).
         """
-        differences = UnitDifference.objects.filter(
-            created_at__gte=date_range[0], created_at__lte=date_range[1]
-        )
+
+        differences = None
+        if case:
+            differences = UnitDifference.objects.filter(
+                unit__identification__entryform_id=case
+            )
+        else:
+            differences = UnitDifference.objects.filter(
+                created_at__gte=date_range[0], created_at__lte=date_range[1]
+            )
 
         if not include_solved:
             differences = differences.filter(status=0)
@@ -316,16 +366,21 @@ class CassetteHome(View):
             ``include_solved``: Latest limit for the date range. Defaults to current.
             ``report_type``: boolean which determines if the response is a file or on-screen.
         """
-        try:
-            from_date = parse(request.POST.get("from_date"))
-        except ParserError:
-            raise Http404("Sin fecha de inicio.")
-        try:
-            to_date = request.POST.get("to_date")
-        except ParserError:
-            to_date = datetime.now()
+        date_range = None
 
-        date_range = (from_date, to_date)
+        case = request.POST.get("case")
+
+        if not case:
+            try:
+                from_date = parse(request.POST.get("from_date"))
+            except ParserError:
+                raise Http404("Sin fecha de inicio.")
+            try:
+                to_date = request.POST.get("to_date")
+            except ParserError:
+                to_date = datetime.now()
+
+            date_range = (from_date, to_date)
 
         report_name = request.POST.get("report_name")
         is_csv = int(request.POST.get("report_type"))
@@ -342,20 +397,22 @@ class CassetteHome(View):
             ] = f"attachment; filename='Reporte {filename} {from_date} - {to_date}.csv'"
 
             if report_name == "created":
-                return self.report_created_cassettes(date_range, response)
+                return self.report_created_cassettes(date_range, case, response)
             elif report_name == "differences":
-                return self.report_differences_cassettes(date_range, response)
+                return self.report_differences_cassettes(
+                    date_range, case=case, response=response
+                )
 
             raise Http404("Tipo de reporte invalido.")
 
         context = self.get_context()
         context["report_name"] = report_name
         if report_name == "created":
-            context["rows"] = self.report_created_cassettes(date_range)
+            context["rows"] = self.report_created_cassettes(date_range, case)
         elif report_name == "differences":
             include_solved = bool(request.POST.get("include_solved"))
             context["rows"] = self.report_differences_cassettes(
-                date_range, include_solved
+                date_range, include_solved, case
             )
 
         return render(request, "cassettes/home.html", context)

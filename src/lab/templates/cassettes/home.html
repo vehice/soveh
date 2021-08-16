@@ -50,7 +50,12 @@
                                 <label for="">Hasta:</label>
                                 <input class="form-control" name="to_date" type="date" value=""/>
                             </div>
-                            <div class="col-md-3 offset-md-2">
+                            <div class="form-group col-md-2">
+                                <label for="">Caso:</label>
+                                <select id="caseSelectCreated" class="form-control caseSelect" name="case">
+                                </select>
+                            </div>
+                            <div class="col-md-3">
                                 <button name="report_type" value="0" class="btn btn-info">Generar reporte en pantalla</button>
                             </div>
                             <div class="col-md-3">
@@ -103,14 +108,17 @@
                                 <label for="">Hasta:</label>
                                 <input class="form-control" name="to_date" type="date" value=""/>
                             </div>
-                            <div class="col-md-2 form-check">
+                            <div class="col-md-1 form-check">
                                 <input class="form-check-input" name="include_solved" type="checkbox" value="true"/>
                                 <label class="form-check-label" for="include_solved">Incluir revisados</label>
                             </div>
-                            <div class="col-md-3">
-                                <button name="report_type" value="0" class="btn btn-info">Generar reporte en pantalla</button>
+                            <div class="form-group col-md-2">
+                                <label for="">Caso:</label>
+                                <select id="caseSelectDifferences" class="form-control caseSelect" name="case">
+                                </select>
                             </div>
-                            <div class="col-md-3">
+                            <div class="col-md-4 d-flex flex-row">
+                                <button name="report_type" value="0" class="btn btn-info">Generar reporte en pantalla</button>
                                 <button name="report_type" value="1" class="btn btn-secondary">Generar reporte en csv/excel</button>
                             </div>
                         </form>
@@ -126,6 +134,8 @@
                                     <th>Identificacion</th>
                                     <th>Unidad</th>
                                     <th>Organos</th>
+
+
                                     <th>Cantidad</th>
                                 </tr>
                             </thead>
@@ -153,4 +163,26 @@
 
 {% endblock content %}
 {% block scripts %}
+<script type="text/javascript">
+ $(document).ready(() => {
+     $(".caseSelect").select2({
+        ajax: {
+            url: Urls["lab:case_select_options"](),
+            dataType: "json",
+            delay: 250,
+            data: (params) => {
+                var query = {
+                    search: params.term,
+                    page: params.page || 1,
+                };
+
+                // Query parameters will be ?search=[term]&page=[page]
+                return query;
+            },
+        },
+     })
+
+ })
+
+</script>
 {% endblock scripts %}
