@@ -258,22 +258,22 @@ $(document).ready(function () {
         return organs;
     }
 
-    function updateNumberCassettes() {
-        let unitId = 1;
-        let cassetteNumber = 1;
+    function updateCorrelativeCassette() {
+        let caseId = 1;
+        let correlativeNumber = 1;
 
         tableBuild.rows().every(function (rowIdx, tableLoop, rowLoop) {
             const row = this.data();
-            let currentCassetteCell = tableBuild.cell({
+            let currentCorrelativeCell = tableBuild.cell({
                 row: rowIdx,
                 column: 3,
             });
-            if (row.unit_id != unitId) {
-                unitId = row.unit_id;
-                cassetteNumber = 1;
+            if (row.case.id != caseId) {
+                caseId = row.case.id;
+                correlativeNumber = 1;
             }
-            currentCassetteCell.data(cassetteNumber);
-            cassetteNumber += 1;
+            currentCorrelativeCell.data(correlativeNumber);
+            correlativeNumber += 1;
         });
     }
 
@@ -312,7 +312,7 @@ $(document).ready(function () {
                 tableBuild.row.add(newRow).draw();
             });
 
-        updateNumberCassettes();
+        updateCorrelativeCassette();
     });
 
     $(".btn-close").click(function () {
@@ -333,7 +333,7 @@ $(document).ready(function () {
         });
         selectedCassettes.length = 0;
 
-        updateNumberCassettes();
+        updateCorrelativeCassette();
     });
 
     $("#btnArmarCassette").click(function () {
@@ -342,6 +342,7 @@ $(document).ready(function () {
             units = response;
             activateNewCassetteUnitSelect(response);
             activateOrganSelect();
+            updateCorrelativeCassette();
         });
 
         let now = new Date();
