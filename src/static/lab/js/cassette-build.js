@@ -530,37 +530,19 @@ $(document).ready(function () {
         const selectedOrgans = $("#selectNewOrgans").select2("data");
         const selectedRows = tableBuild.rows(".selected").data();
         selectedRows.each((value, index) => {
-            const organs = getOrgansFromUnit(value.unit_id);
-            let addedOrgans = {};
-            for (const selectedOrgan of selectedOrgans) {
-                const organ = organs.find(
-                    (organ) => selectedOrgan.id == organ.pk
-                );
-                if (organ == undefined) continue;
-                const organCount = organs.filter(
-                    (currentOrgan) => currentOrgan.pk == organ.pk
-                ).length;
-                const hasOrganGroup = organs.some(
-                    (currentOrgan) => currentOrgan.fields.organ_type == 2
-                );
-                const canBeAdded = hasOrganGroup || organ != undefined;
-                const hasBeenAdded = Object.keys(addedOrgans).includes(
-                    organ.pk
-                );
-                if (canBeAdded && !hasBeenAdded) {
-                    const id = `${value.unit_id};${value.cassette}`;
-                    const element = $(document.getElementById(id));
-                    const currentOrganCount = element.find(
-                        `[value=${organ.pk}]`
-                    ).length;
-                    if (currentOrganCount >= organCount) continue;
-                    const organDOM = `<div class="btn-group mr-1" role="group">
-                            <button class="btn btn-secondary organId" type="button" value="${organ.pk}" disabled>${organ.fields.abbreviation}</button>
-                            <button class="btn btn-danger deleteOrgan" type="button">X</button>
-                          </div>`;
-                    element.append(organDOM);
-                }
+            const organ = organs.find((organ) => selectedOrgan.id == organ.pk);
+
+            if (organ != undefined) {
+                const organDOM = `<div class="btn-group mr-1" role="group">
+                                <button class="btn btn-secondary organId" type="button" value="${organ.pk}" disabled>${organ.fields.abbreviation}</button>
+                                <button class="btn btn-danger deleteOrgan" type="button">X</button>
+                            </div>`;
+                element.append(organDOM);
+
+                continue;
             }
+
+            return;
         });
     });
 
