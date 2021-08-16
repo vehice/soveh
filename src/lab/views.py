@@ -562,7 +562,12 @@ class CassetteBuild(View):
                     build_at=build_at, correlative=row["correlative"]
                 )
             else:
-                correlative = unit.cassettes.count() + 1
+                cassette_highest_correlative = unit.cassettes.order_by(
+                    "-correlative"
+                ).first()
+                correlative = 1
+                if cassette_highest_correlative:
+                    correlative = cassette_highest_correlative.correlative
                 cassette = unit.cassettes.create(
                     build_at=build_at, correlative=correlative
                 )
@@ -881,23 +886,16 @@ def slide_prebuild(request):
             SampleExams.objects.filter(
                 unit_organ__in=organ_unit, organ__in=organs_subject
             )
-            .values("exam_id", "stain_id")
-            .annotate(exam_count=Count("exam_id"))
+            .values("stain_id")
+            .annotate(stain_count=Count("stain_id"))
             .order_by("stain_id")
         )
 
-        # The correlative is just a count of all Slides for one Case
         if prev_case != case:
-            case_identifications = case.identification_set.all().values_list(
-                "id", flat=True
-            )
-            case_units = Unit.objects.filter(identification_id__in=case_identifications)
-            case_slides_count = Slide.objects.filter(unit_id__in=case_units).count()
-            slide_correlative = 1 if case_slides_count < 1 else case_slides_count
+            slide_correlative = cassette.correlative if cassette else unit.correlative
             prev_case = case
 
         for sample_exam in sample_exams:
-            exam = Exam.objects.get(pk=sample_exam["exam_id"])
             stain = Stain.objects.get(pk=sample_exam["stain_id"])
             row = {
                 "case": model_to_dict(case, fields=["id", "no_caso"]),
@@ -906,7 +904,6 @@ def slide_prebuild(request):
                     fields=["id", "cage", "group", "extra_features_detail"],
                 ),
                 "unit": model_to_dict(unit, fields=["id", "correlative"]),
-                "exam": model_to_dict(exam, fields=["id", "name"]),
                 "stain": model_to_dict(stain, fields=["id", "abbreviation"]),
                 "slide": slide_correlative,
             }

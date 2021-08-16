@@ -180,13 +180,17 @@ $(document).ready(function () {
                 orderable: false,
             },
             {
-                data: "slide",
+                data: "cassette",
                 name: "index",
                 type: "string",
                 title: "Correlativo",
                 orderable: false,
-                render: (data, type, row, meta) => {
-                    return data;
+                render: (data, type, row) => {
+                    if (data[0] && data[0].correlative) {
+                        return `${row.case.no_caso},${row.stain.abbreviation},${data[0].correlative}`;
+                    } else {
+                        return `${row.case.no_caso},${row.stain.abbreviation},${row.unit.correlative}`;
+                    }
                 },
             },
         ],
@@ -245,25 +249,6 @@ $(document).ready(function () {
     function getCassetteByPk(pk) {
         const cassette = selectedItems.find((item) => item.cassette.pk == pk);
         return cassette;
-    }
-
-    function updateCorrelativeSlide() {
-        let caseId = 1;
-        let correlativeNumber = 1;
-
-        tableBuild.rows().every(function (rowIdx, tableLoop, rowLoop) {
-            const row = this.data();
-            let currentCorrelativeCell = tableBuild.cell({
-                row: rowIdx,
-                column: 5,
-            });
-            if (row.case.id != caseId) {
-                caseId = row.case.id;
-                correlativeNumber = 1;
-            }
-            currentCorrelativeCell.data(correlativeNumber);
-            correlativeNumber += 1;
-        });
     }
 
     function groupBy(xs) {
@@ -330,7 +315,6 @@ $(document).ready(function () {
 
     $("#btnDeleteSelected").click(() => {
         tableBuild.rows(".selected").remove().draw(false);
-        updateCorrelativeSlide();
     });
 
     selectCase.on("change", (e) => {
@@ -371,51 +355,37 @@ $(document).ready(function () {
             .rows({ selected: true })
             .data()
             .each((value, index) => {
-                const cassette = getCassetteByPk(value.cassette[0].id).cassette;
-                const row = getUnitByPk(value.unit.id);
-
-                let new_row = {
-                    case: {
-                        id: row.case.pk,
-                        no_caso: row.case.fields.no_caso,
-                    },
-                    identification: {
-                        id: row.identification.pk,
-                        cage: row.identification.fields.cage,
-                        group: row.identification.fields.group,
-                        extra_features_detail:
-                            row.identification.fields.extra_features_detail,
-                    },
-                    unit: {
-                        id: row.unit.pk,
-                        correlative: row.unit.fields.correlative,
-                    },
-                    stain: {
-                        id: stain.id,
-                        abbreviation: stain.text,
-                    },
-                    slide: 0,
+                let newRow = { ...value };
+                newRow.stain = {
+                    id: parseInt(stain.id),
+                    abbreviation: stain.text,
                 };
+                let alreadyExists = false;
+                tableBuild
+                    .rows()
+                    .data()
+                    .each((row, index) => {
+                        // Can't reliably compare 2 javascript objects
+                        // thus is necessary to transform them into strings
+                        // and then compare the resulting strings
+                        // this comparison fails if the properties are not
+                        // ordered the same in both objects.
 
-                if ("pk" in cassette && "fields" in cassette) {
-                    new_row.cassette = [
-                        {
-                            id: cassette.pk,
-                            correlative: cassette.fields.correlative,
-                        },
-                    ];
+                        if (JSON.stringify(row) == JSON.stringify(newRow)) {
+                            alreadyExists = true;
+                        }
+                    });
+
+                if (!alreadyExists) {
+                    tableBuild.row.add(newRow).draw();
                 } else {
-                    new_row.cassette = [
-                        {
-                            id: -1,
-                            correlative: "N/A",
-                        },
-                    ];
+                    Swal.fire({
+                        title:
+                            "Ya existe un slide de este Cassette/Unidad con esta tinción",
+                        icon: "error",
+                    });
                 }
-
-                tableBuild.row.add(new_row).draw();
             });
-        updateCorrelativeSlide();
     });
 
     $("#btnSaveSlide").click(() => {
