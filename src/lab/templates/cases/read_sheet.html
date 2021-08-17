@@ -21,10 +21,10 @@
                                     <th scope="col">Slide</th>
                                     <th scope="col">Identificación</th>
                                     <th scope="col">Unidad</th>
-                                    <th scope="col">Grupo</th>
                                     <th scope="col">Organos</th>
                                     <th scope="col">Tincion</th>
                                     <th scope="col">Tag</th>
+                                    <th scope="col">Disponible?</th>
                                     <th scope="col">Ver Slide</th>
                                 </tr>
                             </thead>
@@ -32,9 +32,8 @@
                                 {% for slide in slides %}
                                 <tr>
                                     <th scope="row">{{ slide.correlative }}</th>
-                                    <td>{{ slide.unit.identification.cage }}</td>
+                                    <td>{{ slide.unit.identification }}</td>
                                     <td>{{ slide.unit.correlative }}</td>
-                                    <td>{{ slide.unit.identification.group }}</td>
                                     <td>
                                         {% for organ in slide.organs %}
                                             {% if forloop.last %}
@@ -46,6 +45,7 @@
                                         </td>
                                     <td>{{ slide.stain }}</td>
                                     <td>{{ slide.tag }}</td>
+                                    <td>{{ slide.released_at|yesno:"Si,No" }}</td>
                                     <td>
                                         {% with url=slide.get_absolute_url%}
                                         {% if url %}
