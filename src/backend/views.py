@@ -2247,12 +2247,9 @@ def step_1_entryform(request):
         ):
             # change = True
             pass
-        entryform.sampled_at = datetime.strptime(
-            var_post.get("sampled_at"), "%d/%m/%Y"
-        )
+        entryform.sampled_at = datetime.strptime(var_post.get("sampled_at"), "%d/%m/%Y")
     except:
         pass
-
 
     if str(entryform.sampled_at_hour) != var_post.get("sampled_at_hour") and (
         entryform.sampled_at_hour == None and var_post.get("sampled_at_hour") != ""
@@ -3330,6 +3327,7 @@ def save_generalData(request, id):
     entry.fixative_id = int(var_post["fixative"])
     entry.customer_id = int(var_post["client"])
     entry.entryform_type_id = int(var_post["entryform_type"])
+    entry.entry_format = int(var_post["entry_format"])
     entry.company = var_post["company"]
     entry.center = var_post["center"]
     entry.responsible = var_post["responsable"]
