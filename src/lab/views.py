@@ -43,6 +43,7 @@ def home(request):
     slides_to_build = Cassette.objects.filter(
         slides=None, processed_at__isnull=False
     ).count()
+    slides_to_release = Slide.objects.filter(released_at=None).count()
     return render(
         request,
         "home.html",
@@ -54,6 +55,8 @@ def home(request):
             + cassettes_to_process
             + differences_count,
             "slides_to_build": slides_to_build,
+            "slides_to_release": slides_to_release,
+            "slides_workload": slides_to_build + slides_to_release,
         },
     )
 
@@ -836,9 +839,11 @@ class SlideHome(View):
             slides=None, processed_at__isnull=False
         ).count()
         build_count = units_count + cassettes_count
-        differences_count = UnitDifference.objects.filter(status=0).count()
+        release_count = Slide.objects.filter(released_at__isnull=True).count()
+
         return {
             "build_count": build_count,
+            "release_count": release_count,
         }
 
     def report_created_slides(self, date_range, response=None):
@@ -1278,6 +1283,36 @@ class SlideDetail(View):
         return HttpResponse(
             serializers.serialize("json", [slide]), content_type="application/json"
         )
+
+
+class SlideRelease(View):
+    @method_decorator(login_required)
+    def get(self, request):
+        """
+        Displays a list of :model:`lab.Slide` which ``processed_at`` date is null.
+        """
+        slides = Slide.objects.filter(released_at=None).select_related(
+            "unit__identification__entryform"
+        )
+        return render(request, "slides/release.html", {"slides": slides})
+
+    @method_decorator(login_required)
+    def post(self, request):
+        """
+        Updates the given :model:`lab.Slide` with the given date for `released_at`.
+        """
+        request_data = json.loads(request.body)
+
+        try:
+            released_at = parse(request_data["released_at"])
+        except (ParserError):
+            released_at = datetime.now()
+
+        slides_updated = Slide.objects.filter(pk__in=request_data["slides"]).update(
+            released_at=released_at
+        )
+
+        return JsonResponse(slides_updated, safe=False)
 
 
 # Process related views

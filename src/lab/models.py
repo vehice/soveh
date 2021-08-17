@@ -59,10 +59,11 @@ class Analysis(AnalysisForm):
         if total_organs_count > 0:
             progress_value = 1 / exam_units_organs.count()
             for cassette in cassettes:
+                total_progress += progress_value / 2
+
                 if cassette.slides.count() > 0:
-                    total_progress += progress_value
-                else:
                     total_progress += progress_value / 2
+
             return total_progress * 100
         return 0
 
@@ -215,7 +216,9 @@ class Slide(models.Model):
     unit = models.ForeignKey(Unit, on_delete=models.CASCADE, related_name="slides")
     stain = models.ForeignKey(Stain, on_delete=models.CASCADE, related_name="slides")
     correlative = models.PositiveIntegerField()
-    build_at = models.DateTimeField(null=True)
+
+    build_at = models.DateTimeField(null=True, blank=True)
+    released_at = models.DateTimeField(null=True, blank=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
