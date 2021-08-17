@@ -397,19 +397,29 @@ $(document).ready(function () {
             .rows()
             .data()
             .each((value, index) => {
+                let correlative = value.unit.correlative;
                 let new_slide = {
                     unit_id: value.unit.id,
                     stain_id: value.stain.id,
-                    correlative: index + 1,
                 };
                 if (value.cassette[0] && value.cassette[0].id > 0) {
+                    let correlative = value.cassette[0].correlative;
                     new_slide.cassette_id = value.cassette[0].id;
                 }
+
+                new_slide.correlative = correlative;
                 slides.push(new_slide);
 
-                text += `<li class="list-group-item">${value.case.no_caso},${
-                    value.stain.abbreviation
-                },${index + 1}</li>`;
+                const text_abbreviation = value.stain.abbreviation
+                    .replace(" ", ",")
+                    .replace("+", ",")
+                    .toLocaleUpperCase();
+                const text_correlative = new String(correlative).padStart(
+                    3,
+                    "0"
+                );
+
+                text += `<li class="list-group-item">${value.case.no_caso},${text_abbreviation},${text_correlative}</li>`;
             });
 
         Swal.fire({
