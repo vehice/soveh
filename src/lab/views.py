@@ -285,7 +285,15 @@ class CassetteHome(View):
         if response:
             csv_writer = csv.writer(response)
             csv_writer.writerow(
-                ["Caso", "Identificacion", "Unidad", "Cassette", "Organos", "Codigo"]
+                [
+                    "Caso",
+                    "Identificacion",
+                    "Unidad",
+                    "Cassette",
+                    "Organos",
+                    "Codigo",
+                    "Fecha de Armado",
+                ]
             )
 
             for cassette in cassettes:
@@ -300,6 +308,7 @@ class CassetteHome(View):
                         cassette.correlative,
                         organs_text,
                         cassette.tag,
+                        cassette.created_at,
                     ]
                 )
 
@@ -846,7 +855,15 @@ class SlideHome(View):
         if response:
             csv_writer = csv.writer(response)
             csv_writer.writerow(
-                ["Caso", "Identificacion", "Unidad", "Correlativo", "Organos", "Codigo"]
+                [
+                    "Caso",
+                    "Identificacion",
+                    "Unidad",
+                    "Correlativo",
+                    "Organos",
+                    "Codigo",
+                    "Fecha de Armado",
+                ]
             )
 
             for slide in slides:
@@ -859,6 +876,7 @@ class SlideHome(View):
                         slide.correlative,
                         organs_text,
                         slide.tag,
+                        slide.created_at,
                     ]
                 )
 
@@ -892,9 +910,11 @@ class SlideHome(View):
         except ParserError:
             raise Http404("Sin fecha de inicio.")
         try:
-            to_date = request.POST.get("to_date")
+            to_date = parse(request.POST.get("to_date"))
         except ParserError:
             to_date = datetime.now()
+        finally:
+            to_date += timedelta(days=1)
 
         date_range = (from_date, to_date)
 
@@ -1129,10 +1149,7 @@ class SlideBuild(View):
             if "correlative" in slide:
                 parameters["correlative"] = slide["correlative"]
             else:
-                case = unit.identification.entryform
-                units = Unit.objects.filter(Q(identification__entryform=case))
-                slides = Slide.objects.filter(unit__in=units)
-                parameters["correlative"] = slides.count() + 1
+                parameters["correlative"] = unit.correlative
 
             if (
                 "cassette_id" in slide and slide["cassette_id"]
@@ -1145,6 +1162,7 @@ class SlideBuild(View):
                         status=400,
                     )
                 parameters["cassette"] = cassette
+                parameters["correlative"] = cassette.correlative
 
             try:
                 slide = Slide.objects.create(**parameters)

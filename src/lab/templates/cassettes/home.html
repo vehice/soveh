@@ -76,6 +76,7 @@
                                     <th>Cassette</th>
                                     <th>Organos</th>
                                     <th>Codigo</th>
+                                    <th>Fecha Armado</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -87,6 +88,7 @@
                                     <td>{{ cassette.correlative }}</td>
                                     <td>{{ cassette.organs.all|join:"," }}</td>
                                     <td>{{ cassette.tag }}</td>
+                                    <td>{{ cassette.created_at|date:"d/m/Y" }}</td>
                                 </tr>
                                 {% endfor %}
                             </tbody>
@@ -134,8 +136,6 @@
                                     <th>Identificacion</th>
                                     <th>Unidad</th>
                                     <th>Organos</th>
-
-
                                     <th>Cantidad</th>
                                 </tr>
                             </thead>

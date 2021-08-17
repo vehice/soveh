@@ -56,8 +56,10 @@
                                     <th>Identificacion</th>
                                     <th>Unidad</th>
                                     <th>Slide</th>
+                                    <th>Tincion</th>
                                     <th>Organos</th>
                                     <th>Codigo</th>
+                                    <th>Fecha Armado</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -67,8 +69,10 @@
                                     <td>{{ slide.unit.identification }}</td>
                                     <td>{{ slide.unit.correlative }}</td>
                                     <td>{{ slide.correlative }}</td>
+                                    <td>{{ slide.stain }}</td>
                                     <td>{{ slide.organs|join:"," }}</td>
                                     <td>{{ slide.tag }}</td>
+                                    <td>{{ slide.created_at|date:"d/m/Y" }}</td>
                                 </tr>
                                 {% endfor %}
                             </tbody>
