@@ -89,17 +89,12 @@ def analysis_mailing_list(request, pk):
     Returns a JsonResponse with a list detailing the given
     pk's :model:`review.Analysis` its :model:`review.MailList`
     """
-    analysis = get_object_or_404(Analysis, pk=pk)
-    recipients = []
-    for mails in analysis.mailing_lists.all():
-        recipients.append(
-            {
-                "name": mails.name,
-                "recipients": serializers.serialize("json", mails.recipients.all()),
-            }
-        )
+    recipients_pk = AnalysisRecipient.objects.filter(analysis_id=pk).values_list(
+        "recipient_id", flat=True
+    )
+    recipients = Recipient.objects.filter(pk__in=recipients_pk)
 
-    return JsonResponse(json.dumps(recipients), safe=False)
+    return JsonResponse(serializers.serialize("json", recipients), safe=False)
 
 
 @login_required
