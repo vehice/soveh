@@ -274,7 +274,8 @@ function showServiceReportsModal(
 
         $("#reports_uploader").dropzone({
             autoProcessQueue: false,
-            acceptedFiles: ".csv, .doc, .docx, .ods, .odt, .pdf, .xls, .xlsx",
+            acceptedFiles:
+                ".csv, .doc, .docx, .ods, .odt, .pdf, .xls, .xlsx, .xlsm",
             init: function () {
                 var submitButton = document.querySelector(".submit-file");
                 myDropzone = this;
