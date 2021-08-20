@@ -446,6 +446,10 @@ class EntryForm(models.Model):
         else:
             return "N/A"
 
+    class Meta:
+        verbose_name = "Caso"
+        verbose_name_plural = "Casos"
+
 
 class Identification(models.Model):
     """
@@ -497,7 +501,7 @@ class OrganUnit(models.Model):
     organ = models.ForeignKey(Organ, on_delete=models.CASCADE)
 
     def __str__(self):
-        return self.unit.correlative
+        return f"{self.unit.identification.entryform.no_caso}-{self.unit.identification}-{self.unit.correlative}: {self.organ.abbreviation}"
 
 
 class ServiceComment(models.Model):
@@ -586,6 +590,10 @@ class AnalysisForm(models.Model):
             status = "En Curso"
         return status
 
+    class Meta:
+        verbose_name = "Analisis"
+        verbose_name_plural = "Analisis"
+
 
 class Sample(models.Model):
     """
@@ -601,7 +609,7 @@ class Sample(models.Model):
     unit_organs = models.ManyToManyField(OrganUnit)
 
     def __str__(self):
-        return str(self.index)
+        return f"{self.entryform.no_caso}-{self.identification}({self.index})"
 
 
 class SampleExams(models.Model):
@@ -616,7 +624,9 @@ class SampleExams(models.Model):
     stain = models.ForeignKey(
         Stain, null=True, on_delete=models.SET_NULL, verbose_name="tinción"
     )
-    unit_organ = models.ForeignKey(OrganUnit, null=True, on_delete=models.CASCADE)
+    unit_organ = models.ForeignKey(
+        OrganUnit, null=True, on_delete=models.CASCADE, blank=True
+    )
 
     def __str__(self):
         return str(self.sample)
