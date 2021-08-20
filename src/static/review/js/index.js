@@ -355,11 +355,8 @@ $(document).ready(() => {
         $.get(Urls["review:analysis_emails"](analysisId), (response) => {
             let data = JSON.parse(response);
             let text = "";
-            for (const mailList of data) {
-                text += `<b>${mailList.name}:</b>`;
-                for (const recipient of JSON.parse(mailList.recipients)) {
-                    text += `<p>${recipient.fields.first_name} (${recipient.fields.email})<p>`;
-                }
+            for (const recipient of data) {
+                text += `<p>${recipient.fields.first_name} &lt;${recipient.fields.email}&gt;<p>`;
             }
             Swal.fire({
                 title:

@@ -137,6 +137,9 @@ class ENTRYFORM(View):
                         exam_id=sE.exam_id, stain_id=sE.stain_id
                     ).first()
 
+                    if not analysis_form:
+                        continue
+
                     a_form = analysis_form.forms.get()
 
                     is_cancelled = a_form.cancelled
