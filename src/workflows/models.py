@@ -141,7 +141,6 @@ class Form(models.Model):
 
     flow = models.ForeignKey(Flow, on_delete=models.CASCADE)
     state = models.ForeignKey(State, on_delete=models.CASCADE)
-    # form closed is a finished case
     form_closed = models.BooleanField(default=False)
     form_reopened = models.BooleanField(default=False)
     parent = models.ForeignKey(
@@ -150,12 +149,11 @@ class Form(models.Model):
     content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
     object_id = models.PositiveIntegerField(null=True)
     content_object = GenericForeignKey()
-    cancelled = models.BooleanField(default=False)
-    cancelled_at = models.DateTimeField(null=True)
-    closed_at = models.DateTimeField(null=True)
-    reception_finished = models.BooleanField(default=False)
-    reception_finished_at = models.DateTimeField(null=True)
-    
+    cancelled = models.BooleanField(default=False, blank=True)
+    cancelled_at = models.DateTimeField(null=True, blank=True)
+    closed_at = models.DateTimeField(null=True, blank=True)
+    reception_finished = models.BooleanField(default=False, blank=True)
+    reception_finished_at = models.DateTimeField(null=True, blank=True)
 
     def __str__(self):
         return str(self.content_type)
