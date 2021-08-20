@@ -446,10 +446,6 @@ class EntryForm(models.Model):
         else:
             return "N/A"
 
-    class Meta:
-        verbose_name = "Caso"
-        verbose_name_plural = "Casos"
-
 
 class Identification(models.Model):
     """
@@ -589,10 +585,6 @@ class AnalysisForm(models.Model):
         else:
             status = "En Curso"
         return status
-
-    class Meta:
-        verbose_name = "Analisis"
-        verbose_name_plural = "Analisis"
 
 
 class Sample(models.Model):
