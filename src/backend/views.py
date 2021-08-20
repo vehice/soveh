@@ -2548,7 +2548,9 @@ def step_3_entryform(request):
             exists = False
             for elem in sample_exams_stains:
                 exams_stain = list(elem)
-                if se.exam_id == exams_stain[0] and se.stain_id == exams_stain[1]:
+                if se.exam_id == int(exams_stain[0]) and se.stain_id == int(
+                    exams_stain[1]
+                ):
                     exists = True
                     break
             if not exists:
@@ -2577,37 +2579,39 @@ def step_3_entryform(request):
             for se in SampleExams.objects.filter(
                 sample=sample, exam_id=exam_stain[0], stain_id=exam_stain[1]
             ):
-                if se.unit_organ_id + "-" + se.organ_id not in sample_organs[0]:
-                    se.delete()
+                if se.unit_organ_id is not None:
+                    if se.unit_organ_id + "-" + se.organ_id not in sample_organs[0]:
+                        se.delete()
 
             unit_organ_dict = {}
             for uo in sample.unit_organs.all():
                 unit_organ_dict[uo.organ.id] = uo.id
 
-            for organ in sample_organs[0]:
-                uo_organ_id = organ.split("-")[0]
-                organ_id = organ.split("-")[1]
-                uo_id = unit_organ_dict[int(uo_organ_id)]
+            if len(sample_organs) > 0:
+                for organ in sample_organs[0]:
+                    uo_organ_id = organ.split("-")[0]
+                    organ_id = organ.split("-")[1]
+                    uo_id = unit_organ_dict[int(uo_organ_id)]
 
-                if (
-                    SampleExams.objects.filter(
-                        sample=sample,
-                        exam_id=exam_stain[0],
-                        stain_id=exam_stain[1],
-                        organ_id=organ_id,
-                        unit_organ_id=uo_id,
-                    ).count()
-                    == 0
-                ):
-                    bulk_data.append(
-                        SampleExams(
-                            sample_id=sample.pk,
+                    if (
+                        SampleExams.objects.filter(
+                            sample=sample,
                             exam_id=exam_stain[0],
+                            stain_id=exam_stain[1],
                             organ_id=organ_id,
                             unit_organ_id=uo_id,
-                            stain_id=exam_stain[1],
+                        ).count()
+                        == 0
+                    ):
+                        bulk_data.append(
+                            SampleExams(
+                                sample_id=sample.pk,
+                                exam_id=exam_stain[0],
+                                organ_id=organ_id,
+                                unit_organ_id=uo_id,
+                                stain_id=exam_stain[1],
+                            )
                         )
-                    )
 
         change = change or checkSampleExams(sample.sampleexams_set.all(), bulk_data)
         SampleExams.objects.bulk_create(bulk_data)
