@@ -2583,7 +2583,10 @@ def step_3_entryform(request):
                 sample=sample, exam_id=exam_stain[0], stain_id=exam_stain[1]
             ):
                 if se.unit_organ_id is not None:
-                    if se.unit_organ_id + "-" + se.organ_id not in sample_organs[0]:
+                    if (
+                        str(se.unit_organ_id) + "-" + str(se.organ_id)
+                        not in sample_organs[0]
+                    ):
                         se.delete()
 
             unit_organ_dict = {}
