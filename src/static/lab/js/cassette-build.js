@@ -527,10 +527,12 @@ $(document).ready(function () {
     });
 
     $("#addOrgansButton").click(() => {
-        const selectedOrgans = $("#selectNewOrgans").select2("data");
+        const selectedOrgans = $("#selectNewOrgans").select2("data")[0];
         const selectedRows = tableBuild.rows(".selected").data();
         selectedRows.each((value, index) => {
-            const organ = organs.find((organ) => selectedOrgan.id == organ.pk);
+            const organ = organs.find((organ) => selectedOrgans.id == organ.pk);
+            const id = `${value.unit_id};${value.cassette}`;
+            const element = $(document.getElementById(id));
 
             if (organ != undefined) {
                 const organDOM = `<div class="btn-group mr-1" role="group">
