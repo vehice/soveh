@@ -137,6 +137,70 @@ class Case(EntryForm):
         ordering = ["-entryform_type_id", "-created_at"]
 
 
+class UnitManager(models.Manager):
+    """
+    Custom manager for :model:`backend.Unit` that allows to
+    query exams and simplify view's code.
+    """
+
+    def pending_cassettes(self, entry_format_list=[1, 2, 6, 7]):
+        """
+        Returns a queryset including all Units that are waiting
+        for :model:`lab.Cassette`.
+        """
+        units = (
+            super()
+            .get_queryset()
+            .filter(
+                cassettes__isnull=True,
+                organs__isnull=False,
+                identification__entryform__entry_format__in=entry_format_list,
+            )
+            .order_by("identification__correlative")
+            .distinct()
+        )
+
+        units_organ = OrganUnit.objects.filter(
+            unit_id__in=units.values_list("id", flat=True)
+        )
+        sample_exams = SampleExams.objects.filter(
+            unit_organ_id__in=units_organ.values_list("id", flat=True),
+            exam__service_id__in=[1, 2, 3],
+        )
+        units_organ = OrganUnit.objects.filter(
+            pk__in=sample_exams.values_list("unit_organ_id", flat=True)
+        )
+        return (
+            UnitProxy.objects.filter(
+                pk__in=units_organ.values_list("unit_id", flat=True)
+            )
+            .select_related("identification__entryform")
+            .distinct()
+        )
+
+
+class UnitProxy(Unit):
+    """Unit proxy to implement custom manager and methods"""
+
+    objects = UnitManager()
+
+    @property
+    def exams(self):
+        """
+        Returns a queryset of all :model:`backend.SampleExams` related through
+        :model:`backend.OrganUnit` to a single Unit.
+        """
+        unit_organs_pk = self.organunit_set.all().values_list("id", flat=True)
+        sample_exams = SampleExams.objects.filter(unit_organ_id__in=unit_organs_pk)
+
+        return Exam.objects.filter(
+            pk__in=sample_exams.values_list("exam_id", flat=True)
+        )
+
+    class Meta:
+        proxy = True
+
+
 class Cassette(models.Model):
     """
     A Cassette is a plastic unit where organs are put and

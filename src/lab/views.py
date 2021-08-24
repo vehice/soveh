@@ -27,17 +27,14 @@ from lab.models import (
     Process,
     Slide,
     UnitDifference,
+    UnitProxy,
 )
 from lab.services import change_case_step, generate_differences
 
 
 @login_required
 def home(request):
-    cassettes_to_build = Unit.objects.filter(
-        cassettes__isnull=True,
-        organs__isnull=False,
-        identification__entryform__entry_format__in=[1, 2, 6, 7],
-    ).count()
+    cassettes_to_build = UnitProxy.objects.pending_cassettes().count()
     cassettes_to_process = Cassette.objects.filter(processed_at=None).count()
     differences_count = UnitDifference.objects.filter(status=0).count()
     slides_to_build = Cassette.objects.filter(
@@ -251,16 +248,7 @@ class CassetteHome(View):
         """
         Returns common context for the class.
         """
-        build_count = (
-            Unit.objects.filter(
-                cassettes__isnull=True,
-                organs__isnull=False,
-                identification__entryform__entry_format__in=[1, 2, 6, 7],
-            )
-            .select_related("identification__entryform")
-            .distinct()
-            .count()
-        )
+        build_count = UnitProxy.objects.pending_cassettes().count()
         process_count = Cassette.objects.filter(processed_at=None).count()
         differences_count = UnitDifference.objects.filter(status=0).count()
         return {
@@ -496,7 +484,9 @@ def cassette_prebuild(request):
     units_id = items["selected"]
     rules = items["rules"]
 
-    units = Unit.objects.filter(pk__in=units_id).order_by("identification__entryform")
+    units = Unit.objects.filter(pk__in=units_id).order_by(
+        "identification__correlative", "correlative"
+    )
 
     response = []
 
@@ -579,17 +569,9 @@ class CassetteBuild(View):
         **Template**
         ``lab/cassettes/build.html``
         """
-
-        units = (
-            Unit.objects.filter(
-                cassettes__isnull=True,
-                organs__isnull=False,
-                identification__entryform__entry_format__in=[1, 2, 6, 7],
-            )
-            .select_related("identification__entryform")
-            .distinct()
+        units = UnitProxy.objects.pending_cassettes().order_by(
+            "identification__correlative", "correlative"
         )
-
         organs = serializers.serialize("json", Organ.objects.all())
 
         return render(

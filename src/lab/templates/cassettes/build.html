@@ -34,6 +34,7 @@
                     <thead>
                         <tr>
                             <th scope="col">Ingreso</th>
+                            <th scope="col">Alertas</th>
                             <th scope="col">Caso</th>
                             <th scope="col">Identificacion</th>
                             <th scope="col"># Unidad</th>
@@ -46,6 +47,19 @@
                         {% for unit in units %}
                         <tr>
                             <td>{{ unit.identification.entryform.entryform_type|capfirst }}</td>
+                            <td>
+                                {% for exam in unit.exams %}
+                                    {% if exam.service_id != 1 %}
+                                        <button
+                                            type="button"
+                                            class="btn btn-outline-warning"
+                                            data-toggle="tooltip"
+                                            title="Esta unidad incluye uno o mas servicios no histologicos. Contacte a un veterinario antes de su procesamiento.">
+                                                <i class="ft-alert-triangle alertNonLab"></i>
+                                        </button>
+                                    {% endif %}
+                                {% endfor %}
+                            </td>
                             <td>{{ unit.identification.entryform.no_caso|capfirst }}</td>
                             <td>{{ unit.identification }}</td>
                             <td>{{ unit.correlative }}</td>

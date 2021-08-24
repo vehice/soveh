@@ -13,6 +13,9 @@ $(document).ready(function () {
         }
     );
 
+    const alertNonLabProcess = $(".alertNonLab");
+    alertNonLabProcess.tooltip({ boundary: "window" });
+
     const rulesForm = {
         uniqueOrgans: $("#selUniqueOrgans"),
         groupOrgans: $("#selGroupOrgans"),
@@ -72,7 +75,7 @@ $(document).ready(function () {
 
         paging: false,
 
-        rowsGroup: [1, 2, 3],
+        rowsGroup: [2],
 
         oLanguage: {
             sUrl:
@@ -116,14 +119,12 @@ $(document).ready(function () {
                 name: "case",
                 type: "string",
                 title: "Caso",
-                orderData: [0, 1],
             },
             {
                 data: "identification",
                 name: "identification",
                 type: "string",
                 title: "Identificacion",
-                orderData: [0],
             },
             {
                 data: "unit",
@@ -147,7 +148,7 @@ $(document).ready(function () {
             },
         ],
 
-        rowsGroup: [0, 1, 2],
+        rowsGroup: [0],
 
         select: {
             style: "multi",
@@ -175,13 +176,17 @@ $(document).ready(function () {
         return cookieValue;
     }
 
+    // Sets the variable selectedItems with the
+    // values from the fith column of the table
+    // which should be the id unit
     function setSelectedUnits() {
+        const ID_COLUMN = 5; // 5 is the column with the id of the unit
         let selected = [];
         let item = tableIndex
             .rows({ selected: true })
             .data()
             .each((element) => {
-                selected.push(parseInt(element[4]));
+                selected.push(parseInt(element[ID_COLUMN]));
             });
 
         selectedItems = selected;
