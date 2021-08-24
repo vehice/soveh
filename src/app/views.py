@@ -1273,7 +1273,9 @@ def show_patologos(request, all):
 
         if int(all):
             if (
-                not entryform_form.cancelled
+                entryform_form
+                and not entryform_form.cancelled
+                and analysisform_form
                 and a.exam.pathologists_assignment
                 and not analysisform_form.cancelled
             ):
@@ -1286,8 +1288,10 @@ def show_patologos(request, all):
                 )
         else:
             if (
-                not entryform_form.cancelled
+                entryform_form
+                and not entryform_form.cancelled
                 and a.exam.pathologists_assignment
+                and analysisform_form
                 and not analysisform_form.cancelled
                 and not entryform_form.form_closed
             ):
