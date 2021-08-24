@@ -231,8 +231,14 @@
         <tr>
           <td class="col-xs-2" style="background-color: #fbe9e7;"><span class="t3"> ID Tank/Cage: </span></td>
           <td class="col-xs-2 t3_n">{{item.cage}}</td>
-          <td class="col-xs-2" style="background-color: #fbe9e7;"><span class="t3"> Group/Batch: </span></td>
-          <td class="col-xs-2 t3_n">{{item.group}}</td>
+          <td class="col-xs-2" style="background-color: #fbe9e7;"><span class="t3"> Group/No. Client Case: </span></td>
+          <td class="col-xs-2 t3_n">
+              {{item.group}}
+              {% if item.group and item.client_case_number %}
+                /
+              {% endif %}
+              {{item.client_case_number}}
+          </td>
           <td class="col-xs-2" style="background-color: #fbe9e7;"><span class="t3"> Extra Features: </span></td>
           <td class="col-xs-2 t3_n">{{item.extra_features_detail}}</td>
         </tr>
