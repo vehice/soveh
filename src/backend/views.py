@@ -3357,7 +3357,7 @@ def save_generalData(request, id):
 
     try:
         entry.created_at = datetime.strptime(var_post.get("recive"), "%d/%m/%Y %H:%M")
-        entry.sampled_at = datetime.strptime(var_post.get("muestreo"), "%d/%m/%Y %H:%M")
+        entry.sampled_at = datetime.strptime(var_post.get("muestreo"), "%d/%m/%Y")
     except:
         pass
 
