@@ -151,6 +151,14 @@ class ENTRYFORM(View):
 
                     if sE.unit_organ is not None:
                         uo_organ_id = sE.unit_organ.organ.id
+                    else:
+                        # Fix missing unit organ related to sample exams (old cases)
+                        for uo in s.unit_organs.all():
+                            if uo.organ_id == sE.organ_id:
+                                sE.unit_organ = uo
+                                sE.save()
+                                uo_organ_id = uo.organ_id
+                                break
 
                     sE_dict = {
                         "organ_name": sE.organ.name,
