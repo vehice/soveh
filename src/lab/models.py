@@ -155,6 +155,7 @@ class UnitManager(models.Manager):
                 cassettes__isnull=True,
                 organs__isnull=False,
                 identification__entryform__entry_format__in=entry_format_list,
+                identification__entryform__id__gt=2034,  # This is the last case before the unit revamp
             )
             .order_by("identification__correlative")
             .distinct()
