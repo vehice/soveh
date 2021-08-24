@@ -569,7 +569,7 @@ class CassetteBuild(View):
         **Template**
         ``lab/cassettes/build.html``
         """
-        units = UnitProxy.objects.pending_cassettes().order_by(
+        units = UnitProxy.objects.pending_cassettes([1, 2, 6, 7]).order_by(
             "identification__correlative", "correlative"
         )
         organs = serializers.serialize("json", Organ.objects.all())
