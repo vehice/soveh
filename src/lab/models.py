@@ -49,8 +49,7 @@ class Analysis(AnalysisForm):
             id__in=case_samples_exams.values_list("unit_organ_id", flat=True)
         )
 
-        cassettes = Cassette.objects.filter(
-            organs__in=exam_units_organs.values_list("organ_id", flat=True),
+        slides = Slide.objects.filter(
             unit_id__in=exam_units_organs.values_list("unit_id", flat=True),
         )
 
@@ -58,13 +57,13 @@ class Analysis(AnalysisForm):
         total_organs_count = exam_units_organs.count()
         if total_organs_count > 0:
             progress_value = 1 / exam_units_organs.count()
-            for cassette in cassettes:
+            for slide in slides:
                 total_progress += progress_value / 2
 
-                if cassette.slides.count() > 0:
+                if slide.released_at is not None:
                     total_progress += progress_value / 2
 
-            return total_progress * 100
+            return min(total_progress * 100, 100)
         return 0
 
     class Meta:
@@ -322,13 +321,18 @@ class Slide(models.Model):
 
         with connections["dsstore"].cursor() as cursor:
             cursor.execute(
-                "SELECT ds.id FROM DSStore_Slide ds WHERE ds.Name LIKE %s", [tag]
+                "SELECT ds.id, ds.ImportTime FROM DSStore_Slide ds WHERE ds.Name LIKE %s",
+                [tag],
             )
 
             row = cursor.fetchone()
 
         if row:
             slide_id = row[0]
+            if not self.released_at:
+                release_date = row[1]
+                self.released_at = release_date
+                self.save()
 
             return f"http://vehice.net/DSStore/HtmlViewer.aspx?Id={slide_id}"
         return row
