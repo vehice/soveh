@@ -1500,11 +1500,14 @@ def tabla_patologos(request):
             sample__in=samples, exam=a["analysis"].exam, stain=a["analysis"].stain
         ).select_related("organ")
         organ_types = []
+        organs = []
         for se in sampleExams:
             sampleExams_counter += 1
+            organs.append(se.organ.abbreviation)
             if se.organ.organ_type not in organ_types:
                 organ_types.append(se.organ.organ_type)
         organ_types = set(organ_types)
+        organs_text = str(",").join(set(organs))
         unit = ""
         if len(organ_types) > 1:
             unit = "Multiple"
@@ -1548,7 +1551,7 @@ def tabla_patologos(request):
                 "entryform": a["analysis"].entryform.id,
                 "entryform_form_closed": a["entryform_form"].form_closed,
                 "entryform_cancelled": a["entryform_form"].cancelled,
-                "unidad": unit,
+                "organos": organs_text,
                 "fecha_derivacion": a["analysis"].assignment_done_at.strftime(
                     "%d/%m/%Y"
                 )
