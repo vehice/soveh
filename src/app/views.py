@@ -204,8 +204,7 @@ def tabla_ingresos(request):
             Q(no_caso__icontains=search)
             | Q(customer__name__icontains=search)
             | Q(center__icontains=search)
-            | Q(no_request__icontains=search)
-            | Q(created_at__icontains=search),
+            | Q(no_request__icontains=search),
         )
 
         form = form.filter(object_id__in=cases.values_list("id", flat=True))
@@ -1381,7 +1380,6 @@ def tabla_patologos(request):
             Q(entryform__no_caso__icontains=search)
             | Q(entryform__customer__name__icontains=search)
             | Q(entryform__center__icontains=search)
-            | Q(entryform__created_at__icontains=search)
             | Q(exam__name__icontains=search)
             | Q(patologo__first_name__icontains=search)
             | Q(patologo__last_name__icontains=search)
