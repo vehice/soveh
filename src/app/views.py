@@ -15,6 +15,7 @@ from accounts.models import *
 from backend.models import *
 from utils import functions as fn
 from workflows.models import *
+from django.core.paginator import Paginator
 
 
 @login_required
@@ -155,7 +156,23 @@ def show_ingresos(request):
     eliminar = request.user.is_superuser
     check_forms = Form.objects.filter(content_type__model="entryform", state__id=1)
 
+    return render(
+        request,
+        "app/ingresos.html",
+        {"edit": editar, "eliminar": eliminar},
+    )
+
+
+@login_required
+def tabla_ingresos(request):
+    up = UserProfile.objects.filter(user=request.user).first()
     form = Form.objects.filter(content_type__model="entryform").order_by("-object_id")
+
+    draw = int(request.GET.get("draw"))
+    length = int(request.GET.get("length"))
+    search = request.GET.get("search[value]")
+    start = int(request.GET.get("start")) + 1
+
     if up.profile_id in (4, 5):
         assigned_areas = UserArea.objects.filter(user=request.user, role=0)
         pks = [request.user.id]
@@ -181,11 +198,74 @@ def show_ingresos(request):
         ).values_list("parent_id")
         form = form.filter(id__in=state_ids)
 
-    return render(
-        request,
-        "app/ingresos.html",
-        {"entryForm_list": form, "edit": editar, "eliminar": eliminar},
-    )
+    if search:
+        cases = EntryForm.objects.filter(
+            Q(pk__in=form.values_list("object_id", flat=True)),
+            Q(no_caso__icontains=search)
+            | Q(customer__name__icontains=search)
+            | Q(center__icontains=search)
+            | Q(no_request__icontains=search)
+            | Q(created_at__icontains=search),
+        )
+
+        form = form.filter(object_id__in=cases.values_list("id", flat=True))
+
+    form_paginator = Paginator(form, length)
+
+    context = {
+        "draw": draw + 1,
+        "recordsTotal": form_paginator.count,
+        "recordsFiltered": form_paginator.count,
+        "data": [],
+    }
+
+    for page in form_paginator.page_range:
+        page_start = form_paginator.get_page(page).start_index()
+        if page_start == start:
+            form_page = form_paginator.get_page(page).object_list
+            for form in form_page:
+                row = {
+                    "DT_RowId": f"form-{form.pk}",
+                    "case": model_to_dict(
+                        form.content_object,
+                        fields=[
+                            "id",
+                            "no_request",
+                            "no_caso",
+                            "center",
+                            "customer",
+                            "created_at",
+                        ],
+                    ),
+                    "form": model_to_dict(form),
+                    "step": model_to_dict(form.state.step, fields=["name", "tag"]),
+                }
+
+                # If no customer is assigned to the entryform
+                if form.content_object.customer:
+                    row.update(
+                        {"customer": model_to_dict(form.content_object.customer)}
+                    )
+
+                # Get current analysis progress for the entryform
+
+                analysis_pk = form.content_object.analysisform_set.all().values_list(
+                    "id", flat=True
+                )
+                analysis_forms = Form.objects.filter(
+                    content_type__model="analysisform",
+                    object_id__in=analysis_pk,
+                    form_closed=False,
+                    cancelled=False,
+                )
+                has_in_progress = analysis_forms.count() > 0
+
+                row.update({"progress": has_in_progress})
+                context["data"].append(row)
+
+            break
+
+    return JsonResponse(context)
 
 
 @login_required
@@ -1221,6 +1301,30 @@ def show_patologos(request, all):
     :template:`app/patologos.html`
     """
     up = UserProfile.objects.filter(user=request.user).first()
+    data = []
+    patologos = list(
+        User.objects.filter(
+            Q(userprofile__profile_id__in=[4, 5]) | Q(userprofile__is_pathologist=True)
+        ).values()
+    )
+    editar = up.profile_id in (1, 2, 3)
+
+    return render(
+        request,
+        "app/patologos.html",
+        {"patologos": patologos, "edit": editar, "all": all},
+    )
+
+
+@login_required
+def tabla_patologos(request, all):
+    up = UserProfile.objects.filter(user=request.user).first()
+
+    draw = int(request.GET.get("draw"))
+    length = int(request.GET.get("length"))
+    search = request.GET.get("search[value]")
+    start = int(request.GET.get("start")) + 1
+
     # Get AnalysisForm according to user permissions
     if request.user.is_superuser or up.profile_id in (1, 2, 3):
         analysis = (
@@ -1257,7 +1361,6 @@ def show_patologos(request, all):
             .order_by("-entryform_id")
         )
 
-    data = []
     patologos = list(
         User.objects.filter(
             Q(userprofile__profile_id__in=[4, 5]) | Q(userprofile__is_pathologist=True)
@@ -1265,43 +1368,68 @@ def show_patologos(request, all):
     )
     editar = up.profile_id in (1, 2, 3)
 
+    if search:
+        analysis = analysis.filter(
+            Q(entryform__no_caso__icontains=search)
+            | Q(entryform__customer__name__icontains=search)
+            | Q(entryform__center__icontains=search)
+            | Q(entryform__created_at__icontains=search)
+            | Q(exam__name__icontains=search)
+            | Q(assignment_done_at__icontains=search)
+            | Q(patologo__first_name__icontains=search)
+            | Q(patologo__last_name__icontains=search)
+        )
+
     selected_analysis = []
 
-    for a in analysis:
-        entryform_form = a.entryform.forms.first()
-        analysisform_form = a.forms.first()
+    analysis_paginator = Paginator(analysis, length)
 
-        if int(all):
-            if (
-                entryform_form
-                and not entryform_form.cancelled
-                and analysisform_form
-                and a.exam.pathologists_assignment
-                and not analysisform_form.cancelled
-            ):
-                selected_analysis.append(
-                    {
-                        "analysis": a,
-                        "entryform_form": entryform_form,
-                        "analysisform_form": analysisform_form,
-                    }
-                )
-        else:
-            if (
-                entryform_form
-                and not entryform_form.cancelled
-                and a.exam.pathologists_assignment
-                and analysisform_form
-                and not analysisform_form.cancelled
-                and not entryform_form.form_closed
-            ):
-                selected_analysis.append(
-                    {
-                        "analysis": a,
-                        "entryform_form": entryform_form,
-                        "analysisform_form": analysisform_form,
-                    }
-                )
+    context = {
+        "draw": draw + 1,
+        "recordsTotal": analysis_paginator.count,
+        "recordsFiltered": analysis_paginator.count,
+        "data": [],
+    }
+
+    for page in analysis_paginator.page_range:
+        page_start = analysis_paginator.get_page(page).start_index()
+        if page_start == start:
+            analysis_page = analysis_paginator.get_page(page).object_list
+            for a in analysis_page:
+                entryform_form = a.entryform.forms.first()
+                analysisform_form = a.forms.first()
+
+                if int(all):
+                    if (
+                        entryform_form
+                        and not entryform_form.cancelled
+                        and analysisform_form
+                        and a.exam.pathologists_assignment
+                        and not analysisform_form.cancelled
+                    ):
+                        selected_analysis.append(
+                            {
+                                "analysis": a,
+                                "entryform_form": entryform_form,
+                                "analysisform_form": analysisform_form,
+                            }
+                        )
+                else:
+                    if (
+                        entryform_form
+                        and not entryform_form.cancelled
+                        and a.exam.pathologists_assignment
+                        and analysisform_form
+                        and not analysisform_form.cancelled
+                        and not entryform_form.form_closed
+                    ):
+                        selected_analysis.append(
+                            {
+                                "analysis": a,
+                                "entryform_form": entryform_form,
+                                "analysisform_form": analysisform_form,
+                            }
+                        )
 
     for a in selected_analysis:
         days_open = 0
@@ -1370,7 +1498,7 @@ def show_patologos(request, all):
         else:
             parte = " (Parte " + parte + ")"
 
-        data.append(
+        context["data"].append(
             {
                 "analisis": a["analysis"].id,
                 "patologo": a["analysis"].patologo_id
@@ -1418,11 +1546,7 @@ def show_patologos(request, all):
             }
         )
 
-    return render(
-        request,
-        "app/patologos.html",
-        {"casos": data, "patologos": patologos, "edit": editar, "all": all},
-    )
+    return JsonResponse(context)
 
 
 class ChangeLanguage(View):

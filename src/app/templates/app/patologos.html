@@ -3,297 +3,238 @@
 {% block stylesheets %}
 
 <style>
-  .steps {
-    pointer-events: none;
-  }
-  .form-section {
-    color: #404E67;
-    line-height: 3rem;
-    margin-bottom: 20px;
-    border-bottom: 1px solid #404E67;
-  }
-  .incomplete{
-    color: red !important;
-    font-weight: bolder;
-  }
+ .steps {
+     pointer-events: none;
+ }
 
-  .dt-body-center{
-    text-align: center;
-    padding:6px !important;
-    margin:6px !important;
-  }
+ .form-section {
+     color: #404E67;
+     line-height: 3rem;
+     margin-bottom: 20px;
+     border-bottom: 1px solid #404E67;
+ }
+ .incomplete{
+     color: red !important;
+     font-weight: bolder;
+ }
+
+ .dt-body-center{
+     text-align: center;
+     padding:6px !important;
+     margin:6px !important;
+ }
 
 </style>
 
 {% endblock stylesheets %}
 {% block content_header %}
 <div class="content-header row">
-  <div class="content-header-left col-md-6 col-12 mb-2">
-    <h3 class="content-header-title mb-0">Asignación de Patólogos</h3>
-    <div class="row breadcrumbs-top">
-      <div class="breadcrumb-wrapper col-12">
-        <ol class="breadcrumb">
-          <li class="breadcrumb-item">
-            <a href="/">INICIO</a>
-          </li>
-          <li class="breadcrumb-item">
-            <a href="#">Patólogos</a>
-          </li>
-          <li class="breadcrumb-item active">
-          </li>
-        </ol>
-      </div>
+    <div class="content-header-left col-md-6 col-12 mb-2">
+        <h3 class="content-header-title mb-0">Asignación de Patólogos</h3>
+        <div class="row breadcrumbs-top">
+            <div class="breadcrumb-wrapper col-12">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item">
+                        <a href="/">INICIO</a>
+                    </li>
+                    <li class="breadcrumb-item">
+                        <a href="#">Patólogos</a>
+                    </li>
+                    <li class="breadcrumb-item active">
+                    </li>
+                </ol>
+            </div>
+        </div>
     </div>
-  </div>
 </div>
 {% endblock content_header %}
 {% block content %}
 <div class="row">
-  <div class="col-12">
-    <div class="card">
-      <div class="card-header">
-        <h4 class="card-title">Casos</h4>
-      </div>
-      <div class="card-content">
-        <div class="card-body card-dashboard">
-          <div class="col-12 ml-1 pl-1">
-            <div class="row">
-              <div class="col-3">
-                <div class="form-group">
-                  <label><b>Filtro de Casos</b></label><br>
-                  <select style="width:100% !important;" class="form-control " id="mostar-casos-cerrados">
-                    <option value="0" {% if all == "0" %} selected {% endif %}>No mostrar casos cerrados</option>
-                    <option value="1" {% if all == "1" %} selected {% endif %}>Mostrar casos cerrados</option>
-                  </select>
-                </div>
-              </div>
-              <div class="col-3">
-                <div id="findPatologo" class="form-group">
-                </div>
-              </div>
-              <div class="col-6">
-              </div>
-              <div class="col-3">
-                <div id="filterDays" class="form-group">
-                  <label><b>Filtro por días abierto</b></label><br>
-                  <div class="row">
-                    <div class="col-12">
-                      <select style="width:100% !important;" class="form-control " id="filtro-dias">
-                        <option value="0">Sin filtro</option>
-                        <option value="1">Mayor a </option>
-                        <option value="2">Menor a </option>
-                        <option value="3">Entre </option>
-                      </select>
-                    </div>
-
-                    <div class="col-12 mt-1" id="filtro-dias-slot">
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div class="col-3">
-                <div id="filterDiagScore" class="form-group">
-                  <label><b>Filtro por notas de diagnóstico</b></label><br>
-                  <div class="row">
-                    <div class="col-12">
-                      <select style="width:100% !important;" class="form-control " id="filtro-notas-diag">
-                        <option value="0">Sin filtro</option>
-                        <option value="1">Mayor a </option>
-                        <option value="2">Menor a </option>
-                        <option value="3">Entre </option>
-                      </select>
-                    </div>
-
-                    <div class="col-12 mt-1" id="filtro-notas-diag-slot">
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div class="col-3">
-                <div id="filterReportScore" class="form-group">
-                  <label><b>Filtro por notas de informe</b></label><br>
-                  <div class="row">
-                    <div class="col-12">
-                      <select style="width:100% !important;" class="form-control " id="filtro-notas-report">
-                        <option value="0">Sin filtro</option>
-                        <option value="1">Mayor a </option>
-                        <option value="2">Menor a </option>
-                        <option value="3">Entre </option>
-                      </select>
-                    </div>
-
-                    <div class="col-12 mt-1" id="filtro-notas-report-slot">
-                    </div>
-                  </div>
-                </div>
-              </div>
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="card-title">Casos</h4>
             </div>
-          </div>
-          <div class="col-12 ml-0 pl-0">
-            <div class="table-responsive m-n p-n">
-              <table id="table-casos" class="table table-striped table-bordered compact dataTable" width="100%" style="font-size:12px !important;">
-                <thead>
-                  <tr>
-                    <th>Nro<br>Caso</th>
-                    <th>Cliente</th>
-                    <th>Centro</th>
-                    <th>Servicios</th>
-                    <th>Fecha<br>Ingreso</th>
-                    <th>Días<br>Abierto</th>
-                    <th>Fecha<br>Derivación</th>
-                    <th>Fecha<br>Plazo</th>
-                    <th>Días<br>Atraso</th>
-                    <th>Nro<br>Órganos</th>
-                    <th>Unidad</th>
-                    <th>Estado</th>
-                    <th>N.<br>Diag.</th>
-                    <th>N.<br>Inf.</th>
-                    <th>Patólogos</th>
-                    <th></th>
-                    <th></th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {% for entryForm in casos %}
-                    <tr>
-                      <td class="first-column"><strong>{{ entryForm.no_caso }}</strong></td>
-                      <td>
-                          {{ entryForm.cliente }}
-                      </td>
-                      <td>
-                          {{ entryForm.centro }}
-                      </td>
-                      <td class="service-{{entryForm.analisis}} {% if not entryForm.patologo %} incomplete {% endif %}">{{ entryForm.exam|default:"" }}</td>
-                      <td>
-                          {{ entryForm.fecha_ingreso }}
-                      </td>
-                      <td>
-                          {{ entryForm.dias_abierto }}
-                      </td>
-                      <td>
-                          {{ entryForm.fecha_derivacion }}
-                      </td>
-                      <td>
-                          {{ entryForm.fecha_plazo }}
-                      </td>
-                      <td>
-                          {{ entryForm.dias_atraso }}
-                      </td>
-                      <td>
-                          {{ entryForm.nro_organos }}
-                      </td>
-                      <td>
-                          {{ entryForm.unidad }}
-                      </td>
-                      <td>
-                          {{ entryForm.estado }}
-                      </td>
-                      <td>
-                          {{ entryForm.nota_diagnostico|default:"" }}
-                      </td>
-                      <td>
-                          {{ entryForm.nota_informe|default:"" }}
-                      </td>
-                      <td>
-                        <select class="select2 form-control patologos-select" style="width:100% !important;" data-exam="{{entryForm.exam}}" data-nocase="{{entryForm.no_caso}}" data-analisis="{{entryForm.analisis}}" {% if not edit %} disabled {% endif %}>
-                          <option value="NA">No Asignado</option>
-                          {% for p in patologos %}
-                            <option value="{{p.id}}" {% if p.id == entryForm.patologo %}selected{% endif %}>{{p.first_name}} {{p.last_name}}</option>
-                          {% endfor %}
-                        </select>
-                      </td>
-                      <td>
-                          {{ entryForm.patologo_name }}
-                      </td>
-                      <td>
-                        <div class="btn-group optionGroups-{{entryForm.analisis}}" data-entryform="{{ entryForm.entryform }}" role="group">
-                          <button class="btn btn-primary showSummaryBtn" data-id="{{ entryForm.entryform }}" data-closed="{% if entryForm.entryform_form_closed or entryForm.entryform_cancelled %} 1 {% else %} 0 {% endif %}" data-editable="{% if edit %}1{% else %}0{% endif %}" data-toggle="tooltip" data-placement="top" title="Resúmen del Caso"><i class="fa fa-list-alt fa-fx"></i></button>
-                          {% if request.user.is_superuser and entryForm.patologo %}
-                            <button class="btn btn-info showScoreBtn" data-id="{{ entryForm.analisis }}" data-toggle="tooltip" data-placement="top" title="Notas"><i class="fa fa-check-square-o fa-fx"></i></button>
-                          {% endif %}
-                      </td>
-                    </tr>
-                  {% endfor %}
-                </tbody>
-              </table>
+            <div class="card-content">
+                <div class="card-body card-dashboard">
+
+                    <div class="col-12 ml-1 pl-1">
+                        <div class="row">
+                            <div class="col-3">
+                                <div class="form-group">
+                                    <label><b>Filtro de Casos</b></label><br>
+                                    <select style="width:100% !important;" class="form-control " id="mostar-casos-cerrados">
+                                        <option value="0" {% if all == "0" %} selected {% endif %}>No mostrar casos cerrados</option>
+                                        <option value="1" {% if all == "1" %} selected {% endif %}>Mostrar casos cerrados</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-3">
+                                <div id="findPatologo" class="form-group">
+                                </div>
+                            </div>
+                            <div class="col-6">
+                            </div>
+                            <div class="col-3">
+                                <div id="filterDays" class="form-group">
+                                    <label><b>Filtro por días abierto</b></label><br>
+                                    <div class="row">
+                                        <div class="col-12">
+                                            <select style="width:100% !important;" class="form-control " id="filtro-dias">
+                                                <option value="0">Sin filtro</option>
+                                                <option value="1">Mayor a </option>
+                                                <option value="2">Menor a </option>
+                                                <option value="3">Entre </option>
+                                            </select>
+                                        </div>
+
+                                        <div class="col-12 mt-1" id="filtro-dias-slot">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-3">
+                                <div id="filterDiagScore" class="form-group">
+                                    <label><b>Filtro por notas de diagnóstico</b></label><br>
+                                    <div class="row">
+                                        <div class="col-12">
+                                            <select style="width:100% !important;" class="form-control " id="filtro-notas-diag">
+                                                <option value="0">Sin filtro</option>
+                                                <option value="1">Mayor a </option>
+                                                <option value="2">Menor a </option>
+                                                <option value="3">Entre </option>
+                                            </select>
+                                        </div>
+
+                                        <div class="col-12 mt-1" id="filtro-notas-diag-slot">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-3">
+                                <div id="filterReportScore" class="form-group">
+                                    <label><b>Filtro por notas de informe</b></label><br>
+                                    <div class="row">
+                                        <div class="col-12">
+                                            <select style="width:100% !important;" class="form-control " id="filtro-notas-report">
+                                                <option value="0">Sin filtro</option>
+                                                <option value="1">Mayor a </option>
+                                                <option value="2">Menor a </option>
+                                                <option value="3">Entre </option>
+                                            </select>
+                                        </div>
+
+                                        <div class="col-12 mt-1" id="filtro-notas-report-slot">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12 ml-0 pl-0">
+                        <div class="table-responsive m-n p-n">
+                            <table id="table-casos" class="table table-striped table-bordered compact dataTable" width="100%" style="font-size:12px !important;">
+                                <thead>
+                                    <tr>
+                                        <th>Nro<br>Caso</th>
+                                        <th>Cliente</th>
+                                        <th>Centro</th>
+                                        <th>Servicios</th>
+                                        <th>Fecha<br>Ingreso</th>
+                                        <th>Días<br>Abierto</th>
+                                        <th>Fecha<br>Derivación</th>
+                                        <th>Fecha<br>Plazo</th>
+                                        <th>Días<br>Atraso</th>
+                                        <th>Nro<br>Órganos</th>
+                                        <th>Unidad</th>
+                                        <th>Estado</th>
+                                        <th>N.<br>Diag.</th>
+                                        <th>N.<br>Inf.</th>
+                                        <th>Patólogos</th>
+                                        <th>Resumen</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
             </div>
-          </div>
         </div>
-      </div>
     </div>
-  </div>
 </div>
 
 <div class="modal fade text-left" id="score_modal" role="dialog" data-backdrop="static" data-keyboard="false">
-  <div class="modal-dialog" style="max-width:20% !important;" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h3 class="modal-title">Notas</h3>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-      <div class="modal-body">
-        <input type="hidden" id="score_service_id" />
-        <input type="hidden" id="score_index" />
-        <form id="score_form" class="form form-horizontal">
-          <div class="form-group row">
-            <label class="col-md-7 label-control">
-              Nota de diagnóstico:
-            </label>
-            <div class="col-md-5">
-              <input type="text" class="form-control" id="score_diagnostic" min="0" name="score_diagnostic" />
+    <div class="modal-dialog" style="max-width:20% !important;" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Notas</h3>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
             </div>
-          </div>
-          <div class="form-group row">
-            <label class="col-md-7 label-control">
-              Nota de informe:
-            </label>
-            <div class="col-md-5">
-              <input type="text" class="form-control" id="score_report" min="0" name="score_report" />
+            <div class="modal-body">
+                <input type="hidden" id="score_service_id" />
+                <input type="hidden" id="score_index" />
+                <form id="score_form" class="form form-horizontal">
+                    <div class="form-group row">
+                        <label class="col-md-7 label-control">
+                            Nota de diagnóstico:
+                        </label>
+                        <div class="col-md-5">
+                            <input type="text" class="form-control" id="score_diagnostic" min="0" name="score_diagnostic" />
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label class="col-md-7 label-control">
+                            Nota de informe:
+                        </label>
+                        <div class="col-md-5">
+                            <input type="text" class="form-control" id="score_report" min="0" name="score_report" />
+                        </div>
+                    </div>
+                    <p><small>Recuerda que el separador decimal es el punto (.)</small></p>
+                    <div class="form-group pull-right">
+                        <button type="button" class="btn btn-primary saveScores">Guardar</button>
+                    </div>
+                </form>
             </div>
-          </div>
-          <p><small>Recuerda que el separador decimal es el punto (.)</small></p>
-          <div class="form-group pull-right">
-            <button type="button" class="btn btn-primary saveScores">Guardar</button>
-          </div>
-        </form>
-      </div>
+        </div>
     </div>
-  </div>
 </div>
 
 <div class="modal fade text-left" id="assignmentModal" role="dialog" data-backdrop="static" data-keyboard="false">
-  <div class="modal-dialog" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h3 class="modal-title" id="title">Derivación <span class="caseAssignment"></span> - <span class="examAssignment"></span></h3>
-      </div>
-      <div class="modal-body">
-        <form id="assignmentForm">
-          <input type="hidden" class="form-control assignment-analysis-id" name="analysis"/>
-          <input type="hidden" class="form-control assignment-pathologist" name="pathologist"/>
-          <input type="hidden" class="form-control assignment-pathologist-name"/>
-          <div class="form-group">
-            <label>
-              Fecha de plazo:
-            </label>
-            <input type="text" class="form-control assignment-deadline" name="deadline" />
-          </div>
-          <div class="form-group">
-            <label>
-              Comentarios al Patólogo:
-            </label>
-            <textarea row="3" class="form-control assignment-comment" name="comment"> </textarea>
-          </div>
-          <div class="form-group pull-right">
-            <button type="button" class="btn btn-danger" data-dismiss="modal">Cancelar</button>
-            <button type="button" class="btn btn-primary" onclick="finishAssignment()">Finalizar</button>
-          </div>
-        </form>
-      </div>
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="title">Derivación <span class="caseAssignment"></span> - <span class="examAssignment"></span></h3>
+            </div>
+            <div class="modal-body">
+                <form id="assignmentForm">
+                    <input type="hidden" class="form-control assignment-analysis-id" name="analysis"/>
+                    <input type="hidden" class="form-control assignment-pathologist" name="pathologist"/>
+                    <input type="hidden" class="form-control assignment-pathologist-name"/>
+                    <div class="form-group">
+                        <label>
+                            Fecha de plazo:
+                        </label>
+                        <input type="text" class="form-control assignment-deadline" name="deadline" />
+                    </div>
+                    <div class="form-group">
+                        <label>
+                            Comentarios al Patólogo:
+                        </label>
+                        <textarea row="3" class="form-control assignment-comment" name="comment"> </textarea>
+                    </div>
+                    <div class="form-group pull-right">
+                        <button type="button" class="btn btn-danger" data-dismiss="modal">Cancelar</button>
+                        <button type="button" class="btn btn-primary" onclick="finishAssignment()">Finalizar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
     </div>
-  </div>
 </div>
 
 {% endblock content %}
@@ -301,373 +242,442 @@
 <script src="{% url 'js_reverse' %}" type="text/javascript"></script>
 <script language="JavaScript">
 
-  var tabla_casos; 
-  var resumenId;
-  var closed;
-  var feriados;
-  $.getJSON('https://apis.digital.gob.cl/fl/feriados', function(data) {
-    feriados = data;
-  })
+ var tabla_casos;
+ var resumenId;
+ var closed;
+ var feriados;
 
-  $(function () {
-    $('[data-toggle="tooltip"]').tooltip()
-  })
-  
-  $('.patologos-select').select2()
-  
-  $(document).on('change', '#mostar-casos-cerrados', function(e){
-    if ($(this).val() == 0){
-      window.location.href = '/derivacion/0';
-    } else {
-      window.location.href = '/derivacion/1';
-    }
-  });
+var patologos = [
+    {% for patologo in patologos %}
+      {id: {{patologo.id}}, text: "{{patologo.first_name}} {{patologo.last_name}}"},
+    {% endfor %}
+];
+ $.getJSON('https://apis.digital.gob.cl/fl/feriados', function(data) {
+     feriados = data;
+ })
+
+ $(function () {
+     $('[data-toggle="tooltip"]').tooltip()
+ })
 
 
-  $(document).on('select2:selecting', '.patologos-select', function(e){
-    e.preventDefault();
-    var selected = e.params.args.data.id
-    var name = e.params.args.data.text
-    var analysis_id = $(this).data("analisis");
-    var no_case = $(this).data("nocase");
-    var analysis_name = $(this).data("exam");
-    var pathologist = selected;
-    var pathologist_name = name;
+ $(document).on('change', '#mostar-casos-cerrados', function(e){
+     if ($(this).val() == 0){
+         window.location.href = '/derivacion/0';
+     } else {
+         window.location.href = '/derivacion/1';
+     }
+ });
 
-    $('.assignment-comment').val("");
-    if (pathologist == "NA"){
-      $('.assignment-deadline').val("");
-      $('.assignment-deadline').prop("disabled", true);
-    } else {
-      var days_counter = 2;
-      
-      while(isWeekend(moment().add(days_counter, 'days'))){
-        days_counter += 1;
-      }
 
-      while(isHoliday(moment().add(days_counter, 'days'))){
-        days_counter += 1;
-      }
+ $(document).on('select2:selecting', '.patologos-select', function(e){
+     e.preventDefault();
+     var selected = e.params.args.data.id
+     var name = e.params.args.data.text
+     var analysis_id = $(this).data("analisis");
+     var no_case = $(this).data("nocase");
+     var analysis_name = $(this).data("exam");
+     var pathologist = selected;
+     var pathologist_name = name;
 
-      var deadline_date = moment().add(days_counter, 'days').format("DD/MM/YYYY");
-      $('.assignment-deadline').prop("disabled", false);
-    }
-    $('.assignment-deadline').val(deadline_date);
-    $('.assignment-analysis-id').val(analysis_id);
-    $('.assignment-pathologist').val(pathologist);
-    $('.assignment-pathologist-name').val(pathologist_name);
-    $(".caseAssignment").text(no_case);
-    $(".examAssignment").text(analysis_name);
-    $("#assignmentModal").modal("show");
-  });
-  
-  function isWeekend(date){
-    if (date.isoWeekday() == 6 || date.isoWeekday() == 7){
-      return true;
-    } else {
-      return false;
-    }
-  }
+     $('.assignment-comment').val("");
+     if (pathologist == "NA"){
+         $('.assignment-deadline').val("");
+         $('.assignment-deadline').prop("disabled", true);
+     } else {
+         var days_counter = 2;
 
-  function isHoliday(date){
-    aux = feriados.filter( i =>  i.fecha == date.format("YYYY-MM-DD"));
-    if (aux.length > 0){
-      return true;
-    } else{
-      return false;
-    }
-  }
+         while(isWeekend(moment().add(days_counter, 'days'))){
+             days_counter += 1;
+         }
 
-  $(document).on('change', '.filterPathologist', function(e){
-    tabla_casos.column(15).search(this.value ? '^'+this.value+'$' : '', true, false ).draw();
-  });
+         while(isHoliday(moment().add(days_counter, 'days'))){
+             days_counter += 1;
+         }
 
-  $('.assignment-deadline').datetimepicker({
-    locale: 'es',
-    keepOpen: false,
-    format: 'DD/MM/YYYY'
-  });
+         var deadline_date = moment().add(days_counter, 'days').format("DD/MM/YYYY");
+         $('.assignment-deadline').prop("disabled", false);
+     }
+     $('.assignment-deadline').val(deadline_date);
+     $('.assignment-analysis-id').val(analysis_id);
+     $('.assignment-pathologist').val(pathologist);
+     $('.assignment-pathologist-name').val(pathologist_name);
+     $(".caseAssignment").text(no_case);
+     $(".examAssignment").text(analysis_name);
+     $("#assignmentModal").modal("show");
+ });
 
-  $(document).on("change", "#filtro-dias", function(){
-    $('.input-dias1').val("").trigger("change");
-    $('.input-dias2').val("").trigger("change");
-    $('#filtro-dias-slot').html("");
-    
-    if ($(this).val() == 1){
-      var temp = '<div class="row"> <div class="col-sm-12"> <input type="number" class="form-control  input-dias1" placeholder="días" /> </div> </div>';
-      $('#filtro-dias-slot').html(temp);
-    } else if ($(this).val() == 2){
-      var temp = '<div class="row"> <div class="col-sm-12"> <input type="number" class="form-control  input-dias2" placeholder="días" /> </div> </div>';
-      $('#filtro-dias-slot').html(temp); 
-    } else if ($(this).val() == 3){
-      var temp = '<div class="row"> <div class="col-sm-5"> <input type="number" class="form-control input-dias1" placeholder="días" /> </div> <div class="col-sm-2 mt-1 text-center"><span>Y</span> </div><div class="col-sm-5"> <input type="number" class="form-control  input-dias2" placeholder="días" /> </div></div>';
-      $('#filtro-dias-slot').html(temp);
-    }
-  });
+ function isWeekend(date){
+     if (date.isoWeekday() == 6 || date.isoWeekday() == 7){
+         return true;
+     } else {
+         return false;
+     }
+ }
 
-  $(document).on("change", "#filtro-notas-diag", function(){
-    $('.input-notas-d-1').val("").trigger("change");
-    $('.input-notas-d-2').val("").trigger("change");
-    $('#filtro-notas-diag-slot').html("");
-    
-    if ($(this).val() == 1){
-      var temp = '<div class="row"> <div class="col-sm-12"> <input type="number" class="form-control  input-notas-d-1" placeholder="nota" /> </div> </div>';
-      $('#filtro-notas-diag-slot').html(temp);
-    } else if ($(this).val() == 2){
-      var temp = '<div class="row"> <div class="col-sm-12"> <input type="number" class="form-control  input-notas-d-2" placeholder="nota" /> </div> </div>';
-      $('#filtro-notas-diag-slot').html(temp); 
-    } else if ($(this).val() == 3){
-      var temp = '<div class="row"> <div class="col-sm-5"> <input type="number" class="form-control input-notas-d-1" placeholder="nota" /> </div> <div class="col-sm-2 mt-1 text-center"><span>Y</span> </div><div class="col-sm-5"> <input type="number" class="form-control  input-notas-d-2" placeholder="nota" /> </div></div>';
-      $('#filtro-notas-diag-slot').html(temp);
-    }
-  });
+ function isHoliday(date){
+     aux = feriados.filter( i =>  i.fecha == date.format("YYYY-MM-DD"));
+     if (aux.length > 0){
+         return true;
+     } else{
+         return false;
+     }
+ }
 
-  $(document).on("change", "#filtro-notas-report", function(){
-    $('.input-notas-r-1').val("").trigger("change");
-    $('.input-notas-r-2').val("").trigger("change");
-    $('#filtro-notas-report-slot').html("");
-    
-    if ($(this).val() == 1){
-      var temp = '<div class="row"> <div class="col-sm-12"> <input type="number" class="form-control  input-notas-r-1" placeholder="nota" /> </div> </div>';
-      $('#filtro-notas-report-slot').html(temp);
-    } else if ($(this).val() == 2){
-      var temp = '<div class="row"> <div class="col-sm-12"> <input type="number" class="form-control  input-notas-r-2" placeholder="nota" /> </div> </div>';
-      $('#filtro-notas-report-slot').html(temp); 
-    } else if ($(this).val() == 3){
-      var temp = '<div class="row"> <div class="col-sm-5"> <input type="number" class="form-control input-notas-r-1" placeholder="nota" /> </div> <div class="col-sm-2 mt-1 text-center"><span>Y</span> </div><div class="col-sm-5"> <input type="number" class="form-control  input-notas-r-2" placeholder="nota" /> </div></div>';
-      $('#filtro-notas-report-slot').html(temp);
-    }
-  });
+ $(document).on('change', '.filterPathologist', function(e){
+     tabla_casos.column(15).search(this.value ? '^'+this.value+'$' : '', true, false ).draw();
+ });
 
-  $(document).on("keyup change", ".input-dias1", function(){
-    tabla_casos.draw();
-  });
+ $('.assignment-deadline').datetimepicker({
+     locale: 'es',
+     keepOpen: false,
+     format: 'DD/MM/YYYY'
+ });
 
-  $(document).on("keyup change", ".input-dias2", function(){
-    tabla_casos.draw();
-  });
+ $(document).on("change", "#filtro-dias", function(){
+     $('.input-dias1').val("").trigger("change");
+     $('.input-dias2').val("").trigger("change");
+     $('#filtro-dias-slot').html("");
 
-  $(document).on("keyup change", ".input-notas-d-1", function(){
-    tabla_casos.draw();
-  });
+     if ($(this).val() == 1){
+         var temp = '<div class="row"> <div class="col-sm-12"> <input type="number" class="form-control  input-dias1" placeholder="días" /> </div> </div>';
+         $('#filtro-dias-slot').html(temp);
+     } else if ($(this).val() == 2){
+         var temp = '<div class="row"> <div class="col-sm-12"> <input type="number" class="form-control  input-dias2" placeholder="días" /> </div> </div>';
+         $('#filtro-dias-slot').html(temp);
+     } else if ($(this).val() == 3){
+         var temp = '<div class="row"> <div class="col-sm-5"> <input type="number" class="form-control input-dias1" placeholder="días" /> </div> <div class="col-sm-2 mt-1 text-center"><span>Y</span> </div><div class="col-sm-5"> <input type="number" class="form-control  input-dias2" placeholder="días" /> </div></div>';
+         $('#filtro-dias-slot').html(temp);
+     }
+ });
 
-  $(document).on("keyup change", ".input-notas-d-2", function(){
-    tabla_casos.draw();
-  });
+ $(document).on("change", "#filtro-notas-diag", function(){
+     $('.input-notas-d-1').val("").trigger("change");
+     $('.input-notas-d-2').val("").trigger("change");
+     $('#filtro-notas-diag-slot').html("");
 
-  $(document).on("keyup change", ".input-notas-r-1", function(){
-    tabla_casos.draw();
-  });
+     if ($(this).val() == 1){
+         var temp = '<div class="row"> <div class="col-sm-12"> <input type="number" class="form-control  input-notas-d-1" placeholder="nota" /> </div> </div>';
+         $('#filtro-notas-diag-slot').html(temp);
+     } else if ($(this).val() == 2){
+         var temp = '<div class="row"> <div class="col-sm-12"> <input type="number" class="form-control  input-notas-d-2" placeholder="nota" /> </div> </div>';
+         $('#filtro-notas-diag-slot').html(temp);
+     } else if ($(this).val() == 3){
+         var temp = '<div class="row"> <div class="col-sm-5"> <input type="number" class="form-control input-notas-d-1" placeholder="nota" /> </div> <div class="col-sm-2 mt-1 text-center"><span>Y</span> </div><div class="col-sm-5"> <input type="number" class="form-control  input-notas-d-2" placeholder="nota" /> </div></div>';
+         $('#filtro-notas-diag-slot').html(temp);
+     }
+ });
 
-  $(document).on("keyup change", ".input-notas-r-2", function(){
-    tabla_casos.draw();
-  });
+ $(document).on("change", "#filtro-notas-report", function(){
+     $('.input-notas-r-1').val("").trigger("change");
+     $('.input-notas-r-2').val("").trigger("change");
+     $('#filtro-notas-report-slot').html("");
 
-  $(document).on("keyup change", "#score_report", function(){
-    $(this).val($(this).val().replace(',', '.').replace(/[^0-9\.]/g,''));
-  });
+     if ($(this).val() == 1){
+         var temp = '<div class="row"> <div class="col-sm-12"> <input type="number" class="form-control  input-notas-r-1" placeholder="nota" /> </div> </div>';
+         $('#filtro-notas-report-slot').html(temp);
+     } else if ($(this).val() == 2){
+         var temp = '<div class="row"> <div class="col-sm-12"> <input type="number" class="form-control  input-notas-r-2" placeholder="nota" /> </div> </div>';
+         $('#filtro-notas-report-slot').html(temp);
+     } else if ($(this).val() == 3){
+         var temp = '<div class="row"> <div class="col-sm-5"> <input type="number" class="form-control input-notas-r-1" placeholder="nota" /> </div> <div class="col-sm-2 mt-1 text-center"><span>Y</span> </div><div class="col-sm-5"> <input type="number" class="form-control  input-notas-r-2" placeholder="nota" /> </div></div>';
+         $('#filtro-notas-report-slot').html(temp);
+     }
+ });
 
-  $(document).on("keyup change", "#score_diagnostic", function(){
-    $(this).val($(this).val().replace(',', '.').replace(/[^0-9\.]/g,''));
-  });
+ $(document).on("keyup change", ".input-dias1", function(){
+     tabla_casos.draw();
+ });
 
-  $(document).on('click', '.showScoreBtn', function(e){
-    var service_id = $(this).data('id');
-    $('#score_service_id').val(service_id);
-    $('#score_index').val(tabla_casos.row($(this).parent().parent().parent()).index());
-    $('#score_diagnostic').val("");
-    $('#score_report').val("");
-    var url = Urls.get_scores(service_id);
-    $.ajax({
-      type: "GET",
-      url: url,
-    })
-    .done(function (data) {
-      if (data.score_diagnostic) {
-        $('#score_diagnostic').val(data.score_diagnostic.toString().replace(",", "."));
-      }
-      if (data.score_report) {
-        $('#score_report').val(data.score_report.toString().replace(",", "."));
-      }
-    })
-    .fail(function () {
-      console.log("Fail")
-    });
-    $("#score_modal").modal("show");
-  });
+ $(document).on("keyup change", ".input-dias2", function(){
+     tabla_casos.draw();
+ });
 
-  $(document).on('click', '.saveScores', function(e){
-    var id = $('#score_service_id').val();
-    var data = $('#score_form').serialize();
-    var row_index = parseInt($('#score_index').val());
-    $.ajax({
-        type: "POST",
-        url: '/save-scores/'+id,
-        data: data,
-        async: false,
-    })
-    .done(function (data) {
-        tabla_casos.cell({row:row_index, column:12}).data(data.score_diagnostic.toString().replace(",", "."));
-        tabla_casos.cell({row:row_index, column:13}).data(data.score_report.toString().replace(",", "."));
-        toastr.success("Notas guardadas exitosamente.", "Listo!");
-        $("#score_modal").modal("hide");
-    })
-    .fail(function (data) {
-        console.log("Fail");
-    })
-  });
+ $(document).on("keyup change", ".input-notas-d-1", function(){
+     tabla_casos.draw();
+ });
 
-  $.fn.dataTable.ext.search.push(
-    function( settings, data, dataIndex ) {
-      var min = parseInt( $('.input-dias1').val(), 10 );
-      var max = parseInt( $('.input-dias2').val(), 10 );
-      var days = parseFloat( data[5] ) || 0;
+ $(document).on("keyup change", ".input-notas-d-2", function(){
+     tabla_casos.draw();
+ });
 
-      if ( ( isNaN( min ) && isNaN( max ) ) ||
-            ( isNaN( min ) && days <= max ) ||
-            ( min <= days && isNaN( max ) ) ||
-            ( min <= days && days <= max ) )
-      {
-          return true;
-      }
-      return false;
-    }
-  );
+ $(document).on("keyup change", ".input-notas-r-1", function(){
+     tabla_casos.draw();
+ });
 
-  $.fn.dataTable.ext.search.push(
-    function( settings, data, dataIndex ) {
-      var min = parseFloat( $('.input-notas-d-1').val(), 10 );
-      var max = parseFloat( $('.input-notas-d-2').val(), 10 );
-      try {
-        var days = parseFloat( data[12] );
-      } catch {
-        return false;
-      }
+ $(document).on("keyup change", ".input-notas-r-2", function(){
+     tabla_casos.draw();
+ });
 
-      if ( ( isNaN( min ) && isNaN( max ) ) ||
-            ( isNaN( min ) && days <= max ) ||
-            ( min <= days && isNaN( max ) ) ||
-            ( min <= days && days <= max ) )
-      {
-          return true;
-      }
-      return false;
-    }
-  );
+ $(document).on("keyup change", "#score_report", function(){
+     $(this).val($(this).val().replace(',', '.').replace(/[^0-9\.]/g,''));
+ });
 
-  $.fn.dataTable.ext.search.push(
-    function( settings, data, dataIndex ) {
-      var min = parseFloat( $('.input-notas-r-1').val(), 10 );
-      var max = parseFloat( $('.input-notas-r-2').val(), 10 );
-      try {
-        var days = parseFloat( data[13] );
-      } catch {
-        return false;
-      }
+ $(document).on("keyup change", "#score_diagnostic", function(){
+     $(this).val($(this).val().replace(',', '.').replace(/[^0-9\.]/g,''));
+ });
 
-      if ( ( isNaN( min ) && isNaN( max ) ) ||
-            ( isNaN( min ) && days <= max ) ||
-            ( min <= days && isNaN( max ) ) ||
-            ( min <= days && days <= max ) )
-      {
-          return true;
-      }
-      return false;
-    }
-  );
-
-  function finishAssignment(){
-    lockScreen(1);
-    
-    var data = $('#assignmentForm').serialize();
-    var url = Urls.service_assignment();
-    var analysis_id = $('.assignment-analysis-id').val();
-    var td = $('.service-'+analysis_id)[0];
-    var row_index = tabla_casos.row($(td).parent()).index();
-    var deadline = $('.assignment-deadline').val();
-    var path_name = $('.assignment-pathologist-name').val();
-    var pathologist_value = $('.assignment-pathologist').val();
-    $("#assignmentModal").modal("hide");
-
-    $.ajax({
-      type: "POST",
-      url: url,
-      data: data
-    })
-    .done(function (data) {
-      lockScreen(0);
-      if (data.ok){
-        if (data.msg != "") {
-          toastr.info("Hemos procesado la derivación pero ha surgido un problema: "+data.msg, "Listo!");
-        } else {
-          {% if request.user.is_superuser %}
-            if (pathologist_value == 'NA'){
-              $('.optionGroups-'+analysis_id+' .showScoreBtn').remove();
-            } else {
-              $('.optionGroups-'+analysis_id+' .showScoreBtn').remove();
-              $('.optionGroups-'+analysis_id).append('<button class="btn btn-info showScoreBtn" data-id="'+analysis_id+'" data-toggle="tooltip" data-placement="top" title="Notas"><i class="fa fa-check-square-o fa-fx"></i></button>');
-            }
-          {% endif %}
-          $('*[data-analisis="'+analysis_id+'"]').val(pathologist_value).trigger("change");
-          $(td).removeClass('incomplete');
-          tabla_casos.cell({row:row_index, column:6}).data(moment().format("DD/MM/YYYY"));
-          tabla_casos.cell({row:row_index, column:7}).data(deadline);
-          tabla_casos.cell({row:row_index, column:15}).data(path_name);
-          toastr.success("Derivación realizada exitosamente.", "Listo!");
-        }
-      } else {
-        toastr.error("No ha sido posible realizar la derivación con éxito, itente nuevamente o contacte un administrador.", "Ups! Problemas.");
-      }
-    })
-    .fail(function (data) {
-      toastr.error("No ha sido posible realizar la derivación con éxito, itente nuevamente o contacte un administrador.", "Ups! Problemas.");
-    });
-  }
-
-  $(document).ready(function(){
-    lockScreen(1);
-    tabla_casos = $('#table-casos').DataTable({
-      "rowsGroup": [0,1,2],
-      "bPaginate" : true,
-      "order": [[ 0, "desc" ]],
-      "orderable": false,
-      "targets": 'no-sort',
-      "bSort": false,
-      "columnDefs": [
-        {
-          "targets": [0, 1, 2, 3, 4, 5 ,6 , 7, 8, 9, 10, 11, 12, 13, 14, 15, 16],
-          "orderable": false,
-          "className": "dt-body-center",
-        },
-        {
-          "targets": [ 15],
-          "visible": false,
-        },
-         {
-          "targets": [ 0],
-          "className": "dt-wd-1",
-        },
-      ],
-      initComplete: function () {
-        lockScreen(0);
-        this.api().columns().every( function () {
-          if(this[0][0] == 15){
-            var column = this;
-            var select = $('<select style="width:100% !important;" class="filterPathologist form-control "><option value="">Todos</option></select>')
-              .appendTo( $('#findPatologo'));
-            select.before('<label><b>Filtro por Patólogos</b></label><br> ');
-            column.data().unique().sort().each( function ( d, j ) {
-              if (select.find('option[value="'+d+'"]').length==0)
-              {
-                  select.append( '<option value="'+d+'">'+d+'</option>' )
-              }
-            } )
-            select.select2();
+ $(document).on('click', '.showScoreBtn', function(e){
+     var service_id = $(this).data('id');
+     $('#score_service_id').val(service_id);
+     $('#score_index').val(tabla_casos.row($(this).parent().parent().parent()).index());
+     $('#score_diagnostic').val("");
+     $('#score_report').val("");
+     var url = Urls.get_scores(service_id);
+     $.ajax({
+         type: "GET",
+         url: url,
+     })
+      .done(function (data) {
+          if (data.score_diagnostic) {
+              $('#score_diagnostic').val(data.score_diagnostic.toString().replace(",", "."));
           }
-        })
-      }
-    });
-  })
+          if (data.score_report) {
+              $('#score_report').val(data.score_report.toString().replace(",", "."));
+          }
+      })
+      .fail(function () {
+          console.log("Fail")
+      });
+     $("#score_modal").modal("show");
+ });
+
+ $(document).on('click', '.saveScores', function(e){
+     var id = $('#score_service_id').val();
+     var data = $('#score_form').serialize();
+     var row_index = parseInt($('#score_index').val());
+     $.ajax({
+         type: "POST",
+         url: '/save-scores/'+id,
+         data: data,
+         async: false,
+     })
+      .done(function (data) {
+          tabla_casos.cell({row:row_index, column:12}).data(data.score_diagnostic.toString().replace(",", "."));
+          tabla_casos.cell({row:row_index, column:13}).data(data.score_report.toString().replace(",", "."));
+          toastr.success("Notas guardadas exitosamente.", "Listo!");
+          $("#score_modal").modal("hide");
+      })
+      .fail(function (data) {
+          console.log("Fail");
+      })
+ });
+
+ $.fn.dataTable.ext.search.push(
+     function( settings, data, dataIndex ) {
+         var min = parseInt( $('.input-dias1').val(), 10 );
+         var max = parseInt( $('.input-dias2').val(), 10 );
+         var days = parseFloat( data[5] ) || 0;
+
+         if ( ( isNaN( min ) && isNaN( max ) ) ||
+              ( isNaN( min ) && days <= max ) ||
+              ( min <= days && isNaN( max ) ) ||
+              ( min <= days && days <= max ) )
+         {
+             return true;
+         }
+         return false;
+     }
+ );
+
+ $.fn.dataTable.ext.search.push(
+     function( settings, data, dataIndex ) {
+         var min = parseFloat( $('.input-notas-d-1').val(), 10 );
+         var max = parseFloat( $('.input-notas-d-2').val(), 10 );
+         try {
+             var days = parseFloat( data[12] );
+         } catch {
+             return false;
+         }
+
+         if ( ( isNaN( min ) && isNaN( max ) ) ||
+              ( isNaN( min ) && days <= max ) ||
+              ( min <= days && isNaN( max ) ) ||
+              ( min <= days && days <= max ) )
+         {
+             return true;
+         }
+         return false;
+     }
+ );
+
+ $.fn.dataTable.ext.search.push(
+     function( settings, data, dataIndex ) {
+         var min = parseFloat( $('.input-notas-r-1').val(), 10 );
+         var max = parseFloat( $('.input-notas-r-2').val(), 10 );
+         try {
+             var days = parseFloat( data[13] );
+         } catch {
+             return false;
+         }
+
+         if ( ( isNaN( min ) && isNaN( max ) ) ||
+              ( isNaN( min ) && days <= max ) ||
+              ( min <= days && isNaN( max ) ) ||
+              ( min <= days && days <= max ) )
+         {
+             return true;
+         }
+         return false;
+     }
+ );
+
+ function finishAssignment(){
+     lockScreen(1);
+
+     var data = $('#assignmentForm').serialize();
+     var url = Urls.service_assignment();
+     var analysis_id = $('.assignment-analysis-id').val();
+     var td = $('.service-'+analysis_id)[0];
+     var row_index = tabla_casos.row($(td).parent()).index();
+     var deadline = $('.assignment-deadline').val();
+     var path_name = $('.assignment-pathologist-name').val();
+     var pathologist_value = $('.assignment-pathologist').val();
+     $("#assignmentModal").modal("hide");
+
+     $.ajax({
+         type: "POST",
+         url: url,
+         data: data
+     })
+      .done(function (data) {
+          lockScreen(0);
+          if (data.ok){
+              if (data.msg != "") {
+                  toastr.info("Hemos procesado la derivación pero ha surgido un problema: "+data.msg, "Listo!");
+              } else {
+                  {% if request.user.is_superuser %}
+                  if (pathologist_value == 'NA'){
+                      $('.optionGroups-'+analysis_id+' .showScoreBtn').remove();
+                  } else {
+                      $('.optionGroups-'+analysis_id+' .showScoreBtn').remove();
+                      $('.optionGroups-'+analysis_id).append('<button class="btn btn-info showScoreBtn" data-id="'+analysis_id+'" data-toggle="tooltip" data-placement="top" title="Notas"><i class="fa fa-check-square-o fa-fx"></i></button>');
+                  }
+                  {% endif %}
+                  $('*[data-analisis="'+analysis_id+'"]').val(pathologist_value).trigger("change");
+                  $(td).removeClass('incomplete');
+                  tabla_casos.cell({row:row_index, column:6}).data(moment().format("DD/MM/YYYY"));
+                  tabla_casos.cell({row:row_index, column:7}).data(deadline);
+                  tabla_casos.cell({row:row_index, column:15}).data(path_name);
+                  toastr.success("Derivación realizada exitosamente.", "Listo!");
+              }
+          } else {
+              toastr.error("No ha sido posible realizar la derivación con éxito, itente nuevamente o contacte un administrador.", "Ups! Problemas.");
+          }
+      })
+      .fail(function (data) {
+          toastr.error("No ha sido posible realizar la derivación con éxito, itente nuevamente o contacte un administrador.", "Ups! Problemas.");
+      });
+ }
+
+ $(document).ready(function(){
+     tabla_casos = $('#table-casos').DataTable({
+         processing: true,
+         serverSide: true,
+         rowsGroup: [0,1,2],
+         bPaginate : true,
+         order: [[ 0, "desc" ]],
+         orderable: false,
+         targets: 'no-sort',
+         autoWidth: false,
+         bSort: false,
+         ajax: Urls.tabla_patologos({{ all }}),
+         columnDefs: [
+             {
+                 "targets": [0, 1, 2, 3, 4, 5 ,6 , 7, 8, 9, 10, 11, 12, 13, 14, 15],
+                 "orderable": false,
+                 "className": "dt-body-center",
+             },
+             {
+                 "targets": [ 0],
+                 "className": "dt-wd-1",
+             },
+
+             {
+                 "targets": [14],
+                 "width": "20rem"
+             },
+         ],
+         columns: [
+             { data: "no_caso" },
+             { data: "cliente" },
+             { data: "centro" },
+             {
+                 data: (row) => row,
+                 render: (data) => {
+                     return `<span class="service-${data.analisis} ${(data.patologo > 0) ? '' : 'incomplete'}">${data.exam}</span>`
+                 }
+             },
+             { data: "fecha_ingreso" },
+             { data: "dias_abierto" },
+             { data: "fecha_derivacion" },
+             { data: "fecha_plazo" },
+             { data: "dias_atraso" },
+             { data: "nro_organos" },
+             { data: "unidad" },
+             { data: "estado" },
+             { data: "nota_diagnostico" },
+             { data: "nota_informe" },
+             {
+                 data: (row) => row,
+                 render:(data) => {
+                     let select =  `<select
+                                      class="select2 form-control patologos-select"
+                                      style="width:100% !important;"
+                                      data-exam="${data.exam}"
+                                      data-nocase="${data.no_caso}"
+                                      data-analisis="${data.analisis}"
+                                      {% if not edit %} disabled {% endif %}
+                                      value="${data.patologo}"
+                                    >
+                                      <option value="NA">N/A</option>
+                     `
+                     for (const patologo of patologos) {
+                         select += `<option value="${patologo.id}" ${(patologo.id == data.patologo) ? "selected" : ""}>${patologo.text}</option>`
+                     }
+                     select += `</select>`;
+                     return select
+
+                 }
+             },
+             {
+                 data: (row) => row,
+                 render: (data) => {
+                     const is_closed = (data.entryform_form_closed || data.entryform_cancelled) ? 1 : 0;
+                     return `<div class="btn-group optionGroups-${data.analysis}" data-entryform="${data.entryform}" role="group">
+                            <button
+                                class="btn btn-primary showSummaryBtn"
+                                data-id="${data.entryform}"
+                                data-closed="${is_closed}"
+                                data-editable="{% if edit %}1{% else %}0{% endif %}"
+                                data-toggle="tooltip"
+                                data-placement="top"
+                                title="Resúmen del Caso"
+                            >
+                                <i class="fa fa-list-alt fa-fx"></i>
+                            </button>
+                            {% if request.user.is_superuser %}
+                              <button
+                                class="btn btn-info showScoreBtn ${(data.patologo > 0) ? '' : "d-none"}"
+                                data-id="${data.analysis}"
+                                data-toggle="tooltip"
+                                data-placement="top"
+                                title="Notas"
+                              >
+                                <i class="fa fa-check-square-o fa-fx"></i>
+                              </button>
+                            {% endif %}
+                          </div>`
+                 }
+             },
+         ],
+     });
+
+ })
+
+ $('#table-casos').on("draw.dt", () => {
+     $(".patologos-select").select2();
+ })
 
 </script>
 
