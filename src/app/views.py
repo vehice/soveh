@@ -1317,13 +1317,21 @@ def show_patologos(request, all):
 
 
 @login_required
-def tabla_patologos(request, all):
+def tabla_patologos(request):
     up = UserProfile.objects.filter(user=request.user).first()
 
     draw = int(request.GET.get("draw"))
     length = int(request.GET.get("length"))
     search = request.GET.get("search[value]")
     start = int(request.GET.get("start")) + 1
+
+    lower_open_day_limit = request.GET.get("lower_open_day_limit")
+    upper_open_day_limit = request.GET.get("upper_open_day_limit")
+
+    lower_tardy_day_limit = request.GET.get("lower_tardy_day_limit")
+    upper_tardy_day_limit = request.GET.get("upper_tardy_day_limit")
+
+    all = int(request.GET.get("included_closed_cases") or 0)
 
     # Get AnalysisForm according to user permissions
     if request.user.is_superuser or up.profile_id in (1, 2, 3):
@@ -1375,7 +1383,6 @@ def tabla_patologos(request, all):
             | Q(entryform__center__icontains=search)
             | Q(entryform__created_at__icontains=search)
             | Q(exam__name__icontains=search)
-            | Q(assignment_done_at__icontains=search)
             | Q(patologo__first_name__icontains=search)
             | Q(patologo__last_name__icontains=search)
         )
@@ -1468,6 +1475,23 @@ def tabla_patologos(request, all):
                 days_open = (
                     a["analysisform_form"].closed_at - a["analysis"].created_at
                 ).days
+
+        if upper_open_day_limit:
+            if days_open >= int(upper_open_day_limit):
+                continue
+
+        if lower_open_day_limit:
+            if days_open <= int(lower_open_day_limit):
+                continue
+
+        if upper_tardy_day_limit:
+            if days_late >= int(upper_tardy_day_limit):
+                continue
+
+        if lower_tardy_day_limit:
+            if days_late <= int(lower_tardy_day_limit):
+                continue
+
         samples = Sample.objects.filter(entryform=a["analysis"].entryform).values_list(
             "id", flat=True
         )

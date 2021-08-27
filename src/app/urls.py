@@ -16,7 +16,7 @@ urlpatterns = [
     url(r"^ingresos/new$", views.new_ingreso, name="ingresos_new"),
     url(r"^research/new$", csrf_exempt(views.new_research), name="research_new"),
     url(r"^derivacion/(?P<all>\d+)$", views.show_patologos, name="patologos"),
-    url(r"^control/tabla/(?P<all>\d+)$", views.tabla_patologos, name="tabla_patologos"),
+    url(r"^control/tabla$", views.tabla_patologos, name="tabla_patologos"),
     url(
         r"^template-reception/(?P<id>\d+)/(?P<userId>\d+)$",
         views.template_reception,
