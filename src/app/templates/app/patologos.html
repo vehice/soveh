@@ -498,7 +498,7 @@
                                       {% if not edit %} disabled {% endif %}
                                       value="${data.patologo}"
                                     >
-                                      <option value="NA">N/A</option>
+                                      <option value="NA">No Asignado</option>
                      `
                      for (const patologo of patologos) {
                          select += `<option value="${patologo.id}" ${(patologo.id == data.patologo) ? "selected" : ""}>${patologo.text}</option>`
