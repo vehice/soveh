@@ -142,7 +142,7 @@ class UnitManager(models.Manager):
     query exams and simplify view's code.
     """
 
-    def pending_cassettes(self, entry_format_list=[1, 2, 6, 7]):
+    def pending_cassettes(self, entry_format_list=[1, 2, 3, 4, 5, 6, 7]):
         """
         Returns a queryset including all Units that are waiting
         for :model:`lab.Cassette`.
