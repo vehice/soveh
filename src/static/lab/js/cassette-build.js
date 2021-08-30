@@ -535,18 +535,16 @@ $(document).ready(function () {
         const selectedOrgans = $("#selectNewOrgans").select2("data")[0];
         const selectedRows = tableBuild.rows(".selected").data();
         selectedRows.each((value, index) => {
+            const td = $(tableBuild.cell(index, 4).node());
+            const cassetteOrgans = td.find(".unitSelectOrgan");
             const organ = organs.find((organ) => selectedOrgans.id == organ.pk);
-            const id = `${value.unit_id};${value.cassette}`;
-            const element = $(document.getElementById(id));
 
             if (organ != undefined) {
                 const organDOM = `<div class="btn-group mr-1" role="group">
                                 <button class="btn btn-secondary organId" type="button" value="${organ.pk}" disabled>${organ.fields.abbreviation}</button>
                                 <button class="btn btn-danger deleteOrgan" type="button">X</button>
                             </div>`;
-                element.append(organDOM);
-            } else {
-                return;
+                cassetteOrgans.append(organDOM);
             }
         });
     });
