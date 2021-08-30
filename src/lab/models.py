@@ -224,6 +224,15 @@ class Cassette(models.Model):
     def __str__(self):
         return f"{self.correlative}"
 
+    def parent_unit(self):
+        return f"{self.unit}"
+
+    def parent_identification(self):
+        return f"{self.unit.identification}"
+
+    def parent_case(self):
+        return f"{self.unit.identification.entryform}"
+
     @property
     def tag(self):
         """
@@ -289,6 +298,18 @@ class Slide(models.Model):
 
     def __str__(self):
         return f"{self.correlative}"
+
+    def parent_cassette(self):
+        return f"{self.cassette}"
+
+    def parent_unit(self):
+        return f"{self.unit}"
+
+    def parent_identification(self):
+        return f"{self.unit.identification}"
+
+    def parent_case(self):
+        return f"{self.unit.identification.entryform}"
 
     @property
     def tag(self):
