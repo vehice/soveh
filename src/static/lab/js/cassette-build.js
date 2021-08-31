@@ -400,6 +400,11 @@ $(document).ready(function () {
         });
 
         const build_at = $("#buildAt").val();
+        Swal.fire({
+            title: "Guardando...",
+            allowOutsideClick: false,
+        });
+        Swal.showLoading();
         $.ajax(Urls["lab:cassette_build"](), {
             data: JSON.stringify({
                 build_at: build_at,
@@ -415,6 +420,7 @@ $(document).ready(function () {
             contentType: "application/json; charset=utf-8",
 
             success: (data, textStatus) => {
+                Swal.close();
                 if (data.differences) {
                     Swal.fire({
                         icon: "info",
@@ -434,6 +440,7 @@ $(document).ready(function () {
                         }
                     });
                 } else {
+                    Swal.close();
                     Swal.fire({
                         icon: "success",
                         title: "Guardado exitosamente",
@@ -443,9 +450,12 @@ $(document).ready(function () {
                 }
             },
             error: (xhr, textStatus, error) => {
+                Swal.close();
                 Swal.fire({
                     icon: "error",
+                    title: "Ocurrió un error guardando los Cassettes",
                 });
+                console.error({ xhr, textStatus, error });
             },
         });
     });
@@ -532,21 +542,25 @@ $(document).ready(function () {
     });
 
     $("#addOrgansButton").click(() => {
-        const selectedOrgans = $("#selectNewOrgans").select2("data")[0];
+        const selectedOrgans = $("#selectNewOrgans").select2("data");
         const selectedRows = tableBuild.rows(".selected").data();
-        selectedRows.each((value, index) => {
-            const td = $(tableBuild.cell(index, 4).node());
-            const cassetteOrgans = td.find(".unitSelectOrgan");
-            const organ = organs.find((organ) => selectedOrgans.id == organ.pk);
+        for (const selectedOrgan of selectedOrgans) {
+            selectedRows.each((value, index) => {
+                const td = $(tableBuild.cell(index, 4).node());
+                const cassetteOrgans = td.find(".unitSelectOrgan");
+                const organ = organs.find(
+                    (organ) => selectedOrgan.id == organ.pk
+                );
 
-            if (organ != undefined) {
-                const organDOM = `<div class="btn-group mr-1" role="group">
-                                <button class="btn btn-secondary organId" type="button" value="${organ.pk}" disabled>${organ.fields.abbreviation}</button>
-                                <button class="btn btn-danger deleteOrgan" type="button">X</button>
-                            </div>`;
-                cassetteOrgans.append(organDOM);
-            }
-        });
+                if (organ != undefined) {
+                    const organDOM = `<div class="btn-group mr-1" role="group">
+                                    <button class="btn btn-secondary organId" type="button" value="${organ.pk}" disabled>${organ.fields.abbreviation}</button>
+                                    <button class="btn btn-danger deleteOrgan" type="button">X</button>
+                                </div>`;
+                    cassetteOrgans.append(organDOM);
+                }
+            });
+        }
     });
 
     $("#btnCleanRules").click(() => {
