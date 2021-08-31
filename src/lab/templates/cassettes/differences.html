@@ -31,8 +31,9 @@
                             <td>
                                 <button id="{{difference.pk}}" class="btn btn-warning markAsFixed">SIN REVISAR</button>
                             </td>
-                            <td>
+                            <td class="d-flex flex-column">
                                 <a href="{% url 'lab:redirect_to_workflow_edit' difference.unit.identification.entryform.pk 2 %}">Editar Identificacion/Unidad</a>
+                                <a href="{% url 'lab:cassette_index' %}" >Editar Cassettes</a>
                             </td>
                         </tr>
                         {% endfor %}
