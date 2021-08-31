@@ -956,7 +956,9 @@ def slide_prebuild(request):
         organ_unit = unit.organunit_set.all().values_list("id", flat=True)
         sample_exams = (
             SampleExams.objects.filter(
-                unit_organ__in=organ_unit, organ__in=organs_subject
+                unit_organ__in=organ_unit,
+                organ__in=organs_subject,
+                exam__service_id__in=[1, 2],
             )
             .values("stain_id")
             .annotate(stain_count=Count("stain_id"))
@@ -1273,10 +1275,23 @@ class SlideRelease(View):
         """
         Displays a list of :model:`lab.Slide` which ``processed_at`` date is null.
         """
-        slides = Slide.objects.filter(released_at=None).select_related(
-            "unit__identification__entryform"
-        )
-        return render(request, "slides/release.html", {"slides": slides})
+        if request.is_ajax():
+            slides = Slide.objects.filter(released_at=None)
+
+            context = []
+            for slide in slides:
+                context.append(
+                    {
+                        "id": slide.id,
+                        "tag": slide.tag,
+                        "url": slide.get_absolute_url(),
+                        "created_at": slide.created_at,
+                    }
+                )
+
+            return JsonResponse(context, safe=False)
+
+        return render(request, "slides/release.html")
 
     @method_decorator(login_required)
     def post(self, request):
