@@ -27,6 +27,11 @@
                             </button>
                         </div>
                     </div>
+                    <div class="col-md-2 offset-md-1">
+                        <button class="btn btn-info" type="button" id="btnRefresh">
+                            <i class="ft ft-refresh-cw"></i>
+                        </button>
+                    </div>
                 </section>
             </header>
             <section class="card-body table-responsive">
@@ -35,18 +40,11 @@
                         <tr>
                             <th scope="col">#</th>
                             <th scope="col">Slide</th>
+                            <th scope="col">Disponible en DsStore</th>
                             <th scope="col">Fecha Armado</th>
                         </tr>
                     </thead>
-                    <tbody>
-                        {% for slide in slides %}
-                        <tr>
-                            <td>{{ slide.id }}</td>
-                            <td>{{ slide.tag }}</td>
-                            <td>{{ slide.created_at }}</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
+                    <tbody></tbody>
                 </table>
             </section>
         </div>

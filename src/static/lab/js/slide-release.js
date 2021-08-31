@@ -28,6 +28,33 @@ $(document).ready(function () {
     const tableList = $("#datatable").DataTable({
         dom: "Bfrtip",
 
+        ajax: {
+            url: Urls["lab:slide_release"](),
+            dataSrc: "",
+        },
+
+        columns: [
+            { data: "id" },
+            { data: "tag" },
+            {
+                data: "url",
+                render: (data) => {
+                    if (data == null) {
+                        return `No`;
+                    } else {
+                        return `<a href="${data}">Si</a>`;
+                    }
+                },
+            },
+            {
+                data: "created_at",
+                render: (data) => {
+                    const date = new Date(data);
+                    return date.toLocaleDateString();
+                },
+            },
+        ],
+
         buttons: [
             {
                 text: "Seleccionar todos",
@@ -110,5 +137,9 @@ $(document).ready(function () {
                 });
             },
         });
+    });
+
+    $("#btnRefresh").click(() => {
+        tableList.ajax.reload();
     });
 });
