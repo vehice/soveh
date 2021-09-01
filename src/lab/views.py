@@ -502,11 +502,19 @@ def cassette_prebuild(request):
         }
 
     for unit in units:
-        last_correlative = 1
-        cassette_highest_correlative = unit.cassettes.order_by("-correlative").first()
+        case = unit.identification.entryform
+        identifications = case.identification_set.all().values_list("id", flat=True)
+        case_units = Unit.objects.filter(
+            identification_id__in=identifications
+        ).values_list("id", flat=True)
+        previous_cassette_highest_correlative = (
+            Cassette.objects.filter(unit_id__in=case_units)
+            .order_by("-correlative")
+            .first()
+        )
         cassette_count = 1
-        if cassette_highest_correlative:
-            cassette_count = cassette_highest_correlative.correlative
+        if previous_cassette_highest_correlative:
+            cassette_count = previous_cassette_highest_correlative.correlative
         excludes = []
 
         if rules["uniques"] and len(rules["uniques"]) > 0:
