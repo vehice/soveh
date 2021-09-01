@@ -2,6 +2,9 @@ from lab.models import Case, CassetteOrgan, UnitDifference
 from django.db.models import Count
 from workflows.models import Form
 from django.shortcuts import get_object_or_404
+from collections import defaultdict
+from itertools import chain
+from operator import methodcaller
 
 
 def generate_differences(unit):
@@ -24,23 +27,40 @@ def generate_differences(unit):
         .order_by()
     )
 
-    if cassettes_organs != unit_organs:
-        organ_differences = [
-            organ
-            for organ in cassettes_organs + unit_organs
-            if organ not in cassettes_organs or organ not in unit_organs
-        ]
+    unit_organs = {
+        unit_organ["organ"]: [unit_organ["organ_count"]] for unit_organ in unit_organs
+    }
+    cassettes_organs = {
+        cassettes_organ["organ"]: [cassettes_organ["organ_count"]]
+        for cassettes_organ in cassettes_organs
+    }
 
-        for difference in organ_differences:
+    final_organs = defaultdict(list)
+
+    dict_items = map(methodcaller("items"), (unit_organs, cassettes_organs))
+    for k, v in chain.from_iterable(dict_items):
+        final_organs[k].extend(v)
+
+    has_differences = False
+    for organ in final_organs:
+        if len(final_organs[organ]) == 1:
             UnitDifference.objects.update_or_create(
                 unit=unit,
-                organ_id=difference["organ"],
-                defaults={"difference": difference["organ_count"]},
+                organ_id=organ,
+                defaults={"difference": final_organs[organ][0]},
             )
+            has_differences = True
+        else:
+            UnitDifference.objects.update_or_create(
+                unit=unit,
+                organ_id=organ,
+                defaults={
+                    "difference": final_organs[organ][0] - final_organs[organ][1]
+                },
+            )
+            has_differences = True
 
-        return True
-
-    return False
+    return has_differences
 
 
 def change_case_step(case_pk, step):
