@@ -1330,6 +1330,11 @@ def tabla_patologos(request):
     lower_tardy_day_limit = request.GET.get("lower_tardy_day_limit")
     upper_tardy_day_limit = request.GET.get("upper_tardy_day_limit")
 
+    selected_pathologists = request.GET.get("selected_pathologists")
+
+    if selected_pathologists:
+        selected_pathologists = selected_pathologists.split(",")
+
     all = int(request.GET.get("included_closed_cases") or 0)
 
     # Get AnalysisForm according to user permissions
@@ -1381,9 +1386,10 @@ def tabla_patologos(request):
             | Q(entryform__customer__name__icontains=search)
             | Q(entryform__center__icontains=search)
             | Q(exam__name__icontains=search)
-            | Q(patologo__first_name__icontains=search)
-            | Q(patologo__last_name__icontains=search)
         )
+
+    if selected_pathologists:
+        analysis = analysis.filter(patologo_id__in=selected_pathologists)
 
     selected_analysis = []
 

@@ -97,6 +97,15 @@
                                     </div>
                                 </div>
                             </fieldset>
+
+                            <fieldset class="col-md-3 border">
+                                <legend>Filtro por patologos</legend>
+                                <select style="width:100% !important;" class="form-control filterTable" id="selPathologists" multiple>
+                                    {% for patologo in patologos %}
+                                    <option value="{{ patologo.id }}">{{ patologo.first_name }} {{ patologo.last_name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </fieldset>
                         </div>
                     </div>
                     <div class="col-12 ml-0 pl-0">
@@ -239,6 +248,7 @@
      var pathologist = selected;
      var pathologist_name = name;
 
+
      $('.assignment-comment').val("");
      if (pathologist == "NA"){
          $('.assignment-deadline').val("");
@@ -283,31 +293,10 @@
      }
  }
 
- $(document).on('change', '.filterPathologist', function(e){
-     tabla_casos.column(15).search(this.value ? '^'+this.value+'$' : '', true, false ).draw();
- });
-
  $('.assignment-deadline').datetimepicker({
      locale: 'es',
      keepOpen: false,
      format: 'DD/MM/YYYY'
- });
-
- $(document).on("change", "#filtro-dias", function(){
-     $('.input-dias1').val("").trigger("change");
-     $('.input-dias2').val("").trigger("change");
-     $('#filtro-dias-slot').html("");
-
-     if ($(this).val() == 1){
-         var temp = '';
-         $('#filtro-dias-slot').html(temp);
-     } else if ($(this).val() == 2){
-         var temp = '<div class="row"> <div class="col-sm-12"> <input type="number" class="form-control  input-dias2" placeholder="días" /> </div> </div>';
-         $('#filtro-dias-slot').html(temp);
-     } else if ($(this).val() == 3){
-         var temp = '<div class="row"> <div class="col-sm-5"> <input type="number" class="form-control input-dias1" placeholder="días" /> </div> <div class="col-sm-2 mt-1 text-center"><span>Y</span> </div><div class="col-sm-5"> <input type="number" class="form-control  input-dias2" placeholder="días" /> </div></div>';
-         $('#filtro-dias-slot').html(temp);
-     }
  });
 
 
@@ -423,6 +412,8 @@
  }
 
  $(document).ready(function(){
+     $("#selPathologists").select2();
+
      tabla_casos = $('#table-casos').DataTable({
          processing: true,
          serverSide: true,
@@ -448,6 +439,14 @@
                  const upperTardyDayLimit = $("#upperTardyDayLimit").val();
                  query.lower_tardy_day_limit = lowerTardyDayLimit
                  query.upper_tardy_day_limit = upperTardyDayLimit
+
+                 const filterPathologists = $("#selPathologists").select2("data");
+                 let selected_pathologists = []
+                 for (const pathologist of filterPathologists) {
+                     selected_pathologists.push(pathologist.id)
+                 }
+                 query.selected_pathologists = selected_pathologists.join()
+
              }
          },
          columnDefs: [
