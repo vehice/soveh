@@ -392,14 +392,23 @@ $(document).ready(function () {
                 organs.push(organId);
             }
 
-            new_cassettes.push({
-                id: data.unit_id,
-                correlative: cassette,
-                organs: organs,
-            });
+            if (organs.length > 0) {
+                new_cassettes.push({
+                    id: data.unit_id,
+                    correlative: cassette,
+                    organs: organs,
+                });
+            }
         });
 
         const build_at = $("#buildAt").val();
+        if (new_cassettes.length <= 0) {
+            Swal.fire({
+                icon: "error",
+                title: "No hay cassettes validos para armar",
+            });
+            return;
+        }
         Swal.fire({
             title: "Guardando...",
             allowOutsideClick: false,
