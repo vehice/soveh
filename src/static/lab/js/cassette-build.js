@@ -543,10 +543,10 @@ $(document).ready(function () {
 
     $("#addOrgansButton").click(() => {
         const selectedOrgans = $("#selectNewOrgans").select2("data");
-        const selectedRows = tableBuild.rows(".selected").data();
+        const selectedRows = tableBuild.rows(".selected");
         for (const selectedOrgan of selectedOrgans) {
-            selectedRows.each((value, index) => {
-                const td = $(tableBuild.cell(index, 4).node());
+            selectedRows.every((rowIdx) => {
+                const td = $(tableBuild.cell(rowIdx, 4).node());
                 const cassetteOrgans = td.find(".unitSelectOrgan");
                 const organ = organs.find(
                     (organ) => selectedOrgan.id == organ.pk
