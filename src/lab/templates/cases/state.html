@@ -12,28 +12,47 @@
                 </h4>
             </header>
             <main class="card-body container-fluid">
-                <div class="row">
-                    <div class="col-md-12">
-                        <h5>Información General:</h5>
-                    </div>
-                </div>
                 <section class="row">
-                    <div class="col-md-4 d-flex flex-column">
-                        <span>Cliente: {{ case.customer|default:"S/I" }}</span>
-                        <span>Centro: {{ case.center|default:"S/I" }}</span>
-                        <span>Especie: {{ case.specie|default:"S/I" }}</span>
-                        <span>Fuente de Agua: {{ case.watersource|default:"S/I" }}</span>
-                        <span>Fijador: {{ case.fixative|default:"S/I" }}</span>
-                        <span>Anamnesis: {{ case.anamnesis|default:"S/I" }}</span>
-                        <span>Tipo de Ingreso: {{ case.get_entry_format_display|default:"S/I" }}</span>
-                    </div>
-                    <div class="col-md-4">
-                        <b><a href="{% url 'lab:case_read_sheet' case.id %}">Hoja de Lectura</a></b>
+                    <fieldset class="col-md-4 border d-flex flex-column">
+                        <legend>Información General</legend>
+                        <span>
+                            <b>Cliente:</b>
+                            {{ case.customer|default:"S/I" }}
+                        </span>
+                        <span>
+                            <b>Centro:</b>
+                            {{ case.center|default:"S/I" }}
+                        </span>
+                        <span>
+                            <b>Especie:</b>
+                            {{ case.specie|default:"S/I" }}
+                        </span>
+                        <span>
+                            <b>Fuente de Agua:</b>
+                            {{ case.watersource|default:"S/I" }}
+                        </span>
+                        <span>
+                            <b>Fijador:</b>
+                            {{ case.fixative|default:"S/I" }}
+                        </span>
+                        <span>
+                            <b>Anamnesis:</b>
+                            {{ case.anamnesis|default:"S/I" }}
+                        </span>
+                        <span>
+                            <b>Tipo de Ingreso:</b>
+                            {{ case.get_entry_format_display|default:"S/I" }}
+                        </span>
+                    </fieldset>
+                    <div class="col-md-5 offset-md-2 d-flex align-items-center">
+                        <h1 class="display-3">
+                            <a href="{% url 'lab:case_read_sheet' case.id %}">Hoja de Lectura</a>
+                        </h1>
                     </div>
                 </section>
                 <div class="row mt-2">
                     <div class="col-md-12">
-                        <h5>Servicios:</h5>
+                        <h5>Servicios</h5>
                         <table class="table">
                             <thead>
                                 <tr>
@@ -43,7 +62,6 @@
                                     <th scope="col">Patologo</th>
                                     <th scope="col">Fecha de Derivación</th>
                                     <th scope="col">Plazo</th>
-                                    <th scope="col">Progreso (Estimado)</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -55,7 +73,35 @@
                                     <td>{{ service.patologo|default:"Sin Asignar" }}</td>
                                     <td>{{ service.assignment_done_at|date:"d/m/Y"|default:"Sin derivar" }}</td>
                                     <td>{{ service.assignment_deadline|date:"d/m/Y"|default:"Sin plazo" }}</td>
-                                    <td>{{ service.lab_progress|floatformat:"0" }} %</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="row mt-2">
+                    <div class="col-md-12">
+                        <h5>Progreso del Procesamiento</h5>
+                        <table class="table zero-configuration">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Unidades(Organos)</th>
+                                    <th scope="col">Armado de Cassettes(Organos)</th>
+                                    <th scope="col">Procesado de Cassettes(Cassettes)</th>
+                                    <th scope="col">Slides</th>
+                                    <th scope="col">Disponibilizados</th>
+                                    <th scope="col">Tincion</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for slide in slides %}
+                                <tr>
+                                    <td>{{ units }}({{ units_organs_count }})</td>
+                                    <td>{{ cassettes }}({{ cassettes_organs_count }})</td>
+                                    <td>{{ cassettes_processed }} / {{ cassettes }}</td>
+                                    <td>{{ slide.build }}</td>
+                                    <td>{{ slide.available }}</td>
+                                    <td>{{ slide.stain__abbreviation }}</td>
                                 </tr>
                                 {% endfor %}
                             </tbody>
@@ -79,7 +125,9 @@
 
 <script type="text/javascript">
  $(document).ready(() => {
-     $(".zero-configuration").DataTable();
+     $(".zero-configuration").DataTable({
+         rowsGroup: [0, 1, 2]
+     });
 
      $(".detailTrigger").click(function (e) {
          e.preventDefault();

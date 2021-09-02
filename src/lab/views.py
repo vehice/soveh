@@ -131,14 +131,32 @@ def case_process_state(request, pk):
     units = Unit.objects.filter(
         identification_id__in=identifications.values_list("id", flat=True)
     )
-    units_organs = OrganUnit.objects.filter(
-        unit_id__in=units.values_list("id", flat=True)
-    )
+    units_id = units.values_list("id", flat=True)
+    units_organs = OrganUnit.objects.filter(unit_id__in=units_id)
     sample_exams = SampleExams.objects.filter(
         unit_organ_id__in=units_organs.values_list("id", flat=True),
     ).exclude(stain_id=2)
 
-    sample_exams_stains = sample_exams.values("stain").annotate(dcount=Count("stain"))
+    cassettes = Cassette.objects.filter(unit_id__in=units_id)
+    cassettes_organs = CassetteOrgan.objects.filter(
+        cassette_id__in=cassettes.values_list("id", flat=True)
+    )
+
+    cassettes_processed = Cassette.objects.filter(
+        id__in=cassettes.values_list("id", flat=True)
+    )
+
+    stain_slides = []
+
+    slides = (
+        Slide.objects.filter(unit_id__in=units_id)
+        .values("stain", "stain__abbreviation")
+        .annotate(
+            build=Count("stain"),
+            available=Count("released_at", filter=Q(released_at__isnull=False)),
+        )
+        .order_by("stain")
+    )
 
     return render(
         request,
@@ -146,7 +164,12 @@ def case_process_state(request, pk):
         {
             "case": case,
             "analysis": analysis,
-            "units": units,
+            "units": units.count(),
+            "units_organs_count": units_organs.count(),
+            "cassettes": cassettes.count(),
+            "cassettes_organs_count": cassettes_organs.count(),
+            "cassettes_processed": cassettes_processed.count(),
+            "slides": slides,
         },
     )
 
@@ -1072,7 +1095,6 @@ class SlideBuild(View):
         **Template**
         ``lab/slides/build.html``
         """
-
         units = (
             Unit.objects.filter(
                 identification__entryform__entry_format=5,
@@ -1087,6 +1109,7 @@ class SlideBuild(View):
             .distinct()
             .select_related("unit__identification__entryform")
         )
+
         stains = Stain.objects.all()
 
         slides = []
