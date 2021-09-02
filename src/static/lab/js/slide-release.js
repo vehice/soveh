@@ -106,7 +106,7 @@ $(document).ready(function () {
             .rows({ selected: true })
             .data()
             .each((test) => {
-                selectedSlidesPk.push(test[0]);
+                selectedSlidesPk.push(test.id);
             });
 
         $.ajax(Urls["lab:slide_release"](), {
