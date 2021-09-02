@@ -71,7 +71,7 @@
  $("#differenceTable").DataTable();
 
  $(document).ready(() => {
-     $(".markAsFixed").click((e) => {
+     $(document).on("click", ".markAsFixed", (e) => {
          const differenceId = e.target.id;
 
          Swal.fire({
