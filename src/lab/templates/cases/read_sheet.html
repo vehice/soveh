@@ -18,42 +18,30 @@
                         <table class="table table-striped zero-configuration">
                             <thead>
                                 <tr>
-                                    <th scope="col">Slide</th>
                                     <th scope="col">Identificación</th>
                                     <th scope="col">Unidad</th>
                                     <th scope="col">Organos</th>
                                     <th scope="col">Tincion</th>
-                                    <th scope="col">Tag</th>
-                                    <th scope="col">Disponible?</th>
-                                    <th scope="col">Ver Slide</th>
+                                    <th scope="col">#</th>
+                                    <th scope="col">Nombre</th>
+                                    <th scope="col">Disponibilidad</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {% for slide in slides %}
                                 <tr>
-                                    <th scope="row">{{ slide.correlative }}</th>
-                                    <td>{{ slide.unit.identification }}</td>
-                                    <td>{{ slide.unit.correlative }}</td>
-                                    <td>
-                                        {% for organ in slide.organs %}
-                                            {% if forloop.last %}
-                                                {{ organ.abbreviation }}
-                                            {% else %}
-                                                {{ organ.abbreviation }},
-                                            {% endif %}
-                                        {% endfor %}
-                                        </td>
+                                    <td>{{ slide.identification }}</td>
+                                    <td>{{ slide.unit }}</td>
+                                    <td>{{ slide.organs }}</td>
                                     <td>{{ slide.stain }}</td>
+                                    <th scope="row">{{ slide.correlative }}</th>
                                     <td>{{ slide.tag }}</td>
-                                    <td>{{ slide.released_at|yesno:"Si,No" }}</td>
                                     <td>
-                                        {% with url=slide.get_absolute_url%}
-                                        {% if url %}
-                                        <a href="{{ url }}" target="_blank">Ver en DsStore</a>
+                                        {% if slide.url %}
+                                        <a href="{{ slide.url }}" target="_blank">Disponible</a>
                                         {% else %}
-                                        <small>No se encontró slide.</small>
+                                        {{ slide.released_at|yesno:"Disponible(No en DsStore),No está disponible" }}
                                         {% endif %}
-                                        {% endwith %}
                                     </td>
                                 </tr>
                                 {% endfor %}
@@ -78,7 +66,9 @@
 
 <script type="text/javascript">
  $(document).ready(() => {
-     $(".zero-configuration").DataTable();
+     $(".zero-configuration").DataTable({
+         rowsGroup: [0]
+     });
 
      $(".detailTrigger").click(function (e) {
          e.preventDefault();

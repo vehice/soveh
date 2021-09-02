@@ -73,9 +73,37 @@ class CaseReadSheet(DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        context["slides"] = []
+
         units = Unit.objects.filter(Q(identification__entryform=self.get_object()))
+        units_organs = OrganUnit.objects.filter(
+            unit_id__in=units.values_list("id", flat=True)
+        )
+        sample_exams = SampleExams.objects.filter(
+            unit_organ_id__in=units_organs.values_list("id", flat=True),
+        ).exclude(stain_id=2)
         slides = Slide.objects.filter(unit__in=units).order_by("correlative")
-        context["slides"] = slides
+
+        for slide in slides:
+            organ_exams = sample_exams.filter(stain=slide.stain)
+            slide_organs = slide.organs.filter(
+                pk__in=organ_exams.values_list("organ_id", flat=True)
+            )
+            context["slides"].append(
+                {
+                    "identification": str(slide.unit.identification),
+                    "unit": slide.unit.correlative,
+                    "organs": ",".join(
+                        slide_organs.values_list("abbreviation", flat=True)
+                    ),
+                    "stain": str(slide.stain),
+                    "slide": slide.correlative,
+                    "tag": slide.tag,
+                    "url": slide.get_absolute_url(),
+                    "released_at": slide.released_at,
+                }
+            )
+
         return context
 
 
@@ -99,8 +127,28 @@ def case_process_state(request, pk):
 
     case = get_object_or_404(Case, pk=pk)
     analysis = Analysis.objects.filter(entryform=case)
+    identifications = case.identification_set.all()
+    units = Unit.objects.filter(
+        identification_id__in=identifications.values_list("id", flat=True)
+    )
+    units_organs = OrganUnit.objects.filter(
+        unit_id__in=units.values_list("id", flat=True)
+    )
+    sample_exams = SampleExams.objects.filter(
+        unit_organ_id__in=units_organs.values_list("id", flat=True),
+    ).exclude(stain_id=2)
 
-    return render(request, "cases/state.html", {"case": case, "analysis": analysis})
+    sample_exams_stains = sample_exams.values("stain").annotate(dcount=Count("stain"))
+
+    return render(
+        request,
+        "cases/state.html",
+        {
+            "case": case,
+            "analysis": analysis,
+            "units": units,
+        },
+    )
 
 
 @login_required
@@ -651,8 +699,10 @@ class CassetteBuild(View):
                     CassetteOrgan.objects.create(organ=organ, cassette=cassette)
                     created.append(cassette)
 
+            current_difference = generate_differences(unit)
+
             if not differences:
-                differences = generate_differences(unit)
+                differences = current_difference
 
         return JsonResponse(
             {
