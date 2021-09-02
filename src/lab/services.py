@@ -44,21 +44,22 @@ def generate_differences(unit):
     has_differences = False
     for organ in final_organs:
         if len(final_organs[organ]) == 1:
-            UnitDifference.objects.update_or_create(
-                unit=unit,
-                organ_id=organ,
-                defaults={"difference": final_organs[organ][0]},
-            )
-            has_differences = True
+            if final_organs[organ][0] > 0 or final_organs[organ][0] < 0:
+                UnitDifference.objects.update_or_create(
+                    unit=unit,
+                    organ_id=organ,
+                    defaults={"difference": final_organs[organ][0]},
+                )
+                has_differences = True
         else:
-            UnitDifference.objects.update_or_create(
-                unit=unit,
-                organ_id=organ,
-                defaults={
-                    "difference": final_organs[organ][0] - final_organs[organ][1]
-                },
-            )
-            has_differences = True
+            difference = final_organs[organ][0] - final_organs[organ][1]
+            if difference < 0 or difference > 0:
+                UnitDifference.objects.update_or_create(
+                    unit=unit,
+                    organ_id=organ,
+                    defaults={"difference": difference},
+                )
+                has_differences = True
 
     return has_differences
 
