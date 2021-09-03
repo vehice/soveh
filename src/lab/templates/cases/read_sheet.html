@@ -34,13 +34,13 @@
                                     <td>{{ slide.unit }}</td>
                                     <td>{{ slide.organs }}</td>
                                     <td>{{ slide.stain }}</td>
-                                    <th scope="row">{{ slide.correlative }}</th>
+                                    <th scope="row">{{ slide.slide }}</th>
                                     <td>{{ slide.tag }}</td>
                                     <td>
                                         {% if slide.url %}
                                         <a href="{{ slide.url }}" target="_blank">Disponible</a>
                                         {% else %}
-                                        {{ slide.released_at|yesno:"Disponible(No en DsStore),No está disponible" }}
+                                        {{ slide.released_at|yesno:"Disponible,No está disponible" }}
                                         {% endif %}
                                     </td>
                                 </tr>
