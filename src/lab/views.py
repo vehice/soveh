@@ -511,7 +511,30 @@ def cassette_differences(request):
 def redirect_to_workflow_edit(request, pk, step):
     """Redirects a case to it's workflow form according to the given step"""
     case, form = change_case_step(pk, step)
-    return redirect(reverse("workflow_w_id", kwargs={"form_id": form.pk}))
+    units = case.units()
+    differences = UnitDifference.objects.filter(
+        unit_id__in=units.values_list("id", flat=True), status=0
+    )
+
+    for difference in differences:
+        unit = difference.unit
+        organ = difference.organ
+        delta_difference = difference.difference
+
+        if delta_difference > 0:
+            for index in range(delta_difference):
+                OrganUnit.objects.create(unit=unit, organ=organ)
+        elif delta_difference < 0:
+            abs_difference = abs(delta_difference)
+            to_delete = OrganUnit.objects.filter(organ=organ, unit=unit)[
+                :abs_difference
+            ]
+            to_delete.delete()
+
+        difference.status = 1
+        difference.save()
+
+    return reverse("workflow_w_id", kwargs={"form_id": form.pk})
 
 
 @login_required
@@ -523,9 +546,17 @@ def update_unit_difference(request, pk):
     difference = get_object_or_404(UnitDifference, pk=pk)
     difference.status = not difference.status
     log_message = request.POST.get("message")
+    fix_differences = bool(int(request.POST.get("fix_differences")))
     if log_message:
         difference.status_change_log = f"{difference.status_change_log};{log_message}"
+
     difference.save()
+
+    if fix_differences:
+        redirect = redirect_to_workflow_edit(
+            request, difference.unit.identification.entryform.pk, step=2
+        )
+        return JsonResponse({"redirect": redirect})
 
     return JsonResponse(model_to_dict(difference))
 
@@ -1333,6 +1364,7 @@ class SlideDetail(View):
                 build_at = slide.build_at
             else:
                 slide.build_at = build_at
+
         if "correlative" in request_input:
             slide.correlative = request_input["correlative"]
         if "stain_id" in request_input:
@@ -1391,6 +1423,18 @@ class SlideRelease(View):
         )
 
         return JsonResponse(slides_updated, safe=False)
+
+
+class SlideStain(View):
+    @method_decorator(login_required)
+    def get(self, request):
+
+        if request.is_ajax():
+            print("Activos en la pista")
+
+        stains = Stain.objects.all()
+
+        return render(request, "slide/stain.html", {"stains": stains})
 
 
 # Process related views

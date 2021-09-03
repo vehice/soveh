@@ -29,10 +29,14 @@
                             <td>{{ difference.unit.correlative }}</td>
                             <td>{{ difference.organ.abbreviation }} ({{difference.difference}})</td>
                             <td>
-                                <button id="{{difference.pk}}" class="btn btn-warning markAsFixed">SIN REVISAR</button>
+                                <button
+                                    id="{{difference.pk}}"
+                                    class="btn btn-warning markAsFixed"
+                                >
+                                    SIN REVISAR
+                                </button>
                             </td>
                             <td class="d-flex flex-column">
-                                <a href="{% url 'lab:redirect_to_workflow_edit' difference.unit.identification.entryform.pk 2 %}">Editar Identificacion/Unidad</a>
                                 <a href="{% url 'lab:cassette_index' %}" >Editar Cassettes</a>
                             </td>
                         </tr>
@@ -79,36 +83,59 @@
              icon: "info",
              text: "Puede agregar un comentario opcional:",
              input: "text",
-             confirmButtonText: "Listo, marcar como revisado",
-             cancelButtonText: "Cancelar",
-             showCancelButton: true
+             confirmButtonText: "Listo, ir a editar identificaciones/unidades",
+             denyButtonText: "Listo, solamente marcar como revisado",
+             cancelButtonText: "Cancelar, no marcar como revisado",
+             showCancelButton: true,
+             showDenyButton: true,
+             denyButtonColor: "#006699"
          }).then((result) => {
-             if (result.isConfirmed) {
-
-                 $.ajax(Urls["lab:update_unit_difference"](differenceId), {
-                     data: { message: result.value },
-
-                     method: "POST",
-
-                     headers: {
-                         "X-CSRFToken": getCookie("csrftoken"),
-                     },
-                     success: (data, textStatus) => {
-                         Swal.fire({
-                             icon: "success",
-                             title: "Se ha marcado como revisado",
-                             text: "Se recargará la pagina"
-                         }).then(() => {
-                            location.reload();
-                         });
-                     },
-                     error: (xhr, textStatus, error) => {
-                         Swal.fire({
-                             icon: "error",
-                         });
-                     },
-                 });
+             let message = null;
+             if (result.value) {
+                 message = result.value
              }
+             let data = {
+                 message: message,
+                 fix_differences: 0,
+             }
+
+             if (result.isConfirmed) {
+                 data.fix_differences = 1;
+             }
+
+             if (result.isDenied) {
+                 data.fix_differences = 0;
+             }
+
+             if (result.isDismissed) {
+                 return;
+             }
+
+            $.ajax(Urls["lab:update_unit_difference"](differenceId), {
+                data: data,
+
+                method: "POST",
+
+                headers: {
+                    "X-CSRFToken": getCookie("csrftoken"),
+                },
+                success: (data, textStatus) => {
+                    if (data.redirect != undefined) {
+                        location.href = data.redirect
+                    }
+                    Swal.fire({
+                        icon: "success",
+                        title: "Se ha marcado como revisado",
+                    }).then(() => {
+                        location.reload();
+                    });
+                },
+                error: (xhr, textStatus, error) => {
+                    Swal.fire({
+                        icon: "error",
+                    });
+                },
+            });
          })
      })
  })
