@@ -584,5 +584,13 @@ $(document).ready(function () {
         $("#inputMaxOrgans").val(0).trigger("change");
     });
 
+    $("#clearOrgansButton").click(() => {
+        tableBuild.rows().every((rowIdx) => {
+            const td = $(tableBuild.cell(rowIdx, 4).node());
+            const cassetteOrgans = td.find(".unitSelectOrgan");
+            cassetteOrgans.empty();
+        });
+    });
+
     /* END EVENTS */
 });
