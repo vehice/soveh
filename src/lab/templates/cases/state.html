@@ -62,6 +62,7 @@
                                     <th scope="col">Patologo</th>
                                     <th scope="col">Fecha de Derivación</th>
                                     <th scope="col">Plazo</th>
+                                    <th scope="col">Hoja de Lectura</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -73,6 +74,9 @@
                                     <td>{{ service.patologo|default:"Sin Asignar" }}</td>
                                     <td>{{ service.assignment_done_at|date:"d/m/Y"|default:"Sin derivar" }}</td>
                                     <td>{{ service.assignment_deadline|date:"d/m/Y"|default:"Sin plazo" }}</td>
+                                    <td>
+                                        <a href="{% url 'lab:analysis_read_sheet' service.id %}">Hoja de Lectura</a>
+                                    </td>
                                 </tr>
                                 {% endfor %}
                             </tbody>

@@ -108,6 +108,58 @@ class CaseReadSheet(DetailView):
 
 
 @method_decorator(login_required, name="dispatch")
+class AnalysisReadSheet(DetailView):
+    """Displays format for a :model:`lab.Analysis` read sheet.
+    A read sheet contains information for an Analysis's :model:`lab.Slide`
+    including that slide's :model:`backend.Organ` and :model:`backend.Stain`
+    """
+
+    model = Analysis
+    template_name = "cases/read_sheet.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["slides"] = []
+
+        analysis = self.get_object()
+        case = analysis.entryform
+        units = Unit.objects.filter(Q(identification__entryform=case))
+        units_organs = OrganUnit.objects.filter(
+            unit_id__in=units.values_list("id", flat=True)
+        )
+        sample_exams = SampleExams.objects.filter(
+            unit_organ_id__in=units_organs.values_list("id", flat=True),
+            exam=analysis.exam,
+            stain=analysis.stain,
+        ).exclude(stain_id=2)
+        slides = Slide.objects.filter(unit__in=units, stain=analysis.stain).order_by(
+            "correlative"
+        )
+
+        for slide in slides:
+            organ_exams = sample_exams.filter(stain=slide.stain)
+            slide_organs = slide.organs.filter(
+                pk__in=organ_exams.values_list("organ_id", flat=True)
+            )
+            context["slides"].append(
+                {
+                    "identification": str(slide.unit.identification),
+                    "unit": slide.unit.correlative,
+                    "organs": ",".join(
+                        slide_organs.values_list("abbreviation", flat=True)
+                    ),
+                    "stain": str(slide.stain),
+                    "slide": slide.correlative,
+                    "tag": slide.tag,
+                    "url": slide.get_absolute_url(),
+                    "released_at": slide.released_at,
+                }
+            )
+
+        return context
+
+
+@method_decorator(login_required, name="dispatch")
 class CaseDetail(DetailView):
     """Displays detailed data of a Case.
     Data is displayed in a boilerplate template that can be
