@@ -42,6 +42,7 @@ urlpatterns = [
     path("slides/prebuild", views.slide_prebuild, name="slide_prebuild"),
     path("slides/build", views.SlideBuild.as_view(), name="slide_build"),
     path("slides/release", views.SlideRelease.as_view(), name="slide_release"),
+    path("slides/stain", views.SlideStain.as_view(), name="slide_stain"),
     #
     # Process Routes
     #

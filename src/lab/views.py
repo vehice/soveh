@@ -1430,11 +1430,45 @@ class SlideStain(View):
     def get(self, request):
 
         if request.is_ajax():
-            print("Activos en la pista")
+            draw = int(request.GET.get("draw"))
+            length = int(request.GET.get("length"))
+            search = request.GET.get("search[value]")
+            start = int(request.GET.get("start")) + 1
+
+            cassettes = Cassette.objects.all()
+            if search:
+                cassettes = Cassette.objects.filter(
+                    Q(unit__identification__entryform__no_caso__icontains=search)
+                    | Q(unit__identification__cage__icontains=search)
+                    | Q(unit__identification__group__icontains=search)
+                )
+            cassettes_paginator = Paginator(cassettes, length)
+
+            context = {
+                "draw": draw + 1,
+                "recordsTotal": cassettes_paginator.count,
+                "recordsFiltered": cassettes_paginator.count,
+                "data": [],
+            }
+
+            for page in cassettes_paginator.page_range:
+                page_start = cassettes_paginator.get_page(page).start_index()
+                if page_start == start:
+                    cassettes_page = cassettes_paginator.get_page(page).object_list
+                    for cassette in cassettes_page:
+                        row = {
+                            "id": cassette.id,
+                            "name": str(cassette),
+                            "build_at": cassette.build_at,
+                        }
+
+                        context["data"].append(row)
+
+            return JsonResponse(context)
 
         stains = Stain.objects.all()
 
-        return render(request, "slide/stain.html", {"stains": stains})
+        return render(request, "slides/stain.html", {"stains": stains})
 
 
 # Process related views
