@@ -15,6 +15,10 @@ def generate_differences(unit):
     Returns True if any difference is generated.
     """
     cassettes_pk = unit.cassettes.all().values_list("id", flat=True)
+
+    if len(cassettes_pk) <= 0:
+        return False
+
     cassettes_organs = list(
         CassetteOrgan.objects.filter(cassette_id__in=cassettes_pk)
         .values("organ")
