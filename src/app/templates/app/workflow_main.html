@@ -471,11 +471,7 @@ var continuar =  "{{request.lang.next}}";
         lockScreen(0);
 
         $('.actions > ul > li:first-child').attr('style', 'display:none');
-        
-        if (currentIndex == 1){
-          receptionFileModal({{form.content_object.id}});
-        } 
-        
+
         return true; 
       }, 
       onFinished: function (event, currentIndex)

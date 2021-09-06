@@ -352,10 +352,17 @@ function init_step_2() {
                                     "Listo!"
                                 );
                             } else {
-                                toastr.error(
-                                    "No ha sido posible eliminar la identificación, intente nuevamente.",
-                                    "Ups!"
-                                );
+                                if (data.message == "CASSETTES") {
+                                    toastr.error(
+                                        "No ha sido posible eliminar la identificación, tiene Cassettes creados.",
+                                        "Ups!"
+                                    );
+                                } else {
+                                    toastr.error(
+                                        "No ha sido posible eliminar la identificación, intente nuevamente.",
+                                        "Ups!"
+                                    );
+                                }
                             }
                         })
                         .fail(function () {
@@ -435,10 +442,17 @@ function init_step_2() {
                                 "Listo!"
                             );
                         } else {
-                            toastr.error(
-                                "No ha sido posible eliminar la unidad, intente nuevamente.",
-                                "Ups!"
-                            );
+                            if (data.message == "CASSETTES") {
+                                toastr.error(
+                                    "No ha sido posible eliminar la unidad, tiene Cassettes creados.",
+                                    "Ups!"
+                                );
+                            } else {
+                                toastr.error(
+                                    "No ha sido posible eliminar la unidad, intente nuevamente.",
+                                    "Ups!"
+                                );
+                            }
                         }
                     })
                     .fail(function () {
@@ -537,7 +551,14 @@ function init_step_2() {
             e.params.data.element.remove();
         }
         let ident_id = e.target.id.split("-")[1];
-        saveUnitsByIdentification(ident_id);
+        let response = saveUnitsByIdentification(ident_id);
+        if (response.message == "CASSETTES") {
+            toastr.error(
+                "No ha sido posible eliminar uno de los organos, tiene Cassettes creados.",
+                "Ups!"
+            );
+            location.reload();
+        }
     });
 
     $(document).on("change", ".correlative", function (e) {

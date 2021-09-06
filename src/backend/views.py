@@ -21,6 +21,7 @@ from accounts.models import *
 from app import views as app_view
 from backend.models import *
 from workflows.models import *
+from lab.models import Cassette as LabCassette, CassetteOrgan as LabCassetteOrgan
 
 # from utils import functions as fn
 
@@ -3180,6 +3181,7 @@ def create_unit(request, identification_id, correlative):
 
 def save_units(request):
     units = json.loads(request.POST.get("units"))
+    ok = 1
     for unit in units:
         unit_obj = Unit.objects.get(pk=unit["id"])
         unit_obj.correlative = unit["correlative"]
@@ -3199,6 +3201,19 @@ def save_units(request):
                     break
 
             if not ou_exists_in_new_set:
+
+                # Check if the organ is used in a Cassette of that unit
+                # If it's being used then don't delete it and skip to the next organ
+                cassettes = LabCassette.objects.filter(unit=unit_obj)
+                cassettes_organs = LabCassetteOrgan.objects.filter(
+                    cassette_id__in=cassettes.values_list("id", flat=True),
+                    organ=ou.organ,
+                )
+
+                if cassettes_organs.count() > 0:
+                    ok = 0
+                    continue
+
                 # Check if there are samples with the OrganUnit.
                 # If they exist then validate if when removing the OrgaUnit the sample remains empty, therefore it must also be removed.
                 samples = Sample.objects.filter(unit_organs__in=[ou.id])
@@ -3228,10 +3243,18 @@ def save_units(request):
             if not new_org_exists_in_unit:
                 OrganUnit.objects.create(unit=unit_obj, organ_id=org)
 
-    return JsonResponse({"ok": 1})
+    if ok:
+        return JsonResponse({"ok": 1})
+
+    return JsonResponse({"ok": 0, "message": "CASSETTES"})
 
 
 def remove_unit(request, id):
+    cassettes = LabCassette.objects.filter(unit_id=id)
+
+    if cassettes.count() > 0:
+        return JsonResponse({"ok": 0, "message": "CASSETTES"})
+
     for OU in OrganUnit.objects.filter(unit_id=id):
         samples = Sample.objects.filter(unit_organs__in=[OU.id])
         for s in samples:
@@ -3319,12 +3342,19 @@ def save_new_identification(request, id):
 
 def remove_identification(request, id):
     try:
+        units = Unit.objects.filter(identification_id=id)
+        cassettes = LabCassette.objects.filter(
+            unit_id__in=units.values_list("id", flat=True)
+        )
+
+        if cassettes.count() > 0:
+            return JsonResponse({"ok": 0, "message": "CASSETTES"})
+
+        units.delete()
         Sample.objects.filter(identification_id=id).delete()
-        Unit.objects.filter(identification_id=id).delete()
         Identification.objects.get(pk=id).delete()
-        return JsonResponse({"ok": 1})
     except:
-        return JsonResponse({"ok": 0})
+        return JsonResponse({"ok": 1})
 
 
 def save_generalData(request, id):
