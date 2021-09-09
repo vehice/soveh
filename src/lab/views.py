@@ -82,7 +82,11 @@ class CaseReadSheet(DetailView):
         sample_exams = SampleExams.objects.filter(
             unit_organ_id__in=units_organs.values_list("id", flat=True),
         ).exclude(stain_id=2)
-        slides = Slide.objects.filter(unit__in=units).order_by("correlative")
+        slides = (
+            Slide.objects.filter(unit__in=units)
+            .exclude(stain_id=2)
+            .order_by("correlative")
+        )
 
         for slide in slides:
             organ_exams = sample_exams.filter(stain=slide.stain)
@@ -132,8 +136,10 @@ class AnalysisReadSheet(DetailView):
             exam=analysis.exam,
             stain=analysis.stain,
         ).exclude(stain_id=2)
-        slides = Slide.objects.filter(unit__in=units, stain=analysis.stain).order_by(
-            "correlative"
+        slides = (
+            Slide.objects.filter(unit__in=units, stain=analysis.stain)
+            .exclude(stain_id=2)
+            .order_by("correlative")
         )
 
         for slide in slides:
@@ -197,8 +203,6 @@ def case_process_state(request, pk):
     cassettes_processed = Cassette.objects.filter(
         id__in=cassettes.values_list("id", flat=True)
     )
-
-    stain_slides = []
 
     slides = (
         Slide.objects.filter(unit_id__in=units_id)
@@ -1124,6 +1128,7 @@ def slide_prebuild(request):
                 organ__in=organs_subject,
                 exam__service_id__in=[1, 2],
             )
+            .exclude(stain_id=2)
             .values("stain_id")
             .annotate(stain_count=Count("stain_id"))
             .order_by("stain_id")

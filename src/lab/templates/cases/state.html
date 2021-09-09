@@ -107,6 +107,15 @@
                                     <td>{{ slide.available }}</td>
                                     <td>{{ slide.stain__abbreviation }}</td>
                                 </tr>
+                                {% empty %}
+                                <tr>
+                                    <td>{{ units }}({{ units_organs_count }})</td>
+                                    <td>{{ cassettes }}({{ cassettes_organs_count }})</td>
+                                    <td>{{ cassettes_processed }} / {{ cassettes }}</td>
+                                    <td>0</td>
+                                    <td>0</td>
+                                    <td>Sin Teñir</td>
+                                </tr>
                                 {% endfor %}
                             </tbody>
                         </table>
