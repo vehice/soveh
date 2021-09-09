@@ -9,5 +9,4 @@ urlpatterns = [
     path("service/table", views.services_table, name="services_table"),
     path("efficiency", views.EfficiencyView.as_view(), name="efficiency"),
     path("control", views.ControlView.as_view(), name="control"),
-    path("analysis", views.AnalysisView.as_view(), name="analysis"),
 ]
