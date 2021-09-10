@@ -461,7 +461,7 @@ class Identification(models.Model):
     )
     weight = models.FloatField(default="0", null=True, blank=True)
     extra_features_detail = models.TextField(default="", null=True, blank=True)
-    is_optimum = models.NullBooleanField()
+    is_optimum = models.BooleanField(null=True)
     observation = models.TextField(default="", null=True, blank=True)
     group = models.CharField(default="", max_length=250, null=True, blank=True)
     removable = models.BooleanField(default=False)
