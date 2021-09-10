@@ -16,6 +16,7 @@ from django.views import View
 from backend.models import AnalysisForm, SampleExams
 from accounts.models import Area, UserArea
 from django.core.paginator import Paginator
+from django.db.models.aggregates import Count
 
 
 def get_pathologists(user):
@@ -331,164 +332,23 @@ class EfficiencyView(View):
 
 
 class ControlView(View):
-    def serialize_data(self, queryset):
-        context = []
-        for report in queryset:
-            user = report.patologo
-            try:
-                context.append(
-                    {
-                        "report": model_to_dict(
-                            report,
-                            fields=[
-                                "assignment_deadline",
-                                "manual_cancelled_date",
-                                "manual_closing_date",
-                                "assignment_done_at",
-                                "pre_report_ended",
-                                "pre_report_ended_at",
-                                "pre_report_started",
-                                "pre_report_started_at",
-                                "report_code",
-                                "score_diagnostic",
-                                "score_report",
-                                "patologo",
-                                "created_at",
-                            ],
-                        ),
-                        "case": model_to_dict(
-                            report.entryform,
-                            fields=[
-                                "created_at",
-                                "center",
-                                "no_caso",
-                            ],
-                        ),
-                        "customer": model_to_dict(
-                            report.entryform.customer,
-                            fields=[
-                                "name",
-                            ],
-                        ),
-                        "exam": model_to_dict(
-                            report.exam, fields=["name", "pathologists_assignment"]
-                        ),
-                        "user": model_to_dict(user, fields=["first_name", "last_name"]),
-                        "stain": model_to_dict(
-                            report.stain, fields=["name", "abbreviation"]
-                        ),
-                        "samples": report.exam.sampleexams_set.filter(
-                            sample__entryform_id=report.entryform_id
-                        ).count(),
-                        "workflow": model_to_dict(
-                            report.forms.all().first(),
-                            fields=[
-                                "form_closed",
-                                "cancelled",
-                                "closed_at",
-                                "cancelled_at",
-                            ],
-                        ),
-                    }
-                )
-            except AttributeError:
-                context.append(
-                    {
-                        "report": model_to_dict(
-                            report,
-                            fields=[
-                                "assignment_deadline",
-                                "manual_cancelled_date",
-                                "manual_closing_date",
-                                "assignment_done_at",
-                                "pre_report_ended",
-                                "pre_report_ended_at",
-                                "pre_report_started",
-                                "pre_report_started_at",
-                                "report_code",
-                                "score_diagnostic",
-                                "score_report",
-                                "patologo",
-                                "created_at",
-                            ],
-                        ),
-                        "case": model_to_dict(
-                            report.entryform,
-                            fields=[
-                                "created_at",
-                                "center",
-                                "no_caso",
-                            ],
-                        ),
-                        "customer": model_to_dict(
-                            report.entryform.customer,
-                            fields=[
-                                "name",
-                            ],
-                        ),
-                        "exam": model_to_dict(
-                            report.exam, fields=["name", "pathologists_assignment"]
-                        ),
-                        "user": None,
-                        "stain": model_to_dict(
-                            report.stain, fields=["name", "abbreviation"]
-                        ),
-                        "samples": report.exam.sampleexams_set.filter(
-                            sample__entryform_id=report.entryform_id
-                        ).count(),
-                        "workflow": model_to_dict(
-                            report.forms.all().first(),
-                            fields=[
-                                "form_closed",
-                                "cancelled",
-                                "closed_at",
-                                "cancelled_at",
-                            ],
-                        ),
-                    }
-                )
-
-        return context
-
     def get(self, request):
         """Displays multiple tables and charts to generate reportability.
         This is cattered for Administration Users, where they can see their
         current workload.
         """
-        return render(
-            request,
-            "control/home.html",
+
+        services = (
+            AnalysisForm.objects.filter(
+                Q(manual_cancelled_date__isnull=True) | Q(forms__cancelled=False),
+                Q(manual_closing_date__isnull=True) | Q(forms__form_closed=False),
+                exam__pathologists_assignment=True,
+                patologo__isnull=True,
+                pre_report_started=False,
+                pre_report_ended=False,
+            )
+            .annotate(samples=Count("entryform__sample"))
+            .select_related("entryform", "exam", "stain", "patologo")
         )
 
-    def post(self, request):
-        date_start = date.today() + relativedelta(months=-5)
-        date_end = date.today()
-
-        analysis = AnalysisForm.objects.filter(
-            Q(manual_cancelled_date=None) | Q(forms__cancelled=False),
-        ).select_related("entryform", "patologo", "stain")
-
-        pathologists = get_pathologists(request.user)
-
-        unassigned = AnalysisForm.objects.exclude(
-            Q(manual_cancelled_date__isnull=False)
-            | Q(manual_closing_date__isnull=False)
-            | Q(forms__form_closed=True)
-            | Q(forms__cancelled=True)
-        ).filter(
-            exam__pathologists_assignment=True,
-            patologo_id__isnull=True,
-        )
-
-        analysis = analysis.filter(patologo_id__in=pathologists)
-
-        return HttpResponse(
-            json.dumps(
-                {
-                    "queryset": self.serialize_data(analysis),
-                    "unassigned": self.serialize_data(unassigned),
-                },
-                cls=DjangoJSONEncoder,
-            ),
-            content_type="application/json",
-        )
+        return render(request, "control/home.html", {"services": services})
